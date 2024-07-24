@@ -1,0 +1,38 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# TypeScript
+*.tsbuildinfo
+
+# IDE/Editor
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Build output
+dist/
+build/
+out/
+
+# Logs
+logs/
+*.log
+
+# Dependency directories
+jspm_packages/
+bower_components/
+
+# Testing
+coverage/
+.nyc_output/
+
+# Miscellaneous
+.DS_Store
+.env
+.env.local
+.env.*.local
+.env.test
+.env.test.local
