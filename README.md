@@ -1,16 +1,10 @@
-```
-npx tsc
-```
+## Penrose Visualizations for Forge
 
+1. Run `npm install`
+2. Run in dev mode using `nodemon --exec ts-node src/index.ts`
+3. Application should be available at `localhost:3000`. It expects an Alloy datum and visualization constraints (see examples below)
 
-```
-# Using ts-node
-npx ts-node src/index.ts
-
-# Or, after compiling to JavaScript
-node dist/index.js
-```
-
+### Alloy Datum
 ```
 <alloy builddate="Thursday, July 25th, 2024">
 <instance bitwidth="4" maxseq="-1" command="temporary-name_scratch_1" filename="/no-name.rkt" version="3.5"  >
@@ -89,7 +83,7 @@ node dist/index.js
 </alloy>
 ```
 
-
+### Visualization constraints
 ```
 {
   "fieldDirections": [
