@@ -1,7 +1,7 @@
 // src/index.ts
 import * as http from 'http';
-import { AlloyInstance, parseAlloyXML } from './alloy-instance';
-
+import { AlloyDatum, AlloyInstance, parseAlloyXML } from './alloy-instance';
+import { PenroseInstance } from './penroseinstance';
 
 const trace1 = `<alloy builddate="2021-11-03T15:25:43.736Z">
 
@@ -74,13 +74,15 @@ const server = http.createServer((req, res) => {
     res.end('Hello, World!\n');
 
 
-    let x = parseAlloyXML(trace1);
-
-    console.log(x);
-
-
-
+    let ad : AlloyDatum = parseAlloyXML(trace1);
+    let instances = ad.instances;
     // Great, I have Alloy instances! I think I can generate PENROSE from this!
+
+    let instance = instances[0];
+    let pt = new PenroseInstance(instance);
+
+    let d = pt.getDomain();
+    console.log(d);
 
 });
 
