@@ -47,7 +47,8 @@
       const trio = {
         substance:   `<%- substance %>`,
         domain:  `<%- domain %>`,
-        variation:  `<%- style %>`,
+        style:  `<%- style %>`,
+        variation: `test`  // What is this?
       };
       const compiled = await compile(trio);
       if (compiled.isErr()) console.error(showError(compiled.error));
