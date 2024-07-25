@@ -36,3 +36,5 @@ coverage/
 .env.*.local
 .env.test
 .env.test.local
+
+*.frg

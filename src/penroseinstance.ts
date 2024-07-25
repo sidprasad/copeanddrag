@@ -4,361 +4,12 @@ import { STYLE_TEMPLATE, SUBSTANCE_TEMPLATE, DOMAIN_TEMPLATE } from "./penrosete
 import { LayoutInstance } from "./layoutinstance";
 import { isBuiltin } from "./alloy-instance/src/type";
 
-/*
-{
-types: {
-"seq/Int": {
-_: "type",
-id: "seq/Int",
-types: [
-"seq/Int",
-"Int",
-],
-atoms: [
-],
-meta: {
-builtin: true,
-},
-},
-Int: {
-_: "type",
-id: "Int",
-types: [
-"Int",
-],
-atoms: [
-{
-  _: "atom",
-  id: "-8",
-  type: "Int",
-},
-{
-  _: "atom",
-  id: "-7",
-  type: "Int",
-},
-{
-  _: "atom",
-  id: "-6",
-  type: "Int",
-},
-{
-  _: "atom",
-  id: "-5",
-  type: "Int",
-},
-{
-  _: "atom",
-  id: "-4",
-  type: "Int",
-},
-{
-  _: "atom",
-  id: "-3",
-  type: "Int",
-},
-{
-  _: "atom",
-  id: "-2",
-  type: "Int",
-},
-{
-  _: "atom",
-  id: "-1",
-  type: "Int",
-},
-{
-  _: "atom",
-  id: "0",
-  type: "Int",
-},
-{
-  _: "atom",
-  id: "1",
-  type: "Int",
-},
-{
-  _: "atom",
-  id: "2",
-  type: "Int",
-},
-{
-  _: "atom",
-  id: "3",
-  type: "Int",
-},
-{
-  _: "atom",
-  id: "4",
-  type: "Int",
-},
-{
-  _: "atom",
-  id: "5",
-  type: "Int",
-},
-{
-  _: "atom",
-  id: "6",
-  type: "Int",
-},
-{
-  _: "atom",
-  id: "7",
-  type: "Int",
-},
-],
-meta: {
-builtin: true,
-},
-},
-String: {
-_: "type",
-id: "String",
-types: [
-"String",
-],
-atoms: [
-],
-meta: {
-builtin: true,
-},
-},
-"this/Leaf": {
-_: "type",
-id: "this/Leaf",
-types: [
-"this/Leaf",
-"this/Node",
-],
-atoms: [
-{
-  _: "atom",
-  id: "Leaf$0",
-  type: "this/Leaf",
-},
-{
-  _: "atom",
-  id: "Leaf$1",
-  type: "this/Leaf",
-},
-{
-  _: "atom",
-  id: "Leaf$2",
-  type: "this/Leaf",
-},
-{
-  _: "atom",
-  id: "Leaf$3",
-  type: "this/Leaf",
-},
-{
-  _: "atom",
-  id: "Leaf$4",
-  type: "this/Leaf",
-},
-],
-meta: undefined,
-},
-"this/Branch": {
-_: "type",
-id: "this/Branch",
-types: [
-"this/Branch",
-"this/Node",
-],
-atoms: [
-{
-  _: "atom",
-  id: "Branch$0",
-  type: "this/Branch",
-},
-{
-  _: "atom",
-  id: "Branch$1",
-  type: "this/Branch",
-},
-{
-  _: "atom",
-  id: "Branch$2",
-  type: "this/Branch",
-},
-{
-  _: "atom",
-  id: "Branch$3",
-  type: "this/Branch",
-},
-],
-meta: undefined,
-},
-"this/Node": {
-_: "type",
-id: "this/Node",
-types: [
-"this/Node",
-],
-atoms: [
-],
-meta: {
-abstract: true,
-},
-},
-univ: {
-_: "type",
-id: "univ",
-types: [
-],
-atoms: [
-],
-meta: {
-builtin: true,
-},
-},
-},
-relations: {
-"this/Branch<:left": {
-_: "relation",
-id: "this/Branch<:left",
-name: "left",
-types: [
-"this/Branch",
-"this/Node",
-],
-tuples: [
-{
-  _: "tuple",
-  types: [
-    "this/Branch",
-    "this/Node",
-  ],
-  atoms: [
-    "Branch$0",
-    "Branch$3",
-  ],
-},
-{
-  _: "tuple",
-  types: [
-    "this/Branch",
-    "this/Node",
-  ],
-  atoms: [
-    "Branch$1",
-    "Branch$2",
-  ],
-},
-{
-  _: "tuple",
-  types: [
-    "this/Branch",
-    "this/Node",
-  ],
-  atoms: [
-    "Branch$2",
-    "Branch$0",
-  ],
-},
-{
-  _: "tuple",
-  types: [
-    "this/Branch",
-    "this/Node",
-  ],
-  atoms: [
-    "Branch$3",
-    "Leaf$4",
-  ],
-},
-],
-},
-"this/Branch<:right": {
-_: "relation",
-id: "this/Branch<:right",
-name: "right",
-types: [
-"this/Branch",
-"this/Node",
-],
-tuples: [
-{
-  _: "tuple",
-  types: [
-    "this/Branch",
-    "this/Node",
-  ],
-  atoms: [
-    "Branch$0",
-    "Leaf$3",
-  ],
-},
-{
-  _: "tuple",
-  types: [
-    "this/Branch",
-    "this/Node",
-  ],
-  atoms: [
-    "Branch$1",
-    "Leaf$2",
-  ],
-},
-{
-  _: "tuple",
-  types: [
-    "this/Branch",
-    "this/Node",
-  ],
-  atoms: [
-    "Branch$2",
-    "Leaf$1",
-  ],
-},
-{
-  _: "tuple",
-  types: [
-    "this/Branch",
-    "this/Node",
-  ],
-  atoms: [
-    "Branch$3",
-    "Leaf$0",
-  ],
-},
-],
-},
-},
-skolems: {
-"this/Node<:$binaryTree_root": {
-_: "relation",
-id: "this/Node<:$binaryTree_root",
-name: "$binaryTree_root",
-types: [
-"this/Node",
-],
-tuples: [
-{
-  _: "tuple",
-  types: [
-    "this/Node",
-  ],
-  atoms: [
-    "Branch$1",
-  ],
-},
-],
-},
-},
-}
-
-
-*/
-
 
 export class PenroseInstance {
 
     private readonly _alloyInstance: AlloyInstance;
     private readonly _layoutInstance: LayoutInstance;
-    private readonly SKIP_BUILTIN = true;
+    private readonly SKIP_BUILTIN = false;
 
     private readonly _defined_types: Record<string, AlloyType>;
     private readonly _defined_relations: Record<string, AlloyRelation>;
@@ -468,7 +119,7 @@ export class PenroseInstance {
         let relation_defs = Object.entries(this._defined_relations)
             .map(([rel, rel_data]) => {
 
-                let pname = rel_data.name.replace("<:", "_");
+                let pname = this.ensureValidId(rel_data.name);
                 let args = rel_data.types.map((t) => {
 
                     let t_cleaned = this.cleanType(t);
@@ -649,14 +300,22 @@ export class PenroseInstance {
         if (!t) {
             return "";
         }
-        return t.replace("/", "_");
+        return this.ensureValidId(t);
     }
 
     private ensureValidId(id: string): string {
         if (!id) {
             return "";
         }
-        return id.replace("$", "_").replace("/", "_").replace("-", "_neg_");
+
+        /// If id starts with a number, we need to prepend it with an underscore
+        if (id.match(/^\d/)) {
+            id = "_" + id;
+        }
+
+
+        return id.replace(/\$/g, "").replace(/\//g, "__").replace(/-/g, "_neg_")
+            .replace(/>/g, "_gt_").replace(/</g, "_lt_").replace(/=/g, "_eq_");
     }
 
     private getClusterName(atoms : string[]) : string {
@@ -667,7 +326,7 @@ export class PenroseInstance {
         }
 
         let pertinentAtoms = atoms.slice(1).map((atom) => this.ensureValidId(atom));
-        let clusterName = pertinentAtoms.join("->");
+        let clusterName = pertinentAtoms.join("_arrow_");
         return clusterName;
 
     }
