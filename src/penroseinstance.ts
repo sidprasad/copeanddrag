@@ -433,47 +433,70 @@ export class PenroseInstance {
         let domain_objects = Object.entries(this._defined_types)
         .map(([type, type_data]) => {
 
-            let type_id = type_data.id;
+
+            // TODO: This is wrong. What if NO atoms are defined?
+            // TODO: Is this a hack?
+            let type_id = type_data.id.replace("this/", "");
             let atoms = type_data.atoms;
+
+            if (atoms.length == 0) {
+                return "";
+            }
+
             let atom_ids = atoms.map((atom) => {
                 return atom.id;
             });
             let atom_str = atom_ids.join(", ");
             
 
-            
-            return `${type_id} = {${atom_str}}`;
+            // What is this?
+            return `${type_id} ${atom_str}`;
 
 
         });
         let domain_objects_str = domain_objects.join("\n");
 
-
-
+        let z = Object.entries(this._defined_relations);
+        if (z == undefined || z.length == 0) {
+            return [SUBSTANCE_TEMPLATE, domain_objects_str].join("\n");
+        }
 
         // Each tuple of each relation becomes a Link object, with a label
-        let relation_objects = Object.entries(this._defined_relations)
+        let relation_objects = z
         .map(([rel, rel_data]) => {
 
+
+            if (!rel_data) {
+                return "";
+            }
+
+            // This should have the constraints PER relation
 
             // _Link b2x := _Arc(b2, x)
             // Label b2x "left"
 
-            let randomLinkName = this.randId(6);
+            
 
             let relationname = rel_data.name.replace("<:", "_");
+            let layoutConstraints = this._layoutInstance.getFieldLayout(relationname)
+
+
             let tuples = rel_data.tuples;
-            let tuple_str = tuples.map((tuple) => {
+            let relationConstraints = tuples.map((tuple) => {
+
+                let randomLinkName = this.randId(6);
+
                 let atoms = tuple.atoms;
                 let atom_str = atoms.join(", ");
-                return `_Link `;
-            }).join(", ");
-
-            let layoutConstraints = this._layoutInstance.getFieldLayout(relationname)
-            .map((constraintName) => {
-                return `${constraintName}(${tuple_str})`;
+                let linkDef = `_Link ${randomLinkName} := _Arc(${atom_str}) \n`;
+                let layoutDef = layoutConstraints.map((constraintName) => {
+                    return `${constraintName}(${atom_str})`;
+                }).join("\n");
+                return linkDef + layoutDef;
             });
-            let layoutConstraintsStr = layoutConstraints.join("\n");
+
+
+        
 
             // This is where the relational data is also encoded
             /*
@@ -481,10 +504,9 @@ export class PenroseInstance {
                 _layoutLeft(${tuple_str})
                 _layoutAbove(${tuple_str})
             */
+            return relationConstraints.join("\n");
 
-            return `_Link ${randomLinkName} := _Arc(${tuple_str}) \n` + layoutConstraintsStr;
         });
-
 
         let relation_objects_str = relation_objects.join("\n");
         let sub = SUBSTANCE_TEMPLATE;
@@ -493,6 +515,10 @@ export class PenroseInstance {
 
     generateStyle(): string {
         // TODO
+
+        ///// What goes in Style? ///
+
+
         let style = STYLE_TEMPLATE;
         return style;
     }
