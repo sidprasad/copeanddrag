@@ -3,7 +3,7 @@
 export class LayoutInstance {
     /* TODO: Implement this class */
 
-    _tempRecord : Record<string, string[]>;
+    private readonly _annotSpec : string;
 
 
     LEFT_CONSTRAINT : string = "_layoutLeft";
@@ -12,8 +12,8 @@ export class LayoutInstance {
     BOTTON_CONSTRAINT : string = "_layoutBelow";
 
 
-    constructor() {
-
+    constructor(annotationSpec : string) {
+        this._annotSpec = annotationSpec;
     }
 
 

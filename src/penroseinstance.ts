@@ -2,6 +2,7 @@ import { AlloyInstance, AlloyType, AlloyRelation } from "./alloy-instance";
 import { STYLE_TEMPLATE, SUBSTANCE_TEMPLATE, DOMAIN_TEMPLATE } from "./penrosetemplates";
 
 import {LayoutInstance} from "./layoutinstance";
+import { isBuiltin } from "./alloy-instance/src/type";
 
         /*
 {
@@ -357,6 +358,7 @@ export class PenroseInstance {
 
     private readonly _alloyInstance: AlloyInstance;
     private readonly _layoutInstance: LayoutInstance;
+    private readonly SKIP_BUILTIN = true;
 
     private readonly _defined_types : Record<string, AlloyType>;
     private readonly _defined_relations : Record<string, AlloyRelation>;
@@ -398,12 +400,21 @@ export class PenroseInstance {
 
         let type_defs = Object.entries(this._defined_types)
         .map(([type, type_data]) => {
-            let type_id = type_data.id;
+
+
+            if (isBuiltin(type_data) && this.SKIP_BUILTIN) {
+                return "";
+            }
+
+            let type_id = this.cleanType(type_data.id);
             // This is heirarchy of the type, and I believe it is ordered (with the 0th element being the type itself)
             let type_heirarchy = type_data.types;
             
             // If type_heirarchy[1] exists, that is the supertype else, it is _Vertex
-            let supertype = type_heirarchy[1] || "_Vertex";
+
+            // But I think it is trickier, the ORDER of type declarations matters? That's so dumb penrose.
+
+            let supertype = this.cleanType(type_heirarchy[1]) || "_Vertex";
 
             //// TODO: Unless supertype is _Cluster, which would be the case depending on the annotations!
 
@@ -417,7 +428,9 @@ export class PenroseInstance {
 
             let pname = rel_data.name.replace("<:", "_");
             let args = rel_data.types.map((t) => {
-                return `${t} ${this.randId()}`;
+
+                let t_cleaned = this.cleanType(t);
+                return `${t_cleaned} ${this.randId()}`;
             }).join(", ");
             return `predicate ${pname}(${args})`;
         });
@@ -433,10 +446,13 @@ export class PenroseInstance {
         let domain_objects = Object.entries(this._defined_types)
         .map(([type, type_data]) => {
 
+            if (isBuiltin(type_data) && this.SKIP_BUILTIN) {
+                return "";
+            }
 
             // TODO: This is wrong. What if NO atoms are defined?
             // TODO: Is this a hack?
-            let type_id = type_data.id.replace("this/", "");
+            let type_id = this.cleanType(type_data.id);
             let atoms = type_data.atoms;
 
             if (atoms.length == 0) {
@@ -444,7 +460,7 @@ export class PenroseInstance {
             }
 
             let atom_ids = atoms.map((atom) => {
-                return atom.id;
+                return this.ensureValidId(atom.id);
             });
             let atom_str = atom_ids.join(", ");
             
@@ -470,12 +486,6 @@ export class PenroseInstance {
                 return "";
             }
 
-            // This should have the constraints PER relation
-
-            // _Link b2x := _Arc(b2, x)
-            // Label b2x "left"
-
-            
 
             let relationname = rel_data.name.replace("<:", "_");
             let layoutConstraints = this._layoutInstance.getFieldLayout(relationname)
@@ -523,4 +533,21 @@ export class PenroseInstance {
         return style;
     }
 
+
+
+    private cleanType(t: string): string {
+
+        if (!t) {
+            return "";
+        }
+
+        return t.replace("/", "_");
+    }
+
+    private ensureValidId(id: string): string {
+        if (!id) {
+            return "";
+        }
+        return id.replace("$", "_").replace("/", "_").replace("-", "_neg_");
+    }
 }

@@ -3,6 +3,13 @@ import * as http from 'http';
 import { AlloyDatum, AlloyInstance, parseAlloyXML } from './alloy-instance';
 import { PenroseInstance } from './penroseinstance';
 import { LayoutInstance } from './layoutinstance';
+import multer from 'multer';
+
+
+const express = require('express');
+const path = require('path');
+
+
 
 const trace1 = `<alloy builddate="2021-11-03T15:25:43.736Z">
 
@@ -69,31 +76,55 @@ const trace1 = `<alloy builddate="2021-11-03T15:25:43.736Z">
 `;
 
 
-const server = http.createServer((req, res) => {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
-    res.end('Hello, World!\n');
 
 
-    let ad : AlloyDatum = parseAlloyXML(trace1);
+const app = express();
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+app.set('view engine', 'ejs');
+
+
+
+
+// Define the /penrosefiles endpoint that accepts POST requests
+app.post('/penrosefiles', (req, res) => {
+  
+    // The request has a form-data body with an alloydatum field and a layoutannotation field.
+    
+    const alloyDatum = req.body.alloydatum;
+    const layoutAnnotation = req.body.layoutannotation;
+
+    let ad : AlloyDatum = parseAlloyXML(alloyDatum);
     let instances = ad.instances;
-    // Great, I have Alloy instances! I think I can generate PENROSE from this!
 
+
+    /// TODO: Generate for each instance ///
     let instance = instances[0];
 
-    let li = new LayoutInstance();
-
+    let li = new LayoutInstance(layoutAnnotation);
     let pt = new PenroseInstance(instance, li);
 
     let s = pt.getSubstance();
     let d = pt.getDomain();
-    console.log(d);
+    let sty = pt.getStyle();
+    
+    // res.send({
+    //     substance: s,
+    //     domain: d,
+    //     style: sty
+    // });
+
+    res.render('penrosevjs', { 'substance': s, 'domain': d, 'style': sty });
 
 });
+
+
+const server = http.createServer(app);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}/`);
 });
-
-
