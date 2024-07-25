@@ -83,8 +83,10 @@ export class LayoutInstance {
     }
 
     shouldClusterOnField(fieldId: string): boolean {
-        const clusterRelation = this._layoutSpec.groupBy.find((cluster) => cluster.fieldName === fieldId);
-        return clusterRelation !== undefined;
+        const isMember = this._layoutSpec.groupBy.some((cluster) => cluster.fieldName === fieldId);
+        return isMember;
+        // check if fieldId is a member of groupBy
+
     }
 
     /// This is trickier, will do "property"

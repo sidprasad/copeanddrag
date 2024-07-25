@@ -138,72 +138,39 @@ export class PenroseInstance {
     generateSubstance(): string {
         // TODO: We have to handle skolems as well
 
-        // Each atom of each type becomes a domain object
-        let domain_objects = Object.entries(this._defined_types)
-            .map(([type, type_data]) => {
-
-                // TODO: Hack
-                if (isBuiltin(type_data) && this.SKIP_BUILTIN) {
-                    return "";
-                }
-
-                let type_id = this.cleanType(type_data.id);
-                let atoms = type_data.atoms;
-
-                if (atoms.length == 0) {
-                    return "";
-                }
-
-                let atom_ids = atoms.map((atom) => {
-                    return this.ensureValidId(atom.id);
-                });
-                let atom_str = atom_ids.join(", ");
-                return `${type_id} ${atom_str}
-                    AutoLabel ${atom_str}`;
-
-
-            });
-        let domain_objects_str = domain_objects.join("\n");
-
+        let clusters: Record<string, Record<string, string[]>> = {};
         let relationEntries = Object.entries(this._defined_relations);
-        if (relationEntries == undefined || relationEntries.length == 0) {
-            return [SUBSTANCE_TEMPLATE, domain_objects_str].join("\n");
-        }
-
-
-
-        let clusters : Record<string, Record<string, string[]>> = {};
 
         relationEntries
-        .filter(([rel, rel_data]) => {
+            .filter(([rel, rel_data]) => {
 
-            if (!rel_data) {
-                return false;
-            }
-
-            let fieldName = rel_data.name.replace("<:", "_");
-            return this._layoutInstance.shouldClusterOnField(fieldName);
-        })
-        .forEach(([rel, rel_data]) => {
-
-            let fieldName = rel_data.name.replace("<:", "_");
-
-            let clusterForRelation : Record<string, string[]> = {};
-
-            let tuples = rel_data.tuples;
-            tuples.forEach((tuple) => {
-                let atoms = tuple.atoms.map((atom) => this.ensureValidId(atom));
-                let clusterName = this.getClusterName(atoms);
-                let clusterTarget = this.ensureValidId(atoms[0]);
-
-                // If clusterName is not in clusters.keys, then we need to create a new cluster
-                if (!(clusterName in clusterForRelation)) {
-                    clusterForRelation[clusterName] = [];
+                if (!rel_data) {
+                    return false;
                 }
-                clusterForRelation[clusterName].push(clusterTarget);
+
+                let fieldName = this.ensureValidId(rel_data.name);
+                return this._layoutInstance.shouldClusterOnField(fieldName);
+            })
+            .forEach(([rel, rel_data]) => {
+
+                let fieldName = this.ensureValidId(rel_data.name);
+
+                let clusterForRelation: Record<string, string[]> = {};
+
+                let tuples = rel_data.tuples;
+                tuples.forEach((tuple) => {
+                    let atoms = tuple.atoms.map((atom) => this.ensureValidId(atom));
+                    let clusterName = this.getClusterName(atoms);
+                    let clusterTarget = this.ensureValidId(atoms[0]);
+
+                    // If clusterName is not in clusters.keys, then we need to create a new cluster
+                    if (!(clusterName in clusterForRelation)) {
+                        clusterForRelation[clusterName] = [];
+                    }
+                    clusterForRelation[clusterName].push(clusterTarget);
+                });
+                clusters[fieldName] = clusterForRelation;
             });
-            clusters[fieldName] = clusterForRelation;
-        });
 
         // Now we have all the clusters, we can add them to the domain objects
         let cluster_objects = Object.entries(clusters).map(([fieldName, clusterData]) => {
@@ -211,19 +178,21 @@ export class PenroseInstance {
             let prefix = `-- Clusters for ${fieldName} --\n`;
             let allAtoms = new Set<string>();
             // Create a set of all atoms in a cluster for a field
-            let allFieldClusters = Object.values(clusterData).forEach((clusterTargets) => {
-               clusterTargets.forEach((atom) => {
-                   allAtoms.add(atom);
-               });
+            Object.values(clusterData).forEach((clusterTargets) => {
+                clusterTargets.forEach((atom) => {
+                    allAtoms.add(atom);
+                });
             });
 
 
 
             let inClusterObjects = Object.entries(clusterData).map(([clusterName, clusterTargets]) => {
-                
-                let clusterDef = `Cluster ${clusterName}\n`;
+
+                let clusterDef = `_Cluster ${clusterName}
+                                    Label ${clusterName} "${clusterName}"\n
+                                    `;
                 let clusterAtoms = clusterTargets.map((atom) => {
-                    return `_layoutInCluster( clusterName  ,  ${atom})`;
+                    return `_layoutInCluster( ${clusterName},  ${atom})`;
                 }).join("\n");
                 return clusterDef + clusterAtoms;
             });
@@ -236,12 +205,59 @@ export class PenroseInstance {
                 let clusterAtomConstraints = notInClusterAtoms.map((atom) => {
                     return `_layoutNotInCluster(${clusterName}, ${atom})`;
                 }).join("\n");
+                return clusterAtomConstraints;
             });
 
-            return prefix + inClusterObjects.join("\n") + notInClusterObjects.join("\n");
-          });
+            return [prefix, inClusterObjects.join("\n"), notInClusterObjects.join("\n")].join("\n");
+        });
 
-          let clusterString = cluster_objects.join("\n");
+        let clusterString = cluster_objects.join("\n");
+
+
+
+
+        // Each atom of each type becomes a domain object
+        let domain_objects = Object.entries(this._defined_types)
+            .map(([type, type_data]) => {
+
+                // TODO: Hack
+                if (isBuiltin(type_data) && this.SKIP_BUILTIN) {
+                    return "";
+                }
+
+                let type_id = this.cleanType(type_data.id);
+
+                // If an atom represents a cluster don't add an instantiation for it here //
+                let atoms = type_data.atoms.filter((atom) => !this.atomIsClusterKey(atom.id, clusters));
+
+                if (atoms.length == 0) {
+                    return "";
+                }
+
+                let atomLabels = atoms.map((atom) => {
+                    return `Label ${this.ensureValidId(atom.id)} "${atom.id}"`;
+                }).join("\n");
+
+                let atom_ids = atoms.map((atom) => {
+                    return this.ensureValidId(atom.id);
+                });
+                let atom_str = atom_ids.join(", ");
+
+                // Don't autolabel here. Explicitly gen your labels, so that we can have the weird chars.
+                return `${type_id} ${atom_str}` + "\n" + atomLabels;
+
+
+            });
+        let domain_objects_str = domain_objects.join("\n");
+
+
+        if (relationEntries == undefined || relationEntries.length == 0) {
+            return [SUBSTANCE_TEMPLATE, domain_objects_str].join("\n");
+        }
+
+
+
+
 
 
 
@@ -251,38 +267,38 @@ export class PenroseInstance {
 
         // Each tuple of each relation becomes a Link object, with a label
         let relation_objects = relationEntries
-        // Don't draw edges for relations that are defined as clusters
-        .filter(([rel, rel_data]) => {
-            let fieldName = rel_data.name.replace("<:", "_");
-            return !this._layoutInstance.shouldClusterOnField(fieldName);
-        })
-        .map(([rel, rel_data]) => {
+            // Don't draw edges for relations that are defined as clusters
+            .filter(([rel, rel_data]) => {
+                let fieldName = rel_data.name.replace("<:", "_");
+                return !this._layoutInstance.shouldClusterOnField(fieldName);
+            })
+            .map(([rel, rel_data]) => {
 
 
-            if (!rel_data) {
-                return "";
-            }
+                if (!rel_data) {
+                    return "";
+                }
 
-            let relationname = rel_data.name.replace("<:", "_");
-            let layoutConstraints = this._layoutInstance.getFieldLayout(relationname)
-            let tuples = rel_data.tuples;
-            let relationConstraints = tuples.map((tuple) => {
+                let relationname = rel_data.name.replace("<:", "_");
+                let layoutConstraints = this._layoutInstance.getFieldLayout(relationname)
+                let tuples = rel_data.tuples;
+                let relationConstraints = tuples.map((tuple) => {
 
-                let randomLinkName = this.randId(6);
+                    let randomLinkName = this.randId(6);
 
-                let atoms = tuple.atoms.map((atom) => this.ensureValidId(atom));
-                let atom_str = atoms.join(", ");
-                let linkDef = `_Link ${randomLinkName} := _Arc(${atom_str}) \n
+                    let atoms = tuple.atoms.map((atom) => this.ensureValidId(atom));
+                    let atom_str = atoms.join(", ");
+                    let linkDef = `_Link ${randomLinkName} := _Arc(${atom_str}) \n
             Label ${randomLinkName}  "${relationname}"\n
             `;
 
-                let layoutDef = layoutConstraints.map((constraintName) => {
-                    return `${constraintName}(${atom_str})`;
-                }).join("\n");
-                return linkDef + layoutDef;
+                    let layoutDef = layoutConstraints.map((constraintName) => {
+                        return `${constraintName}(${atom_str})`;
+                    }).join("\n");
+                    return linkDef + layoutDef;
+                });
+                return relationConstraints.join("\n");
             });
-            return relationConstraints.join("\n");
-        });
 
         let relation_objects_str = relation_objects.join("\n");
         let sub = SUBSTANCE_TEMPLATE;
@@ -313,12 +329,14 @@ export class PenroseInstance {
             id = "_" + id;
         }
 
+        // Will have to be able to reverse engineer these so that we can get the original id back for
+        // labels, cluster name, etc.
 
         return id.replace(/\$/g, "").replace(/\//g, "__").replace(/-/g, "_neg_")
             .replace(/>/g, "_gt_").replace(/</g, "_lt_").replace(/=/g, "_eq_");
     }
 
-    private getClusterName(atoms : string[]) : string {
+    private getClusterName(atoms: string[]): string {
 
         if (atoms.length < 2) {
             // We can't cluster a single atom
@@ -326,8 +344,23 @@ export class PenroseInstance {
         }
 
         let pertinentAtoms = atoms.slice(1).map((atom) => this.ensureValidId(atom));
+
+
         let clusterName = pertinentAtoms.join("_arrow_");
         return clusterName;
 
+    }
+
+
+    atomIsClusterKey(atom: string, clusters: Record<string, Record<string, string[]>>): boolean {
+        let atomCleaned = this.ensureValidId(atom);
+        let clusterDicts = Object.values(clusters);
+
+        for (let clusterDict of clusterDicts) {
+            if (Object.keys(clusterDict).includes(atomCleaned)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
