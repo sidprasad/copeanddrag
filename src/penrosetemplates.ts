@@ -5,9 +5,13 @@ type _Link
 type _Cluster
 constructor _Arc(_Vertex u, _Vertex v) -> _Link
 
-
+-- What about N-ary tuples?
 predicate _layoutLeft(_Vertex l, _Vertex r)
 predicate _layoutAbove(_Vertex a, _Vertex b)
+predicate _layoutRight(_Vertex r, _Vertex l)
+predicate _layoutBelow(_Vertex b, _Vertex a)
+
+
 predicate _layoutInCluster(_Cluster c, _Vertex v)
 predicate _layoutNotInCluster(_Cluster c, _Vertex v)
 `;
@@ -212,10 +216,23 @@ forall _Vertex l; _Vertex r where _layoutLeft(l, r) {
     ensure l.dot.center[0] > r.dot.center[0] in nodes
 }
 
+
+forall _Vertex r; _Vertex l where _layoutRight(r, l) {
+  encourage leftwards(l.dot, r.dot) in [nodes]
+  ensure l.dot.center[0] > r.dot.center[0] in nodes
+}
+
+
 forall _Vertex a; _Vertex b where _layoutAbove(a, b) {
     a.dot above b.dot
     ensure a.dot.center[1] > b.dot.center[1] in nodes
 }
+
+forall _Vertex b; _Vertex a where _layoutBelow(b, a) {
+    a.dot above b.dot
+    ensure a.dot.center[1] > b.dot.center[1] in nodes
+}
+
 
 
 -------- Clusters -------
