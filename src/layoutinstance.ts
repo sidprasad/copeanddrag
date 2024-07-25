@@ -31,7 +31,6 @@ interface DirectionalRelation {
 
 interface ClusterRelation {
     fieldName : string;
-    clusterValue : string;
 }
 
 
@@ -83,8 +82,9 @@ export class LayoutInstance {
         return [];
     }
 
-    getSigLayout(sigId: string): string[] {
-        return [];
+    shouldClusterOnField(fieldId: string): boolean {
+        const clusterRelation = this._layoutSpec.groupBy.find((cluster) => cluster.fieldName === fieldId);
+        return clusterRelation !== undefined;
     }
 
     /// This is trickier, will do "property"
