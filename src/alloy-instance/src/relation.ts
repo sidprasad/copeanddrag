@@ -11,8 +11,6 @@ export interface AlloyRelation {
   types: string[];
   // the relation's tuples
   tuples: AlloyTuple[];
-  // the relation's layout direction
-  layoutDirection?: string;
 }
 
 export function getRelationTuples(relation: AlloyRelation): AlloyTuple[] {

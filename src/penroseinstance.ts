@@ -1,24 +1,26 @@
-import { AlloyInstance, AlloyType, AlloyRelation } from "./alloy-instance";
+import { AlloyInstance, AlloyType, AlloyRelation, AlloyAtom } from "./alloy-instance";
 import { STYLE_TEMPLATE, SUBSTANCE_TEMPLATE, DOMAIN_TEMPLATE } from "./penrosetemplates";
 
 import { LayoutInstance } from "./layoutinstance";
 import { isBuiltin } from "./alloy-instance/src/type";
-
+import { atomIsBuiltin, getAtomType } from "./alloy-instance/src/atom";
+import { getInstanceRelationsAndSkolems } from "./alloy-instance/src/instance";
 
 export class PenroseInstance {
 
     private readonly _alloyInstance: AlloyInstance;
     private readonly _layoutInstance: LayoutInstance;
-    private readonly SKIP_BUILTIN = false;
-
     private readonly _defined_types: Record<string, AlloyType>;
     private readonly _defined_relations: Record<string, AlloyRelation>;
+
+    private readonly _instanceRelationsAndSkolems : AlloyRelation[];
 
     constructor(public alloyInstance: AlloyInstance, layoutInstance: LayoutInstance) {
         this._alloyInstance = alloyInstance;
         this._defined_types = this._alloyInstance.types;
         this._defined_relations = this._alloyInstance.relations;
         this._layoutInstance = layoutInstance;
+        this._instanceRelationsAndSkolems = getInstanceRelationsAndSkolems(this._alloyInstance);
     }
 
 
@@ -88,7 +90,7 @@ export class PenroseInstance {
         ///////////
 
         let type_defs: TypeElement[] = Object.entries(this._defined_types)
-            .filter(([type, type_data]) => !(isBuiltin(type_data) && this.SKIP_BUILTIN))
+            //.filter(([type, type_data]) => !(isBuiltin(type_data) && this.SKIP_BUILTIN))
             .map(([type, type_data]) => {
 
                 let type_id = this.cleanType(type_data.id);
@@ -97,15 +99,6 @@ export class PenroseInstance {
 
                 // If type_heirarchy[1] exists, that is the supertype else, it is _Vertex OR _Cluster
                 let supertype = this.cleanType(type_heirarchy[1]) || "_Vertex";
-
-                //// TODO: Unless supertype is _Cluster, which would be the case depending on the annotations!
-
-                /*
-
-                    May have to do some post-editing about the cluster maybe? Like, relations whose atoms are involved with clusters shouldn't plot the atoms? idk
-
-                */
-
                 let x: TypeElement = { type: type_id, supertype: supertype };
                 return x;
             });
@@ -184,8 +177,6 @@ export class PenroseInstance {
                 });
             });
 
-
-
             let inClusterObjects = Object.entries(clusterData).map(([clusterName, clusterTargets]) => {
 
                 let clusterDef = `_Cluster ${clusterName}
@@ -220,15 +211,11 @@ export class PenroseInstance {
         let domain_objects = Object.entries(this._defined_types)
             .map(([type, type_data]) => {
 
-                // TODO: Hack
-                if (isBuiltin(type_data) && this.SKIP_BUILTIN) {
-                    return "";
-                }
-
                 let type_id = this.cleanType(type_data.id);
 
                 // If an atom represents a cluster don't add an instantiation for it here //
-                let atoms = type_data.atoms.filter((atom) => !this.atomIsClusterKey(atom.id, clusters));
+                let atoms = type_data.atoms.filter((atom) => !this.atomIsClusterKey(atom.id, clusters))
+                                            .filter((atom) => this.shouldShowAtom(atom.id));
 
                 if (atoms.length == 0) {
                     return "";
@@ -362,5 +349,28 @@ export class PenroseInstance {
             }
         }
         return false;
+    }
+
+
+
+    private shouldShowAtom(atom: string): boolean {
+
+        // Check if the atom is a builtin type
+        let builtin = atomIsBuiltin(this._alloyInstance, atom);
+        let t = getAtomType(this._alloyInstance, atom);
+        
+        // Check if atom is in _instanceRelationsAndSkolems
+
+        let includedInRelations = this._instanceRelationsAndSkolems.some((rel) => {
+
+            return rel.tuples.some((tuple) => {
+                if (tuple.atoms.includes(atom)) {
+                    return true;
+                }
+                return false;
+            });
+        });
+
+        return includedInRelations || !builtin;
     }
 }

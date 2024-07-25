@@ -33,9 +33,7 @@ interface ClusterRelation {
     fieldName : string;
 }
 
-
 export class LayoutInstance {
-    /* TODO: Implement this class */
 
     private readonly _annotSpec : string;
     private readonly _layoutSpec: LayoutSpec;
@@ -78,15 +76,12 @@ export class LayoutInstance {
                 }
             });
         }
-
         return [];
     }
 
     shouldClusterOnField(fieldId: string): boolean {
         const isMember = this._layoutSpec.groupBy.some((cluster) => cluster.fieldName === fieldId);
         return isMember;
-        // check if fieldId is a member of groupBy
-
     }
 
     /// This is trickier, will do "property"

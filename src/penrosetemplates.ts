@@ -41,7 +41,7 @@ num {
   loopRadius = 15
   pointerX = 6
   pointerY = 4
-  clusterpad = 10
+  clusterpad = 30
 }
 
 ----------- _Vertex properties ------------
@@ -49,7 +49,9 @@ forall _Vertex v {
   v.dot = Circle {
     center: (? in nodes, ? in nodes)
     r: num.radius
-    fillColor : color.black
+    fillColor : color.white
+    strokeColor: color.black
+    strokeWidth: 1
   }
 
   v.text = Text {
@@ -242,7 +244,12 @@ forall _Cluster c {
     center: (? in nodes, ? in nodes)
     width: ? in nodes
     height: ? in nodes
-  }
+    strokeColor: color.black
+    strokeStyle : "dashed"
+    strokeWidth : 1
+    fillColor: hsva(0,0,0, 0)
+    ensureOnCanvas: true
+  }  
 
   c.text = Text {
     string: c.label
@@ -250,26 +257,45 @@ forall _Cluster c {
     strokeColor: color.white
     strokeWidth: 4
     paintOrder: "stroke"
+    
   }
   ensure contains(c.blob, c.text) in text
-  encourage minimal(c.blob.height) in nodes
-  encourage minimal(c.blob.width) in nodes
+  --encourage minimal(c.blob.height) in nodes
+  --encourage minimal(c.blob.width) in nodes
 }
 
 forall _Cluster c; _Vertex v where _layoutInCluster (c, v) {
   layer c.blob below v.dot
-  layer c.blob below v.text 
+  layer c.blob below v.text
+  --encourage notTooClose(c.text, v.text) in text
   ensure contains(c.blob, v.dot, num.clusterpad) in nodes
+
+  encourage nearPt(v.dot, c.blob.center[0], c.blob.center[1]) in nodes
+
   
 }
 
 forall _Cluster c; _Vertex v where _layoutNotInCluster (c, v) {
-  ensure disjoint(c.blob, v.dot) in nodes
+  ensure disjoint(c.blob, v.dot, num.clusterpad) in nodes
   encourage notTooClose(c.blob, v.dot) in nodes
 }
 
 forall _Cluster c; _Vertex v1; _Vertex v2
 where _layoutInCluster (c, v1); _layoutInCluster (c, v2){
-  encourage near(v1.dot, v2.dot) in nodes
+  encourage near(v1.dot, v2.dot) in [nodes, text]
+}
+
+
+
+forall _Vertex v; _Link e {
+  ensure disjoint(v.text, e.text) in text
+}
+
+forall _Vertex v; _Cluster c {
+  ensure disjoint(v.text, c.text) in text
+}
+
+forall _Cluster c; _Link e {
+  ensure disjoint(e.text, c.text) in text
 }
 `;
