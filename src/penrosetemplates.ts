@@ -17,8 +17,8 @@ export const SUBSTANCE_TEMPLATE = ``;
 /// TODO: This needs work ///
 export const STYLE_TEMPLATE = `
 canvas {
-  width = 400
-  height = 400
+  width = 800
+  height = 800
 }
 
 layout = [nodes, loops, arrows, text]
@@ -198,7 +198,7 @@ forall _Vertex  v {
     encourage near(v.dot, v.text)
     layer v.text above v.dot 
 }
-s
+
 -- Do not overlap vertices
 forall _Vertex v1; _Vertex v2 {
   ensure disjoint(v1.dot, v2.dot) in dots

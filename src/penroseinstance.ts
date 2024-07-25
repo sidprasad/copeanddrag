@@ -397,14 +397,14 @@ export class PenroseInstance {
 
 
     generateDomain(): string {
+        interface TypeElement {
+            type: string;
+            supertype: string;
+          }
 
-        let type_defs = Object.entries(this._defined_types)
+        let type_defs : TypeElement[] = Object.entries(this._defined_types)
+        .filter(([type, type_data]) => !(isBuiltin(type_data) && this.SKIP_BUILTIN))
         .map(([type, type_data]) => {
-
-
-            if (isBuiltin(type_data) && this.SKIP_BUILTIN) {
-                return "";
-            }
 
             let type_id = this.cleanType(type_data.id);
             // This is heirarchy of the type, and I believe it is ordered (with the 0th element being the type itself)
@@ -417,11 +417,57 @@ export class PenroseInstance {
             let supertype = this.cleanType(type_heirarchy[1]) || "_Vertex";
 
             //// TODO: Unless supertype is _Cluster, which would be the case depending on the annotations!
-
-
-            return `type ${type_id} <: ${supertype}`;
+            let x : TypeElement = { type:type_id, supertype: supertype};
+            return x;
         });
-        let type_defs_str = type_defs.join("\n");
+
+
+        /// We now have a list of types and super types. How can we order them so the super types are declared first?
+
+        ///// HACK //////
+
+            function hasSuperType(te : TypeElement)
+            {
+                return te.supertype != "_Vertex" && te.supertype != "_Cluster";
+            }
+          
+          function sortTypes(elements: TypeElement[]): TypeElement[] {
+
+
+
+            const elementLookup = new Map<string, TypeElement>();
+            elements.forEach(element => elementLookup.set(element.type, element));
+          
+            const sorted: TypeElement[] = [];
+            const visited = new Set<string>();
+          
+            function visit(element: TypeElement) {
+              if (visited.has(element.type)) return;
+              visited.add(element.type);
+          
+              if (hasSuperType(element)) {
+                const supertypeElement = elementLookup.get(element.supertype);
+                if (supertypeElement) {
+                  visit(supertypeElement); // Visit the supertype first
+                }
+              }
+          
+              sorted.push(element);
+            }
+          
+            elements.forEach(element => {
+                visit(element);
+            });
+          
+            return sorted;
+          }
+
+
+          let type_defs_sorted = sortTypes(type_defs);
+          ///////////
+
+
+        let type_defs_str = type_defs_sorted.map((x) =>`type ${x.type} <: ${x.supertype}`).join("\n");
 
         let relation_defs = Object.entries(this._defined_relations)
         .map(([rel, rel_data]) => {
@@ -440,18 +486,15 @@ export class PenroseInstance {
     }
 
     generateSubstance(): string {
-        // TODO
-
         // Each atom of each type becomes a domain object
         let domain_objects = Object.entries(this._defined_types)
         .map(([type, type_data]) => {
 
+            // TODO: Hack
             if (isBuiltin(type_data) && this.SKIP_BUILTIN) {
                 return "";
             }
 
-            // TODO: This is wrong. What if NO atoms are defined?
-            // TODO: Is this a hack?
             let type_id = this.cleanType(type_data.id);
             let atoms = type_data.atoms;
 
@@ -463,10 +506,8 @@ export class PenroseInstance {
                 return this.ensureValidId(atom.id);
             });
             let atom_str = atom_ids.join(", ");
-            
-
-            // What is this?
-            return `${type_id} ${atom_str}`;
+            return `${type_id} ${atom_str}
+                    AutoLabel ${atom_str}`;
 
 
         });
@@ -496,9 +537,12 @@ export class PenroseInstance {
 
                 let randomLinkName = this.randId(6);
 
-                let atoms = tuple.atoms;
+                let atoms = tuple.atoms.map((atom) => this.ensureValidId(atom));
                 let atom_str = atoms.join(", ");
-                let linkDef = `_Link ${randomLinkName} := _Arc(${atom_str}) \n`;
+                let linkDef = `_Link ${randomLinkName} := _Arc(${atom_str}) \n
+                Label ${randomLinkName}  "${relationname}"\n
+                `;
+
                 let layoutDef = layoutConstraints.map((constraintName) => {
                     return `${constraintName}(${atom_str})`;
                 }).join("\n");
