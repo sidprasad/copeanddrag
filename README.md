@@ -103,3 +103,12 @@
   ]
 }
 ```
+
+## Current Issues
+
+- [] Layout graphs are decidedly NOT beautiful. Likely, this can be fixed via changes to the penrose `.style` file (`src/penrosetemplates/default.style`)\
+    - [] Cluster visualizations do not always load. Could this be a Penrose bug?
+    - [] Need to minimize label overlap as well as edge overlap?
+- [] Currently only show a visualization for the *first* alloy instance in the datum
+- [] Support may not be great for n-ary relations laid out, especially in clusters.
+

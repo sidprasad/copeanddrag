@@ -243,15 +243,6 @@ export class PenroseInstance {
         }
 
 
-
-
-
-
-
-
-
-
-
         // Each tuple of each relation becomes a Link object, with a label
         let relation_objects = relationEntries
             // Don't draw edges for relations that are defined as clusters
@@ -260,8 +251,6 @@ export class PenroseInstance {
                 return !this._layoutInstance.shouldClusterOnField(fieldName);
             })
             .map(([rel, rel_data]) => {
-
-
                 if (!rel_data) {
                     return "";
                 }
@@ -271,14 +260,11 @@ export class PenroseInstance {
                 let tuples = rel_data.tuples;
                 let relationConstraints = tuples.map((tuple) => {
 
-                    let randomLinkName = this.randId(6);
+                    let randomLinkName = `${relationname}_${this.randId(6)}`;
 
                     let atoms = tuple.atoms.map((atom) => this.ensureValidId(atom));
                     let atom_str = atoms.join(", ");
-                    let linkDef = `_Link ${randomLinkName} := _Arc(${atom_str}) \n
-            Label ${randomLinkName}  "${relationname}"\n
-            `;
-
+                    let linkDef = `_Link ${randomLinkName} := _Arc(${atom_str}) \n Label ${randomLinkName}  "${relationname}"\n`;
                     let layoutDef = layoutConstraints.map((constraintName) => {
                         return `${constraintName}(${atom_str})`;
                     }).join("\n");

@@ -2,7 +2,7 @@
 import { readFileSync } from 'fs';
 import {join }  from 'path';
 
-const basepath = join(__dirname, 'penrose-templates');
+const basepath = join(__dirname, 'penrosetemplates');
 
 const domainpath = join(basepath, 'default.domain');
 export const DOMAIN_TEMPLATE = readFileSync(domainpath, { encoding: 'utf8' });

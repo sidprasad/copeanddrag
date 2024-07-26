@@ -252,8 +252,10 @@ forall _Cluster c {
     
   }
   ensure contains(c.blob, c.text) in text
-  --encourage minimal(c.blob.height) in nodes
-  --encourage minimal(c.blob.width) in nodes
+  encourage minimal(c.blob.height) in nodes
+  encourage minimal(c.blob.width) in nodes
+  ensure c.blob.height > num.clusterpad in nodes
+  ensure c.blob.width > num.clusterpad in nodes
 }
 
 forall _Cluster c; _Vertex v where _layoutInCluster (c, v) {
