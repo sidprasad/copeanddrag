@@ -11,9 +11,10 @@ color {
 }
 
 num {
-  radius = 5
+  vheight = 25
+  vwidth = 50
   labelDist = 5
-  edgeDist = 100
+  edgeDist = 200
   repelDist = 1.5 * edgeDist
   offset = 10
   loopRadius = 15
@@ -24,9 +25,10 @@ num {
 
 ----------- _Vertex properties ------------
 forall _Vertex v {
-  v.dot = Circle {
+  v.dot = Rectangle {
     center: (? in nodes, ? in nodes)
-    r: num.radius
+    width : num.vwidth
+    height: num.vheight
     fillColor : color.white
     strokeColor: color.black
     strokeWidth: 1
@@ -45,7 +47,9 @@ forall _Vertex v {
 
   v.text above v.dot
 
-  encourage shapeDistance(v.dot, v.text) == num.labelDist in text
+  --encourage shapeDistance(v.dot, v.text) == num.labelDist in text
+  encourage sameCenter(v.dot, v.text) in text
+  
 }
 
 
@@ -192,25 +196,35 @@ forall _Vertex v1; _Vertex v2 {
 -- Layout (directional )---------------
 
 forall _Vertex l; _Vertex r where _layoutLeft(l, r) {
-    encourage leftwards(l.dot, r.dot) in [nodes]
-    ensure l.dot.center[0] > r.dot.center[0] in nodes
+
+  encourage leftwards(l.dot, r.dot) in nodes
+  
+  l_right_edge = l.dot.center[0] + (num.vwidth / 2)
+  r_left_edge = r.dot.center[0] - (num.vwidth / 2)
+  ensure l_right_edge < r_left_edge in nodes
 }
 
 
 forall _Vertex r; _Vertex l where _layoutRight(r, l) {
   encourage leftwards(l.dot, r.dot) in [nodes]
-  ensure l.dot.center[0] > r.dot.center[0] in nodes
+  l_right_edge = l.dot.center[0] + (num.vwidth / 2)
+  r_left_edge = r.dot.center[0] - (num.vwidth / 2)
+  ensure l_right_edge < r_left_edge in nodes
 }
 
 
 forall _Vertex a; _Vertex b where _layoutAbove(a, b) {
     a.dot above b.dot
-    ensure a.dot.center[1] > b.dot.center[1] in nodes
+    a_bottom_edge = a.dot.center[1] - (num.vheight / 2)
+    b_top_edge = b.dot.center[1] + (num.vheight / 2)
+    ensure a_bottom_edge > b_top_edge in nodes
 }
 
 forall _Vertex b; _Vertex a where _layoutBelow(b, a) {
     a.dot above b.dot
-    ensure a.dot.center[1] > b.dot.center[1] in nodes
+    a_bottom_edge = a.dot.center[1] - (num.vheight / 2)
+    b_top_edge = b.dot.center[1] + (num.vheight / 2)
+    ensure a_bottom_edge > b_top_edge in nodes
 }
 
 

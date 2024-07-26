@@ -38,10 +38,12 @@ export class LayoutInstance {
     private readonly _annotSpec : string;
     private readonly _layoutSpec: LayoutSpec;
 
-    LEFT_CONSTRAINT : string = "_layoutLeft";
-    RIGHT_CONSTRAINT : string = "_layoutRight";
-    TOP_CONSTRAINT : string = "_layoutAbove";
-    BOTTON_CONSTRAINT : string = "_layoutBelow";
+
+    // Counter-intuitive, but this is how it should work.
+    LEFT_CONSTRAINT : string = "_layoutRight";
+    RIGHT_CONSTRAINT : string = "_layoutLeft";
+    TOP_CONSTRAINT : string = "_layoutBelow";
+    BOTTON_CONSTRAINT : string = "_layoutAbove";
 
 
     constructor(annotationSpec : string) {
