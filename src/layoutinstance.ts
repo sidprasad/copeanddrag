@@ -18,6 +18,7 @@
 
 
 */
+import { Graph } from 'graphlib';
 
 interface LayoutSpec {
     fieldDirections : DirectionalRelation[];
@@ -62,21 +63,12 @@ export class LayoutInstance {
     }
 
 
+
     getFieldLayout(fieldId: string): string[] {
         
         const fieldDirection = this._layoutSpec.fieldDirections.find((field) => field.fieldName === fieldId);
         if (fieldDirection) {
-            return fieldDirection.directions.map((dir) => {
-                if (dir == "above") {
-                    return this.TOP_CONSTRAINT;
-                } else if (dir === "below") {
-                    return this.BOTTON_CONSTRAINT;
-                } else if (dir === "left") {
-                    return this.LEFT_CONSTRAINT;
-                } else if (dir === "right") {
-                    return this.RIGHT_CONSTRAINT;
-                }
-            });
+            return fieldDirection.directions;
         }
         return [];
     }
@@ -89,5 +81,55 @@ export class LayoutInstance {
     /// This is trickier, will do "property"
     getAtomLayout(atomId: string): string[] {
         return [];
+    }
+
+
+    /**
+     * Generates groups based on the specified graph.
+     * @param g - The graph, which will be modified to remove the edges that are used to generate groups.
+     * @returns A record of groups.
+     */    
+    generateGroups(g : Graph) : Record<string, string[]> {
+
+        let groups : Record<string, string[]> = {};
+        // Should we also remove the groups from the graph?
+
+        let graphEdges = [...g.edges()];
+
+        // Go through all edge labels in the graph
+        graphEdges.forEach((edge) => {
+            const edgeId = edge.name;
+            const relName = g.edge(edge.v, edge.w, edgeId);
+
+            // Check if the edge label is a groupBy field
+            if (this.shouldClusterOnField(relName)) {
+
+                // If so, add the targter as a group key,
+                // and the source as a value in the group
+
+                let source = edge.v;
+                let target = edge.w;
+                if (groups[target]) {
+                    groups[target].push(source);
+                }
+                else {
+                    groups[target] = [source];
+                }
+
+                // But also remove this edge from the graph,
+                // and the source
+                g.removeEdge(source, target);
+                
+
+            }
+        });
+
+
+        Object.keys(groups).forEach((key) => {
+            g.removeNode(key);
+
+        });
+
+        return groups;
     }
 }

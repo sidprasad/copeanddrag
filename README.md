@@ -89,11 +89,11 @@
   "fieldDirections": [
     {
       "fieldName": "left",
-      "directions": ["above", "left"]
+      "directions": ["below", "left"]
     },
     {
       "fieldName": "right",
-      "directions": ["above", "right"]
+      "directions": ["below", "right"]
     }
   ],
   "groupBy": [
@@ -110,5 +110,5 @@
     - [] Cluster visualizations do not always load. Could this be a Penrose bug?
     - [] Need to minimize label overlap as well as edge overlap?
 - [] Currently only show a visualization for the *first* alloy instance in the datum
-- [] Support may not be great for n-ary relations laid out, especially in clusters.
+- [] Only works for binary relations
 

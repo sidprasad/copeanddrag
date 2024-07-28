@@ -1,0 +1,8 @@
+{
+    "fieldDirections": [ ],
+    "groupBy": [
+      {
+        "fieldName" : "near"
+      }
+    ]
+  }

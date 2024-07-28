@@ -6,11 +6,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <title>Alloy2Penrose</title>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        // Prevent the default form submission
+        $("#penrose, #cola").click(function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            var form = $(this).closest("form"); // Find the form closest to the clicked button
+            var actionEndpoint = "";
+
+            // Determine which button was clicked and set the appropriate action endpoint
+            if (this.id === 'penrose') {
+                actionEndpoint = "/penrosefiles"; // Endpoint for Penrose
+            } else if (this.id === 'cola') {
+                actionEndpoint = "/webcolafiles"; // Endpoint for Webcola
+            }
+
+            // Change the form's action and submit the form programmatically
+            form.attr("action", actionEndpoint);
+            form.submit();
+        });
+    });
+    </script>
 </head>
 
 <body>
     <div class="container">
-        <form action="/penrosefiles" method="post">
+        <form method="post">
             <div class="form-group">
                 <label for="alloydatum">Alloy Instance</label>
                 <textarea class="form-control" id="alloydatum" rows="5" name="alloydatum"></textarea>
@@ -19,7 +42,8 @@
                 <label for="layoutannotation">Layout Annotation</label>
                 <textarea class="form-control" id="layoutannotation" rows="5" name="layoutannotation"></textarea>
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" id='penrose' class="btn btn-primary">Gen Penrose</button>
+            <button type="submit" id='cola' class="btn btn-primary">Gen Webcola</button>
         </form>
     </div>
 

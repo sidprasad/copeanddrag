@@ -13,6 +13,12 @@ export class PenroseInstance {
     private readonly _defined_types: Record<string, AlloyType>;
     private readonly _defined_relations: Record<string, AlloyRelation>;
 
+    // Unintuitive but correct
+    LEFT_CONSTRAINT : string = "_layoutRight";
+    RIGHT_CONSTRAINT : string = "_layoutLeft";
+    TOP_CONSTRAINT : string = "_layoutBelow";
+    BOTTON_CONSTRAINT : string = "_layoutAbove";
+
     private readonly _instanceRelationsAndSkolems : AlloyRelation[];
 
     constructor(public alloyInstance: AlloyInstance, layoutInstance: LayoutInstance) {
@@ -256,7 +262,22 @@ export class PenroseInstance {
                 }
 
                 let relationname = rel_data.name.replace("<:", "_");
-                let layoutConstraints = this._layoutInstance.getFieldLayout(relationname)
+                let layoutDirections = this._layoutInstance.getFieldLayout(relationname)
+                let layoutConstraints = layoutDirections.map((dir) => {
+                    if (dir == "above") {
+                        return this.TOP_CONSTRAINT;
+                    } else if (dir === "below") {
+                        return this.BOTTON_CONSTRAINT;
+                    } else if (dir === "left") {
+                        return this.LEFT_CONSTRAINT;
+                    } else if (dir === "right") {
+                        return this.RIGHT_CONSTRAINT;
+                    }
+                });
+
+
+
+
                 let tuples = rel_data.tuples;
                 let relationConstraints = tuples.map((tuple) => {
 
