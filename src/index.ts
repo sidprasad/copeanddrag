@@ -4,10 +4,11 @@ import { AlloyDatum, AlloyInstance, parseAlloyXML } from './alloy-instance';
 import { generateGraph } from './alloy-graph';
 
 
-import { PenroseInstance } from './penroseinstance';
+//import { PenroseInstance } from './penroseinstance';
 import { LayoutInstance } from './layoutinstance';
 import multer from 'multer';
 import { graphToWebcola } from './webcola-gen/graphtowebcola';
+import { PenroseInstance } from './penrose-gen/graphtopenrose';
 
 
 const express = require('express');
@@ -36,26 +37,45 @@ function getFormContents(req: any) {
     return {instances, li};
 }
 
+// OLD PENROSE
+// app.post('/penrosefiles', (req, res) => {    
+//     let {instances, li} = getFormContents(req);
+//     let instance = instances[0];
+
+//     //let g = generateGraph(instance);
+
+
+//     /// TODO: MODIFY THE PENROSE INSTANCE TO
+//     // USE a graph and layout instance
+
+
+//     let pt = new PenroseInstance(instance, li);
+
+//     let s = pt.getSubstance();
+//     let d = pt.getDomain();
+//     let sty = pt.getStyle();
+//     res.render('penrosevjs', { 'substance': s, 'domain': d, 'style': sty });
+
+// });
+
+
 
 app.post('/penrosefiles', (req, res) => {    
     let {instances, li} = getFormContents(req);
     let instance = instances[0];
 
-    //let g = generateGraph(instance);
+    let g = generateGraph(instance);
 
+    let pt = new PenroseInstance(g, li, instance);
 
-    /// TODO: MODIFY THE PENROSE INSTANCE TO
-    // USE a graph and layout instance
-
-
-    let pt = new PenroseInstance(instance, li);
-
-    let s = pt.getSubstance();
-    let d = pt.getDomain();
-    let sty = pt.getStyle();
+    let s = pt.substance;
+    let d = pt.domain;
+    let sty = pt.style;
     res.render('penrosevjs', { 'substance': s, 'domain': d, 'style': sty });
 
 });
+
+
 
 app.post('/webcolafiles', (req, res) => {    
     let {instances, li} = getFormContents(req);

@@ -4,11 +4,9 @@ type _Link
 type _Cluster
 constructor _Arc(_Vertex u, _Vertex v) -> _Link
 
--- What about N-ary tuples?
+
 predicate _layoutLeft(_Vertex l, _Vertex r)
 predicate _layoutAbove(_Vertex a, _Vertex b)
-predicate _layoutRight(_Vertex r, _Vertex l)
-predicate _layoutBelow(_Vertex b, _Vertex a)
 
 
 predicate _layoutInCluster(_Cluster c, _Vertex v)

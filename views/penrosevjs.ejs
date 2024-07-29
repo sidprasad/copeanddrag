@@ -1,21 +1,21 @@
 <!doctype html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Penrose Generated Visualization</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.0/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-  </head>
-  <body>
-    <!--
+
+<head>
+  <meta charset="utf-8" />
+  <title>Penrose Generated Visualization</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+
+</head>
+
+<body>
+  <!--
     JSPM Generator Import Map
     Edit URL: https://generator.jspm.io/#U2VhYGBkTM4vSmVwKEjNK8ovTtUH8RyM9Qz0DAA+kyABHgA
   -->
-    <script type="importmap">
+  <script type="importmap">
       {
         "imports": {
           "@penrose/core": "https://ga.jspm.io/npm:@penrose/core@3.2.0/dist/index.js"
@@ -40,94 +40,83 @@
       }
     </script>
 
-    <!-- ES Module Shims: Import maps polyfill for olrder browsers without import maps support (eg Safari 16.3) -->
-    <script
-      async
-      src="https://ga.jspm.io/npm:es-module-shims@1.7.3/dist/es-module-shims.js"
-      crossorigin="anonymous"
-    ></script>
+  <!-- ES Module Shims: Import maps polyfill for olrder browsers without import maps support (eg Safari 16.3) -->
+  <script async src="https://ga.jspm.io/npm:es-module-shims@1.7.3/dist/es-module-shims.js"
+    crossorigin="anonymous"></script>
 
-    <script type="module">
-      import { compile, optimize, toSVG, showError } from "@penrose/core";
-      const trio = {
-        substance:   `<%- substance %>`,
-        domain:  `<%- domain %>`,
-        style:  `<%- style %>`,
-        variation: `test`  // What is this?
-      };
-      const compiled = await compile(trio);
-      if (compiled.isErr()) console.error(showError(compiled.error));
-      const optimized = optimize(compiled.value);
-      if (optimized.isErr()) console.error(showError(optimized.error));
-      document
-        .getElementById("penrose")
-        .appendChild(await toSVG(optimized.value));
-    </script>
+  <script type="module">
+    import { compile, optimize, toSVG, showError } from "@penrose/core";
+    const trio = {
+      substance: `<%- substance %>`,
+      domain: `<%- domain %>`,
+      style: `<%- style %>`,
+      variation: `test`  // What is this?
+    };
+    const compiled = await compile(trio);
+    if (compiled.isErr()) console.error(showError(compiled.error));
+    const optimized = optimize(compiled.value);
+    if (optimized.isErr()) console.error(showError(optimized.error));
+    document
+      .getElementById("penrose")
+      .appendChild(await toSVG(optimized.value));
+  </script>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 
+
+  <div class="container">
+    <h1> Penrose Generated Graph </h1>
+
+    <p>
+      For some reason, the Penrose diagram here does not render as well as when using the standalone Penrose webpage. While these diagrams are not ideal (read: ugly)
+      everywhere, they are particularly bad here.
+
+      For the best experience, copy the domain, substance, and style into the Penrose editor at <a href="https://penrose.cs.cmu.edu/try/">https://penrose.cs.cmu.edu/try/</a>.
+
+    </p>
+    <div class="btn-group" role="group">
+      <button type="button" class="btn btn-outline-secondary"><a href="#penrose"> Penrose Diagram </a></button>
+      <button type="button" class="btn btn-outline-secondary"><a href="#domain"> Domain </a></button>
+      <button type="button" class="btn btn-outline-secondary"><a href="#substance"> Substance </a></button>
+      <button type="button" class="btn btn-outline-secondary"><a href="#style"> Style </a></button>
+    </div>
+
+    <hr>
 
     <div class="container">
       <div id="penrose"></div>
     </div>
 
     <hr>
-    
-    <!-- <div id="domainfile">
-      <h3> .domain</h3>
+
+    <div id="domain" class="container">
+      <h2>Domain</h2>
       <pre><%- domain %></pre>
     </div>
 
-    <hr>
-    <div id="stylefile">
-      <h3> .style</h3>
-      <pre><%- style %></pre>
 
-    </div>
-    <hr>
-    <div id="substancefile">
-      <h3> .substance</h3>
+    <div id="substance" class="container">
+      <h2>Substance</h2>
       <pre><%- substance %></pre>
-    </div> -->
-
-    <div class="accordion" id="accordionExample">
-
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="headingOne">
-          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-            .domain
-          </button>
-        </h2>
-        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-          <div class="accordion-body">
-            <pre><%- domain %></pre>
-          </div>
-        </div>
-      </div>
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="headingTwo">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-            .style
-          </button>
-        </h2>
-        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
-          <div class="accordion-body">
-            <pre><%- style %></pre>
-          </div>
-        </div>
-      </div>
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="headingThree">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-            .substance
-          </button>
-        </h2>
-        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
-          <div class="accordion-body">
-            <pre><%- substance %></pre>
-          </div>
-        </div>
-      </div>
     </div>
+    <hr>
 
-  </body>
+    <div id="style" class="container">
+      <h2>Style</h2>
+      <pre><%- style %></pre>
+    </div>
+    <hr>
+
+
+
+
+
+
+  </div>
+
+</body>
+
 </html>

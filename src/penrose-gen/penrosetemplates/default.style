@@ -205,22 +205,9 @@ forall _Vertex l; _Vertex r where _layoutLeft(l, r) {
 }
 
 
-forall _Vertex r; _Vertex l where _layoutRight(r, l) {
-  encourage leftwards(l.dot, r.dot) in [nodes]
-  l_right_edge = l.dot.center[0] + (num.vwidth / 2)
-  r_left_edge = r.dot.center[0] - (num.vwidth / 2)
-  ensure l_right_edge < r_left_edge in nodes
-}
 
 
 forall _Vertex a; _Vertex b where _layoutAbove(a, b) {
-    a.dot above b.dot
-    a_bottom_edge = a.dot.center[1] - (num.vheight / 2)
-    b_top_edge = b.dot.center[1] + (num.vheight / 2)
-    ensure a_bottom_edge > b_top_edge in nodes
-}
-
-forall _Vertex b; _Vertex a where _layoutBelow(b, a) {
     a.dot above b.dot
     a_bottom_edge = a.dot.center[1] - (num.vheight / 2)
     b_top_edge = b.dot.center[1] + (num.vheight / 2)
