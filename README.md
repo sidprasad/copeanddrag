@@ -110,5 +110,5 @@
     - [] Cluster visualizations do not always load. Could this be a Penrose bug?
     - [] Need to minimize label overlap as well as edge overlap?
 - [] Currently only show a visualization for the *first* alloy instance in the datum
-- [] Only works for binary relations
+- [x] Only works for binary relations
 
