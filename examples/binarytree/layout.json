@@ -2,11 +2,11 @@
     "fieldDirections": [ 
 
       {
-        "fieldName": "near",
+        "fieldName": "left",
         "directions": ["below", "left"]
       },
       {
-        "fieldName": "far",
+        "fieldName": "right",
         "directions": ["below", "right"]
       }
 
