@@ -1,0 +1,123 @@
+<alloy builddate="Tuesday, July 30th, 2024">
+<instance bitwidth="4" maxseq="-1" command="temporary-name_ttt_1" filename="/no-name.rkt" version="3.5"  >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Board" ID="4" parentID="2">
+<atom label="Board0"/><atom label="Board1"/><atom label="Board2"/><atom label="Board3"/><atom label="Board4"/><atom label="Board5"/><atom label="Board6"/><atom label="Board7"/><atom label="Board8"/>
+</sig>
+
+<sig label="Player" ID="5" parentID="2">
+
+</sig>
+
+<sig label="O" ID="6" parentID="5">
+<atom label="O0"/>
+</sig>
+
+<sig label="Index" ID="7" parentID="2">
+
+</sig>
+
+<sig label="A" ID="8" parentID="7">
+<atom label="A0"/>
+</sig>
+
+<sig label="C" ID="9" parentID="7">
+<atom label="C0"/>
+</sig>
+
+<sig label="Trace" ID="10" parentID="2">
+<atom label="Trace0"/>
+</sig>
+
+<sig label="X" ID="11" parentID="5">
+<atom label="X0"/>
+</sig>
+
+<sig label="B" ID="12" parentID="7">
+<atom label="B0"/>
+</sig>
+
+<field label="next" ID="13" parentID="10">
+<tuple><atom label="Trace0"/><atom label="Board0"/><atom label="Board1"/></tuple>
+<tuple><atom label="Trace0"/><atom label="Board1"/><atom label="Board2"/></tuple>
+<tuple><atom label="Trace0"/><atom label="Board2"/><atom label="Board3"/></tuple>
+<tuple><atom label="Trace0"/><atom label="Board3"/><atom label="Board4"/></tuple>
+<tuple><atom label="Trace0"/><atom label="Board4"/><atom label="Board5"/></tuple>
+<tuple><atom label="Trace0"/><atom label="Board5"/><atom label="Board6"/></tuple>
+<tuple><atom label="Trace0"/><atom label="Board6"/><atom label="Board7"/></tuple>
+<tuple><atom label="Trace0"/><atom label="Board7"/><atom label="Board8"/></tuple>
+<types><type ID="10"/><type ID="4"/><type ID="4"/></types>
+
+</field>
+
+<field label="places" ID="14" parentID="4">
+<tuple><atom label="Board1"/><atom label="A0"/><atom label="C0"/><atom label="X0"/></tuple>
+<tuple><atom label="Board2"/><atom label="A0"/><atom label="C0"/><atom label="X0"/></tuple>
+<tuple><atom label="Board2"/><atom label="C0"/><atom label="B0"/><atom label="O0"/></tuple>
+<tuple><atom label="Board3"/><atom label="A0"/><atom label="A0"/><atom label="X0"/></tuple>
+<tuple><atom label="Board3"/><atom label="A0"/><atom label="C0"/><atom label="X0"/></tuple>
+<tuple><atom label="Board3"/><atom label="C0"/><atom label="B0"/><atom label="O0"/></tuple>
+<tuple><atom label="Board4"/><atom label="A0"/><atom label="A0"/><atom label="X0"/></tuple>
+<tuple><atom label="Board4"/><atom label="A0"/><atom label="C0"/><atom label="X0"/></tuple>
+<tuple><atom label="Board4"/><atom label="B0"/><atom label="C0"/><atom label="O0"/></tuple>
+<tuple><atom label="Board4"/><atom label="C0"/><atom label="B0"/><atom label="O0"/></tuple>
+<tuple><atom label="Board5"/><atom label="A0"/><atom label="A0"/><atom label="X0"/></tuple>
+<tuple><atom label="Board5"/><atom label="A0"/><atom label="C0"/><atom label="X0"/></tuple>
+<tuple><atom label="Board5"/><atom label="B0"/><atom label="B0"/><atom label="X0"/></tuple>
+<tuple><atom label="Board5"/><atom label="B0"/><atom label="C0"/><atom label="O0"/></tuple>
+<tuple><atom label="Board5"/><atom label="C0"/><atom label="B0"/><atom label="O0"/></tuple>
+<tuple><atom label="Board6"/><atom label="A0"/><atom label="A0"/><atom label="X0"/></tuple>
+<tuple><atom label="Board6"/><atom label="A0"/><atom label="C0"/><atom label="X0"/></tuple>
+<tuple><atom label="Board6"/><atom label="B0"/><atom label="A0"/><atom label="O0"/></tuple>
+<tuple><atom label="Board6"/><atom label="B0"/><atom label="B0"/><atom label="X0"/></tuple>
+<tuple><atom label="Board6"/><atom label="B0"/><atom label="C0"/><atom label="O0"/></tuple>
+<tuple><atom label="Board6"/><atom label="C0"/><atom label="B0"/><atom label="O0"/></tuple>
+<tuple><atom label="Board7"/><atom label="A0"/><atom label="A0"/><atom label="X0"/></tuple>
+<tuple><atom label="Board7"/><atom label="A0"/><atom label="B0"/><atom label="X0"/></tuple>
+<tuple><atom label="Board7"/><atom label="A0"/><atom label="C0"/><atom label="X0"/></tuple>
+<tuple><atom label="Board7"/><atom label="B0"/><atom label="A0"/><atom label="O0"/></tuple>
+<tuple><atom label="Board7"/><atom label="B0"/><atom label="B0"/><atom label="X0"/></tuple>
+<tuple><atom label="Board7"/><atom label="B0"/><atom label="C0"/><atom label="O0"/></tuple>
+<tuple><atom label="Board7"/><atom label="C0"/><atom label="B0"/><atom label="O0"/></tuple>
+<tuple><atom label="Board8"/><atom label="A0"/><atom label="A0"/><atom label="X0"/></tuple>
+<tuple><atom label="Board8"/><atom label="A0"/><atom label="B0"/><atom label="X0"/></tuple>
+<tuple><atom label="Board8"/><atom label="A0"/><atom label="C0"/><atom label="X0"/></tuple>
+<tuple><atom label="Board8"/><atom label="B0"/><atom label="A0"/><atom label="O0"/></tuple>
+<tuple><atom label="Board8"/><atom label="B0"/><atom label="B0"/><atom label="X0"/></tuple>
+<tuple><atom label="Board8"/><atom label="B0"/><atom label="C0"/><atom label="O0"/></tuple>
+<tuple><atom label="Board8"/><atom label="C0"/><atom label="A0"/><atom label="O0"/></tuple>
+<tuple><atom label="Board8"/><atom label="C0"/><atom label="B0"/><atom label="O0"/></tuple>
+<types><type ID="4"/><type ID="7"/><type ID="7"/><type ID="5"/></types>
+
+</field>
+
+<field label="first" ID="15" parentID="10">
+<tuple><atom label="Trace0"/><atom label="Board0"/></tuple>
+<types><type ID="10"/><type ID="4"/></types>
+
+</field>
+
+<skolem label="$winningb_some46517" ID="16">
+<tuple><atom label="Board8"/></tuple>
+<types><type ID="2"/></types>
+
+</skolem>
+
+
+</instance>
+
+<source filename="/no-name.rkt" content="// Couldn't open source file (/no-name.rkt) (info: (2 . posix)). Is the file saved?"></source>
+</alloy>

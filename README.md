@@ -112,3 +112,6 @@
 - [] Currently only show a visualization for the *first* alloy instance in the datum
 - [x] Only works for binary relations
 
+
+## Should we be able to group by sig Value as well?
+ ## Or layout by Sig Value?

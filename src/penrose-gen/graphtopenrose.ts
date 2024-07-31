@@ -245,16 +245,4 @@ export class PenroseInstance {
             .replace(/>/g, "_gt_").replace(/</g, "_lt_").replace(/=/g, "_eq_")
             .replace(/:/g, "_c_").replace(/\./g, "_dot_").replace(/\?/g, "_q_");
     }
-
-    private randId(length: number = 4): string {
-        let result = '';
-        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-        const charactersLength = characters.length;
-        for (let i = 0; i < length; i++) {
-            result += characters.charAt(Math.floor(Math.random() * charactersLength));
-        }
-        return result;
-    }
-
-
 }
