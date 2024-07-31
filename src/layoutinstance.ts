@@ -18,7 +18,8 @@
 
 
 */
-import { Graph } from 'graphlib';
+import { group } from 'console';
+import { Graph, Edge } from 'graphlib';
 
 interface LayoutSpec {
     fieldDirections : DirectionalRelation[];
@@ -32,6 +33,7 @@ interface DirectionalRelation {
 
 interface ClusterRelation {
     fieldName : string;
+    groupOn? : string;
 }
 
 export class LayoutInstance {
@@ -46,6 +48,8 @@ export class LayoutInstance {
     TOP_CONSTRAINT : string = "_layoutAbove";
     BOTTON_CONSTRAINT : string = "_layoutBelow";
 
+
+    DEFAULT_GROUP_ON : string = "range";
 
     constructor(annotationSpec : string) {
         this._annotSpec = annotationSpec;
@@ -73,9 +77,14 @@ export class LayoutInstance {
         return [];
     }
 
-    shouldClusterOnField(fieldId: string): boolean {
-        const isMember = this._layoutSpec.groupBy.some((cluster) => cluster.fieldName === fieldId);
-        return isMember;
+    // shouldClusterOnField(fieldId: string): boolean {
+    //     const isMember = this._layoutSpec.groupBy.some((cluster) => cluster.fieldName === fieldId);
+    //     return isMember;
+    // }
+
+
+    getClusterSettings(fieldId: string): ClusterRelation | undefined {
+        return this._layoutSpec.groupBy.find((cluster) => cluster.fieldName === fieldId);
     }
 
     /// This is trickier, will do "property"
@@ -83,6 +92,28 @@ export class LayoutInstance {
         return [];
     }
 
+
+
+    getGroupSourceAndTarget(edge : Edge, groupOn: string) {
+        
+        let source = "";
+        let target = "";
+
+        if (groupOn === "domain") {
+            source = edge.w;
+            target = edge.v;
+        } else if (groupOn == "range") {
+            source = edge.v;
+            target = edge.w;
+        }
+        else {
+            // Default to range
+            source = edge.v;
+            target = edge.w;
+        }
+
+        return {source, target};
+    }
 
     /**
      * Generates groups based on the specified graph.
@@ -101,14 +132,18 @@ export class LayoutInstance {
             const edgeId = edge.name;
             const relName = g.edge(edge.v, edge.w, edgeId);
 
-            // Check if the edge label is a groupBy field
-            if (this.shouldClusterOnField(relName)) {
+            // clusterSettings is defined only if the field should be used to group atoms
+            const clusterSettings = this.getClusterSettings(relName);
+            
+            if (clusterSettings) {
 
                 // If so, add the targter as a group key,
                 // and the source as a value in the group
 
-                let source = edge.v;
-                let target = edge.w;
+                // Check if clusterSettings has a groupOn field
+                const groupOn = clusterSettings.groupOn || this.DEFAULT_GROUP_ON;
+
+                let {source, target} = this.getGroupSourceAndTarget(edge, groupOn);
                 if (groups[target]) {
                     groups[target].push(source);
                 }
@@ -116,18 +151,15 @@ export class LayoutInstance {
                     groups[target] = [source];
                 }
 
-                // But also remove this edge from the graph,
-                // and the source
-                g.removeEdge(source, target);
+                // But also remove this edge from the graph.
+                g.removeEdge(edge.v, edge.w, edgeId);
                 
-
             }
         });
 
 
         Object.keys(groups).forEach((key) => {
             g.removeNode(key);
-
         });
 
         return groups;

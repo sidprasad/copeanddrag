@@ -104,6 +104,8 @@
 }
 ```
 
+TODO: Maybe groupBy becomes (groupBy domain / range. Default is range )
+
 ## Current Issues
 
 - [] Layout graphs are decidedly NOT beautiful. Likely, this can be fixed via changes to the penrose `.style` file (`src/penrosetemplates/default.style`)\

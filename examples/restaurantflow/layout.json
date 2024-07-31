@@ -1,0 +1,22 @@
+{
+  "fieldDirections": [
+    {
+      "fieldName": "myTables",
+      "directions": [
+        "below"
+      ]
+    }
+  ],
+  "groupBy": [
+    {
+      "fieldName": "foodOrder"
+    },
+    {
+      "fieldName": "status"
+    },
+    {
+      "fieldName": "myTables",
+      "groupOn" : "domain"
+    }
+  ]
+}

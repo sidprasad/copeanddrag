@@ -1,0 +1,934 @@
+<alloy builddate="Wednesday, July 31st, 2024">
+<instance bitwidth="4" maxseq="-1" command="temporary-name_front_of_house_1" filename="/no-name.rkt" version="3.5" prefixLength="5" loop="4" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Kitchen" ID="4" parentID="2">
+<atom label="Kitchen0"/>
+</sig>
+
+<sig label="TableStatus" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Available" ID="6" parentID="5">
+<atom label="Available0"/>
+</sig>
+
+<sig label="CustomerStatus" ID="7" parentID="2">
+
+</sig>
+
+<sig label="Waiting" ID="8" parentID="7">
+<atom label="Waiting0"/>
+</sig>
+
+<sig label="Dish" ID="9" parentID="2">
+
+</sig>
+
+<sig label="Chicken" ID="10" parentID="9">
+<atom label="Chicken0"/>
+</sig>
+
+<sig label="Ticket" ID="11" parentID="2">
+<atom label="Ticket0"/><atom label="Ticket1"/><atom label="Ticket2"/><atom label="Ticket3"/>
+</sig>
+
+<sig label="Seated" ID="12" parentID="7">
+<atom label="Seated0"/>
+</sig>
+
+<sig label="Ordered" ID="13" parentID="7">
+<atom label="Ordered0"/>
+</sig>
+
+<sig label="Table" ID="14" parentID="2">
+<atom label="Table0"/><atom label="Table1"/><atom label="Table2"/><atom label="Table3"/>
+</sig>
+
+<sig label="Ready4Check" ID="15" parentID="7">
+<atom label="Ready4Check0"/>
+</sig>
+
+<sig label="Full" ID="16" parentID="5">
+<atom label="Full0"/>
+</sig>
+
+<sig label="Person" ID="17" parentID="2">
+
+</sig>
+
+<sig label="Customer" ID="18" parentID="17">
+<atom label="Person2"/><atom label="Person3"/>
+</sig>
+
+<sig label="Tofu" ID="19" parentID="9">
+<atom label="Tofu0"/>
+</sig>
+
+<sig label="Server" ID="20" parentID="17">
+<atom label="Person1"/>
+</sig>
+
+<sig label="Party" ID="21" parentID="2">
+<atom label="Party3"/>
+</sig>
+
+<sig label="Burger" ID="22" parentID="9">
+<atom label="Burger0"/>
+</sig>
+
+<field label="tableNumber" ID="23" parentID="14">
+<tuple><atom label="Table0"/><atom label="7"/></tuple>
+<tuple><atom label="Table1"/><atom label="7"/></tuple>
+<tuple><atom label="Table2"/><atom label="7"/></tuple>
+<tuple><atom label="Table3"/><atom label="7"/></tuple>
+<types><type ID="14"/><type ID="1"/></types>
+
+</field>
+
+<field label="placedOrder" ID="24" parentID="4">
+<types><type ID="4"/><type ID="11"/></types>
+
+</field>
+
+<field label="tables" ID="25" parentID="5">
+<types><type ID="5"/><type ID="14"/></types>
+
+</field>
+
+<field label="myTables" ID="26" parentID="20">
+<tuple><atom label="Person1"/><atom label="Table0"/></tuple>
+<tuple><atom label="Person1"/><atom label="Table1"/></tuple>
+<tuple><atom label="Person1"/><atom label="Table2"/></tuple>
+<tuple><atom label="Person1"/><atom label="Table3"/></tuple>
+<types><type ID="20"/><type ID="14"/></types>
+
+</field>
+
+<field label="size" ID="27" parentID="21">
+<tuple><atom label="Party3"/><atom label="6"/></tuple>
+<types><type ID="21"/><type ID="1"/></types>
+
+</field>
+
+<field label="spot" ID="28" parentID="21">
+<types><type ID="21"/><type ID="14"/></types>
+
+</field>
+
+<field label="people" ID="29" parentID="21">
+<tuple><atom label="Party3"/><atom label="Person2"/></tuple>
+<types><type ID="21"/><type ID="18"/></types>
+
+</field>
+
+<field label="foodOrder" ID="30" parentID="11">
+<tuple><atom label="Ticket0"/><atom label="Tofu0"/></tuple>
+<tuple><atom label="Ticket1"/><atom label="Tofu0"/></tuple>
+<tuple><atom label="Ticket2"/><atom label="Tofu0"/></tuple>
+<tuple><atom label="Ticket3"/><atom label="Burger0"/></tuple>
+<types><type ID="11"/><type ID="9"/></types>
+
+</field>
+
+<field label="customersAtTable" ID="31" parentID="14">
+<tuple><atom label="Table0"/><atom label="Person2"/></tuple>
+<tuple><atom label="Table0"/><atom label="Person3"/></tuple>
+<tuple><atom label="Table1"/><atom label="Person2"/></tuple>
+<tuple><atom label="Table1"/><atom label="Person3"/></tuple>
+<tuple><atom label="Table2"/><atom label="Person3"/></tuple>
+<tuple><atom label="Table3"/><atom label="Person2"/></tuple>
+<types><type ID="14"/><type ID="18"/></types>
+
+</field>
+
+<field label="status" ID="32" parentID="18">
+<tuple><atom label="Person2"/><atom label="Seated0"/></tuple>
+<tuple><atom label="Person3"/><atom label="Ordered0"/></tuple>
+<types><type ID="18"/><type ID="7"/></types>
+
+</field>
+
+<field label="capacity" ID="33" parentID="14">
+<tuple><atom label="Table0"/><atom label="7"/></tuple>
+<tuple><atom label="Table1"/><atom label="7"/></tuple>
+<tuple><atom label="Table2"/><atom label="3"/></tuple>
+<tuple><atom label="Table3"/><atom label="-6"/></tuple>
+<types><type ID="14"/><type ID="1"/></types>
+
+</field>
+
+<field label="next" ID="34" parentID="11">
+<types><type ID="11"/><type ID="11"/></types>
+
+</field>
+
+<field label="orders" ID="35" parentID="14">
+<types><type ID="14"/><type ID="9"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_front_of_house_1" filename="/no-name.rkt" version="3.5" prefixLength="5" loop="4" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Kitchen" ID="4" parentID="2">
+<atom label="Kitchen0"/>
+</sig>
+
+<sig label="TableStatus" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Available" ID="6" parentID="5">
+<atom label="Available0"/>
+</sig>
+
+<sig label="CustomerStatus" ID="7" parentID="2">
+
+</sig>
+
+<sig label="Waiting" ID="8" parentID="7">
+<atom label="Waiting0"/>
+</sig>
+
+<sig label="Dish" ID="9" parentID="2">
+
+</sig>
+
+<sig label="Chicken" ID="10" parentID="9">
+<atom label="Chicken0"/>
+</sig>
+
+<sig label="Ticket" ID="11" parentID="2">
+<atom label="Ticket0"/><atom label="Ticket1"/><atom label="Ticket2"/><atom label="Ticket3"/>
+</sig>
+
+<sig label="Seated" ID="12" parentID="7">
+<atom label="Seated0"/>
+</sig>
+
+<sig label="Ordered" ID="13" parentID="7">
+<atom label="Ordered0"/>
+</sig>
+
+<sig label="Table" ID="14" parentID="2">
+<atom label="Table0"/><atom label="Table1"/><atom label="Table2"/><atom label="Table3"/>
+</sig>
+
+<sig label="Ready4Check" ID="15" parentID="7">
+<atom label="Ready4Check0"/>
+</sig>
+
+<sig label="Full" ID="16" parentID="5">
+<atom label="Full0"/>
+</sig>
+
+<sig label="Person" ID="17" parentID="2">
+
+</sig>
+
+<sig label="Customer" ID="18" parentID="17">
+<atom label="Person2"/><atom label="Person3"/>
+</sig>
+
+<sig label="Tofu" ID="19" parentID="9">
+<atom label="Tofu0"/>
+</sig>
+
+<sig label="Server" ID="20" parentID="17">
+<atom label="Person1"/>
+</sig>
+
+<sig label="Party" ID="21" parentID="2">
+<atom label="Party3"/>
+</sig>
+
+<sig label="Burger" ID="22" parentID="9">
+<atom label="Burger0"/>
+</sig>
+
+<field label="tableNumber" ID="23" parentID="14">
+<tuple><atom label="Table0"/><atom label="7"/></tuple>
+<tuple><atom label="Table1"/><atom label="7"/></tuple>
+<tuple><atom label="Table2"/><atom label="7"/></tuple>
+<tuple><atom label="Table3"/><atom label="7"/></tuple>
+<types><type ID="14"/><type ID="1"/></types>
+
+</field>
+
+<field label="placedOrder" ID="24" parentID="4">
+<tuple><atom label="Kitchen0"/><atom label="Ticket2"/></tuple>
+<types><type ID="4"/><type ID="11"/></types>
+
+</field>
+
+<field label="tables" ID="25" parentID="5">
+<types><type ID="5"/><type ID="14"/></types>
+
+</field>
+
+<field label="myTables" ID="26" parentID="20">
+<tuple><atom label="Person1"/><atom label="Table0"/></tuple>
+<tuple><atom label="Person1"/><atom label="Table1"/></tuple>
+<tuple><atom label="Person1"/><atom label="Table2"/></tuple>
+<tuple><atom label="Person1"/><atom label="Table3"/></tuple>
+<types><type ID="20"/><type ID="14"/></types>
+
+</field>
+
+<field label="size" ID="27" parentID="21">
+<tuple><atom label="Party3"/><atom label="6"/></tuple>
+<types><type ID="21"/><type ID="1"/></types>
+
+</field>
+
+<field label="spot" ID="28" parentID="21">
+<types><type ID="21"/><type ID="14"/></types>
+
+</field>
+
+<field label="people" ID="29" parentID="21">
+<tuple><atom label="Party3"/><atom label="Person2"/></tuple>
+<types><type ID="21"/><type ID="18"/></types>
+
+</field>
+
+<field label="foodOrder" ID="30" parentID="11">
+<tuple><atom label="Ticket0"/><atom label="Tofu0"/></tuple>
+<tuple><atom label="Ticket1"/><atom label="Tofu0"/></tuple>
+<tuple><atom label="Ticket2"/><atom label="Tofu0"/></tuple>
+<tuple><atom label="Ticket3"/><atom label="Burger0"/></tuple>
+<types><type ID="11"/><type ID="9"/></types>
+
+</field>
+
+<field label="customersAtTable" ID="31" parentID="14">
+<tuple><atom label="Table0"/><atom label="Person2"/></tuple>
+<tuple><atom label="Table0"/><atom label="Person3"/></tuple>
+<tuple><atom label="Table1"/><atom label="Person2"/></tuple>
+<tuple><atom label="Table1"/><atom label="Person3"/></tuple>
+<tuple><atom label="Table2"/><atom label="Person3"/></tuple>
+<tuple><atom label="Table3"/><atom label="Person2"/></tuple>
+<types><type ID="14"/><type ID="18"/></types>
+
+</field>
+
+<field label="status" ID="32" parentID="18">
+<tuple><atom label="Person2"/><atom label="Seated0"/></tuple>
+<tuple><atom label="Person3"/><atom label="Ordered0"/></tuple>
+<types><type ID="18"/><type ID="7"/></types>
+
+</field>
+
+<field label="capacity" ID="33" parentID="14">
+<tuple><atom label="Table0"/><atom label="7"/></tuple>
+<tuple><atom label="Table1"/><atom label="7"/></tuple>
+<tuple><atom label="Table2"/><atom label="3"/></tuple>
+<tuple><atom label="Table3"/><atom label="-6"/></tuple>
+<types><type ID="14"/><type ID="1"/></types>
+
+</field>
+
+<field label="next" ID="34" parentID="11">
+<types><type ID="11"/><type ID="11"/></types>
+
+</field>
+
+<field label="orders" ID="35" parentID="14">
+<types><type ID="14"/><type ID="9"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_front_of_house_1" filename="/no-name.rkt" version="3.5" prefixLength="5" loop="4" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Kitchen" ID="4" parentID="2">
+<atom label="Kitchen0"/>
+</sig>
+
+<sig label="TableStatus" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Available" ID="6" parentID="5">
+<atom label="Available0"/>
+</sig>
+
+<sig label="CustomerStatus" ID="7" parentID="2">
+
+</sig>
+
+<sig label="Waiting" ID="8" parentID="7">
+<atom label="Waiting0"/>
+</sig>
+
+<sig label="Dish" ID="9" parentID="2">
+
+</sig>
+
+<sig label="Chicken" ID="10" parentID="9">
+<atom label="Chicken0"/>
+</sig>
+
+<sig label="Ticket" ID="11" parentID="2">
+<atom label="Ticket0"/><atom label="Ticket1"/><atom label="Ticket2"/><atom label="Ticket3"/>
+</sig>
+
+<sig label="Seated" ID="12" parentID="7">
+<atom label="Seated0"/>
+</sig>
+
+<sig label="Ordered" ID="13" parentID="7">
+<atom label="Ordered0"/>
+</sig>
+
+<sig label="Table" ID="14" parentID="2">
+<atom label="Table0"/><atom label="Table1"/><atom label="Table2"/><atom label="Table3"/>
+</sig>
+
+<sig label="Ready4Check" ID="15" parentID="7">
+<atom label="Ready4Check0"/>
+</sig>
+
+<sig label="Full" ID="16" parentID="5">
+<atom label="Full0"/>
+</sig>
+
+<sig label="Person" ID="17" parentID="2">
+
+</sig>
+
+<sig label="Customer" ID="18" parentID="17">
+<atom label="Person2"/><atom label="Person3"/>
+</sig>
+
+<sig label="Tofu" ID="19" parentID="9">
+<atom label="Tofu0"/>
+</sig>
+
+<sig label="Server" ID="20" parentID="17">
+<atom label="Person1"/>
+</sig>
+
+<sig label="Party" ID="21" parentID="2">
+<atom label="Party3"/>
+</sig>
+
+<sig label="Burger" ID="22" parentID="9">
+<atom label="Burger0"/>
+</sig>
+
+<field label="tableNumber" ID="23" parentID="14">
+<tuple><atom label="Table0"/><atom label="7"/></tuple>
+<tuple><atom label="Table1"/><atom label="7"/></tuple>
+<tuple><atom label="Table2"/><atom label="7"/></tuple>
+<tuple><atom label="Table3"/><atom label="7"/></tuple>
+<types><type ID="14"/><type ID="1"/></types>
+
+</field>
+
+<field label="placedOrder" ID="24" parentID="4">
+<tuple><atom label="Kitchen0"/><atom label="Ticket1"/></tuple>
+<types><type ID="4"/><type ID="11"/></types>
+
+</field>
+
+<field label="tables" ID="25" parentID="5">
+<types><type ID="5"/><type ID="14"/></types>
+
+</field>
+
+<field label="myTables" ID="26" parentID="20">
+<tuple><atom label="Person1"/><atom label="Table0"/></tuple>
+<tuple><atom label="Person1"/><atom label="Table1"/></tuple>
+<tuple><atom label="Person1"/><atom label="Table2"/></tuple>
+<tuple><atom label="Person1"/><atom label="Table3"/></tuple>
+<types><type ID="20"/><type ID="14"/></types>
+
+</field>
+
+<field label="size" ID="27" parentID="21">
+<tuple><atom label="Party3"/><atom label="6"/></tuple>
+<types><type ID="21"/><type ID="1"/></types>
+
+</field>
+
+<field label="spot" ID="28" parentID="21">
+<types><type ID="21"/><type ID="14"/></types>
+
+</field>
+
+<field label="people" ID="29" parentID="21">
+<tuple><atom label="Party3"/><atom label="Person2"/></tuple>
+<types><type ID="21"/><type ID="18"/></types>
+
+</field>
+
+<field label="foodOrder" ID="30" parentID="11">
+<tuple><atom label="Ticket0"/><atom label="Tofu0"/></tuple>
+<tuple><atom label="Ticket1"/><atom label="Tofu0"/></tuple>
+<tuple><atom label="Ticket2"/><atom label="Tofu0"/></tuple>
+<tuple><atom label="Ticket3"/><atom label="Burger0"/></tuple>
+<types><type ID="11"/><type ID="9"/></types>
+
+</field>
+
+<field label="customersAtTable" ID="31" parentID="14">
+<tuple><atom label="Table0"/><atom label="Person2"/></tuple>
+<tuple><atom label="Table0"/><atom label="Person3"/></tuple>
+<tuple><atom label="Table1"/><atom label="Person2"/></tuple>
+<tuple><atom label="Table1"/><atom label="Person3"/></tuple>
+<tuple><atom label="Table2"/><atom label="Person3"/></tuple>
+<tuple><atom label="Table3"/><atom label="Person2"/></tuple>
+<types><type ID="14"/><type ID="18"/></types>
+
+</field>
+
+<field label="status" ID="32" parentID="18">
+<tuple><atom label="Person2"/><atom label="Ready4Check0"/></tuple>
+<tuple><atom label="Person3"/><atom label="Ready4Check0"/></tuple>
+<types><type ID="18"/><type ID="7"/></types>
+
+</field>
+
+<field label="capacity" ID="33" parentID="14">
+<tuple><atom label="Table0"/><atom label="7"/></tuple>
+<tuple><atom label="Table1"/><atom label="7"/></tuple>
+<tuple><atom label="Table2"/><atom label="3"/></tuple>
+<tuple><atom label="Table3"/><atom label="-6"/></tuple>
+<types><type ID="14"/><type ID="1"/></types>
+
+</field>
+
+<field label="next" ID="34" parentID="11">
+<tuple><atom label="Ticket1"/><atom label="Ticket2"/></tuple>
+<types><type ID="11"/><type ID="11"/></types>
+
+</field>
+
+<field label="orders" ID="35" parentID="14">
+<types><type ID="14"/><type ID="9"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_front_of_house_1" filename="/no-name.rkt" version="3.5" prefixLength="5" loop="4" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Kitchen" ID="4" parentID="2">
+<atom label="Kitchen0"/>
+</sig>
+
+<sig label="TableStatus" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Available" ID="6" parentID="5">
+<atom label="Available0"/>
+</sig>
+
+<sig label="CustomerStatus" ID="7" parentID="2">
+
+</sig>
+
+<sig label="Waiting" ID="8" parentID="7">
+<atom label="Waiting0"/>
+</sig>
+
+<sig label="Dish" ID="9" parentID="2">
+
+</sig>
+
+<sig label="Chicken" ID="10" parentID="9">
+<atom label="Chicken0"/>
+</sig>
+
+<sig label="Ticket" ID="11" parentID="2">
+<atom label="Ticket0"/><atom label="Ticket1"/><atom label="Ticket2"/><atom label="Ticket3"/>
+</sig>
+
+<sig label="Seated" ID="12" parentID="7">
+<atom label="Seated0"/>
+</sig>
+
+<sig label="Ordered" ID="13" parentID="7">
+<atom label="Ordered0"/>
+</sig>
+
+<sig label="Table" ID="14" parentID="2">
+<atom label="Table0"/><atom label="Table1"/><atom label="Table2"/><atom label="Table3"/>
+</sig>
+
+<sig label="Ready4Check" ID="15" parentID="7">
+<atom label="Ready4Check0"/>
+</sig>
+
+<sig label="Full" ID="16" parentID="5">
+<atom label="Full0"/>
+</sig>
+
+<sig label="Person" ID="17" parentID="2">
+
+</sig>
+
+<sig label="Customer" ID="18" parentID="17">
+<atom label="Person2"/><atom label="Person3"/>
+</sig>
+
+<sig label="Tofu" ID="19" parentID="9">
+<atom label="Tofu0"/>
+</sig>
+
+<sig label="Server" ID="20" parentID="17">
+<atom label="Person1"/>
+</sig>
+
+<sig label="Party" ID="21" parentID="2">
+<atom label="Party3"/>
+</sig>
+
+<sig label="Burger" ID="22" parentID="9">
+<atom label="Burger0"/>
+</sig>
+
+<field label="tableNumber" ID="23" parentID="14">
+<tuple><atom label="Table0"/><atom label="7"/></tuple>
+<tuple><atom label="Table1"/><atom label="7"/></tuple>
+<tuple><atom label="Table2"/><atom label="7"/></tuple>
+<tuple><atom label="Table3"/><atom label="7"/></tuple>
+<types><type ID="14"/><type ID="1"/></types>
+
+</field>
+
+<field label="placedOrder" ID="24" parentID="4">
+<tuple><atom label="Kitchen0"/><atom label="Ticket0"/></tuple>
+<types><type ID="4"/><type ID="11"/></types>
+
+</field>
+
+<field label="tables" ID="25" parentID="5">
+<types><type ID="5"/><type ID="14"/></types>
+
+</field>
+
+<field label="myTables" ID="26" parentID="20">
+<tuple><atom label="Person1"/><atom label="Table0"/></tuple>
+<tuple><atom label="Person1"/><atom label="Table1"/></tuple>
+<tuple><atom label="Person1"/><atom label="Table2"/></tuple>
+<tuple><atom label="Person1"/><atom label="Table3"/></tuple>
+<types><type ID="20"/><type ID="14"/></types>
+
+</field>
+
+<field label="size" ID="27" parentID="21">
+<tuple><atom label="Party3"/><atom label="6"/></tuple>
+<types><type ID="21"/><type ID="1"/></types>
+
+</field>
+
+<field label="spot" ID="28" parentID="21">
+<types><type ID="21"/><type ID="14"/></types>
+
+</field>
+
+<field label="people" ID="29" parentID="21">
+<tuple><atom label="Party3"/><atom label="Person2"/></tuple>
+<types><type ID="21"/><type ID="18"/></types>
+
+</field>
+
+<field label="foodOrder" ID="30" parentID="11">
+<tuple><atom label="Ticket0"/><atom label="Tofu0"/></tuple>
+<tuple><atom label="Ticket1"/><atom label="Tofu0"/></tuple>
+<tuple><atom label="Ticket2"/><atom label="Tofu0"/></tuple>
+<tuple><atom label="Ticket3"/><atom label="Burger0"/></tuple>
+<types><type ID="11"/><type ID="9"/></types>
+
+</field>
+
+<field label="customersAtTable" ID="31" parentID="14">
+<tuple><atom label="Table0"/><atom label="Person2"/></tuple>
+<tuple><atom label="Table0"/><atom label="Person3"/></tuple>
+<tuple><atom label="Table1"/><atom label="Person2"/></tuple>
+<tuple><atom label="Table1"/><atom label="Person3"/></tuple>
+<tuple><atom label="Table2"/><atom label="Person3"/></tuple>
+<tuple><atom label="Table3"/><atom label="Person2"/></tuple>
+<types><type ID="14"/><type ID="18"/></types>
+
+</field>
+
+<field label="status" ID="32" parentID="18">
+<tuple><atom label="Person2"/><atom label="Ready4Check0"/></tuple>
+<tuple><atom label="Person3"/><atom label="Ready4Check0"/></tuple>
+<types><type ID="18"/><type ID="7"/></types>
+
+</field>
+
+<field label="capacity" ID="33" parentID="14">
+<tuple><atom label="Table0"/><atom label="7"/></tuple>
+<tuple><atom label="Table1"/><atom label="7"/></tuple>
+<tuple><atom label="Table2"/><atom label="3"/></tuple>
+<tuple><atom label="Table3"/><atom label="-6"/></tuple>
+<types><type ID="14"/><type ID="1"/></types>
+
+</field>
+
+<field label="next" ID="34" parentID="11">
+<tuple><atom label="Ticket0"/><atom label="Ticket1"/></tuple>
+<tuple><atom label="Ticket1"/><atom label="Ticket2"/></tuple>
+<types><type ID="11"/><type ID="11"/></types>
+
+</field>
+
+<field label="orders" ID="35" parentID="14">
+<types><type ID="14"/><type ID="9"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_front_of_house_1" filename="/no-name.rkt" version="3.5" prefixLength="5" loop="4" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Kitchen" ID="4" parentID="2">
+<atom label="Kitchen0"/>
+</sig>
+
+<sig label="TableStatus" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Available" ID="6" parentID="5">
+<atom label="Available0"/>
+</sig>
+
+<sig label="CustomerStatus" ID="7" parentID="2">
+
+</sig>
+
+<sig label="Waiting" ID="8" parentID="7">
+<atom label="Waiting0"/>
+</sig>
+
+<sig label="Dish" ID="9" parentID="2">
+
+</sig>
+
+<sig label="Chicken" ID="10" parentID="9">
+<atom label="Chicken0"/>
+</sig>
+
+<sig label="Ticket" ID="11" parentID="2">
+<atom label="Ticket0"/><atom label="Ticket1"/><atom label="Ticket2"/><atom label="Ticket3"/>
+</sig>
+
+<sig label="Seated" ID="12" parentID="7">
+<atom label="Seated0"/>
+</sig>
+
+<sig label="Ordered" ID="13" parentID="7">
+<atom label="Ordered0"/>
+</sig>
+
+<sig label="Table" ID="14" parentID="2">
+<atom label="Table0"/><atom label="Table1"/><atom label="Table2"/><atom label="Table3"/>
+</sig>
+
+<sig label="Ready4Check" ID="15" parentID="7">
+<atom label="Ready4Check0"/>
+</sig>
+
+<sig label="Full" ID="16" parentID="5">
+<atom label="Full0"/>
+</sig>
+
+<sig label="Person" ID="17" parentID="2">
+
+</sig>
+
+<sig label="Customer" ID="18" parentID="17">
+<atom label="Person2"/><atom label="Person3"/>
+</sig>
+
+<sig label="Tofu" ID="19" parentID="9">
+<atom label="Tofu0"/>
+</sig>
+
+<sig label="Server" ID="20" parentID="17">
+<atom label="Person1"/>
+</sig>
+
+<sig label="Party" ID="21" parentID="2">
+<atom label="Party3"/>
+</sig>
+
+<sig label="Burger" ID="22" parentID="9">
+<atom label="Burger0"/>
+</sig>
+
+<field label="tableNumber" ID="23" parentID="14">
+<tuple><atom label="Table0"/><atom label="7"/></tuple>
+<tuple><atom label="Table1"/><atom label="7"/></tuple>
+<tuple><atom label="Table2"/><atom label="7"/></tuple>
+<tuple><atom label="Table3"/><atom label="7"/></tuple>
+<types><type ID="14"/><type ID="1"/></types>
+
+</field>
+
+<field label="placedOrder" ID="24" parentID="4">
+<tuple><atom label="Kitchen0"/><atom label="Ticket3"/></tuple>
+<types><type ID="4"/><type ID="11"/></types>
+
+</field>
+
+<field label="tables" ID="25" parentID="5">
+<types><type ID="5"/><type ID="14"/></types>
+
+</field>
+
+<field label="myTables" ID="26" parentID="20">
+<tuple><atom label="Person1"/><atom label="Table0"/></tuple>
+<tuple><atom label="Person1"/><atom label="Table1"/></tuple>
+<tuple><atom label="Person1"/><atom label="Table2"/></tuple>
+<tuple><atom label="Person1"/><atom label="Table3"/></tuple>
+<types><type ID="20"/><type ID="14"/></types>
+
+</field>
+
+<field label="size" ID="27" parentID="21">
+<tuple><atom label="Party3"/><atom label="6"/></tuple>
+<types><type ID="21"/><type ID="1"/></types>
+
+</field>
+
+<field label="spot" ID="28" parentID="21">
+<types><type ID="21"/><type ID="14"/></types>
+
+</field>
+
+<field label="people" ID="29" parentID="21">
+<tuple><atom label="Party3"/><atom label="Person2"/></tuple>
+<types><type ID="21"/><type ID="18"/></types>
+
+</field>
+
+<field label="foodOrder" ID="30" parentID="11">
+<tuple><atom label="Ticket0"/><atom label="Tofu0"/></tuple>
+<tuple><atom label="Ticket1"/><atom label="Tofu0"/></tuple>
+<tuple><atom label="Ticket2"/><atom label="Tofu0"/></tuple>
+<tuple><atom label="Ticket3"/><atom label="Burger0"/></tuple>
+<types><type ID="11"/><type ID="9"/></types>
+
+</field>
+
+<field label="customersAtTable" ID="31" parentID="14">
+<tuple><atom label="Table0"/><atom label="Person2"/></tuple>
+<tuple><atom label="Table0"/><atom label="Person3"/></tuple>
+<tuple><atom label="Table1"/><atom label="Person2"/></tuple>
+<tuple><atom label="Table1"/><atom label="Person3"/></tuple>
+<tuple><atom label="Table2"/><atom label="Person3"/></tuple>
+<tuple><atom label="Table3"/><atom label="Person2"/></tuple>
+<types><type ID="14"/><type ID="18"/></types>
+
+</field>
+
+<field label="status" ID="32" parentID="18">
+<tuple><atom label="Person2"/><atom label="Ready4Check0"/></tuple>
+<tuple><atom label="Person3"/><atom label="Ready4Check0"/></tuple>
+<types><type ID="18"/><type ID="7"/></types>
+
+</field>
+
+<field label="capacity" ID="33" parentID="14">
+<tuple><atom label="Table0"/><atom label="7"/></tuple>
+<tuple><atom label="Table1"/><atom label="7"/></tuple>
+<tuple><atom label="Table2"/><atom label="3"/></tuple>
+<tuple><atom label="Table3"/><atom label="-6"/></tuple>
+<types><type ID="14"/><type ID="1"/></types>
+
+</field>
+
+<field label="next" ID="34" parentID="11">
+<tuple><atom label="Ticket0"/><atom label="Ticket1"/></tuple>
+<tuple><atom label="Ticket1"/><atom label="Ticket2"/></tuple>
+<tuple><atom label="Ticket3"/><atom label="Ticket0"/></tuple>
+<types><type ID="11"/><type ID="11"/></types>
+
+</field>
+
+<field label="orders" ID="35" parentID="14">
+<types><type ID="14"/><type ID="9"/></types>
+
+</field>
+
+
+</instance>
+
+<source filename="/no-name.rkt" content="// Couldn't open source file (/no-name.rkt) (info: (2 . posix)). Is the file saved?"></source>
+</alloy>
