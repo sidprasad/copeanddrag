@@ -2,6 +2,7 @@ import { Graph } from 'graphlib';
 import * as cola from 'webcola'; // Importing WebCola
 import { Group, Node, Link } from 'webcola';
 import { LayoutInstance } from '../layoutinstance';
+import { AlloyInstance } from '../alloy-instance';
 
 
 const nodeWidth = 50;
@@ -20,14 +21,15 @@ const DEFAULT_Y = 0;
 
 type NodeWithId = Node & { id: string, attributes: Record<string, string[]> };
 
-export function graphToWebcola(graph: Graph, layoutSpec: LayoutInstance) {
+export function graphToWebcola(graph: Graph, layoutInstance: LayoutInstance, alloyInstance : AlloyInstance) {
 
   // This must happen before the nodes are generated,
   // because the function generateGroups may remove groups and nodes
   // from the graph.
-  const allGraphAttributes = layoutSpec.generateAttributes(graph);
-  const groupDefinitions = layoutSpec.generateGroups(graph);
+  const changes = layoutInstance.applyGraphChangesRequiredByLayout(graph, alloyInstance);
 
+  const groupDefinitions = changes.groups;
+  const allGraphAttributes = changes.attributes;
 
   const colaNodes: NodeWithId[] = graph.nodes().map(node => {
 
@@ -57,7 +59,7 @@ export function graphToWebcola(graph: Graph, layoutSpec: LayoutInstance) {
 
     colaConstraints.push(heirarchyConstraint(sourceNode, targetNode, minSeparation));
 
-    layoutSpec.getFieldLayout(relName).forEach((direction) => {
+    layoutInstance.getFieldLayout(relName).forEach((direction) => {
       if (direction === "left") {
         // Target node goes to the left of source node
         colaConstraints.push(leftConstraint(targetNode, sourceNode, minSepWidth));

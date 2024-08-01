@@ -1,6 +1,11 @@
 
 import { group } from 'console';
 import { Graph, Edge } from 'graphlib';
+import { AlloyInstance, getAtomType } from './alloy-instance';
+import { isBuiltin } from './alloy-instance/src/type';
+
+
+
 
 interface LayoutSpec {
     fieldDirections : DirectionalRelation[];
@@ -40,9 +45,9 @@ export class LayoutInstance {
 
 
     readonly DEFAULT_GROUP_ON : string = "range";
-
-
     readonly ATTRIBUTE_KEY : string = "attributes";
+
+
 
     constructor(annotationSpec : string) {
         this._annotSpec = annotationSpec;
@@ -89,7 +94,7 @@ export class LayoutInstance {
 
 
 
-    getGroupSourceAndTarget(edge : Edge, groupOn: string) {
+    private getGroupSourceAndTarget(edge : Edge, groupOn: string) {
         let source = "";
         let target = "";
 
@@ -113,7 +118,7 @@ export class LayoutInstance {
      * @param g - The graph, which will be modified to remove the edges that are used to generate groups.
      * @returns A record of groups.
      */    
-    generateGroups(g : Graph) : Record<string, string[]> {
+    private generateGroups(g : Graph) : Record<string, string[]> {
 
         let groups : Record<string, string[]> = {};
         // Should we also remove the groups from the graph?
@@ -166,7 +171,7 @@ export class LayoutInstance {
      * @param g - The graph, which will be modified to remove the edges that are used to determine attributes.
      * @returns A record of attributes
      */   
-    generateAttributes(g : Graph) : Record<string, Record<string, string[]>> {
+    private generateAttributes(g : Graph) : Record<string, Record<string, string[]>> {
 
         // Node : [] of attributes
         let attributes :  Record<string, Record<string, string[]>> = {};
@@ -204,5 +209,67 @@ export class LayoutInstance {
         });
 
         return attributes;
+    }
+
+     /**
+     * Modifies the graph to remove extraneous nodes (ex. those to be hidden)
+     * @param g - The graph, which will be modified to remove extraneous nodes.
+     */
+    private ensureNoExtraNodes(g : Graph, a : AlloyInstance) {
+
+        let nodes = [...g.nodes()];
+
+        // Built-ins :
+        // Node types : isBuiltin
+        a.types
+
+        if (this.hideDisconnected) {
+            nodes.forEach((node) => {
+
+
+                // Check if builtin
+                try {
+                    const type = getAtomType(a, node);
+                    const isAtomBuiltin = isBuiltin(type);
+
+                    let inEdges = g.inEdges(node) || [];
+                    let outEdges = g.outEdges(node) || [];
+                    const isDisconnected = inEdges.length === 0 && outEdges.length === 0;
+
+
+                    const hideNode = isDisconnected && ( (this.hideDisconnectedBuiltIns && isAtomBuiltin) || this.hideDisconnected );
+
+                    if (hideNode) {
+                        g.removeNode(node);
+                    }
+
+                } catch (error) {
+                    console.error("Failed to identify node type. Defaulting to showing node.", error);
+                }
+            });
+        }
+        
+
+    }
+
+
+
+    /**
+     * Generates a layout based on the specified graph.
+     * @param g - The graph, which will be modified to remove extraneous nodes.
+     * @param a - The AlloyInstance, which will be used to determine the types of nodes.
+     * @returns A record of groups and attributes.
+     */
+    applyGraphChangesRequiredByLayout(g : Graph, a : AlloyInstance)  {
+
+        // The order of things is important here.
+        
+        const attributes = this.generateAttributes(g);
+
+        this.ensureNoExtraNodes(g, a);
+
+        const groups = this.generateGroups(g);
+
+        return {groups, attributes};
     }
 }

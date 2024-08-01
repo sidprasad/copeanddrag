@@ -61,7 +61,7 @@ app.post('/webcolafiles', (req, res) => {
     /// Right now, we are only generating for the first instance ///
     let instance = instances[0];
     let g = generateGraph(instance, li);
-    let colaDefinitions = graphToWebcola(g, li);
+    let colaDefinitions = graphToWebcola(g, li, instance);
 
     try {
         // Serialize and then parse to strip non-serializable parts

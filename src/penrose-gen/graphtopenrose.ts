@@ -26,8 +26,11 @@ export class PenroseInstance {
     constructor(graph : Graph, layoutInstance : LayoutInstance, alloyInstance : AlloyInstance) {
 
         // TODO: We currently DO NOT KNOW how to handle attributes in Penrose
-        this._attributes = layoutInstance.generateAttributes(graph);
-        this._groups = layoutInstance.generateGroups(graph);
+
+        let {groups, attributes } = layoutInstance.applyGraphChangesRequiredByLayout(graph, alloyInstance);
+
+        this._attributes = attributes;
+        this._groups = groups;
 
         this._layoutInstance = layoutInstance;
         this._graph = graph;
