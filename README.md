@@ -100,7 +100,10 @@
     {
       "fieldName" : "pos"
     }
-  ]
+  ],
+  "attributeFields" : [],
+  "hideDisconnected" : true,
+  "hideDisconnectedBuiltIns" : false
 }
 ```
 
