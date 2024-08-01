@@ -91,6 +91,7 @@
                 </a></button>
         </div>
         <hr>
+        <div class="container-fluid" id="svg-container">
         <svg id="svg" width="<%- width %>" height="<%- height %>">
             <defs>
                 <marker id="end-arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
@@ -253,7 +254,7 @@
                     
 
                     node
-                        .each(function (d) { d.innerBounds = d.bounds.inflate(-margin); })
+                        .each(function (d) { d.innerBounds = d.bounds.inflate(-1); })
                         .attr("x", function (d) { return d.bounds.x; })
                         .attr("y", function (d) { return d.bounds.y; })
                         .attr("width", function (d) { return d.bounds.width(); })
@@ -310,7 +311,7 @@
             });
         </script>
 
-
+        </div>
 
         <div id="webcola">
 

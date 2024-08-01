@@ -1,23 +1,4 @@
 
-/*
-
-    Example
-
-    {
-    // Field for layout
-        'fieldDirections': {
-            'left': ['above, left'],
-            'right': ['above, right]'
-        },
-
-        // Fields that define clusters (aka field values that are used to group atoms)
-        'groupBy': [],
-        'sigIcons': [], // TODO: Implement this
-    }
-
-
-
-*/
 import { group } from 'console';
 import { Graph, Edge } from 'graphlib';
 
@@ -25,6 +6,8 @@ interface LayoutSpec {
     fieldDirections : DirectionalRelation[];
     groupBy : ClusterRelation[];
     attributeFields : AttributeDefinition[];
+    hideDisconnected? : boolean;
+    hideDisconnectedBuiltIns? : boolean;
 }
 
 interface DirectionalRelation {
@@ -77,7 +60,13 @@ export class LayoutInstance {
         }
     }
 
+    get hideDisconnected() : boolean {
+        return this._layoutSpec.hideDisconnected || false;
+    }
 
+    get hideDisconnectedBuiltIns() : boolean {
+        return this._layoutSpec.hideDisconnectedBuiltIns || false;
+    }
 
     getFieldLayout(fieldId: string): string[] {
         

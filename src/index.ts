@@ -37,34 +37,12 @@ function getFormContents(req: any) {
     return {instances, li};
 }
 
-// OLD PENROSE
-// app.post('/penrosefiles', (req, res) => {    
-//     let {instances, li} = getFormContents(req);
-//     let instance = instances[0];
-
-//     //let g = generateGraph(instance);
-
-
-//     /// TODO: MODIFY THE PENROSE INSTANCE TO
-//     // USE a graph and layout instance
-
-
-//     let pt = new PenroseInstance(instance, li);
-
-//     let s = pt.getSubstance();
-//     let d = pt.getDomain();
-//     let sty = pt.getStyle();
-//     res.render('penrosevjs', { 'substance': s, 'domain': d, 'style': sty });
-
-// });
-
-
 
 app.post('/penrosefiles', (req, res) => {    
     let {instances, li} = getFormContents(req);
     let instance = instances[0];
 
-    let g = generateGraph(instance);
+    let g = generateGraph(instance, li);
 
     let pt = new PenroseInstance(g, li, instance);
 
@@ -82,7 +60,7 @@ app.post('/webcolafiles', (req, res) => {
 
     /// Right now, we are only generating for the first instance ///
     let instance = instances[0];
-    let g = generateGraph(instance);
+    let g = generateGraph(instance, li);
     let colaDefinitions = graphToWebcola(g, li);
 
     try {
@@ -92,7 +70,7 @@ app.post('/webcolafiles', (req, res) => {
         let serializedColaConstraints = JSON.parse(JSON.stringify(colaDefinitions.colaConstraints));
         let serializedColaGroups = JSON.parse(JSON.stringify(colaDefinitions.colaGroups));
 
-        res.render('webcolavis', { 'height': 800, 'width': 800, 'colaNodes': serializedColaNodes, 'colaEdges': serializedColaEdges, 'colaConstraints' : serializedColaConstraints, 'colaGroups': serializedColaGroups });
+        res.render('webcolavis', { 'height': 800, 'width': 1000, 'colaNodes': serializedColaNodes, 'colaEdges': serializedColaEdges, 'colaConstraints' : serializedColaConstraints, 'colaGroups': serializedColaGroups });
     } catch (error) {
         console.error("Error serializing colaNodes, colaEdges, colaConstraints or colaGroups:", error);
         // Handle the error appropriately

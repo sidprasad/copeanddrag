@@ -8,17 +8,11 @@ import {
   getInstanceRelations,
   getRelationTuples
 } from '../../alloy-instance';
-// import { newGraph } from 'graph-lib';
 
-//import { newGraph } from 'graph-lib';
-
-//import { getRelationIsAttribute, getRelationSTIndexes, SterlingTheme } from '../../sterling-theme';
-// import { WritableDraft } from 'immer/dist/types/types-external';
 import { first, last } from 'lodash';
 import { generateEdgeId, generateNodeId } from './ids';
-//import { AlloyEdge, AlloyGraph, AlloyNode } from './types';
 import { Graph, Edge } from 'graphlib';
-
+import { LayoutInstance } from '../../layoutinstance';
 
 
 
@@ -48,14 +42,6 @@ export function getRelationSTIndexes(
 }
 
 
-function getRelationIsAttribute() {
-
-  // Read this from the layout spec
-
-  return false;
-}
-
-///
 
 
 
@@ -68,22 +54,20 @@ function getRelationIsAttribute() {
  */
 export function generateGraph(
   instance: AlloyInstance,
-  //theme?: SterlingTheme //| WritableDraft<SterlingTheme>
+  layout : LayoutInstance
 ): Graph {
 
 
   const graph = new Graph({ directed: true, multigraph: true });
 
   // Determine which nodes to exclude from the graph
-  const hideDisconnected = false //theme?.hidden?.disconnected || false;
-  const hideDisconnectedBuiltins =  true //false //  hideDisconnected || theme?.hidden?.builtinDisconnected || false;
-
+  const hideDisconnected = layout.hideDisconnected || false;
+  const hideDisconnectedBuiltins =  layout.hideDisconnectedBuiltIns || false;
   // Get the set of node ids and edges ids that are to be included in the graph
   const { nodeIds, edgeIds } = getVisibleGraphComponents(
     instance,
     hideDisconnected,
     hideDisconnectedBuiltins,
-    //theme
   );
 
 
@@ -98,9 +82,7 @@ export function generateGraph(
   getInstanceRelations(instance).forEach((relation) => {
     const isAttribute = false
     
-    // theme
-    //   ? getRelationIsAttribute(theme, relation.id)
-    //   : false;
+
     if (!isAttribute) {
       getRelationTuples(relation).forEach((tuple) => {
         const edgeId = generateEdgeId(relation, tuple);

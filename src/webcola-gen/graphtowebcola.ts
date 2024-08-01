@@ -7,9 +7,6 @@ import { LayoutInstance } from '../layoutinstance';
 const nodeWidth = 50;
 const nodeHeight = 30;
 
-const graphWidth = 800;
-const graphHeight = 800;
-
 const minSepHeight = 15;
 const minSepWidth = 15;
 const minSeparation = Math.min(minSepHeight, minSepWidth);
