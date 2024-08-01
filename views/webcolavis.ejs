@@ -8,7 +8,7 @@
     <style>
         .node {
             stroke: black;
-            fill:white;
+            fill: white;
             stroke-width: 1.5px;
             cursor: move;
         }
@@ -44,8 +44,8 @@
 
         .label {
             fill: black;
-            font-family: Verdana;
-            font-size: 12px;
+            font-family: system-ui;
+            font-size: 10px;
             text-anchor: middle;
             cursor: move;
         }
@@ -54,7 +54,7 @@
 
             fill: black;
             font-family: Verdana;
-            font-size: 12px;
+            font-size: 10px;
             text-anchor: middle;
             cursor: move;
         }
@@ -68,11 +68,11 @@
         }
     </style>
 
-
+    <script src="https://marvl.infotech.monash.edu/webcola/extern/graphlib-dot.min.js"></script>
     <!-- Minified version -->
     <!-- <script src="http://marvl.infotech.monash.edu/webcola/cola.min.js"></script> -->
     <!-- Full version -->
-    <script src="http://marvl.infotech.monash.edu/webcola/cola.js"></script>
+    <script src="https://marvl.infotech.monash.edu/webcola/cola.min.js"></script>
 
     <!-- Include d3 here -->
     <script src="https://d3js.org/d3.v4.min.js"></script>
@@ -80,208 +80,253 @@
 
 <body>
     <div class="container">
-    <h1>WebCola Instance</h1>
-    <div class="btn-group" role="group">
-        <button type="button" class="btn btn-outline-secondary"><a href="#svg"> WebCola Diagram </a></button>
-        <button type="button" class="btn btn-outline-secondary"><a href="#constraints"> WebCola Alignment Constraints </a></button>
-        <button type="button" class="btn btn-outline-secondary"><a href="#groups"> WebCola Group Definitions </a></button>
-        <button type="button" class="btn btn-outline-secondary"><a href="#graphDefs"> WebCola Graph Definitions </a></button>
-      </div>
-    <hr>
-    <svg id="svg" width="<%- width %>" height="<%- height %>">
-        <defs>
-            <marker id="end-arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-                <polygon points="0 0, 10 3.5, 0 7" />
-            </marker>
-        </defs>
-    </svg>
-    <script>
-        window.addEventListener('load', function () {
+        <h1>WebCola Instance</h1>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-secondary"><a href="#svg"> WebCola Diagram </a></button>
+            <button type="button" class="btn btn-outline-secondary"><a href="#constraints"> WebCola Alignment
+                    Constraints </a></button>
+            <button type="button" class="btn btn-outline-secondary"><a href="#groups"> WebCola Group Definitions
+                </a></button>
+            <button type="button" class="btn btn-outline-secondary"><a href="#graphDefs"> WebCola Graph Definitions
+                </a></button>
+        </div>
+        <hr>
+        <svg id="svg" width="<%- width %>" height="<%- height %>">
+            <defs>
+                <marker id="end-arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" />
+                </marker>
+            </defs>
+        </svg>
+        <script>
+            window.addEventListener('load', function () {
 
 
-            var color = d3.scaleOrdinal(d3.schemeCategory20);
 
-            var width = <%- width %>, height = <%- height %>;
 
-            var svg = d3.select("#svg");
-            var colaLayout = cola.d3adaptor(d3)
-                .linkDistance(120)
-                .avoidOverlaps(true)
-                .size([width, height]);
+                const LINK_DISTANCE = 120;
+                const dy_for_linespacing = 5; // Adjust for spacing between lines
 
-            var nodes = <%- JSON.stringify(colaNodes) %>;
-            var edges = <%- JSON.stringify(colaEdges) %>;
+                var color = d3.scaleOrdinal(d3.schemeCategory20);
 
-            console.log(nodes);
+                
+                var width = <%- width %>, height = <%- height %>;
 
-            nodes.forEach(function (node) {
-                node.name = node.id;
-            });
+                var svg = d3.select("#svg");
+                var colaLayout = cola.d3adaptor(d3)
+                    .convergenceThreshold(0.1) // TODO: What should we do here?
+                    .linkDistance(LINK_DISTANCE)
+                    .avoidOverlaps(true)
+                    .size([width, height]);
 
-            var constraints = <%- JSON.stringify(colaConstraints) %>;
-            var groups = <%- JSON.stringify(colaGroups) %>;
+                var nodes = <%- JSON.stringify(colaNodes) %>;
+                var edges = <%- JSON.stringify(colaEdges) %>;
 
-            colaLayout
-                .nodes(nodes)
-                .links(edges)
-                .constraints(constraints)
-                .groups(groups)
-                .start();
 
-            var link = svg.selectAll(".link")
-                .data(edges)
-                .enter().append("line")
-                .attr("class", "link")
-                .attr("x1", d => d.source.x)
-                .attr("y1", d => d.source.y)
-                .attr("x2", d => d.target.x)
-                .attr("y2", d => d.target.y)
-                .attr("stroke", "black") // Set the color of the edge
-                .attr("marker-end", "url(#end-arrow)"); // Apply the arrow marker
 
-            // var node = svg.selectAll(".node")
-            //     .data(nodes)
-            //     .enter().append("circle")
-            //     .attr("class", "node")
-            //     .attr("r", 5)
-            //     .call(colaLayout.drag);
+                nodes.forEach(function (node) {
+                    node.name = node.id;
+                });
+
+                var constraints = <%- JSON.stringify(colaConstraints) %>;
+                var groups = <%- JSON.stringify(colaGroups) %>;
+
+                colaLayout
+                    .nodes(nodes)
+                    .links(edges)
+                    .constraints(constraints)
+                    .groups(groups)
+                    .flowLayout("y", LINK_DISTANCE);
+
+
+                const margin = 10;
+
+                var lineFunction = d3.line()
+                                .x(function (d) { return d.x; })
+                                .y(function (d) { return d.y; });
+
+
+                var routeEdges = function () {
+                    colaLayout.prepareEdgeRouting(margin / 3);
+
+                    // Need a call to d3adaptor route edge
+                    link.attr("d", function (d) { return lineFunction(colaLayout.routeEdge(d)); });
+                    //if (isIE()) link.each(function (d) { this.parentNode.insertBefore(this, this) });
+                }
+
+
+
+
+                var link = svg.selectAll(".link")
+                    .data(edges)
+                    .enter().append("path")
+                    .attr("class", "link");
+
 
 
                 var node = svg.selectAll(".node")
                     .data(nodes)
                     .enter().append("rect") // Changed from circle to rect
                     .attr("class", "node")
-                    .attr("width", function(d) { return d.width; }) // Use node's width
-                    .attr("height", function(d) { return d.height; }) // Use node's height
-                    .attr("x", function(d) { return -d.width / 2; }) // Center the rectangle on the node's x
-                    .attr("y", function(d) { return -d.height / 2; }) // Center the rectangle on the node's y
+                    .attr("width", function (d) { return d.width; }) // Use node's width
+                    .attr("height", function (d) { return d.height; }) // Use node's height
+                    .attr("x", function (d) { return -d.width / 2; }) // Center the rectangle on the node's x
+                    .attr("y", function (d) { return -d.height / 2; }) // Center the rectangle on the node's y
                     .call(colaLayout.drag);
 
-            var label = svg.selectAll(".label")
-                .data(nodes)
-                .enter().append("text")
-                .attr("class", "label")
-                .text(function (d) {
-                    return d.name;
-                })
-                .call(colaLayout.drag);
+                    var label = svg.selectAll(".label")
+                                .data(nodes)
+                                .enter().append("text")
+                                .attr("class", "label")
+                                .each(function(d) {
+                                    // Append tspan for d.name
+                                    d3.select(this).append("tspan")
+                                        .attr("x", 0) // Align with the parent text element
+                                        .attr("dy", "0em") // Start at the same vertical position
+                                        .style("font-weight", "bold")
+                                        .text(d.name);
 
-            // Assuming 'svg' is your d3-selected SVG element
-            var linklabel = svg.selectAll(".link-label")
-                .data(edges)
-                .enter().append("text")
-                .attr("class", "link-label")
-                .text(d => d.relName); // Set the text content to the link's label
+                                    var y = 1; // Start from the next line for attributes
 
-            node.append("title")
-                .text(function (d) { return d.name; });
+                                    // Append tspans for each attribute
+                                    for (let key in d.attributes) {
+                                        d3.select(this).append("tspan")
+                                            .attr("x", 0) // Align with the parent text element
+                                            .attr("dy", `${y}em`) // Move each attribute to a new line
+                                            .text(key + ": " + d.attributes[key]);
+                                        y += 1; // Increment for the next line
+                                    }
+                                })
+                                .call(colaLayout.drag);
+
+                var attributes = svg.selectAll(".attributes")
+                    .data(nodes)
+                    .enter().append("text")
+                    .attr("class", "attributes")
+                    .each(function (d) {
+                        var y = 0; // Initial y offset
+
+                        for (let key in d.attributes) {
+                            d3.select(this).append("tspan")
+                                .attr("x", d.x) // Set the absolute x position of the first tspan to align with the parent text element
+                                .attr("dy", `${y}px`) // Use dy only for vertical spacing from the previous tspan or the parent text element's y position
+                                .text(key + ": " + d.attributes[key]);
+                            y += dy_for_linespacing; // Increment y offset for the next line
+                        }
+                    })
+                    .call(colaLayout.drag);
 
 
-            // Add a rectangle for each group and a label at the top of the group
 
-            var group = svg.selectAll(".group")
-                .data(groups)
-                .enter().append("rect")
-                .attr("class", "group")
-                .attr("rx", 8).attr("ry", 8)
-                .style("fill", function (d, i) { return color(i); })
-                .call(colaLayout.drag);
 
-            var groupLabel = svg.selectAll(".groupLabel")
-                .data(groups)
-                .enter().append("text")
-                .attr("class", "groupLabel")
-                .text(function (d) { return d.name; })
-                .call(colaLayout.drag);
-            
 
-            colaLayout.on("tick", function () {
+                var linklabel = svg.selectAll(".link-label")
+                    .data(edges)
+                    .enter().append("text")
+                    .attr("class", "link-label")
+                    .text(d => d.relName); // Set the text content to the link's label
 
-                link.attr("x1", function (d) {
-                    // Adjust start point to source's bounding box edge
-                    var deltaX = d.target.x - d.source.x;
-                    if (Math.abs(deltaX) > Math.abs(d.target.y - d.source.y)) {
-                        return deltaX > 0 ? d.source.x + d.source.width / 2 : d.source.x - d.source.width / 2;
-                    } else {
-                        return d.source.x;
-                    }
-                })
-                .attr("y1", function (d) {
-                    // Adjust start point to source's bounding box edge
-                    var deltaY = d.target.y - d.source.y;
-                    if (Math.abs(deltaY) > Math.abs(d.target.x - d.source.x)) {
-                        return deltaY > 0 ? d.source.y + d.source.height / 2 : d.source.y - d.source.height / 2;
-                    } else {
-                        return d.source.y;
-                    }
-                })
-                .attr("x2", function (d) {
-                    // Adjust end point to target's bounding box edge
-                    var deltaX = d.target.x - d.source.x;
-                    if (Math.abs(deltaX) > Math.abs(d.target.y - d.source.y)) {
-                        return deltaX > 0 ? d.target.x - d.target.width / 2 : d.target.x + d.target.width / 2;
-                    } else {
-                        return d.target.x;
-                    }
-                })
-                .attr("y2", function (d) {
-                    // Adjust end point to target's bounding box edge
-                    var deltaY = d.target.y - d.source.y;
-                    if (Math.abs(deltaY) > Math.abs(d.target.x - d.source.x)) {
-                        return deltaY > 0 ? d.target.y - d.target.height / 2 : d.target.y + d.target.height / 2;
-                    } else {
-                        return d.target.y;
-                    }
-                })
-                .raise();
+                node.append("title")
+                    .text(function (d) { return d.name; });
 
-                node.attr("x", function (d) { return d.bounds.x; })
-                    .attr("y", function (d) { return d.bounds.y; })
-                    .attr("width", function (d) { return d.bounds.width(); })
-                    .attr("height", function (d) { return d.bounds.height(); });
 
-                label.attr("x", function (d) { return d.x; })
-                    .attr("y", function (d) { return d.y; })
-                    .raise();
+                // Add a rectangle for each group and a label at the top of the group
 
-                linklabel.attr("x", d => (d.source.x + d.target.x) / 2)
-                    .attr("y", d => (d.source.y + d.target.y) / 2)
-                    .attr("text-anchor", "middle") // Center the text on its position
-                    .attr("dy", "-5") // Adjust the y-position to offset the text above the link
-                    .raise();
-                
-                group.attr("x", function (d) { return d.bounds.x; })
-                    .attr("y", function (d) { return d.bounds.y; })
-                    .attr("width", function (d) { return d.bounds.width(); })
-                    .attr("height", function (d) { return d.bounds.height(); })
-                    .lower();
+                var group = svg.selectAll(".group")
+                    .data(groups)
+                    .enter().append("rect")
+                    .attr("class", "group")
+                    .attr("rx", 8).attr("ry", 8)
+                    .style("fill", function (d, i) { return color(i); })
+                    .call(colaLayout.drag);
 
-                groupLabel.attr("x", function (d) { return d.bounds.x; })
-                    .attr("y", function (d) { return d.bounds.y; })
-                    .attr("text-anchor", "middle") // Center the text on its position
-                    .attr("dy", "-5") // Adjust the y-position to offset the text above the link
-                    .raise();
+                var groupLabel = svg.selectAll(".groupLabel")
+                    .data(groups)
+                    .enter().append("text")
+                    .attr("class", "groupLabel")
+                    .text(function (d) { return d.name; })
+                    .call(colaLayout.drag);
+
+
+                colaLayout.on("tick", function () {
+
+                    
+
+                    node
+                        .each(function (d) { d.innerBounds = d.bounds.inflate(-margin); })
+                        .attr("x", function (d) { return d.bounds.x; })
+                        .attr("y", function (d) { return d.bounds.y; })
+                        .attr("width", function (d) { return d.bounds.width(); })
+                        .attr("height", function (d) { return d.bounds.height(); });
+
+                        label
+        .attr("x", d => d.x)
+        .attr("y", d => d.y)
+        .each(function(d) {
+            var y = 0; // Initialize y offset for tspans
+            d3.select(this).selectAll("tspan")
+                .attr("x", d.x) // Align tspans with the node's x position
+                .attr("dy", function() {
+                    y += 1; // Increment y for each tspan to create line spacing
+                    return y === 1 ? "0em" : "1em"; // Keep the first tspan in place, move others down
+                });
+        })
+        .raise();
+
+                    linklabel.attr("x", d => (d.source.x + d.target.x) / 2)
+                        .attr("y", d => (d.source.y + d.target.y) / 2)
+                        .attr("text-anchor", "middle") // Center the text on its position
+                        .attr("dy", "-5") // Adjust the y-position to offset the text above the link
+                        .raise();
+
+
+                    group.attr("x", function (d) { return d.bounds.x; })
+                        .attr("y", function (d) { return d.bounds.y; })
+                        .attr("width", function (d) { return d.bounds.width(); })
+                        .attr("height", function (d) { return d.bounds.height(); })
+                        .lower();
+
+                    groupLabel.attr("x", function (d) { return d.bounds.x; })
+                        .attr("y", function (d) { return d.bounds.y; })
+                        .attr("text-anchor", "middle") // Center the text on its position
+                        .attr("dy", "-5") // Adjust the y-position to offset the text above the link
+                        .raise();
+
+
+
+                        link
+                        .attr("d", function (d) {
+                            var route = cola.makeEdgeBetween(d.source.innerBounds, d.target.innerBounds, 5);
+                            return lineFunction([route.sourceIntersection, route.arrowStart]);
+                        })
+                        .raise();    
+
+                });
+
+
+                colaLayout.start()
+                    .on("end", routeEdges);
+
             });
-        });
-    </script>
+        </script>
 
 
 
-    <div id="webcola">
+        <div id="webcola">
 
-    <h3> Alignment Constraints </h3>
-    <pre id="constraints"> <%- JSON.stringify(colaConstraints, null,2) %>;%></pre>
+            <h3> Alignment Constraints </h3>
+            <pre id="constraints"> <%- JSON.stringify(colaConstraints, null,2) %>;%></pre>
 
-    <h3> Group Definitions</h3>
-    <pre id="groups"> <%- JSON.stringify(colaGroups, null,2) %>;%></pre>
+            <h3> Group Definitions</h3>
+            <pre id="groups"> <%- JSON.stringify(colaGroups, null,2) %>;%></pre>
 
-    <h3 id="graphDefs"> Graph definitions </h3>
-    <h4>Nodes</h4>
-    <pre id="nodes"> <%- JSON.stringify(colaNodes,null, 2) %>;%></pre>
-    <h4>Edges</h4>
-    <pre id="edges"> <%- JSON.stringify(colaEdges, null,2) %>;%></pre>
+            <h3 id="graphDefs"> Graph definitions </h3>
+            <h4>Nodes</h4>
+            <pre id="nodes"> <%- JSON.stringify(colaNodes,null, 2) %>;%></pre>
+            <h4>Edges</h4>
+            <pre id="edges"> <%- JSON.stringify(colaEdges, null,2) %>;%></pre>
 
-    </div>
+        </div>
 
     </div>
 

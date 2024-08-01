@@ -1,9 +1,10 @@
 {
   "fieldDirections": [
     {
-      "fieldName": "myTables",
+      "fieldName": "customersAtTable",
       "directions": [
-        "below"
+        "below",
+        "right"
       ]
     }
   ],
@@ -12,11 +13,25 @@
       "fieldName": "foodOrder"
     },
     {
+      "fieldName": "myTables",
+      "groupOn": "domain"
+    }
+  ],
+  "attributeFields": [
+    {
+      "fieldName": "capacity"
+    },
+    {
       "fieldName": "status"
     },
     {
-      "fieldName": "myTables",
-      "groupOn" : "domain"
+      "fieldName": "size"
+    },
+    {
+      "fieldName": "tableNumber"
+    },
+    {
+      "fieldName": "people"
     }
   ]
 }

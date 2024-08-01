@@ -104,7 +104,6 @@
 }
 ```
 
-TODO: Maybe groupBy becomes (groupBy domain / range. Default is range )
 
 ## Current Issues
 
@@ -112,7 +111,7 @@ TODO: Maybe groupBy becomes (groupBy domain / range. Default is range )
     - [] Cluster visualizations do not always load. Could this be a Penrose bug?
     - [] Need to minimize label overlap as well as edge overlap?
 - [] Currently only show a visualization for the *first* alloy instance in the datum
-- [x] Only works for binary relations
+
 
 
 ## Should we be able to group by sig Value as well?

@@ -16,23 +16,28 @@ export class PenroseInstance {
     private readonly _graph : Graph;
     private readonly _layoutInstance : LayoutInstance;
     private readonly _groups : Record<string, string[]>;
+    private readonly _attributes : Record<string, Record<string, string[]>>;
+
+
     private readonly _alloyInstance : AlloyInstance;
 
     private readonly _nodesWithTypes : Record<string, AlloyType> = {};
 
     constructor(graph : Graph, layoutInstance : LayoutInstance, alloyInstance : AlloyInstance) {
 
+        // TODO: We currently DO NOT KNOW how to handle attributes in Penrose
+        this._attributes = layoutInstance.generateAttributes(graph);
         this._groups = layoutInstance.generateGroups(graph);
+
         this._layoutInstance = layoutInstance;
         this._graph = graph;
         this._alloyInstance = alloyInstance;
         this._nodesWithTypes = this._graph.nodes()
-        //.filter(node => !this._groups[node]) // Assuming this is the correct check
-                            .reduce((acc, node) => {
-                                let type = getAtomType(this._alloyInstance, node);
-                                acc[node] = type; // Assign the type to the node key in the accumulator
-                                return acc; // Return the updated accumulator for the next iteration
-                            }, {} as Record<string, AlloyType>); // Initialize the accumulator as an empty object
+            .reduce((acc, node) => {
+                let type = getAtomType(this._alloyInstance, node);
+                acc[node] = type; // Assign the type to the node key in the accumulator
+                return acc; // Return the updated accumulator for the next iteration
+            }, {} as Record<string, AlloyType>); // Initialize the accumulator as an empty object
     }
 
     get domain(): string {
@@ -51,24 +56,15 @@ export class PenroseInstance {
 
     generateDomain(): string {
         /*
-         We should still define the order of the types.
-
          For each node, we need to define the type of the node (which we can get from the AlloyInstance)
          Then, we have to topologically sort the types, and then define the order of the types.
-
-         Crucially, we need to avoid Cluster nodes (which we can do by checking if the node is in the groups keys)
-         (or these have already been removed from the graph)
         */
 
         const BASE_TYPE = "_Vertex";
         const supertypeOP = "<:";
 
         let typeDAG = new Graph({ directed: true, multigraph: false });
-
         let allTypes = getInstanceTypes(this._alloyInstance);
-
-        // Add the base type
-        //typeDAG.setNode(BASE_TYPE);
 
         // Add all the types
         allTypes.forEach(type => {
@@ -90,8 +86,6 @@ export class PenroseInstance {
         });
 
         var nodeList = alg.topsort(typeDAG);
-        //nodeList = nodeList.map (node => this.ensureValidId(node));
-
 
         let typeDefinitions : string [] = []
         for (let i = 0; i < nodeList.length; i++) {
@@ -115,10 +109,6 @@ export class PenroseInstance {
         }
         
         let typeDefString = typeDefinitions.join("\n");
-
-
-
-
         return DOMAIN_TEMPLATE + "\n" + typeDefString;
     }
 
@@ -129,21 +119,25 @@ export class PenroseInstance {
     }
 
     generateSubstance(): string {
-
-        // The meat of the problem.
- 
-
-        
-
-
         let vertexDefinitions = this._graph.nodes().map(node => {
-
-
             let definedType = this._nodesWithTypes[node].types[0] || "_Vertex";
             let definedTypeCleaned = this.ensureValidId(definedType);
 
             // Ensure our IDs are supported by Penrose
             let nodeId = this.ensureValidId(node);
+
+
+
+            /***
+             * 
+             * 
+             *  TODO: This is where we would show attributes (if needed).
+             * 
+             * 
+             */
+
+
+
 
             // Instead of _Vertex, we should use the type of the node
             return `${definedTypeCleaned} ${nodeId}\nLabel ${nodeId} "${node}"`;

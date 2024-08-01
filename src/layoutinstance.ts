@@ -24,6 +24,7 @@ import { Graph, Edge } from 'graphlib';
 interface LayoutSpec {
     fieldDirections : DirectionalRelation[];
     groupBy : ClusterRelation[];
+    attributeFields : AttributeDefinition[];
 }
 
 interface DirectionalRelation {
@@ -36,6 +37,12 @@ interface ClusterRelation {
     groupOn? : string;
 }
 
+
+interface AttributeDefinition {
+    fieldName : string;
+}
+
+
 export class LayoutInstance {
 
     private readonly _annotSpec : string;
@@ -43,13 +50,16 @@ export class LayoutInstance {
 
 
     // Counter-intuitive, but this is how it should work.
-    LEFT_CONSTRAINT : string = "_layoutRight";
-    RIGHT_CONSTRAINT : string = "_layoutLeft";
-    TOP_CONSTRAINT : string = "_layoutAbove";
-    BOTTON_CONSTRAINT : string = "_layoutBelow";
+    readonly LEFT_CONSTRAINT : string = "_layoutRight";
+    readonly RIGHT_CONSTRAINT : string = "_layoutLeft";
+    readonly TOP_CONSTRAINT : string = "_layoutAbove";
+    readonly BOTTON_CONSTRAINT : string = "_layoutBelow";
 
 
-    DEFAULT_GROUP_ON : string = "range";
+    readonly DEFAULT_GROUP_ON : string = "range";
+
+
+    readonly ATTRIBUTE_KEY : string = "attributes";
 
     constructor(annotationSpec : string) {
         this._annotSpec = annotationSpec;
@@ -61,7 +71,8 @@ export class LayoutInstance {
             console.error("Failed to parse annotation spec. Defaulting to no layout.", error);
             this._layoutSpec = {
                 fieldDirections: [],
-                groupBy: []
+                groupBy: [],
+                attributeFields: []
             };
         }
     }
@@ -77,25 +88,19 @@ export class LayoutInstance {
         return [];
     }
 
-    // shouldClusterOnField(fieldId: string): boolean {
-    //     const isMember = this._layoutSpec.groupBy.some((cluster) => cluster.fieldName === fieldId);
-    //     return isMember;
-    // }
-
-
-    getClusterSettings(fieldId: string): ClusterRelation | undefined {
-        return this._layoutSpec.groupBy.find((cluster) => cluster.fieldName === fieldId);
+    isAttributeField(fieldId: string): boolean {
+        const isAttributeRel = this._layoutSpec.attributeFields.find((field) => field.fieldName === fieldId);
+        return isAttributeRel ? true : false;
     }
 
-    /// This is trickier, will do "property"
-    getAtomLayout(atomId: string): string[] {
-        return [];
+
+    private getClusterSettings(fieldId: string): ClusterRelation | undefined {
+        return this._layoutSpec.groupBy.find((cluster) => cluster.fieldName === fieldId);
     }
 
 
 
     getGroupSourceAndTarget(edge : Edge, groupOn: string) {
-        
         let source = "";
         let target = "";
 
@@ -111,7 +116,6 @@ export class LayoutInstance {
             source = edge.v;
             target = edge.w;
         }
-
         return {source, target};
     }
 
@@ -163,5 +167,53 @@ export class LayoutInstance {
         });
 
         return groups;
+    }
+
+
+
+
+    /**
+     * Generates groups based on the specified graph.
+     * @param g - The graph, which will be modified to remove the edges that are used to determine attributes.
+     * @returns A record of attributes
+     */   
+    generateAttributes(g : Graph) : Record<string, Record<string, string[]>> {
+
+        // Node : [] of attributes
+        let attributes :  Record<string, Record<string, string[]>> = {};
+
+        let graphEdges = [...g.edges()];
+        // Go through all edge labels in the graph
+
+        graphEdges.forEach((edge) => {
+            const edgeId = edge.name;
+            const relName = g.edge(edge.v, edge.w, edgeId);
+            const isAttributeRel = this.isAttributeField(relName);
+            
+            if (isAttributeRel) {
+
+                // If the field is an attribute field, we should add the attribute to the source node's
+                // attributes field.
+
+
+                let source = edge.v;
+                let target = edge.w;
+
+                let nodeAttributes = attributes[source] || {};
+                if (nodeAttributes[relName]) {
+                    nodeAttributes[relName].push(target);
+                }
+                else {
+                    nodeAttributes[relName] = [target];
+                    attributes[source] = nodeAttributes;
+                }
+    
+                
+                // Now remove the edge from the graph
+                g.removeEdge(edge.v, edge.w, edgeId);
+            }
+        });
+
+        return attributes;
     }
 }
