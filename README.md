@@ -112,7 +112,4 @@
     - [] Need to minimize label overlap as well as edge overlap?
 - [] Currently only show a visualization for the *first* alloy instance in the datum
 
-
-
-## Should we be able to group by sig Value as well?
- ## Or layout by Sig Value?
+- [] Better Label Layout: https://medium.com/@adarshlilha/removing-label-overlapping-from-pretty-charts-8dd2e3581b71
