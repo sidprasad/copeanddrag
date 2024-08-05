@@ -1,16 +1,24 @@
 {
-    "fieldDirections": [ 
+  "fieldDirections": [
+    {
+      "fieldName": "near",
+      "directions": ["below"]
+    },
+    {
+      "fieldName": "far",
+      "groupOn": ["above"]
+    }
+  ],
+  "groupBy": [
+    {
+      "fieldName": "nextState",
+      "groupOn": "domain"
+    }
 
-      {
-        "fieldName": "near",
-        "directions": ["below", "left"]
-      },
-      {
-        "fieldName": "far",
-        "directions": ["below", "right"]
-      }
+  ],
+  "attributeFields": [
 
-
-    ],
-    "groupBy": [    ]
-  }
+  ],
+  "hideDisconnected": true,
+  "hideDisconnectedBuiltIns": false
+}
