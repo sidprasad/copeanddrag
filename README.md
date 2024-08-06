@@ -116,5 +116,7 @@
 - [] Currently only show a visualization for the *first* alloy instance in the datum
 
 - [] Better Label Layout: https://medium.com/@adarshlilha/removing-label-overlapping-from-pretty-charts-8dd2e3581b71
+- [] Color Code nodes by type
+
 
 - [] Infer setcola constraints from file.
