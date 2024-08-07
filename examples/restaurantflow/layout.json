@@ -33,6 +33,6 @@
       "fieldName": "people"
     }
   ],
-  "hideDisconnected" : true,
-  "hideDisconnectedBuiltIns" : false
+  "hideDisconnected" : false,
+  "hideDisconnectedBuiltIns" : true
 }

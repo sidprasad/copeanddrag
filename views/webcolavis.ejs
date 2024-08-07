@@ -7,7 +7,7 @@
     <title>Webcola Alloy Instance Layout</title>
     <style>
         .node {
-            stroke: black;
+            /* stroke: black; */
             fill: white;
             stroke-width: 1.5px;
             cursor: move;
@@ -173,6 +173,8 @@
                     .attr("height", function (d) { return d.height; }) // Use node's height
                     .attr("x", function (d) { return -d.width / 2; }) // Center the rectangle on the node's x
                     .attr("y", function (d) { return -d.height / 2; }) // Center the rectangle on the node's y
+                    .attr("stroke", function (d) { return d.color; }) // Outline color of the node
+                    .attr("stroke-width", 1.5) // Adjust the stroke width as needed
                     .call(colaLayout.drag);
 
                     var label = svg.selectAll(".label")

@@ -1,7 +1,7 @@
 
 import { group } from 'console';
 import { Graph, Edge } from 'graphlib';
-import { AlloyInstance, getAtomType } from './alloy-instance';
+import { AlloyInstance, getAtomType, getInstanceTypes } from './alloy-instance';
 import { isBuiltin } from './alloy-instance/src/type';
 
 
@@ -219,35 +219,31 @@ export class LayoutInstance {
 
         let nodes = [...g.nodes()];
 
-        // Built-ins :
-        // Node types : isBuiltin
-        a.types
 
-        if (this.hideDisconnected) {
-            nodes.forEach((node) => {
+        nodes.forEach((node) => {
 
 
-                // Check if builtin
-                try {
-                    const type = getAtomType(a, node);
-                    const isAtomBuiltin = isBuiltin(type);
+            // Check if builtin
+            try {
+                const type = getAtomType(a, node);
+                const isAtomBuiltin = isBuiltin(type);
 
-                    let inEdges = g.inEdges(node) || [];
-                    let outEdges = g.outEdges(node) || [];
-                    const isDisconnected = inEdges.length === 0 && outEdges.length === 0;
+                let inEdges = g.inEdges(node) || [];
+                let outEdges = g.outEdges(node) || [];
+                const isDisconnected = inEdges.length === 0 && outEdges.length === 0;
 
 
-                    const hideNode = isDisconnected && ( (this.hideDisconnectedBuiltIns && isAtomBuiltin) || this.hideDisconnected );
+                const hideNode = isDisconnected && ( (this.hideDisconnectedBuiltIns && isAtomBuiltin) || this.hideDisconnected );
 
-                    if (hideNode) {
-                        g.removeNode(node);
-                    }
-
-                } catch (error) {
-                    console.error("Failed to identify node type. Defaulting to showing node.", error);
+                if (hideNode) {
+                    g.removeNode(node);
                 }
-            });
-        }
+
+            } catch (error) {
+                console.error("Failed to identify node type. Defaulting to showing node.", error);
+            }
+        });
+
         
 
     }
@@ -270,6 +266,41 @@ export class LayoutInstance {
 
         const groups = this.generateGroups(g);
 
-        return {groups, attributes};
+
+        const colors = this.colorNodesByType(g, a);
+
+        return {groups, attributes, colors};
+    }
+
+
+    private getRandomColor(): string {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
+    private colorNodesByType(g : Graph, a : AlloyInstance) : Record<string, string> {
+        let colorsByType : Record<string, string> = {};
+        let nodes = [...g.nodes()];
+
+        let types = getInstanceTypes(a);
+
+        // For each type, assign a unique, random color
+        types.forEach((type) => {
+            colorsByType[type.id] = this.getRandomColor();
+        });
+
+
+        let colorsByNode = {};
+        nodes.forEach((node) => {
+            // Get the type of the node
+            let type = getAtomType(a, node);
+            let color = colorsByType[type.id];
+            colorsByNode[node] = color;
+        });
+        return colorsByNode;
     }
 }

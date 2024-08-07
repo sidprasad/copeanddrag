@@ -19,7 +19,7 @@ const DEFAULT_Y = 0;
 
 
 
-type NodeWithId = Node & { id: string, attributes: Record<string, string[]> };
+type NodeWithMetadata = Node & { id: string, attributes: Record<string, string[]>, color: string };
 
 export function graphToWebcola(graph: Graph, layoutInstance: LayoutInstance, alloyInstance : AlloyInstance) {
 
@@ -30,15 +30,16 @@ export function graphToWebcola(graph: Graph, layoutInstance: LayoutInstance, all
 
   const groupDefinitions = changes.groups;
   const allGraphAttributes = changes.attributes;
+  const nodeColors = changes.colors;
 
-  const colaNodes: NodeWithId[] = graph.nodes().map(node => {
+  const colaNodes: NodeWithMetadata[] = graph.nodes().map(node => {
 
     const attributes = allGraphAttributes[node] || {};
-
+    const color = nodeColors[node] || "white";
 
     const h = nodeHeight + minSepHeight;
     const w = nodeWidth + minSepWidth;
-    return { id: node, x: DEFAULT_X, y: DEFAULT_Y, width: w, height: h, attributes: attributes };
+    return { id: node, x: DEFAULT_X, y: DEFAULT_Y, width: w, height: h, attributes: attributes , color: color };
   });
 
   function getNodeIndex(nodeId: string) {
