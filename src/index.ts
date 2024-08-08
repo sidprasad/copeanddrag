@@ -28,19 +28,20 @@ app.set('view engine', 'ejs');
 function getFormContents(req: any) {
     const alloyDatum = req.body.alloydatum;
     const layoutAnnotation = req.body.layoutannotation;
+    const instanceNumber = parseInt(req.body.instancenumber);
 
     let ad : AlloyDatum = parseAlloyXML(alloyDatum);
     let instances = ad.instances;
 
     let li = new LayoutInstance(layoutAnnotation);
 
-    return {instances, li};
+    return {instances, li, instanceNumber};
 }
 
 
 app.post('/penrosefiles', (req, res) => {    
-    let {instances, li} = getFormContents(req);
-    let instance = instances[0];
+    let {instances, li, instanceNumber} = getFormContents(req);
+    let instance = instances[instanceNumber];
 
     let g = generateGraph(instance, li);
 
@@ -56,10 +57,8 @@ app.post('/penrosefiles', (req, res) => {
 
 
 app.post('/webcolafiles', (req, res) => {    
-    let {instances, li} = getFormContents(req);
-
-    /// Right now, we are only generating for the first instance ///
-    let instance = instances[0];
+    let {instances, li, instanceNumber} = getFormContents(req);
+    let instance = instances[instanceNumber];
     let g = generateGraph(instance, li);
     let colaDefinitions = graphToWebcola(g, li, instance);
 

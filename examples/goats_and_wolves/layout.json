@@ -1,0 +1,14 @@
+{
+  "fieldDirections": [
+  ],
+  "groupBy": [
+    {
+      "fieldName": "animals",
+      "groupOn": "domain"
+    }
+  ],
+  "attributeFields": [
+  ],
+  "hideDisconnected": false,
+  "hideDisconnectedBuiltIns": true
+}

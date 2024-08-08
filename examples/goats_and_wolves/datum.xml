@@ -1,0 +1,748 @@
+<alloy builddate="Thursday, August 8th, 2024">
+<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/no-name.rkt" version="3.5" prefixLength="12" loop="10" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="GWBoat" ID="4" parentID="2">
+<atom label="GWBoat0"/>
+</sig>
+
+<sig label="GWAnimal" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Goat" ID="6" parentID="5">
+<atom label="Goat0"/><atom label="Goat1"/><atom label="Goat2"/>
+</sig>
+
+<sig label="Wolf" ID="7" parentID="5">
+<atom label="Wolf0"/><atom label="Wolf1"/><atom label="Wolf2"/>
+</sig>
+
+<sig label="Position" ID="8" parentID="2">
+
+</sig>
+
+<sig label="Near" ID="9" parentID="8">
+<atom label="Near0"/>
+</sig>
+
+<sig label="Far" ID="10" parentID="8">
+<atom label="Far0"/>
+</sig>
+
+<field label="animals" ID="11" parentID="8">
+<tuple><atom label="Near0"/><atom label="Goat0"/></tuple>
+<tuple><atom label="Near0"/><atom label="Goat1"/></tuple>
+<tuple><atom label="Near0"/><atom label="Goat2"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf0"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf1"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf2"/></tuple>
+<types><type ID="8"/><type ID="5"/></types>
+
+</field>
+
+<field label="location" ID="12" parentID="4">
+<tuple><atom label="GWBoat0"/><atom label="Near0"/></tuple>
+<types><type ID="4"/><type ID="8"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/no-name.rkt" version="3.5" prefixLength="12" loop="10" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="GWBoat" ID="4" parentID="2">
+<atom label="GWBoat0"/>
+</sig>
+
+<sig label="GWAnimal" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Goat" ID="6" parentID="5">
+<atom label="Goat0"/><atom label="Goat1"/><atom label="Goat2"/>
+</sig>
+
+<sig label="Wolf" ID="7" parentID="5">
+<atom label="Wolf0"/><atom label="Wolf1"/><atom label="Wolf2"/>
+</sig>
+
+<sig label="Position" ID="8" parentID="2">
+
+</sig>
+
+<sig label="Near" ID="9" parentID="8">
+<atom label="Near0"/>
+</sig>
+
+<sig label="Far" ID="10" parentID="8">
+<atom label="Far0"/>
+</sig>
+
+<field label="animals" ID="11" parentID="8">
+<tuple><atom label="Near0"/><atom label="Goat0"/></tuple>
+<tuple><atom label="Near0"/><atom label="Goat1"/></tuple>
+<tuple><atom label="Near0"/><atom label="Goat2"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf2"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf0"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf1"/></tuple>
+<types><type ID="8"/><type ID="5"/></types>
+
+</field>
+
+<field label="location" ID="12" parentID="4">
+<tuple><atom label="GWBoat0"/><atom label="Far0"/></tuple>
+<types><type ID="4"/><type ID="8"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/no-name.rkt" version="3.5" prefixLength="12" loop="10" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="GWBoat" ID="4" parentID="2">
+<atom label="GWBoat0"/>
+</sig>
+
+<sig label="GWAnimal" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Goat" ID="6" parentID="5">
+<atom label="Goat0"/><atom label="Goat1"/><atom label="Goat2"/>
+</sig>
+
+<sig label="Wolf" ID="7" parentID="5">
+<atom label="Wolf0"/><atom label="Wolf1"/><atom label="Wolf2"/>
+</sig>
+
+<sig label="Position" ID="8" parentID="2">
+
+</sig>
+
+<sig label="Near" ID="9" parentID="8">
+<atom label="Near0"/>
+</sig>
+
+<sig label="Far" ID="10" parentID="8">
+<atom label="Far0"/>
+</sig>
+
+<field label="animals" ID="11" parentID="8">
+<tuple><atom label="Near0"/><atom label="Goat0"/></tuple>
+<tuple><atom label="Near0"/><atom label="Goat1"/></tuple>
+<tuple><atom label="Near0"/><atom label="Goat2"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf1"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf2"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf0"/></tuple>
+<types><type ID="8"/><type ID="5"/></types>
+
+</field>
+
+<field label="location" ID="12" parentID="4">
+<tuple><atom label="GWBoat0"/><atom label="Near0"/></tuple>
+<types><type ID="4"/><type ID="8"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/no-name.rkt" version="3.5" prefixLength="12" loop="10" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="GWBoat" ID="4" parentID="2">
+<atom label="GWBoat0"/>
+</sig>
+
+<sig label="GWAnimal" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Goat" ID="6" parentID="5">
+<atom label="Goat0"/><atom label="Goat1"/><atom label="Goat2"/>
+</sig>
+
+<sig label="Wolf" ID="7" parentID="5">
+<atom label="Wolf0"/><atom label="Wolf1"/><atom label="Wolf2"/>
+</sig>
+
+<sig label="Position" ID="8" parentID="2">
+
+</sig>
+
+<sig label="Near" ID="9" parentID="8">
+<atom label="Near0"/>
+</sig>
+
+<sig label="Far" ID="10" parentID="8">
+<atom label="Far0"/>
+</sig>
+
+<field label="animals" ID="11" parentID="8">
+<tuple><atom label="Near0"/><atom label="Goat0"/></tuple>
+<tuple><atom label="Near0"/><atom label="Goat1"/></tuple>
+<tuple><atom label="Near0"/><atom label="Goat2"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf0"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf1"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf2"/></tuple>
+<types><type ID="8"/><type ID="5"/></types>
+
+</field>
+
+<field label="location" ID="12" parentID="4">
+<tuple><atom label="GWBoat0"/><atom label="Far0"/></tuple>
+<types><type ID="4"/><type ID="8"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/no-name.rkt" version="3.5" prefixLength="12" loop="10" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="GWBoat" ID="4" parentID="2">
+<atom label="GWBoat0"/>
+</sig>
+
+<sig label="GWAnimal" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Goat" ID="6" parentID="5">
+<atom label="Goat0"/><atom label="Goat1"/><atom label="Goat2"/>
+</sig>
+
+<sig label="Wolf" ID="7" parentID="5">
+<atom label="Wolf0"/><atom label="Wolf1"/><atom label="Wolf2"/>
+</sig>
+
+<sig label="Position" ID="8" parentID="2">
+
+</sig>
+
+<sig label="Near" ID="9" parentID="8">
+<atom label="Near0"/>
+</sig>
+
+<sig label="Far" ID="10" parentID="8">
+<atom label="Far0"/>
+</sig>
+
+<field label="animals" ID="11" parentID="8">
+<tuple><atom label="Near0"/><atom label="Goat0"/></tuple>
+<tuple><atom label="Near0"/><atom label="Goat1"/></tuple>
+<tuple><atom label="Near0"/><atom label="Goat2"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf1"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf0"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf2"/></tuple>
+<types><type ID="8"/><type ID="5"/></types>
+
+</field>
+
+<field label="location" ID="12" parentID="4">
+<tuple><atom label="GWBoat0"/><atom label="Near0"/></tuple>
+<types><type ID="4"/><type ID="8"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/no-name.rkt" version="3.5" prefixLength="12" loop="10" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="GWBoat" ID="4" parentID="2">
+<atom label="GWBoat0"/>
+</sig>
+
+<sig label="GWAnimal" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Goat" ID="6" parentID="5">
+<atom label="Goat0"/><atom label="Goat1"/><atom label="Goat2"/>
+</sig>
+
+<sig label="Wolf" ID="7" parentID="5">
+<atom label="Wolf0"/><atom label="Wolf1"/><atom label="Wolf2"/>
+</sig>
+
+<sig label="Position" ID="8" parentID="2">
+
+</sig>
+
+<sig label="Near" ID="9" parentID="8">
+<atom label="Near0"/>
+</sig>
+
+<sig label="Far" ID="10" parentID="8">
+<atom label="Far0"/>
+</sig>
+
+<field label="animals" ID="11" parentID="8">
+<tuple><atom label="Near0"/><atom label="Goat1"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf1"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat0"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat2"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf0"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf2"/></tuple>
+<types><type ID="8"/><type ID="5"/></types>
+
+</field>
+
+<field label="location" ID="12" parentID="4">
+<tuple><atom label="GWBoat0"/><atom label="Far0"/></tuple>
+<types><type ID="4"/><type ID="8"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/no-name.rkt" version="3.5" prefixLength="12" loop="10" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="GWBoat" ID="4" parentID="2">
+<atom label="GWBoat0"/>
+</sig>
+
+<sig label="GWAnimal" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Goat" ID="6" parentID="5">
+<atom label="Goat0"/><atom label="Goat1"/><atom label="Goat2"/>
+</sig>
+
+<sig label="Wolf" ID="7" parentID="5">
+<atom label="Wolf0"/><atom label="Wolf1"/><atom label="Wolf2"/>
+</sig>
+
+<sig label="Position" ID="8" parentID="2">
+
+</sig>
+
+<sig label="Near" ID="9" parentID="8">
+<atom label="Near0"/>
+</sig>
+
+<sig label="Far" ID="10" parentID="8">
+<atom label="Far0"/>
+</sig>
+
+<field label="animals" ID="11" parentID="8">
+<tuple><atom label="Near0"/><atom label="Goat1"/></tuple>
+<tuple><atom label="Near0"/><atom label="Goat2"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf0"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf1"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat0"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf2"/></tuple>
+<types><type ID="8"/><type ID="5"/></types>
+
+</field>
+
+<field label="location" ID="12" parentID="4">
+<tuple><atom label="GWBoat0"/><atom label="Near0"/></tuple>
+<types><type ID="4"/><type ID="8"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/no-name.rkt" version="3.5" prefixLength="12" loop="10" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="GWBoat" ID="4" parentID="2">
+<atom label="GWBoat0"/>
+</sig>
+
+<sig label="GWAnimal" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Goat" ID="6" parentID="5">
+<atom label="Goat0"/><atom label="Goat1"/><atom label="Goat2"/>
+</sig>
+
+<sig label="Wolf" ID="7" parentID="5">
+<atom label="Wolf0"/><atom label="Wolf1"/><atom label="Wolf2"/>
+</sig>
+
+<sig label="Position" ID="8" parentID="2">
+
+</sig>
+
+<sig label="Near" ID="9" parentID="8">
+<atom label="Near0"/>
+</sig>
+
+<sig label="Far" ID="10" parentID="8">
+<atom label="Far0"/>
+</sig>
+
+<field label="animals" ID="11" parentID="8">
+<tuple><atom label="Near0"/><atom label="Wolf0"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf1"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat0"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat1"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat2"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf2"/></tuple>
+<types><type ID="8"/><type ID="5"/></types>
+
+</field>
+
+<field label="location" ID="12" parentID="4">
+<tuple><atom label="GWBoat0"/><atom label="Far0"/></tuple>
+<types><type ID="4"/><type ID="8"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/no-name.rkt" version="3.5" prefixLength="12" loop="10" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="GWBoat" ID="4" parentID="2">
+<atom label="GWBoat0"/>
+</sig>
+
+<sig label="GWAnimal" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Goat" ID="6" parentID="5">
+<atom label="Goat0"/><atom label="Goat1"/><atom label="Goat2"/>
+</sig>
+
+<sig label="Wolf" ID="7" parentID="5">
+<atom label="Wolf0"/><atom label="Wolf1"/><atom label="Wolf2"/>
+</sig>
+
+<sig label="Position" ID="8" parentID="2">
+
+</sig>
+
+<sig label="Near" ID="9" parentID="8">
+<atom label="Near0"/>
+</sig>
+
+<sig label="Far" ID="10" parentID="8">
+<atom label="Far0"/>
+</sig>
+
+<field label="animals" ID="11" parentID="8">
+<tuple><atom label="Near0"/><atom label="Wolf0"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf1"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf2"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat0"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat1"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat2"/></tuple>
+<types><type ID="8"/><type ID="5"/></types>
+
+</field>
+
+<field label="location" ID="12" parentID="4">
+<tuple><atom label="GWBoat0"/><atom label="Near0"/></tuple>
+<types><type ID="4"/><type ID="8"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/no-name.rkt" version="3.5" prefixLength="12" loop="10" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="GWBoat" ID="4" parentID="2">
+<atom label="GWBoat0"/>
+</sig>
+
+<sig label="GWAnimal" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Goat" ID="6" parentID="5">
+<atom label="Goat0"/><atom label="Goat1"/><atom label="Goat2"/>
+</sig>
+
+<sig label="Wolf" ID="7" parentID="5">
+<atom label="Wolf0"/><atom label="Wolf1"/><atom label="Wolf2"/>
+</sig>
+
+<sig label="Position" ID="8" parentID="2">
+
+</sig>
+
+<sig label="Near" ID="9" parentID="8">
+<atom label="Near0"/>
+</sig>
+
+<sig label="Far" ID="10" parentID="8">
+<atom label="Far0"/>
+</sig>
+
+<field label="animals" ID="11" parentID="8">
+<tuple><atom label="Near0"/><atom label="Wolf1"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat0"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat1"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat2"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf0"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf2"/></tuple>
+<types><type ID="8"/><type ID="5"/></types>
+
+</field>
+
+<field label="location" ID="12" parentID="4">
+<tuple><atom label="GWBoat0"/><atom label="Far0"/></tuple>
+<types><type ID="4"/><type ID="8"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/no-name.rkt" version="3.5" prefixLength="12" loop="10" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="GWBoat" ID="4" parentID="2">
+<atom label="GWBoat0"/>
+</sig>
+
+<sig label="GWAnimal" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Goat" ID="6" parentID="5">
+<atom label="Goat0"/><atom label="Goat1"/><atom label="Goat2"/>
+</sig>
+
+<sig label="Wolf" ID="7" parentID="5">
+<atom label="Wolf0"/><atom label="Wolf1"/><atom label="Wolf2"/>
+</sig>
+
+<sig label="Position" ID="8" parentID="2">
+
+</sig>
+
+<sig label="Near" ID="9" parentID="8">
+<atom label="Near0"/>
+</sig>
+
+<sig label="Far" ID="10" parentID="8">
+<atom label="Far0"/>
+</sig>
+
+<field label="animals" ID="11" parentID="8">
+<tuple><atom label="Near0"/><atom label="Wolf0"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf1"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat0"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat1"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat2"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf2"/></tuple>
+<types><type ID="8"/><type ID="5"/></types>
+
+</field>
+
+<field label="location" ID="12" parentID="4">
+<tuple><atom label="GWBoat0"/><atom label="Near0"/></tuple>
+<types><type ID="4"/><type ID="8"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/no-name.rkt" version="3.5" prefixLength="12" loop="10" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="GWBoat" ID="4" parentID="2">
+<atom label="GWBoat0"/>
+</sig>
+
+<sig label="GWAnimal" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Goat" ID="6" parentID="5">
+<atom label="Goat0"/><atom label="Goat1"/><atom label="Goat2"/>
+</sig>
+
+<sig label="Wolf" ID="7" parentID="5">
+<atom label="Wolf0"/><atom label="Wolf1"/><atom label="Wolf2"/>
+</sig>
+
+<sig label="Position" ID="8" parentID="2">
+
+</sig>
+
+<sig label="Near" ID="9" parentID="8">
+<atom label="Near0"/>
+</sig>
+
+<sig label="Far" ID="10" parentID="8">
+<atom label="Far0"/>
+</sig>
+
+<field label="animals" ID="11" parentID="8">
+<tuple><atom label="Far0"/><atom label="Goat0"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat1"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat2"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf0"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf1"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf2"/></tuple>
+<types><type ID="8"/><type ID="5"/></types>
+
+</field>
+
+<field label="location" ID="12" parentID="4">
+<tuple><atom label="GWBoat0"/><atom label="Far0"/></tuple>
+<types><type ID="4"/><type ID="8"/></types>
+
+</field>
+
+
+</instance>
+
+<source filename="/no-name.rkt" content="// Couldn't open source file (/no-name.rkt) (info: (2 . posix)). Is the file saved?"></source>
+</alloy>
