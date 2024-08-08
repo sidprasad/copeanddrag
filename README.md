@@ -110,14 +110,17 @@
 
 ## Current Issues
 
-- [] Layout graphs are decidedly NOT beautiful. Likely, this can be fixed via changes to the penrose `.style` file (`src/penrosetemplates/default.style`)\
-    - [] Cluster visualizations do not always load. Could this be a Penrose bug?
-    - [] Need to minimize label overlap as well as edge overlap?
+
 - [] Currently only show a visualization for the *first* alloy instance in the datum
 
-- [] Better Label Layout: https://medium.com/@adarshlilha/removing-label-overlapping-from-pretty-charts-8dd2e3581b71
-- [] Color Code nodes by type
+
 
 
 - [] Infer setcola constraints from layout.
 - [] Better support for n-ary relations (by default, Sterling does something like `a[b] -> c` for `a ->b -> c` I think)
+- [] Grouping: We lose the relation name I suppose
+
+### WebCola
+
+- [] Better Label Layout: https://medium.com/@adarshlilha/removing-label-overlapping-from-pretty-charts-8dd2e3581b71
+- [] I think WebCola struggles with groups that intersect but are not subgroups of one another

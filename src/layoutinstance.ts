@@ -141,12 +141,17 @@ export class LayoutInstance {
                 // Check if clusterSettings has a groupOn field
                 const groupOn = clusterSettings.groupOn || this.DEFAULT_GROUP_ON;
 
+
+
                 let {source, target} = this.getGroupSourceAndTarget(edge, groupOn);
-                if (groups[target]) {
-                    groups[target].push(source);
+
+                let groupName = target + ":" + relName;
+
+                if (groups[groupName]) {
+                    groups[groupName].push(source);
                 }
                 else {
-                    groups[target] = [source];
+                    groups[groupName] = [source];
                 }
 
                 // But also remove this edge from the graph.
@@ -159,6 +164,10 @@ export class LayoutInstance {
         Object.keys(groups).forEach((key) => {
             g.removeNode(key);
         });
+
+
+
+
 
         return groups;
     }

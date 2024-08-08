@@ -1,15 +1,15 @@
 {
   "fieldDirections": [
+  ],
+  "groupBy": [
     {
       "fieldName": "near",
-      "directions": ["below"]
+      "groupOn": "domain"
     },
     {
       "fieldName": "far",
-      "directions": ["above"]
+      "groupOn": "domain"
     }
-  ],
-  "groupBy": [
   ],
   "attributeFields": [
     {

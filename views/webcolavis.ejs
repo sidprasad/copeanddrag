@@ -23,7 +23,7 @@
         .link {
             stroke: darkslategrey;
             fill: none;
-            stroke-width: 2px;
+            stroke-width: 1px;
             stroke-opacity: 1;
             marker-end: url(#end-arrow);
         }
@@ -318,8 +318,8 @@
                         .attr("d", function (d) {
                             var route = cola.makeEdgeBetween(d.source.innerBounds, d.target.innerBounds, 5);
                             return lineFunction([route.sourceIntersection, route.arrowStart]);
-                        })
-                        .raise();    
+                        });
+                        //.raise();    
 
                 });
 

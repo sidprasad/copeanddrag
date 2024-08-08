@@ -1,0 +1,23 @@
+{
+    "fieldDirections": [
+      {
+        "fieldName": "leftP",
+        "directions": ["left"]
+      },
+      {
+        "fieldName": "rightP",
+        "directions": ["right"]
+      }
+    ],
+    "groupBy": [],
+    "attributeFields": [
+      {
+        "fieldName": "rFork"
+      },
+      {
+        "fieldName": "lFork"
+      }
+    ],
+    "hideDisconnected": false,
+    "hideDisconnectedBuiltIns": true
+  }
