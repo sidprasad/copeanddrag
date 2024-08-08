@@ -13,6 +13,7 @@ interface LayoutSpec {
     attributeFields : AttributeDefinition[];
     hideDisconnected? : boolean;
     hideDisconnectedBuiltIns? : boolean;
+    sigColors? : SigColor[];
 }
 
 interface DirectionalRelation {
@@ -28,6 +29,11 @@ interface ClusterRelation {
 
 interface AttributeDefinition {
     fieldName : string;
+}
+
+interface SigColor {
+    sigName : string;
+    color : string;
 }
 
 
@@ -47,7 +53,7 @@ export class LayoutInstance {
     readonly DEFAULT_GROUP_ON : string = "range";
     readonly ATTRIBUTE_KEY : string = "attributes";
 
-
+    private readonly _sigColors : Record<string, string> ;
 
     constructor(annotationSpec : string) {
         this._annotSpec = annotationSpec;
@@ -63,6 +69,15 @@ export class LayoutInstance {
                 attributeFields: []
             };
         }
+
+
+        this._sigColors = {};
+        if (this._layoutSpec.sigColors) {
+            this._layoutSpec.sigColors.forEach((sigColor) => {
+                this._sigColors[sigColor.sigName] = sigColor.color;
+            });
+        }
+
     }
 
     get hideDisconnected() : boolean {
@@ -300,7 +315,14 @@ export class LayoutInstance {
 
         // For each type, assign a unique, random color
         types.forEach((type) => {
-            colorsByType[type.id] = this.getRandomColor();
+
+            // If the type has a color specified, use that
+            if (this._sigColors[type.id]) {
+                colorsByType[type.id] = this._sigColors[type.id];
+            }
+            else {
+                colorsByType[type.id] = this.getRandomColor();
+            }
         });
 
 

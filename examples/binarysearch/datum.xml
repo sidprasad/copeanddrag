@@ -1,0 +1,89 @@
+<alloy builddate="Thursday, August 8th, 2024">
+<instance bitwidth="4" maxseq="-1" command="temporary-name_binarysearch_6" filename="/no-name.rkt" version="3.5"  >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="IntArray" ID="4" parentID="2">
+<atom label="IntArray0"/>
+</sig>
+
+<sig label="SearchState" ID="5" parentID="2">
+<atom label="SearchState0"/><atom label="SearchState1"/>
+</sig>
+
+<field label="elements" ID="6" parentID="4">
+<tuple><atom label="IntArray0"/><atom label="0"/><atom label="0"/></tuple>
+<tuple><atom label="IntArray0"/><atom label="1"/><atom label="0"/></tuple>
+<tuple><atom label="IntArray0"/><atom label="2"/><atom label="4"/></tuple>
+<types><type ID="4"/><type ID="1"/><type ID="1"/></types>
+
+</field>
+
+<field label="arr" ID="7" parentID="5">
+<tuple><atom label="SearchState0"/><atom label="IntArray0"/></tuple>
+<tuple><atom label="SearchState1"/><atom label="IntArray0"/></tuple>
+<types><type ID="5"/><type ID="4"/></types>
+
+</field>
+
+<field label="lastIndex" ID="8" parentID="4">
+<tuple><atom label="IntArray0"/><atom label="2"/></tuple>
+<types><type ID="4"/><type ID="1"/></types>
+
+</field>
+
+<field label="low" ID="9" parentID="5">
+<tuple><atom label="SearchState0"/><atom label="2"/></tuple>
+<tuple><atom label="SearchState1"/><atom label="0"/></tuple>
+<types><type ID="5"/><type ID="1"/></types>
+
+</field>
+
+<field label="target" ID="10" parentID="5">
+<tuple><atom label="SearchState0"/><atom label="4"/></tuple>
+<tuple><atom label="SearchState1"/><atom label="4"/></tuple>
+<types><type ID="5"/><type ID="1"/></types>
+
+</field>
+
+<field label="high" ID="11" parentID="5">
+<tuple><atom label="SearchState0"/><atom label="2"/></tuple>
+<tuple><atom label="SearchState1"/><atom label="2"/></tuple>
+<types><type ID="5"/><type ID="1"/></types>
+
+</field>
+
+<skolem label="$s2_some68402" ID="12">
+<tuple><atom label="SearchState0"/></tuple>
+<types><type ID="2"/></types>
+
+</skolem>
+
+<skolem label="$s1_some68401" ID="13">
+<tuple><atom label="SearchState1"/></tuple>
+<types><type ID="2"/></types>
+
+</skolem>
+
+<skolem label="$i_some68411" ID="14">
+<tuple><atom label="2"/></tuple>
+<types><type ID="2"/></types>
+
+</skolem>
+
+
+</instance>
+
+<source filename="/no-name.rkt" content="// Couldn't open source file (/no-name.rkt) (info: (2 . posix)). Is the file saved?"></source>
+<visualizer script="/*&#xA;  Script for Binary Search example&#xA;&#xA;  ASSUMES: all sigs as written in binarysearch.frg&#xA;*/&#xA;&#xA;////////////////////////////////////////////////////////////&#xA;&#xA;/** Helper to extract the atom from a singleton &#xA; *  Note: this does not convert to the atom's id(); may get wrapping [] */&#xA;function atomOf(expr, row, col) {&#xA;    if(!('empty' in expr) || !('tuples' in expr)) throw `atomOf: expected expression, got: ${expr}`&#xA;    if(expr.length &amp;lt; row-1) throw `atomOf: number of rows insufficient: ${expr}`&#xA;    if(!expr.empty()) {&#xA;      if(expr.tuples()[row] === undefined)&#xA;        throw `atomOf: got undefined for ${row}th tuple in ${expr.tuples()[row]}`&#xA;      if(expr.tuples()[row].atoms()[col] === undefined)&#xA;        throw `atomOf: got undefined for ${col}th column in ${row}th tuple of ${expr.tuples()[row]}`&#xA;      return expr.tuples()[row].atoms()[col]&#xA;    }&#xA;    return 'none'&#xA;}&#xA;/** Helper that returns a filter-function that filters for a specific set of atom IDs */&#xA;function atomIdIn(idArr) {&#xA;    return atomObj =&amp;gt; atomObj.id() in idArr&#xA;}&#xA;&#xA;////////////////////////////////////////////////////////////&#xA;&#xA;// Should only be one array&#xA;const arrays = IntArray.tuples().map(ltup =&amp;gt; atomOf(ltup, 0, 0))&#xA;const arrayElements = (arrays[0]).join(elements).tuples()&#xA;const states = SearchState.tuples().map(ltup =&amp;gt; atomOf(ltup, 0, 0))&#xA;const targetElement = atomOf(SearchState.join(target), 0, 0)&#xA;&#xA;const arrayGridConfig = {&#xA;    // Absolute location in parent (here, of the stage itself)&#xA;    grid_location: { x:10, y:150},&#xA;    // How large is each cell?&#xA;    cell_size: {x_size:80,y_size:50},&#xA;    // How many rows and columns?&#xA;    grid_dimensions: {&#xA;        // One row for each state&#xA;        y_size:states.length,&#xA;        // One column for every entry in the array (plus state label)&#xA;        x_size:arrayElements.length + 1}}&#xA;&#xA;const arrayGrid = new Grid(arrayGridConfig)&#xA;&#xA;// Populate a row in the table for each state&#xA;states.forEach((stateVal, stateIdx) =&amp;gt; {&#xA;    // Populate label&#xA;    arrayGrid.add({x: 0, y: stateIdx}, new TextBox({text: `${stateVal.id().replace('SearchState','S')}`}));&#xA;    // Identify low/high &#xA;    const lowAtom = atomOf(stateVal.join(low), 0, 0)&#xA;    const highAtom = atomOf(stateVal.join(high), 0, 0)&#xA;    // Populate array&#xA;    arrayElements.forEach((eVal, eIdx) =&amp;gt; {&#xA;        const indexAtom = atomOf(eVal, 0, 0)&#xA;        const valueAtom = atomOf(eVal, 0, 1)&#xA;        const labels = `${lowAtom.id() == indexAtom ? 'L' : ''}${highAtom.id() == indexAtom ? 'H' : ''}`&#xA;        arrayGrid.add({x: parseInt(indexAtom.id())+1, y: stateIdx}, &#xA;            new TextBox({text: `${valueAtom} ${labels}`, color: valueAtom.id() == targetElement.id() ? 'red' : 'black'}))&#xA;    })&#xA;})&#xA;&#xA;// Finally, render everything&#xA;const stage = new Stage() &#xA;stage.add(arrayGrid)&#xA;stage.render(svg)" /></alloy>
