@@ -1,5 +1,5 @@
-"<alloy builddate="Monday, July 29th, 2024">
-<instance bitwidth="4" maxseq="-1" command="temporary-name_source_1" filename="/no-name.rkt" version="3.5"  >
+<alloy builddate="Thursday, August 8th, 2024">
+<instance bitwidth="4" maxseq="-1" command="temporary-name_binarytree_1" filename="/no-name.rkt" version="3.5"  >
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>
@@ -19,15 +19,25 @@
 </sig>
 
 <field label="right" ID="5" parentID="4">
-<tuple><atom label="Node0"/><atom label="Node4"/></tuple>
-<tuple><atom label="Node1"/><atom label="Node3"/></tuple>
-<tuple><atom label="Node2"/><atom label="Node0"/></tuple>
+<tuple><atom label="Node1"/><atom label="Node0"/></tuple>
 <tuple><atom label="Node3"/><atom label="Node2"/></tuple>
 <types><type ID="4"/><type ID="4"/></types>
 
 </field>
 
-<field label="left" ID="6" parentID="4">
+<field label="value" ID="6" parentID="4">
+<tuple><atom label="Node0"/><atom label="5"/></tuple>
+<tuple><atom label="Node1"/><atom label="6"/></tuple>
+<tuple><atom label="Node2"/><atom label="0"/></tuple>
+<tuple><atom label="Node3"/><atom label="5"/></tuple>
+<tuple><atom label="Node4"/><atom label="7"/></tuple>
+<types><type ID="4"/><type ID="1"/></types>
+
+</field>
+
+<field label="left" ID="7" parentID="4">
+<tuple><atom label="Node2"/><atom label="Node4"/></tuple>
+<tuple><atom label="Node3"/><atom label="Node1"/></tuple>
 <types><type ID="4"/><type ID="4"/></types>
 
 </field>
@@ -36,4 +46,4 @@
 </instance>
 
 <source filename="/no-name.rkt" content="// Couldn't open source file (/no-name.rkt) (info: (2 . posix)). Is the file saved?"></source>
-</alloy>"
+</alloy>

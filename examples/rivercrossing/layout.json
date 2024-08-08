@@ -6,19 +6,22 @@
     },
     {
       "fieldName": "far",
-      "groupOn": ["above"]
+      "directions": ["above"]
     }
   ],
   "groupBy": [
-    {
-      "fieldName": "nextState",
-      "groupOn": "domain"
-    }
-
   ],
   "attributeFields": [
-
+    {
+      "fieldName": "eats"
+    },
+    {
+      "fieldName" : "firstState"
+    },
+    {
+      "fieldName": "nextState"
+    }
   ],
-  "hideDisconnected": true,
-  "hideDisconnectedBuiltIns": false
+  "hideDisconnected": false,
+  "hideDisconnectedBuiltIns": true
 }

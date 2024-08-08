@@ -1,16 +1,26 @@
 {
-    "fieldDirections": [ 
-
-      {
-        "fieldName": "left",
-        "directions": ["below", "left"]
-      },
-      {
-        "fieldName": "right",
-        "directions": ["below", "right"]
-      }
-
-
-    ],
-    "groupBy": [    ]
-  }
+  "fieldDirections": [
+    {
+      "fieldName": "left",
+      "directions": [
+        "below",
+        "left"
+      ]
+    },
+    {
+      "fieldName": "right",
+      "directions": [
+        "below",
+        "right"
+      ]
+    }
+  ],
+  "groupBy": [],
+  "attributeFields": [
+    {
+      "fieldName": "value"
+    }
+  ],
+  "hideDisconnected": false,
+  "hideDisconnectedBuiltIns": true
+}

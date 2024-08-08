@@ -116,7 +116,7 @@
                 var svg = d3.select("#svg");
                 var colaLayout = cola.d3adaptor(d3)
                     .convergenceThreshold(0.1) // TODO: What should we do here?
-                    .linkDistance(LINK_DISTANCE)
+                    //.linkDistance(LINK_DISTANCE)
                     .avoidOverlaps(true)
                     .size([width, height]);
 
@@ -137,6 +137,7 @@
                     .links(edges)
                     .constraints(constraints)
                     .groups(groups)
+                    .jaccardLinkLengths(LINK_DISTANCE, 0.5)
                     .flowLayout("y", LINK_DISTANCE);
 
 

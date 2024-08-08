@@ -119,4 +119,5 @@
 - [] Color Code nodes by type
 
 
-- [] Infer setcola constraints from file.
+- [] Infer setcola constraints from layout.
+- [] Better support for n-ary relations (by default, Sterling does something like `a[b] -> c` for `a ->b -> c` I think)

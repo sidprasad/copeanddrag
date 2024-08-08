@@ -4,7 +4,8 @@
 // Define the Binary Tree signature
 sig Node {
     left: lone Node,
-    right: lone Node
+    right: lone Node,
+    value : one Int
 }
 
 
