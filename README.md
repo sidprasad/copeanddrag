@@ -5,7 +5,7 @@
 3. Application should be available at `localhost:3000`. It expects an Alloy datum and visualization constraints (see the `/examples` folder)
 
 
-### What Do Visualization Constraints Look like
+###Layout Settings
 
 
 We currently support:
