@@ -315,7 +315,7 @@ export class LayoutInstance {
     }
 
 
-    private getRelationName(g : Graph, edge : Edge) : string {
+    public getRelationName(g : Graph, edge : Edge) : string {
         let relNameRaw = g.edge(edge.v, edge.w, edge.name);
         // If relNameRaw has `[`, ignore everything after it
         let relName = relNameRaw.split("[")[0];

@@ -54,11 +54,13 @@ export function graphToWebcola(graph: Graph, layoutInstance: LayoutInstance, all
     const edgeId = edge.name;
 
     // Get the Edge label
-    const relName = graph.edge(edge.v, edge.w, edgeId);
+    const edgeLabel = graph.edge(edge.v, edge.w, edgeId);
     const sourceNode = getNodeIndex(edge.v);
+
+    const relName = layoutInstance.getRelationName(graph, edge);//
     const targetNode = getNodeIndex(edge.w);
 
-    colaConstraints.push(heirarchyConstraint(sourceNode, targetNode, minSeparation));
+    //colaConstraints.push(heirarchyConstraint(sourceNode, targetNode, minSeparation));
 
     layoutInstance.getFieldLayout(relName).forEach((direction) => {
       if (direction === "left") {
@@ -80,7 +82,7 @@ export function graphToWebcola(graph: Graph, layoutInstance: LayoutInstance, all
       source: sourceNode,
       target: targetNode,
       id: edgeId,
-      relName: relName
+      relName: edgeLabel
     };
   });
 
