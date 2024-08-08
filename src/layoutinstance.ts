@@ -128,7 +128,8 @@ export class LayoutInstance {
         // Go through all edge labels in the graph
         graphEdges.forEach((edge) => {
             const edgeId = edge.name;
-            const relName = g.edge(edge.v, edge.w, edgeId);
+            const relName = this.getRelationName(g, edge);
+
 
             // clusterSettings is defined only if the field should be used to group atoms
             const clusterSettings = this.getClusterSettings(relName);
@@ -190,7 +191,7 @@ export class LayoutInstance {
 
         graphEdges.forEach((edge) => {
             const edgeId = edge.name;
-            const relName = g.edge(edge.v, edge.w, edgeId);
+            const relName = this.getRelationName(g, edge);
             const isAttributeRel = this.isAttributeField(relName);
             
             if (isAttributeRel) {
@@ -311,5 +312,13 @@ export class LayoutInstance {
             colorsByNode[node] = color;
         });
         return colorsByNode;
+    }
+
+
+    private getRelationName(g : Graph, edge : Edge) : string {
+        let relNameRaw = g.edge(edge.v, edge.w, edge.name);
+        // If relNameRaw has `[`, ignore everything after it
+        let relName = relNameRaw.split("[")[0];
+        return relName;
     }
 }

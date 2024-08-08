@@ -100,7 +100,13 @@ export function generateGraph(
         // TODO: This is tricky, what should we do here?
 
         if (source && target && edgeIds.has(edgeId)) {
-          let label: string = relation.name;
+
+          let betweenTuples = atoms.slice(1, -1).join(',');
+          let tupleSuffix = betweenTuples.length > 0 ? `[${betweenTuples}]` : '';
+
+          // Label needs to be the relation name and then all the tuple atoms that are not source or target
+          let label: string = relation.name + tupleSuffix;
+          
           let source_node_id = generateNodeId(getInstanceAtom(instance, source));
           let target_node_id = generateNodeId(getInstanceAtom(instance, target));
 
