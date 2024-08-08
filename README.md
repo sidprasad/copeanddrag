@@ -8,51 +8,60 @@
 ### What Do Visualization Constraints Look like
 
 
-We currently support :
-- 3 types of layout settings that act upon relations (also called fields)
-    - Directional Relationships (`fieldDirections`): These specify that a field must be laid out in a particular direction (any combination of "left", "right", "above", "below")
-
-    ```
-    {
-      "fieldName": "afield",
-      "directions": ["below", "left"]
-    }
-    ```
-
-  *Limitations*: Currently, we do not deal well with conflicting directions (say `["left", "right"]). The rendering engine may fail to settle on a layout here.
-
-  - Grouping by field (`groupBy`): These specify that the atoms related by a field should be grouped together. This can be configured for the grouping key to be the range (default) or domain of a relation. The node associated with the grouping key (and its related edges) are removed from the graph.
-
-  ```
- "groupBy": [
-    {
-      "fieldName" : "pos"
-      "groupOn" : "range"
-    },
-    {
-      "fieldName" : "bank"
-      "groupOn" : "domain"
-    }
- ]
-  ```
-
-  *Limitations* : WebCola layouts currently struggle to lay out groups that intersect but are not subsumed by one another. This is a webcola limitation that needs to be addressed, either by us or them.
+We currently support:
+3 types of layout settings that act upon relations (also called fields)
 
 
-  - Relation to attribute (`attributeFields`) : These replace graph edges representing a relation with attribute fields within the source node of the edge.
-   This is analagous to attributes in Sterling themes.
-  ```
-    "attributeFields": [
-          {
-            "fieldName": "rFork"
-          },
-          {
-            "fieldName": "lFork"
-          }
-        ]
-  ```
+### Directional Relationships (`fieldDirections`)
 
-- 2 very basic layout settings that act upon sigs (that is, atoms)
+These specify that a field must be laid out in a particular direction (any combination of "left", "right", "above", "below")
+
+```
+{
+  "fieldName": "afield",
+  "directions": ["below", "left"]
+}
+```
+
+*Limitations*: Currently, we do not deal well with conflicting directions (say `["left", "right"]). The rendering engine may fail to settle on a layout here.
+
+### Grouping by field (`groupBy`)
+
+These specify that the atoms related by a field should be grouped together. This can be configured for the grouping key to be the range (default) or domain of a relation. The node associated with the grouping key (and its related edges) are removed from the graph.
+
+```
+"groupBy": [
+  {
+    "fieldName" : "pos"
+    "groupOn" : "range"
+  },
+  {
+    "fieldName" : "bank"
+    "groupOn" : "domain"
+  }
+]
+```
+
+*Limitations* : WebCola layouts currently struggle to lay out groups that intersect but are not subsumed by one another. This is a webcola limitation that needs to be addressed, either by us or them.
+
+
+### Relation to attribute (`attributeFields`)
+
+These replace graph edges representing a relation with attribute fields within the source node of the edge. This is analagous to attributes in Sterling themes.
+```
+  "attributeFields": [
+        {
+          "fieldName": "rFork"
+        },
+        {
+          "fieldName": "lFork"
+        }
+      ]
+```
+
+
+-------------------
+We also support 2  basic layout settings that act upon sigs (that is, atoms)
 
   - `hideDisconnected`: If true, hide all atoms in the graph that are not referenced by a relation.
   = `hideDisconnectedBuiltIns`: If true, hide all atoms of built-in type (ex. `Int`) that are not referenced by a relation.
