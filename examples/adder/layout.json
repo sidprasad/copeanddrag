@@ -3,8 +3,7 @@
         {
             "fieldName": "nextAdder",
             "directions": [
-                "right",
-                "below"
+                "right"
             ]
         }
     ],
@@ -13,8 +12,23 @@
     ],
     "attributeFields": [
 
+        {
+            "fieldName" : "cin"
+        },
+        {
+            "fieldName" : "cout"
+        },
+        {
+            "fieldName": "b"
+        },
+        {
+            "fieldName": "a"
+        },
+        {
+            "fieldName": "s"
+        }
 
-    ],
+      ],
     "hideDisconnected": false,
     "hideDisconnectedBuiltIns": true,
     "sigColors" : [
@@ -28,5 +42,10 @@
             "color": "#f03c3c"
         }
 
+    ],
+    "projections" : [
+        {
+            "sigName": "RCA"
+        }
     ]
 }

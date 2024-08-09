@@ -7,6 +7,14 @@ import { isBuiltin } from './alloy-instance/src/type';
 
 
 
+interface fieldDefinition {
+    fieldName : string;
+}
+
+interface sigDefinition {
+    sigName : string;
+}
+
 interface LayoutSpec {
     fieldDirections : DirectionalRelation[];
     groupBy : ClusterRelation[];
@@ -14,42 +22,42 @@ interface LayoutSpec {
     hideDisconnected? : boolean;
     hideDisconnectedBuiltIns? : boolean;
     sigColors? : SigColor[];
+    projections? : ProjectionDefinition[];
 }
 
-interface DirectionalRelation {
-    fieldName : string;
+interface DirectionalRelation extends fieldDefinition {
     directions : string[];
 }
 
-interface ClusterRelation {
-    fieldName : string;
+interface ClusterRelation  extends fieldDefinition {
     groupOn? : string;
 }
 
+interface AttributeDefinition extends fieldDefinition {}
 
-interface AttributeDefinition {
-    fieldName : string;
-}
-
-interface SigColor {
-    sigName : string;
+interface SigColor extends sigDefinition {
     color : string;
 }
+
+interface ProjectionDefinition extends sigDefinition {}
+
+
+
+const DEFAULT_LAYOUT : LayoutSpec = {
+    fieldDirections: [],
+    groupBy: [],
+    attributeFields: [],
+    hideDisconnected: false,
+    hideDisconnectedBuiltIns: true,
+    sigColors: [],
+    projections: []
+};
 
 
 export class LayoutInstance {
 
     private readonly _annotSpec : string;
     private readonly _layoutSpec: LayoutSpec;
-
-
-    // Counter-intuitive, but this is how it should work.
-    readonly LEFT_CONSTRAINT : string = "_layoutRight";
-    readonly RIGHT_CONSTRAINT : string = "_layoutLeft";
-    readonly TOP_CONSTRAINT : string = "_layoutAbove";
-    readonly BOTTON_CONSTRAINT : string = "_layoutBelow";
-
-
     readonly DEFAULT_GROUP_ON : string = "range";
     readonly ATTRIBUTE_KEY : string = "attributes";
 
@@ -62,12 +70,8 @@ export class LayoutInstance {
             this._layoutSpec = JSON.parse(this._annotSpec) as LayoutSpec;
             // Now _layoutSpec is populated with the parsed data and can be used
         } catch (error) {
-            console.error("Failed to parse annotation spec. Defaulting to no layout.", error);
-            this._layoutSpec = {
-                fieldDirections: [],
-                groupBy: [],
-                attributeFields: []
-            };
+            console.error("Failed to parse annotation spec, falling back on default layout.", error);
+            this._layoutSpec = DEFAULT_LAYOUT;
         }
 
 
@@ -78,6 +82,14 @@ export class LayoutInstance {
             });
         }
 
+    }
+
+
+    get projectedSigs() : string[] {
+        if (!this._layoutSpec.projections) {
+            return [];
+        }
+        return this._layoutSpec.projections.map((projection) => projection.sigName);
     }
 
     get hideDisconnected() : boolean {

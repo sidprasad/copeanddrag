@@ -1,6 +1,6 @@
 // src/index.ts
 import * as http from 'http';
-import { AlloyDatum, AlloyInstance, parseAlloyXML } from './alloy-instance';
+import { AlloyAtom, AlloyDatum, AlloyInstance, AlloyType, parseAlloyXML } from './alloy-instance';
 import { generateGraph } from './alloy-graph';
 
 
@@ -9,6 +9,8 @@ import { LayoutInstance } from './layoutinstance';
 import multer from 'multer';
 import { graphToWebcola } from './webcola-gen/graphtowebcola';
 import { PenroseInstance } from './penrose-gen/graphtopenrose';
+
+import { applyProjections } from './alloy-instance/src/projection';
 
 
 const express = require('express');
@@ -39,9 +41,23 @@ function getFormContents(req: any) {
 }
 
 
+function applyLayoutProjections(ai : AlloyInstance, li : LayoutInstance) : AlloyInstance {
+
+    let projectedSigs : string[] = li.projectedSigs;
+    let projectedTypes : AlloyType[] = projectedSigs.map((sig) => ai.types[sig]);
+    // Then get the the atoms of the projected types
+    let projectedAtoms : AlloyAtom[] = projectedTypes.flatMap((type) => type.atoms);
+    let projectedAtomIds : string[] = projectedAtoms.map((atom) => atom.id);
+
+    // Get new instance, calling applyProjectioons
+    let projectedInstance = applyProjections(ai, projectedAtomIds);
+    return projectedInstance;
+}
+
+
 app.post('/penrosefiles', (req, res) => {    
     let {instances, li, instanceNumber} = getFormContents(req);
-    let instance = instances[instanceNumber];
+    let instance = applyLayoutProjections(instances[instanceNumber], li);
 
     let g = generateGraph(instance, li);
 
@@ -58,7 +74,9 @@ app.post('/penrosefiles', (req, res) => {
 
 app.post('/webcolafiles', (req, res) => {    
     let {instances, li, instanceNumber} = getFormContents(req);
-    let instance = instances[instanceNumber];
+    let instance = applyLayoutProjections(instances[instanceNumber], li);
+
+
     let g = generateGraph(instance, li);
     let colaDefinitions = graphToWebcola(g, li, instance);
 
