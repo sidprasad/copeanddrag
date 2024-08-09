@@ -1,0 +1,32 @@
+{
+    "fieldDirections": [
+        {
+            "fieldName": "nextAdder",
+            "directions": [
+                "right",
+                "below"
+            ]
+        }
+    ],
+    "groupBy": [
+
+    ],
+    "attributeFields": [
+
+
+    ],
+    "hideDisconnected": false,
+    "hideDisconnectedBuiltIns": true,
+    "sigColors" : [
+
+        {
+            "sigName": "True",
+            "color": "#3cf06a"
+        },
+        {
+            "sigName": "False",
+            "color": "#f03c3c"
+        }
+
+    ]
+}

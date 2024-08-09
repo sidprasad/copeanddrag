@@ -3,7 +3,8 @@
         {
             "fieldName": "elements",
             "directions": [
-                "right"
+                "right",
+                "below"
             ]
         }
     ],
@@ -23,9 +24,21 @@
     ],
     "attributeFields": [
         {
-            "filedName": "lastIndex"
+            "fieldName": "lastIndex"
+        },
+        {
+            "fieldName": "arr"
         }
+
     ],
     "hideDisconnected": false,
-    "hideDisconnectedBuiltIns": true
+    "hideDisconnectedBuiltIns": true,
+    "sigColors" : [
+
+        {
+            "sigName": "IntArray",
+            "color": "#3cf06a"
+        }
+
+    ]
 }
