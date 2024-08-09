@@ -29,16 +29,12 @@
         {
             "fieldName": "arr"
         }
-
     ],
     "hideDisconnected": false,
     "hideDisconnectedBuiltIns": true,
-    "sigColors" : [
-
+    "projections" : [
         {
-            "sigName": "IntArray",
-            "color": "#3cf06a"
+            "sigName": "IntArray"
         }
-
     ]
 }
