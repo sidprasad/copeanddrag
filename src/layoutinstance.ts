@@ -7,47 +7,61 @@ import { isBuiltin } from './alloy-instance/src/type';
 
 
 
+interface fieldDefinition {
+    fieldName : string;
+}
+
+interface sigDefinition {
+    sigName : string;
+}
+
 interface LayoutSpec {
     fieldDirections : DirectionalRelation[];
     groupBy : ClusterRelation[];
     attributeFields : AttributeDefinition[];
     hideDisconnected? : boolean;
     hideDisconnectedBuiltIns? : boolean;
+    sigColors? : SigColor[];
+    projections? : ProjectionDefinition[];
 }
 
-interface DirectionalRelation {
-    fieldName : string;
+interface DirectionalRelation extends fieldDefinition {
     directions : string[];
 }
 
-interface ClusterRelation {
-    fieldName : string;
+interface ClusterRelation  extends fieldDefinition {
     groupOn? : string;
 }
 
+interface AttributeDefinition extends fieldDefinition {}
 
-interface AttributeDefinition {
-    fieldName : string;
+interface SigColor extends sigDefinition {
+    color : string;
 }
+
+interface ProjectionDefinition extends sigDefinition {}
+
+
+
+const DEFAULT_LAYOUT : LayoutSpec = {
+    fieldDirections: [],
+    groupBy: [],
+    attributeFields: [],
+    hideDisconnected: false,
+    hideDisconnectedBuiltIns: true,
+    sigColors: [],
+    projections: []
+};
 
 
 export class LayoutInstance {
 
     private readonly _annotSpec : string;
     private readonly _layoutSpec: LayoutSpec;
-
-
-    // Counter-intuitive, but this is how it should work.
-    readonly LEFT_CONSTRAINT : string = "_layoutRight";
-    readonly RIGHT_CONSTRAINT : string = "_layoutLeft";
-    readonly TOP_CONSTRAINT : string = "_layoutAbove";
-    readonly BOTTON_CONSTRAINT : string = "_layoutBelow";
-
-
     readonly DEFAULT_GROUP_ON : string = "range";
     readonly ATTRIBUTE_KEY : string = "attributes";
 
-
+    private readonly _sigColors : Record<string, string> ;
 
     constructor(annotationSpec : string) {
         this._annotSpec = annotationSpec;
@@ -56,13 +70,26 @@ export class LayoutInstance {
             this._layoutSpec = JSON.parse(this._annotSpec) as LayoutSpec;
             // Now _layoutSpec is populated with the parsed data and can be used
         } catch (error) {
-            console.error("Failed to parse annotation spec. Defaulting to no layout.", error);
-            this._layoutSpec = {
-                fieldDirections: [],
-                groupBy: [],
-                attributeFields: []
-            };
+            console.error("Failed to parse annotation spec, falling back on default layout.", error);
+            this._layoutSpec = DEFAULT_LAYOUT;
         }
+
+
+        this._sigColors = {};
+        if (this._layoutSpec.sigColors) {
+            this._layoutSpec.sigColors.forEach((sigColor) => {
+                this._sigColors[sigColor.sigName] = sigColor.color;
+            });
+        }
+
+    }
+
+
+    get projectedSigs() : string[] {
+        if (!this._layoutSpec.projections) {
+            return [];
+        }
+        return this._layoutSpec.projections.map((projection) => projection.sigName);
     }
 
     get hideDisconnected() : boolean {
@@ -300,7 +327,14 @@ export class LayoutInstance {
 
         // For each type, assign a unique, random color
         types.forEach((type) => {
-            colorsByType[type.id] = this.getRandomColor();
+
+            // If the type has a color specified, use that
+            if (this._sigColors[type.id]) {
+                colorsByType[type.id] = this._sigColors[type.id];
+            }
+            else {
+                colorsByType[type.id] = this.getRandomColor();
+            }
         });
 
 
@@ -315,7 +349,7 @@ export class LayoutInstance {
     }
 
 
-    private getRelationName(g : Graph, edge : Edge) : string {
+    public getRelationName(g : Graph, edge : Edge) : string {
         let relNameRaw = g.edge(edge.v, edge.w, edge.name);
         // If relNameRaw has `[`, ignore everything after it
         let relName = relNameRaw.split("[")[0];

@@ -1,0 +1,112 @@
+<alloy builddate="Friday, August 9th, 2024">
+<instance bitwidth="4" maxseq="-1" command="temporary-name_ripple_carry_adder_2" filename="/no-name.rkt" version="3.5"  >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Bool" ID="4" parentID="2">
+
+</sig>
+
+<sig label="False" ID="5" parentID="4">
+<atom label="False0"/>
+</sig>
+
+<sig label="True" ID="6" parentID="4">
+<atom label="True0"/>
+</sig>
+
+<sig label="FA" ID="7" parentID="2">
+<atom label="FA0"/><atom label="FA1"/><atom label="FA2"/><atom label="FA3"/><atom label="FA4"/><atom label="FA5"/>
+</sig>
+
+<sig label="RCA" ID="8" parentID="2">
+<atom label="RCA0"/>
+</sig>
+
+<field label="nextAdder" ID="9" parentID="8">
+<tuple><atom label="RCA0"/><atom label="FA0"/><atom label="FA2"/></tuple>
+<tuple><atom label="RCA0"/><atom label="FA1"/><atom label="FA0"/></tuple>
+<tuple><atom label="RCA0"/><atom label="FA3"/><atom label="FA4"/></tuple>
+<tuple><atom label="RCA0"/><atom label="FA4"/><atom label="FA5"/></tuple>
+<tuple><atom label="RCA0"/><atom label="FA5"/><atom label="FA1"/></tuple>
+<types><type ID="8"/><type ID="7"/><type ID="7"/></types>
+
+</field>
+
+<field label="cout" ID="10" parentID="7">
+<tuple><atom label="FA0"/><atom label="False0"/></tuple>
+<tuple><atom label="FA1"/><atom label="False0"/></tuple>
+<tuple><atom label="FA2"/><atom label="True0"/></tuple>
+<tuple><atom label="FA3"/><atom label="True0"/></tuple>
+<tuple><atom label="FA4"/><atom label="True0"/></tuple>
+<tuple><atom label="FA5"/><atom label="True0"/></tuple>
+<types><type ID="7"/><type ID="4"/></types>
+
+</field>
+
+<field label="firstAdder" ID="11" parentID="8">
+<tuple><atom label="RCA0"/><atom label="FA3"/></tuple>
+<types><type ID="8"/><type ID="7"/></types>
+
+</field>
+
+<field label="cin" ID="12" parentID="7">
+<tuple><atom label="FA0"/><atom label="False0"/></tuple>
+<tuple><atom label="FA1"/><atom label="True0"/></tuple>
+<tuple><atom label="FA2"/><atom label="False0"/></tuple>
+<tuple><atom label="FA3"/><atom label="False0"/></tuple>
+<tuple><atom label="FA4"/><atom label="True0"/></tuple>
+<tuple><atom label="FA5"/><atom label="True0"/></tuple>
+<types><type ID="7"/><type ID="4"/></types>
+
+</field>
+
+<field label="s" ID="13" parentID="7">
+<tuple><atom label="FA0"/><atom label="False0"/></tuple>
+<tuple><atom label="FA1"/><atom label="True0"/></tuple>
+<tuple><atom label="FA2"/><atom label="False0"/></tuple>
+<tuple><atom label="FA3"/><atom label="False0"/></tuple>
+<tuple><atom label="FA4"/><atom label="True0"/></tuple>
+<tuple><atom label="FA5"/><atom label="True0"/></tuple>
+<types><type ID="7"/><type ID="4"/></types>
+
+</field>
+
+<field label="a" ID="14" parentID="7">
+<tuple><atom label="FA0"/><atom label="False0"/></tuple>
+<tuple><atom label="FA1"/><atom label="False0"/></tuple>
+<tuple><atom label="FA2"/><atom label="True0"/></tuple>
+<tuple><atom label="FA3"/><atom label="True0"/></tuple>
+<tuple><atom label="FA4"/><atom label="True0"/></tuple>
+<tuple><atom label="FA5"/><atom label="True0"/></tuple>
+<types><type ID="7"/><type ID="4"/></types>
+
+</field>
+
+<field label="b" ID="15" parentID="7">
+<tuple><atom label="FA0"/><atom label="False0"/></tuple>
+<tuple><atom label="FA1"/><atom label="False0"/></tuple>
+<tuple><atom label="FA2"/><atom label="True0"/></tuple>
+<tuple><atom label="FA3"/><atom label="True0"/></tuple>
+<tuple><atom label="FA4"/><atom label="True0"/></tuple>
+<tuple><atom label="FA5"/><atom label="True0"/></tuple>
+<types><type ID="7"/><type ID="4"/></types>
+
+</field>
+
+
+</instance>
+
+<source filename="/no-name.rkt" content="// Couldn't open source file (/no-name.rkt) (info: (2 . posix)). Is the file saved?"></source>
+</alloy>

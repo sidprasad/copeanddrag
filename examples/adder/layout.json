@@ -1,0 +1,51 @@
+{
+    "fieldDirections": [
+        {
+            "fieldName": "nextAdder",
+            "directions": [
+                "right"
+            ]
+        }
+    ],
+    "groupBy": [
+
+    ],
+    "attributeFields": [
+
+        {
+            "fieldName" : "cin"
+        },
+        {
+            "fieldName" : "cout"
+        },
+        {
+            "fieldName": "b"
+        },
+        {
+            "fieldName": "a"
+        },
+        {
+            "fieldName": "s"
+        }
+
+      ],
+    "hideDisconnected": false,
+    "hideDisconnectedBuiltIns": true,
+    "sigColors" : [
+
+        {
+            "sigName": "True",
+            "color": "#3cf06a"
+        },
+        {
+            "sigName": "False",
+            "color": "#f03c3c"
+        }
+
+    ],
+    "projections" : [
+        {
+            "sigName": "RCA"
+        }
+    ]
+}
