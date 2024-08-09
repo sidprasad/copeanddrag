@@ -1,0 +1,44 @@
+{
+    "fieldDirections": [
+        {
+            "fieldName": "elements",
+            "directions": [
+                "right",
+                "below"
+            ]
+        }
+    ],
+    "groupBy": [
+        {
+            "fieldName": "target",
+            "groupOn": "domain"
+        },
+        {
+            "fieldName": "low",
+            "groupOn": "domain"
+        },
+        {
+            "fieldName": "high",
+            "groupOn": "domain"
+        }
+    ],
+    "attributeFields": [
+        {
+            "fieldName": "lastIndex"
+        },
+        {
+            "fieldName": "arr"
+        }
+
+    ],
+    "hideDisconnected": false,
+    "hideDisconnectedBuiltIns": true,
+    "sigColors" : [
+
+        {
+            "sigName": "IntArray",
+            "color": "#3cf06a"
+        }
+
+    ]
+}
