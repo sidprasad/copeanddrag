@@ -5,22 +5,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <title>Alloy2Penrose</title>
+    <title>Alloy Data Viz</title>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script>
     $(document).ready(function() {
         // Prevent the default form submission
-        $("#penrose, #cola").click(function(event) {
+        $("#penrose, #cola, #cassowary").click(function(event) {
             event.preventDefault(); // Prevent default form submission
 
             var form = $(this).closest("form"); // Find the form closest to the clicked button
             var actionEndpoint = "";
+
+            console.log(this.id);
 
             // Determine which button was clicked and set the appropriate action endpoint
             if (this.id === 'penrose') {
                 actionEndpoint = "/penrosefiles"; // Endpoint for Penrose
             } else if (this.id === 'cola') {
                 actionEndpoint = "/webcolafiles"; // Endpoint for Webcola
+            }
+            else if (this.id === 'cassowary') {
+                console.log("cassowary");
+                actionEndpoint = "/cassowaryfiles"; // Endpoint for cassowary
             }
 
             // Change the form's action and submit the form programmatically
@@ -47,8 +53,10 @@
                 <label for="instancenumber">Instance Number To Render (Default to 0)</label>
                 <input type="number" class="form-control" id="instancenumber" name="instancenumber" value="0">
             </div>
+
             <button type="submit" id='penrose' class="btn btn-primary">Gen Penrose</button>
             <button type="submit" id='cola' class="btn btn-primary">Gen Webcola</button>
+            <button type="submit" id='cassowary' class="btn btn-primary">Gen cassowary Version</button>
         </form>
     </div>
 

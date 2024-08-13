@@ -103,27 +103,22 @@
             window.addEventListener('load', function () {
 
 
-
-
-                const LINK_DISTANCE = 120;
                 const dy_for_linespacing = 5; // Adjust for spacing between lines
 
-                var color = d3.scaleOrdinal(d3.schemeCategory20);
-
-                
+                var color = d3.scaleOrdinal(d3.schemeCategory20);               
                 var width = <%- width %>, height = <%- height %>;
 
                 var svg = d3.select("#svg");
                 var colaLayout = cola.d3adaptor(d3)
                     .convergenceThreshold(0.1) // TODO: What should we do here?
-                    //.linkDistance(LINK_DISTANCE)
                     .avoidOverlaps(true)
                     .size([width, height]);
 
                 var nodes = <%- JSON.stringify(colaNodes) %>;
                 var edges = <%- JSON.stringify(colaEdges) %>;
 
-
+                const LINK_DISTANCE = Math.min(width, height) / Math.sqrt(nodes.length);
+                console.log("Link distance: ", LINK_DISTANCE);
 
                 nodes.forEach(function (node) {
                     node.name = node.id;
@@ -137,8 +132,7 @@
                     .links(edges)
                     .constraints(constraints)
                     .groups(groups)
-                    .jaccardLinkLengths(LINK_DISTANCE, 0.5)
-                    .flowLayout("y", LINK_DISTANCE);
+                    .jaccardLinkLengths(LINK_DISTANCE, 3);
 
 
                 const margin = 10;
@@ -150,10 +144,7 @@
 
                 var routeEdges = function () {
                     colaLayout.prepareEdgeRouting(margin / 3);
-
-                    // Need a call to d3adaptor route edge
                     link.attr("d", function (d) { return lineFunction(colaLayout.routeEdge(d)); });
-                    //if (isIE()) link.each(function (d) { this.parentNode.insertBefore(this, this) });
                 }
 
 
@@ -183,6 +174,12 @@
                                 .enter().append("text")
                                 .attr("class", "label")
                                 .each(function(d) {
+
+
+                                    if (d.name.startsWith("_")) {
+                                        return;
+                                    }
+
                                     // Append tspan for d.name
                                     d3.select(this).append("tspan")
                                         .attr("x", 0) // Align with the parent text element
@@ -263,19 +260,19 @@
                         .attr("width", function (d) { return d.bounds.width(); })
                         .attr("height", function (d) { return d.bounds.height(); });
 
-                        label
-        .attr("x", d => d.x)
-        .attr("y", d => d.y)
-        .each(function(d) {
-            var y = 0; // Initialize y offset for tspans
-            d3.select(this).selectAll("tspan")
-                .attr("x", d.x) // Align tspans with the node's x position
-                .attr("dy", function() {
-                    y += 1; // Increment y for each tspan to create line spacing
-                    return y === 1 ? "0em" : "1em"; // Keep the first tspan in place, move others down
-                });
-        })
-        .raise();
+                    label
+                    .attr("x", d => d.x)
+                    .attr("y", d => d.y)
+                    .each(function(d) {
+                        var y = 0; // Initialize y offset for tspans
+                        d3.select(this).selectAll("tspan")
+                            .attr("x", d.x) // Align tspans with the node's x position
+                            .attr("dy", function() {
+                                y += 1; // Increment y for each tspan to create line spacing
+                                return y === 1 ? "0em" : "1em"; // Keep the first tspan in place, move others down
+                            });
+                    })
+                    .raise();
 
     // Function to generate a random offset along the path
     function getRandomOffsetAlongPath() {

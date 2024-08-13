@@ -1,15 +1,11 @@
 {
-    "fieldDirections": [
-      {
-        "fieldName": "leftP",
-        "directions": ["left"]
-      },
-      {
-        "fieldName": "rightP",
-        "directions": ["right"]
-      }
-    ],
+    "fieldDirections": [ ],
     "groupBy": [],
+    "closures" : [
+        {
+            "fieldName": "leftP"
+        }
+    ],
     "attributeFields": [
       {
         "fieldName": "rFork"

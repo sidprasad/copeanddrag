@@ -23,6 +23,7 @@ interface LayoutSpec {
     hideDisconnectedBuiltIns? : boolean;
     sigColors? : SigColor[];
     projections? : ProjectionDefinition[];
+    closures? : ClosureDefinition[];
 }
 
 interface DirectionalRelation extends fieldDefinition {
@@ -41,7 +42,8 @@ interface SigColor extends sigDefinition {
 
 interface ProjectionDefinition extends sigDefinition {}
 
-
+interface ClosureDefinition extends fieldDefinition {
+}
 
 const DEFAULT_LAYOUT : LayoutSpec = {
     fieldDirections: [],
@@ -62,6 +64,8 @@ export class LayoutInstance {
     readonly ATTRIBUTE_KEY : string = "attributes";
 
     private readonly _sigColors : Record<string, string> ;
+
+
 
     constructor(annotationSpec : string) {
         this._annotSpec = annotationSpec;
@@ -354,5 +358,13 @@ export class LayoutInstance {
         // If relNameRaw has `[`, ignore everything after it
         let relName = relNameRaw.split("[")[0];
         return relName;
+    }
+
+
+    public getClosures() : string[] {
+        if (!this._layoutSpec.closures) {
+            return [];
+        }
+        return this._layoutSpec.closures.map((closure) => closure.fieldName);
     }
 }

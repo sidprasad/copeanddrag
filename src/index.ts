@@ -3,15 +3,14 @@ import * as http from 'http';
 import { AlloyAtom, AlloyDatum, AlloyInstance, AlloyType, parseAlloyXML } from './alloy-instance';
 import { generateGraph } from './alloy-graph';
 
-
-//import { PenroseInstance } from './penroseinstance';
 import { LayoutInstance } from './layoutinstance';
-import multer from 'multer';
-import { graphToWebcola } from './webcola-gen/graphtowebcola';
+
+import { WebColaLayout } from './webcola-gen/graphtowebcola';
 import { PenroseInstance } from './penrose-gen/graphtopenrose';
 
 import { applyProjections } from './alloy-instance/src/projection';
 
+import { CassowaryLayout } from './cassowary-layout/cassowary-layout';
 
 const express = require('express');
 const path = require('path');
@@ -78,7 +77,10 @@ app.post('/webcolafiles', (req, res) => {
 
 
     let g = generateGraph(instance, li);
-    let colaDefinitions = graphToWebcola(g, li, instance);
+    
+    let cl = new WebColaLayout(g, li, instance);
+    let colaDefinitions = cl.layout();
+    //let colaDefinitions = graphToWebcola(g, li, instance);
 
     try {
         // Serialize and then parse to strip non-serializable parts
@@ -96,6 +98,47 @@ app.post('/webcolafiles', (req, res) => {
 
 });
 
+
+app.post('/cassowaryfiles', (req, res) => {
+    try {
+        let { instances, li, instanceNumber } = getFormContents(req);
+        let instance = applyLayoutProjections(instances[instanceNumber], li);
+
+        let g = generateGraph(instance, li);
+
+        let kl = new CassowaryLayout(g, li, instance);
+
+        let layout = kl.layout();
+        let nodes = layout.nodes;
+        let edges = layout.edges;
+        let groupBoundingBoxes = layout.groupBoundingBoxes;
+
+        res.render('cassowaryvis', { 'height': 800, 'width': 1000, 'nodes': nodes, 'edges': edges});
+    } catch (error) {
+        console.log(error);
+        res.status(500).send(error);
+    }
+});
+
+// app.post('/z3files', async (req, res) => {
+//     try {
+//         let { instances, li, instanceNumber } = getFormContents(req);
+//         let instance = applyLayoutProjections(instances[instanceNumber], li);
+
+//         let g = generateGraph(instance, li);
+
+//         let zl = new Z3Layout(g, li, instance);
+
+//         let layout = await zl.layout();
+//         let nodes = layout.nodes;
+//         let edges = layout.edges;
+
+//         res.render('cassowaryvis', { 'height': 800, 'width': 1000, 'nodes': nodes, 'edges': edges});
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).send(error);
+//     }
+// }
 
 
 const server = http.createServer(app);

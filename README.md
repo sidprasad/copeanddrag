@@ -103,3 +103,9 @@ By default, we assign every `sig` a random color, that is respected by all atoms
 
 - [] Better Label Layout: https://medium.com/@adarshlilha/removing-label-overlapping-from-pretty-charts-8dd2e3581b71
 - [] I think WebCola struggles with groups that intersect but are not subgroups of one another
+- [] WebCola struggles with variable link length. 
+    - Minimum link length does not always serve us, since it really tries to enforce that min length.
+    - Perhaps we need to force super large links and also force all nodes within the frame?
+
+- [] Need the notion of a `closure` for things like dining Philosophers. An idea -- closure could add nodes evenly across a circle. This would be complicated, since we would have to 
+really invent our own constraints here, that may be complicated!
