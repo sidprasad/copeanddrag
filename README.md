@@ -9,7 +9,7 @@
 
 
 We currently support:
-3 types of layout settings that act upon relations (also called fields)
+4 types of layout settings that act upon relations (also called fields)
 
 
 ### Directional Relationships (`fieldDirections`)
@@ -57,6 +57,23 @@ These replace graph edges representing a relation with attribute fields within t
           "fieldName": "lFork"
         }
       ]
+```
+
+
+### Relation Defining a Closure (`closures`)
+
+This aligns elements along a relation uniformly around the perimiter of a notional circle, suggesting that they form a shape.
+Atoms in the relation can be laid out either `clockwise` (default) or `counterclockwise`. If a relation is not cyclic, it orders nodes based on a depth-first-search of the relation.
+
+
+```
+ "closures" : [
+        {
+            "fieldName": "leftP",
+            "direction" : "counterclockwise"
+        }
+    ]
+
 ```
 
 

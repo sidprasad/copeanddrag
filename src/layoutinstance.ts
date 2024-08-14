@@ -43,6 +43,7 @@ interface SigColor extends sigDefinition {
 interface ProjectionDefinition extends sigDefinition {}
 
 interface ClosureDefinition extends fieldDefinition {
+    direction? : string;
 }
 
 const DEFAULT_LAYOUT : LayoutSpec = {
@@ -86,6 +87,14 @@ export class LayoutInstance {
             });
         }
 
+
+        if(this._layoutSpec.closures) {
+            this._layoutSpec.closures.forEach((closure) => {
+                if (!closure.direction) {
+                    closure.direction = "clockwise";
+                }
+            });
+        }
     }
 
 
@@ -361,10 +370,10 @@ export class LayoutInstance {
     }
 
 
-    public getClosures() : string[] {
+    public getClosures() : ClosureDefinition[] {
         if (!this._layoutSpec.closures) {
             return [];
         }
-        return this._layoutSpec.closures.map((closure) => closure.fieldName);
+        return this._layoutSpec.closures;
     }
 }

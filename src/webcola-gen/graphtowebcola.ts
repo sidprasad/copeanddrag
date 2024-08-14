@@ -144,6 +144,48 @@ export class WebColaLayout {
     });
   }
 
+
+  private orderNodesByEdges(edges): number[] {
+    let edgesIndices = edges.map(edge => {
+        return { 
+          v : this.getNodeIndex(edge.v),
+          w : this.getNodeIndex(edge.w)
+        };
+    });
+
+    let inNodes = edgesIndices.map(edge => edge.v);
+    let outNodes = edgesIndices.map(edge => edge.w);
+
+    // Root nodes have no incoming edges
+    let rootNodes = outNodes.filter(node => !inNodes.includes(node));
+
+    if (rootNodes.length === 0) {
+      // If there are no root nodes, just pick any node
+      rootNodes = [outNodes[0]];
+    }
+
+
+    let visited = new Set<number>();
+    let traversalOrder = [];
+    let queue : number[] = rootNodes;
+
+    while (queue.length > 0) {
+      let node = queue.pop();
+      if (!visited.has(node)) {
+        visited.add(node);
+        traversalOrder.push(node);
+
+        // Get all the outgoing edges from this node
+        let outgoingEdges = edgesIndices.filter(edge => edge.v === node);
+        let outgoingNodes = outgoingEdges.map(edge => edge.w);
+
+        // Add the outgoing nodes to the queue
+        queue = queue.concat(outgoingNodes);
+      }
+    }  
+    return traversalOrder;
+  }
+
   private determineGroupsAndSubgroups() {
     let subgroups: Record<string, string[]> = {};
 
@@ -254,16 +296,26 @@ export class WebColaLayout {
 
   applyClosureConstraints() {
 
-    const closures : string[] = this.layoutInstance.getClosures();
+    const closures = this.layoutInstance.getClosures();
     closures.forEach((closure) => {
-      this.applyClosureConstraint(closure);
+      this.applyClosureConstraint(closure.fieldName, closure.direction);
     });
 
   }
 
 
 
-  applyClosureConstraint(relName: string) {
+  applyClosureConstraint(relName: string, direction: string) {
+
+
+    let direction_mult : number = 0;
+    
+    if (direction === "clockwise") {
+      direction_mult = 1;
+    }
+    else if (direction === "counterclockwise") {
+      direction_mult = -1;
+    }
 
     const c: NodeWithMetadata = {
       id: `_${relName}`,
@@ -276,83 +328,48 @@ export class WebColaLayout {
     };
 
     this.colaNodes.push(c);
-
-
     let c_index = this.getNodeIndex(c.id);
 
 
     // Now get all nodes that have the relation relName
 
-    let relatedNodes = new Set<number>();
-
-    this.graph.edges().forEach(edge => {
-      const edgeId = edge.name;
-
-      // Get the Edge label
-      const sourceNode = this.getNodeIndex(edge.v);
-
-      const relationName = this.layoutInstance.getRelationName(this.graph, edge);
-      const targetNode = this.getNodeIndex(edge.w);
-
-      if (relationName === relName) {
-        relatedNodes.add(sourceNode);
-        relatedNodes.add(targetNode);
-      }
+    let relationEdges = this.graph.edges().filter(edge => {
+      return this.layoutInstance.getRelationName(this.graph, edge) === relName;
     });
+
+    if (relationEdges.length === 0) {
+      return;
+    }
+
+    let relatedNodes = this.orderNodesByEdges(relationEdges);
 
     // Now keep the related nodes a fixed distance from c
     const fixedDistance = 30; // Example fixed distance
-    const numNodes = relatedNodes.size;
-    const angleStep = (2 * Math.PI) / numNodes;
-    let index = 0;
+    const angleStep = (direction_mult * 2 * Math.PI) / relatedNodes.length;
 
+
+    let index = 0;
     relatedNodes.forEach(nodeIndex => {
 
       const angle = index * angleStep;
 
-
-
-      // // Calculate the new position
-      // node.x = c.x + fixedDistance * Math.cos(angle);
-      // node.y = c.y + fixedDistance * Math.sin(angle);
-
       const x_gap = fixedDistance * Math.cos(angle);
       const y_gap = fixedDistance * Math.sin(angle);
+
 
       if (x_gap > 0) {
         this.colaConstraints.push(this.leftConstraint(c_index, nodeIndex, x_gap));
       }
       else {
-        this.colaConstraints.push(this.leftConstraint(nodeIndex, c_index, x_gap));
+        this.colaConstraints.push(this.leftConstraint(nodeIndex, c_index, -x_gap));
       }
 
       if (y_gap > 0) {
         this.colaConstraints.push(this.topConstraint(c_index, nodeIndex, y_gap));
       }
       else {
-        this.colaConstraints.push(this.topConstraint(nodeIndex, c_index, y_gap));
+        this.colaConstraints.push(this.topConstraint(nodeIndex, c_index, -y_gap));
       }
-
-
-      // let x_constraint = {
-      //   axis: 'x',
-      //   left: c_index,
-      //   right: nodeIndex,
-      //   type: 'separation',
-      //   gap: fixedDistance * Math.cos(angle),
-      // };
-
-      // let y_constraint = {
-      //   axis: 'y',
-      //   type: 'separation',
-      //   left: c_index,
-      //   right: nodeIndex,
-      //   gap: fixedDistance * Math.sin(angle),
-      // };
-
-      // this.colaConstraints.push(x_constraint);
-      // this.colaConstraints.push(y_constraint);
-
       index++;
     });
   }

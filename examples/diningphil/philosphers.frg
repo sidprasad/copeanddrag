@@ -1,23 +1,23 @@
 #lang forge/temporal
 
 sig P {
-   var lFork : lone Fork,
-   var rFork : lone Fork,
-    rightP : one P,
+    var lFork : lone Fork,
+    var rFork : lone Fork,
     leftP : one P
 }
+
+
+one sig Hypatia extends P {}
+one sig Nagarjuna extends P {}
+one sig Arendt extends P {}
+one sig Zhuangzi extends P {}
+one sig IbnSina extends P {}
 
 sig Fork {}
 
 pred wellformed {
-    // There are as many forks as philosphers
-    //#P = #Fork
-
     // Seated in a circle
-    leftP = ~rightP
-
     all p : P | {
-        P in p.^rightP
         P in p.^leftP
     }
 
@@ -25,16 +25,9 @@ pred wellformed {
     no P.lFork & P.rFork
     Fork in (P.lFork + P.rFork)
     all f : Fork | one p : P | f in p.lFork or f in p.rFork
-
-    // Now this is the hard bit. 
-    // A philosphers left fork must constantly be the same.
-    // This is what is wrong with the trace here!
-
-
 }
 
 pred nonStarvation  {
-
     all p : P | {
         eventually {
             some p.lFork
@@ -47,4 +40,4 @@ pred nonStarvation  {
 run {
     always wellformed
     //always nonStarvation
-} for exactly 5 P, 5 Fork
+} for exactly 5 P, exactly 5 Fork

@@ -1,4 +1,4 @@
-<alloy builddate="Thursday, August 8th, 2024">
+<alloy builddate="Wednesday, August 14th, 2024">
 <instance bitwidth="4" maxseq="-1" command="temporary-name_philosphers_1" filename="/no-name.rkt" version="3.5" prefixLength="1" loop="0" >
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
@@ -19,40 +19,50 @@
 </sig>
 
 <sig label="P" ID="5" parentID="2">
-<atom label="P0"/><atom label="P1"/><atom label="P2"/><atom label="P3"/><atom label="P4"/>
+
 </sig>
 
-<field label="leftP" ID="6" parentID="5">
-<tuple><atom label="P0"/><atom label="P4"/></tuple>
-<tuple><atom label="P1"/><atom label="P3"/></tuple>
-<tuple><atom label="P2"/><atom label="P0"/></tuple>
-<tuple><atom label="P3"/><atom label="P2"/></tuple>
-<tuple><atom label="P4"/><atom label="P1"/></tuple>
+<sig label="Hypatia" ID="6" parentID="5">
+<atom label="Hypatia0"/>
+</sig>
+
+<sig label="Arendt" ID="7" parentID="5">
+<atom label="Arendt0"/>
+</sig>
+
+<sig label="IbnSina" ID="8" parentID="5">
+<atom label="IbnSina0"/>
+</sig>
+
+<sig label="Nagarjuna" ID="9" parentID="5">
+<atom label="Nagarjuna0"/>
+</sig>
+
+<sig label="Zhuangzi" ID="10" parentID="5">
+<atom label="Zhuangzi0"/>
+</sig>
+
+<field label="leftP" ID="11" parentID="5">
+<tuple><atom label="Hypatia0"/><atom label="Nagarjuna0"/></tuple>
+<tuple><atom label="Nagarjuna0"/><atom label="IbnSina0"/></tuple>
+<tuple><atom label="Arendt0"/><atom label="Hypatia0"/></tuple>
+<tuple><atom label="Zhuangzi0"/><atom label="Arendt0"/></tuple>
+<tuple><atom label="IbnSina0"/><atom label="Zhuangzi0"/></tuple>
 <types><type ID="5"/><type ID="5"/></types>
 
 </field>
 
-<field label="rightP" ID="7" parentID="5">
-<tuple><atom label="P0"/><atom label="P2"/></tuple>
-<tuple><atom label="P1"/><atom label="P4"/></tuple>
-<tuple><atom label="P2"/><atom label="P3"/></tuple>
-<tuple><atom label="P3"/><atom label="P1"/></tuple>
-<tuple><atom label="P4"/><atom label="P0"/></tuple>
-<types><type ID="5"/><type ID="5"/></types>
-
-</field>
-
-<field label="rFork" ID="8" parentID="5">
-<tuple><atom label="P1"/><atom label="Fork1"/></tuple>
-<tuple><atom label="P2"/><atom label="Fork0"/></tuple>
+<field label="rFork" ID="12" parentID="5">
+<tuple><atom label="Hypatia0"/><atom label="Fork1"/></tuple>
+<tuple><atom label="Nagarjuna0"/><atom label="Fork0"/></tuple>
 <types><type ID="5"/><type ID="4"/></types>
 
 </field>
 
-<field label="lFork" ID="9" parentID="5">
-<tuple><atom label="P0"/><atom label="Fork4"/></tuple>
-<tuple><atom label="P1"/><atom label="Fork3"/></tuple>
-<tuple><atom label="P2"/><atom label="Fork2"/></tuple>
+<field label="lFork" ID="13" parentID="5">
+<tuple><atom label="Hypatia0"/><atom label="Fork4"/></tuple>
+<tuple><atom label="Nagarjuna0"/><atom label="Fork3"/></tuple>
+<tuple><atom label="Arendt0"/><atom label="Fork2"/></tuple>
 <types><type ID="5"/><type ID="4"/></types>
 
 </field>
