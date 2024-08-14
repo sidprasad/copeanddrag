@@ -10,7 +10,7 @@ import { PenroseInstance } from './penrose-gen/graphtopenrose';
 
 import { applyProjections } from './alloy-instance/src/projection';
 
-import { CassowaryLayout } from './cassowary-layout/cassowary-layout';
+import { ConstraintValidator } from './cassowary-layout/constraint-validator';
 
 const express = require('express');
 const path = require('path');
@@ -80,7 +80,15 @@ app.post('/webcolafiles', (req, res) => {
     
     let cl = new WebColaLayout(g, li, instance);
     let colaDefinitions = cl.layout();
-    //let colaDefinitions = graphToWebcola(g, li, instance);
+
+    const constraintValidator = new ConstraintValidator(colaDefinitions.colaConstraints, colaDefinitions.colaNodes);
+    const error = constraintValidator.validateConstraints();
+    if (error) {
+        console.error("Error validating constraints:", error);
+        // This is "I am a teapot" error code, which is a joke error code.
+        res.status(418).send(error);
+        return;
+    }
 
     try {
         // Serialize and then parse to strip non-serializable parts
@@ -88,57 +96,16 @@ app.post('/webcolafiles', (req, res) => {
         let serializedColaEdges = JSON.parse(JSON.stringify(colaDefinitions.colaEdges));
         let serializedColaConstraints = JSON.parse(JSON.stringify(colaDefinitions.colaConstraints));
         let serializedColaGroups = JSON.parse(JSON.stringify(colaDefinitions.colaGroups));
-
         res.render('webcolavis', { 'height': 800, 'width': 1000, 'colaNodes': serializedColaNodes, 'colaEdges': serializedColaEdges, 'colaConstraints' : serializedColaConstraints, 'colaGroups': serializedColaGroups });
     } catch (error) {
         console.error("Error serializing colaNodes, colaEdges, colaConstraints or colaGroups:", error);
         // Handle the error appropriately
         res.status(500).send("Internal Server Error");
     }
-
 });
 
 
-app.post('/cassowaryfiles', (req, res) => {
-    try {
-        let { instances, li, instanceNumber } = getFormContents(req);
-        let instance = applyLayoutProjections(instances[instanceNumber], li);
 
-        let g = generateGraph(instance, li);
-
-        let kl = new CassowaryLayout(g, li, instance);
-
-        let layout = kl.layout();
-        let nodes = layout.nodes;
-        let edges = layout.edges;
-        let groupBoundingBoxes = layout.groupBoundingBoxes;
-
-        res.render('cassowaryvis', { 'height': 800, 'width': 1000, 'nodes': nodes, 'edges': edges});
-    } catch (error) {
-        console.log(error);
-        res.status(500).send(error);
-    }
-});
-
-// app.post('/z3files', async (req, res) => {
-//     try {
-//         let { instances, li, instanceNumber } = getFormContents(req);
-//         let instance = applyLayoutProjections(instances[instanceNumber], li);
-
-//         let g = generateGraph(instance, li);
-
-//         let zl = new Z3Layout(g, li, instance);
-
-//         let layout = await zl.layout();
-//         let nodes = layout.nodes;
-//         let edges = layout.edges;
-
-//         res.render('cassowaryvis', { 'height': 800, 'width': 1000, 'nodes': nodes, 'edges': edges});
-//     } catch (error) {
-//         console.log(error);
-//         res.status(500).send(error);
-//     }
-// }
 
 
 const server = http.createServer(app);

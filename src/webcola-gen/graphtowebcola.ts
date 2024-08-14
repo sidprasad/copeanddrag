@@ -17,7 +17,7 @@ const minSeparation = Math.min(minSepHeight, minSepWidth);
 
 
 type NodeWithMetadata = Node & { id: string, attributes: Record<string, string[]>, color: string };
-
+export {NodeWithMetadata};
 
 export class WebColaLayout {
   private graph: Graph;
@@ -145,7 +145,7 @@ export class WebColaLayout {
   }
 
 
-  private orderNodesByEdges(edges): number[][] {
+  private orderNodesByEdges(edges): number[] {
     let edgesIndices = edges.map(edge => {
         return { 
           v : this.getNodeIndex(edge.v),
@@ -165,27 +165,25 @@ export class WebColaLayout {
     }
 
 
-    return rootNodes.map((rootNode) => {
-      let visited = new Set<number>();
-      let traversalOrder = [];
-      let queue : number[] = [rootNode];
+    let visited = new Set<number>();
+    let traversalOrder = [];
+    let queue : number[] = rootNodes;
 
-      while (queue.length > 0) {
-        let node = queue.pop();
-        if (!visited.has(node)) {
-          visited.add(node);
-          traversalOrder.push(node);
+    while (queue.length > 0) {
+      let node = queue.pop();
+      if (!visited.has(node)) {
+        visited.add(node);
+        traversalOrder.push(node);
 
-          // Get all the outgoing edges from this node
-          let outgoingEdges = edgesIndices.filter(edge => edge.v === node);
-          let outgoingNodes = outgoingEdges.map(edge => edge.w);
+        // Get all the outgoing edges from this node
+        let outgoingEdges = edgesIndices.filter(edge => edge.v === node);
+        let outgoingNodes = outgoingEdges.map(edge => edge.w);
 
-          // Add the outgoing nodes to the queue
-          queue = queue.concat(outgoingNodes);
-        }
-      }  
-      return traversalOrder;
-    });
+        // Add the outgoing nodes to the queue
+        queue = queue.concat(outgoingNodes);
+      }
+    }  
+    return traversalOrder;
   }
 
   private determineGroupsAndSubgroups() {
@@ -309,9 +307,6 @@ export class WebColaLayout {
 
   applyClosureConstraint(relName: string, direction: string) {
 
-    // TODO: This needs to change.
-    // I think for each root, we need to 
-    // lay out its connected order clockwise.
 
     let direction_mult : number = 0;
     
@@ -322,6 +317,18 @@ export class WebColaLayout {
       direction_mult = -1;
     }
 
+    const c: NodeWithMetadata = {
+      id: `_${relName}`,
+      x: this.DEFAULT_X,
+      y: this.DEFAULT_Y,
+      width: 2,
+      height: 2,
+      attributes: {},
+      color: "transparent"
+    };
+
+    this.colaNodes.push(c);
+    let c_index = this.getNodeIndex(c.id);
 
 
     // Now get all nodes that have the relation relName
@@ -334,53 +341,36 @@ export class WebColaLayout {
       return;
     }
 
-    let relatedNodeFragments = this.orderNodesByEdges(relationEdges);
+    let relatedNodes = this.orderNodesByEdges(relationEdges);
 
-    var fragment_num = 0;
-
-    relatedNodeFragments.forEach((relatedNodes) => {
-
-      fragment_num++;
-
-      const c: NodeWithMetadata = {
-        id: `_${relName}_${fragment_num}`,
-        x: this.DEFAULT_X,
-        y: this.DEFAULT_Y,
-        width: 2,
-        height: 2,
-        attributes: {},
-        color: "transparent"
-      };
-  
-      this.colaNodes.push(c);
-      let c_index = this.getNodeIndex(c.id);
-
-      // Now keep the related nodes a fixed distance from c
-      const fixedDistance = 30; // Example fixed distance
-      const angleStep = (direction_mult * 2 * Math.PI) / relatedNodes.length;
+    // Now keep the related nodes a fixed distance from c
+    const fixedDistance = 30; // Example fixed distance
+    const angleStep = (direction_mult * 2 * Math.PI) / relatedNodes.length;
 
 
-      let index = 0;
-      relatedNodes.forEach(nodeIndex => {
+    let index = 0;
+    relatedNodes.forEach(nodeIndex => {
 
-        const angle = index * angleStep;
-        const x_gap = fixedDistance * Math.cos(angle);
-        const y_gap = fixedDistance * Math.sin(angle);
+      const angle = index * angleStep;
 
-        if (x_gap > 0) {
-          this.colaConstraints.push(this.leftConstraint(c_index, nodeIndex, x_gap));
-        }
-        else {
-          this.colaConstraints.push(this.leftConstraint(nodeIndex, c_index, -x_gap));
-        }
+      const x_gap = fixedDistance * Math.cos(angle);
+      const y_gap = fixedDistance * Math.sin(angle);
 
-        if (y_gap > 0) {
-          this.colaConstraints.push(this.topConstraint(c_index, nodeIndex, y_gap));
-        }
-        else {
-          this.colaConstraints.push(this.topConstraint(nodeIndex, c_index, -y_gap));
-        }
-        index++;
-      });
+
+      if (x_gap > 0) {
+        this.colaConstraints.push(this.leftConstraint(c_index, nodeIndex, x_gap));
+      }
+      else {
+        this.colaConstraints.push(this.leftConstraint(nodeIndex, c_index, -x_gap));
+      }
+
+      if (y_gap > 0) {
+        this.colaConstraints.push(this.topConstraint(c_index, nodeIndex, y_gap));
+      }
+      else {
+        this.colaConstraints.push(this.topConstraint(nodeIndex, c_index, -y_gap));
+      }
+      index++;
     });
+  }
 }

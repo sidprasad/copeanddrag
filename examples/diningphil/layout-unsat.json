@@ -3,10 +3,6 @@
       {
         "fieldName": "leftP",
         "directions": ["left"]
-      },
-      {
-        "fieldName": "rightP",
-        "directions": ["right"]
       }
     ],
     "groupBy": [],
