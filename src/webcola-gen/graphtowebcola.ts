@@ -17,7 +17,7 @@ const minSeparation = Math.min(minSepHeight, minSepWidth);
 
 
 type NodeWithMetadata = Node & { id: string, attributes: Record<string, string[]>, color: string };
-export {NodeWithMetadata};
+export { NodeWithMetadata };
 
 export class WebColaLayout {
   private graph: Graph;
@@ -32,13 +32,13 @@ export class WebColaLayout {
 
   private colaNodes: NodeWithMetadata[];
 
-  private readonly DEFAULT_X : number;
-  private readonly DEFAULT_Y : number;
+  private readonly DEFAULT_X: number;
+  private readonly DEFAULT_Y: number;
 
-  readonly FIG_WIDTH : number;
-  readonly FIG_HEIGHT : number;
+  readonly FIG_WIDTH: number;
+  readonly FIG_HEIGHT: number;
 
-  constructor(graph: Graph, layoutInstance: LayoutInstance, alloyInstance: AlloyInstance, fig_height : number = 800, fig_width : number = 800) {
+  constructor(graph: Graph, layoutInstance: LayoutInstance, alloyInstance: AlloyInstance, fig_height: number = 800, fig_width: number = 800) {
 
 
     this.FIG_HEIGHT = fig_height;
@@ -147,14 +147,14 @@ export class WebColaLayout {
 
   private orderNodesByEdges(edges): number[][] {
     let edgesIndices = edges.map(edge => {
-        return { 
-          v : this.getNodeIndex(edge.v),
-          w : this.getNodeIndex(edge.w)
-        };
+      return {
+        v: this.getNodeIndex(edge.v),
+        w: this.getNodeIndex(edge.w)
+      };
     });
 
-    let inNodes = edgesIndices.map(edge => edge.v);
-    let outNodes = edgesIndices.map(edge => edge.w);
+    let inNodes = edgesIndices.map(edge => edge.w);
+    let outNodes = edgesIndices.map(edge => edge.v);
 
     // Root nodes have no incoming edges
     let rootNodes = outNodes.filter(node => !inNodes.includes(node));
@@ -168,7 +168,7 @@ export class WebColaLayout {
     return rootNodes.map((rootNode) => {
       let visited = new Set<number>();
       let traversalOrder = [];
-      let queue : number[] = [rootNode];
+      let queue: number[] = [rootNode];
 
       while (queue.length > 0) {
         let node = queue.pop();
@@ -183,7 +183,7 @@ export class WebColaLayout {
           // Add the outgoing nodes to the queue
           queue = queue.concat(outgoingNodes);
         }
-      }  
+      }
       return traversalOrder;
     });
   }
@@ -309,12 +309,8 @@ export class WebColaLayout {
 
   applyClosureConstraint(relName: string, direction: string) {
 
-    // TODO: This needs to change.
-    // I think for each root, we need to 
-    // lay out its connected order clockwise.
+    let direction_mult: number = 0;
 
-    let direction_mult : number = 0;
-    
     if (direction === "clockwise") {
       direction_mult = 1;
     }
@@ -351,7 +347,7 @@ export class WebColaLayout {
         attributes: {},
         color: "transparent"
       };
-  
+
       this.colaNodes.push(c);
       let c_index = this.getNodeIndex(c.id);
 
@@ -383,4 +379,5 @@ export class WebColaLayout {
         index++;
       });
     });
+  }
 }
