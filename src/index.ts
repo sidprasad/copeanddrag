@@ -81,7 +81,7 @@ app.post('/webcolafiles', (req, res) => {
     let cl = new WebColaLayout(g, li, instance);
     let colaDefinitions = cl.layout();
 
-    const constraintValidator = new ConstraintValidator(colaDefinitions.colaConstraints, colaDefinitions.colaNodes);
+    const constraintValidator = new ConstraintValidator(colaDefinitions.colaConstraints, colaDefinitions.colaNodes, colaDefinitions.colaGroups);
     const error = constraintValidator.validateConstraints();
     if (error) {
         console.error("Error validating constraints:", error);

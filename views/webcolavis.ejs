@@ -273,26 +273,27 @@
                     })
                     .raise();
 
-    // Function to generate a random offset along the path
-    function getRandomOffsetAlongPath() {
-        return (Math.random() - 0.5) * 20; // Random value between -10 and 10
-    }
+                    // Function to generate a random offset along the path
+                    function getRandomOffsetAlongPath() {
+                        return (Math.random() - 0.5) * 20; // Random value between -10 and 10
+                    }
 
-    // Helper function to calculate new position along the path
-    function calculateNewPosition(d, axis) {
-        const midpoint = (d.source[axis] + d.target[axis]) / 2;
-        const direction = d.target[axis] - d.source[axis];
-        const length = Math.sqrt(Math.pow(d.target.x - d.source.x, 2) + Math.pow(d.target.y - d.source.y, 2));
-        const unitDirection = direction / length;
-        const offset = getRandomOffsetAlongPath();
-        return midpoint + unitDirection * offset;
-    }
+                    // Helper function to calculate new position along the path
+                    function calculateNewPosition(d, axis) {
+                        const midpoint = (d.source[axis] + d.target[axis]) / 2;
+                        const direction = d.target[axis] - d.source[axis];
+                        const length = Math.sqrt(Math.pow(d.target.x - d.source.x, 2) + Math.pow(d.target.y - d.source.y, 2));
+                        const unitDirection = direction / length;
+                        const offset = getRandomOffsetAlongPath();
+                        return midpoint + unitDirection * offset;
+                    }
 
-    linklabel.attr("x", d => calculateNewPosition(d, 'x'))
-        .attr("y", d => calculateNewPosition(d, 'y'))
-        .attr("text-anchor", "middle") // Center the text on its position
-        .attr("dy", "-5") // Adjust the y-position to offset the text above the link
-        .raise();
+                    linklabel
+                        .attr("x", d => calculateNewPosition(d, 'x'))
+                        .attr("y", d => calculateNewPosition(d, 'y'))
+                        .attr("text-anchor", "middle") // Center the text on its position
+                        .attr("dy", "-5") // Adjust the y-position to offset the text above the link
+                        .raise();
 
 
 
@@ -308,14 +309,11 @@
                         .attr("dy", "-5") // Adjust the y-position to offset the text above the link
                         .raise();
 
-
-
-                        link
+                    link
                         .attr("d", function (d) {
                             var route = cola.makeEdgeBetween(d.source.innerBounds, d.target.innerBounds, 5);
                             return lineFunction([route.sourceIntersection, route.arrowStart]);
-                        });
-                        //.raise();    
+                        });   
 
                 });
 

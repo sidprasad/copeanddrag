@@ -1,0 +1,29 @@
+{
+    "fieldDirections": [
+        {
+            "fieldName": "next",
+            "directions": [
+                "right"
+            ]
+        }
+    ],
+    "groupBy": [ ],
+    "attributeFields": [
+        {
+            "fieldName": "ID"
+        }
+    ],
+    "closures": [
+        {
+            "fieldName": "successor"
+        }
+    ],
+    "hideDisconnected": false,
+    "hideDisconnectedBuiltIns": true,
+    "sigColors": [],
+    "projections": [
+        {
+            "sigName": "Election"
+        }
+    ]
+}

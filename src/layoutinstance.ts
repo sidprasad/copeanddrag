@@ -185,8 +185,7 @@ export class LayoutInstance {
 
 
                 let {source, target} = this.getGroupSourceAndTarget(edge, groupOn);
-
-                let groupName = target + ":" + relName;
+                let groupName = target + ":" + this.getEdgeLabel(g, edge);
 
                 if (groups[groupName]) {
                     groups[groupName].push(source);
@@ -231,6 +230,8 @@ export class LayoutInstance {
 
         graphEdges.forEach((edge) => {
             const edgeId = edge.name;
+
+
             const relName = this.getRelationName(g, edge);
             const isAttributeRel = this.isAttributeField(relName);
             
@@ -239,19 +240,17 @@ export class LayoutInstance {
                 // If the field is an attribute field, we should add the attribute to the source node's
                 // attributes field.
 
-
+                const attributeKey = this.getEdgeLabel(g, edge);
                 let source = edge.v;
                 let target = edge.w;
 
                 let nodeAttributes = attributes[source] || {};
-                if (nodeAttributes[relName]) {
-                    nodeAttributes[relName].push(target);
-                }
-                else {
-                    nodeAttributes[relName] = [target];
+
+                if (!nodeAttributes[attributeKey]) {
+                    nodeAttributes[attributeKey] = [];
                     attributes[source] = nodeAttributes;
                 }
-    
+                nodeAttributes[attributeKey].push(target);   
                 
                 // Now remove the edge from the graph
                 g.removeEdge(edge.v, edge.w, edgeId);
@@ -363,10 +362,13 @@ export class LayoutInstance {
 
 
     public getRelationName(g : Graph, edge : Edge) : string {
-        let relNameRaw = g.edge(edge.v, edge.w, edge.name);
-        // If relNameRaw has `[`, ignore everything after it
+        let relNameRaw = this.getEdgeLabel(g, edge);
         let relName = relNameRaw.split("[")[0];
         return relName;
+    }
+
+    private getEdgeLabel(g : Graph, edge : Edge) : string {
+        return g.edge(edge.v, edge.w, edge.name);
     }
 
 

@@ -124,5 +124,4 @@ By default, we assign every `sig` a random color, that is respected by all atoms
     - Minimum link length does not always serve us, since it really tries to enforce that min length.
     - Perhaps we need to force super large links and also force all nodes within the frame?
 
-- [] Need the notion of a `closure` for things like dining Philosophers. An idea -- closure could add nodes evenly across a circle. This would be complicated, since we would have to 
-really invent our own constraints here, that may be complicated!
+- [] Attributes for n-ary relations are broken (we lost the in-betweens in the attribute names)

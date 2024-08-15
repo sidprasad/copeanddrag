@@ -4,7 +4,7 @@
     "closures" : [
         {
             "fieldName": "leftP",
-            "direction" : "counterclockwise"
+            "direction" : "clockwise"
         }
     ],
     "attributeFields": [
