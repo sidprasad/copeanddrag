@@ -88,10 +88,11 @@ export class WebColaLayout {
 
   layout() {
 
-
     this.applyClosureConstraints();
     const colaEdges = this.setupRelationalConstraints();
     const colaGroups = this.determineGroupsAndSubgroups();
+
+
 
 
     return {

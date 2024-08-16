@@ -92,237 +92,348 @@
         </div>
         <hr>
         <div class="container-fluid" id="svg-container">
-        <svg id="svg" width="<%- width %>" height="<%- height %>">
-            <defs>
-                <marker id="end-arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-                    <polygon points="0 0, 10 3.5, 0 7" />
-                </marker>
-            </defs>
-        </svg>
-        <script>
-            window.addEventListener('load', function () {
+            <svg id="svg" width="<%- width %>" height="<%- height %>">
+                <defs>
+                    <marker id="end-arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" />
+                    </marker>
+                </defs>
+            </svg>
+            <script>
 
 
-                const dy_for_linespacing = 5; // Adjust for spacing between lines
-
-                var color = d3.scaleOrdinal(d3.schemeCategory20);               
-                var width = <%- width %>, height = <%- height %>;
-
-                var svg = d3.select("#svg");
-                var colaLayout = cola.d3adaptor(d3)
-                    .convergenceThreshold(0.1) // TODO: What should we do here?
-                    .avoidOverlaps(true)
-                    .size([width, height]);
-
-                var nodes = <%- JSON.stringify(colaNodes) %>;
-                var edges = <%- JSON.stringify(colaEdges) %>;
-
-                const LINK_DISTANCE = Math.min(width, height) / Math.sqrt(nodes.length);
-                console.log("Link distance: ", LINK_DISTANCE);
-
-                nodes.forEach(function (node) {
-                    node.name = node.id;
-                });
-
-                var constraints = <%- JSON.stringify(colaConstraints) %>;
-                var groups = <%- JSON.stringify(colaGroups) %>;
-
-                colaLayout
-                    .nodes(nodes)
-                    .links(edges)
-                    .constraints(constraints)
-                    .groups(groups)
-                    .jaccardLinkLengths(LINK_DISTANCE, 3);
-
-
-                const margin = 10;
-
-                var lineFunction = d3.line()
-                                .x(function (d) { return d.x; })
-                                .y(function (d) { return d.y; });
-
-
-                var routeEdges = function () {
-                    colaLayout.prepareEdgeRouting(margin / 3);
-                    link.attr("d", function (d) { return lineFunction(colaLayout.routeEdge(d)); });
+                // Function to generate a random offset along the path
+                function getRandomOffsetAlongPath() {
+                    return (Math.random() - 0.5) * 20; // Random value between -10 and 10
                 }
 
 
 
 
-                var link = svg.selectAll(".link")
-                    .data(edges)
-                    .enter().append("path")
-                    .attr("class", "link");
+                window.addEventListener('load', function () {
+
+
+                    const dy_for_linespacing = 5; // Adjust for spacing between lines
+
+                    var color = d3.scaleOrdinal(d3.schemeCategory20);
+                    var width = <%- width %>, height = <%- height %>;
+
+                    var svg = d3.select("#svg");
+                    var colaLayout = cola.d3adaptor(d3)
+                        .convergenceThreshold(0.1) // TODO: What should we do here?
+                        .avoidOverlaps(true)
+                        .handleDisconnected(true)
+                        .size([width, height]);
+
+                    var nodes = <%- JSON.stringify(colaNodes) %>;
+                    var edges = <%- JSON.stringify(colaEdges) %>;
+                    var constraints = <%- JSON.stringify(colaConstraints) %>;
+                    var groups = <%- JSON.stringify(colaGroups) %>;
 
 
 
-                var node = svg.selectAll(".node")
-                    .data(nodes)
-                    .enter().append("rect") // Changed from circle to rect
-                    .attr("class", "node")
-                    .attr("width", function (d) { return d.width; }) // Use node's width
-                    .attr("height", function (d) { return d.height; }) // Use node's height
-                    .attr("x", function (d) { return -d.width / 2; }) // Center the rectangle on the node's x
-                    .attr("y", function (d) { return -d.height / 2; }) // Center the rectangle on the node's y
-                    .attr("stroke", function (d) { return d.color; }) // Outline color of the node
-                    .attr("stroke-width", 1.5) // Adjust the stroke width as needed
-                    .call(colaLayout.drag);
+                    // // Here add a top left and bottom right node with fixed positions
+                    // var fixedNode = {fixed: true, fixedWeight: 100},
+                    // topLeft = { ...fixedNode, x: 0, y: 0, id : "_tl", height : 1, width : 1 },
+                    // bottomRight = { ...fixedNode, x: width, y: height, id : "_br" , height : 1, width : 1};
+                    
+                    // let tlIndex = nodes.push(topLeft) - 1;
+                    // let brIndex = nodes.push(bottomRight) - 1;
+
+                    // for (var i = 0; i < nodes.length; i++) {
+
+                    //     if (i === tlIndex || i === brIndex) {
+                    //         continue;
+                    //     }
+                    //     let sepY = nodes[i].height / 2;
+                    //     let sepX = nodes[i].width / 2;
+
+
+                    //     constraints.push({ axis: 'x', type: 'separation', left: tlIndex, right: i, gap: sepX });
+                    //     constraints.push({ axis: 'y', type: 'separation', left: tlIndex, right: i, gap: sepY });
+                    //     constraints.push({ axis: 'x', type: 'separation', left: i, right: brIndex, gap: sepX });
+                    //     constraints.push({ axis: 'y', type: 'separation', left: i, right: brIndex, gap: sepY });
+                    // }
+
+
+
+
+                    const LINK_DISTANCE = Math.min(width, height) / Math.sqrt(nodes.length);
+
+                    nodes.forEach(function (node) {
+                        node.name = node.id;
+                    });
+
+
+                    colaLayout
+                        .nodes(nodes)
+                        .links(edges)
+                        .constraints(constraints)
+                        .groups(groups)
+                        .jaccardLinkLengths(LINK_DISTANCE, 3);
+
+
+                    const margin = 10;
+
+                    var lineFunction = d3.line()
+                        .x(function (d) { return d.x; })
+                        .y(function (d) { return d.y; })
+                        .curve(d3.curveBasis); 
+
+
+
+                    var routeEdges = function () {
+                        colaLayout.prepareEdgeRouting(margin / 3);
+                        console.log("Routing edges");
+
+                        function getNodeIndex(nodeId) {
+                            return nodes.findIndex(node => node.id === nodeId);
+                        }
+
+                        // What I want to do is change the angle based on the number of edges between the same nodes
+                                // Function to calculate curvature based on number of edges and index
+                        function calculateCurvature(edges, fromNode, toNode, edgeid) {
+
+                            const sourceIndex = getNodeIndex(fromNode);
+                            const targetIndex = getNodeIndex(toNode);
+
+                            const outEdges = edges.filter(edge => 
+                            {
+                                return edge.source.id == fromNode && edge.target.id == toNode;
+                            });
+
+                            const edgeCount = outEdges.length;
+                            let index = outEdges.findIndex(edge => edge.id == edgeid);
+
+                            let curvature = (index % 2 === 0 ? 1 : -1) * (Math.floor(index / 2) + 1) * 0.1 * edgeCount;
+                            console.log(`${edgeid} is edge ${index} / ${edgeCount} from ${fromNode} to ${toNode}. Curvature: ${curvature}`);
+                            return curvature;
+                        }
+
+                        
+                        link.attr("d", function (d, i) {
+
+                            
+                            // UGH THIS SORT OF WORKS BUT ONLY SOMETIMES CURVES
+                            // IN THE WRONG DIRECTION
+
+                            var route = colaLayout.routeEdge(d);
+                            // Calculate the curvature for the current edge
+                            var curvature = calculateCurvature(edges, d.source.id, d.target.id, d.id);
+
+                            // Apply curvature to the control points
+                            route.forEach(function (point, index) {
+                                if (index > 0 && index < route.length - 1) {
+                                    point.x += curvature * (point.y - route[0].y);
+                                    point.y += curvature * (point.x - route[0].x);
+                                }
+                            });
+
+                            return lineFunction(route);
+                        });
+
+                        // Update label positions after routing edges
+                        linkGroups.select("text.linklabel")
+                            .attr("x", function (d) {
+                                const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
+                                const pathLength = pathElement.getTotalLength();
+                                const midpoint = pathElement.getPointAtLength(pathLength / 2);
+                                return midpoint.x;
+                            })
+                            .attr("y", function (d) {
+                                const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
+                                const pathLength = pathElement.getTotalLength();
+                                const midpoint = pathElement.getPointAtLength(pathLength / 2);
+                                return midpoint.y;
+                            })
+                            .attr("text-anchor", "middle")
+                            .raise();
+                    };
+
+
+
+
+                    const linkGroups = svg.selectAll(".link-group")
+                        .data(edges)
+                        .enter()
+                        .append("g")
+                        .attr("class", "link-group");
+
+                    const link = linkGroups.append("path")
+                        .attr("class", "link")
+                        .attr("data-link-id", d => d.id);
+
+                    linkGroups.append("text")
+                        .attr("class", "linklabel")
+                        .text(d => d.relName);
+
+
+
+                    var node = svg.selectAll(".node")
+                        .data(nodes)
+                        .enter().append("rect") // Changed from circle to rect
+                        .attr("class", "node")
+                        .attr("width", function (d) { return d.width; }) // Use node's width
+                        .attr("height", function (d) { return d.height; }) // Use node's height
+                        .attr("x", function (d) { return -d.width / 2; }) // Center the rectangle on the node's x
+                        .attr("y", function (d) { return -d.height / 2; }) // Center the rectangle on the node's y
+                        .attr("stroke", function (d) { return d.color; }) // Outline color of the node
+                        .attr("stroke-width", 1.5) // Adjust the stroke width as needed
+                        .call(colaLayout.drag);
 
                     var label = svg.selectAll(".label")
-                                .data(nodes)
-                                .enter().append("text")
-                                .attr("class", "label")
-                                .each(function(d) {
-                                    
-                                    if (d.name.startsWith("_")) {
-                                        return;
-                                    }
+                        .data(nodes)
+                        .enter().append("text")
+                        .attr("class", "label")
+                        .each(function (d) {
 
-                                    // Append tspan for d.name
-                                    d3.select(this).append("tspan")
-                                        .attr("x", 0) // Align with the parent text element
-                                        .attr("dy", "0em") // Start at the same vertical position
-                                        .style("font-weight", "bold")
-                                        .text(d.name);
+                            if (d.name.startsWith("_")) {
+                                return;
+                            }
 
-                                    var y = 1; // Start from the next line for attributes
-
-                                    // Append tspans for each attribute
-                                    for (let key in d.attributes) {
-                                        d3.select(this).append("tspan")
-                                            .attr("x", 0) // Align with the parent text element
-                                            .attr("dy", `${y}em`) // Move each attribute to a new line
-                                            .text(key + ": " + d.attributes[key]);
-                                        y += 1; // Increment for the next line
-                                    }
-                                })
-                                .call(colaLayout.drag);
-
-                var attributes = svg.selectAll(".attributes")
-                    .data(nodes)
-                    .enter().append("text")
-                    .attr("class", "attributes")
-                    .each(function (d) {
-                        var y = 0; // Initial y offset
-
-                        for (let key in d.attributes) {
+                            // Append tspan for d.name
                             d3.select(this).append("tspan")
-                                .attr("x", d.x) // Set the absolute x position of the first tspan to align with the parent text element
-                                .attr("dy", `${y}px`) // Use dy only for vertical spacing from the previous tspan or the parent text element's y position
-                                .text(key + ": " + d.attributes[key]);
-                            y += dy_for_linespacing; // Increment y offset for the next line
-                        }
-                    })
-                    .call(colaLayout.drag);
+                                .attr("x", 0) // Align with the parent text element
+                                .attr("dy", "0em") // Start at the same vertical position
+                                .style("font-weight", "bold")
+                                .text(d.name);
 
+                            var y = 1; // Start from the next line for attributes
 
+                            // Append tspans for each attribute
+                            for (let key in d.attributes) {
+                                d3.select(this).append("tspan")
+                                    .attr("x", 0) // Align with the parent text element
+                                    .attr("dy", `${y}em`) // Move each attribute to a new line
+                                    .text(key + ": " + d.attributes[key]);
+                                y += 1; // Increment for the next line
+                            }
+                        })
+                        .call(colaLayout.drag);
 
+                    var attributes = svg.selectAll(".attributes")
+                        .data(nodes)
+                        .enter().append("text")
+                        .attr("class", "attributes")
+                        .each(function (d) {
+                            var y = 0; // Initial y offset
 
+                            for (let key in d.attributes) {
+                                d3.select(this).append("tspan")
+                                    .attr("x", d.x) // Set the absolute x position of the first tspan to align with the parent text element
+                                    .attr("dy", `${y}px`) // Use dy only for vertical spacing from the previous tspan or the parent text element's y position
+                                    .text(key + ": " + d.attributes[key]);
+                                y += dy_for_linespacing; // Increment y offset for the next line
+                            }
+                        })
+                        .call(colaLayout.drag);
 
-                var linklabel = svg.selectAll(".link-label")
-                    .data(edges)
-                    .enter().append("text")
-                    .attr("class", "link-label")
-                    .text(d => d.relName); // Set the text content to the link's label
-
-                node.append("title")
-                    .text(function (d) { return d.name; });
-
-
-                // Add a rectangle for each group and a label at the top of the group
-
-                var group = svg.selectAll(".group")
-                    .data(groups)
-                    .enter().append("rect")
-                    .attr("class", "group")
-                    .attr("rx", 8).attr("ry", 8)
-                    .style("fill", function (d, i) { return color(i); })
-                    .call(colaLayout.drag);
-
-                var groupLabel = svg.selectAll(".groupLabel")
-                    .data(groups)
-                    .enter().append("text")
-                    .attr("class", "groupLabel")
-                    .text(function (d) { return d.name; })
-                    .call(colaLayout.drag);
-
-
-                colaLayout.on("tick", function () {
-
-                    
-
-                    node
-                        .each(function (d) { d.innerBounds = d.bounds.inflate(-1); })
-                        .attr("x", function (d) { return d.bounds.x; })
-                        .attr("y", function (d) { return d.bounds.y; })
-                        .attr("width", function (d) { return d.bounds.width(); })
-                        .attr("height", function (d) { return d.bounds.height(); });
-
-                    label
-                    .attr("x", d => d.x)
-                    .attr("y", d => d.y)
-                    .each(function(d) {
-                        var y = 0; // Initialize y offset for tspans
-                        d3.select(this).selectAll("tspan")
-                            .attr("x", d.x) // Align tspans with the node's x position
-                            .attr("dy", function() {
-                                y += 1; // Increment y for each tspan to create line spacing
-                                return y === 1 ? "0em" : "1em"; // Keep the first tspan in place, move others down
-                            });
-                    })
-                    .raise();
-
-                    // Function to generate a random offset along the path
-                    function getRandomOffsetAlongPath() {
-                        return (Math.random() - 0.5) * 20; // Random value between -10 and 10
-                    }
 
                     // Helper function to calculate new position along the path
-                    function calculateNewPosition(d, axis) {
-                        const midpoint = (d.source[axis] + d.target[axis]) / 2;
-                        const direction = d.target[axis] - d.source[axis];
-                        const length = Math.sqrt(Math.pow(d.target.x - d.source.x, 2) + Math.pow(d.target.y - d.source.y, 2));
-                        const unitDirection = direction / length;
+                    function calculateNewPosition(previousPosition, pathElement, axis) {
+                        const pathLength = pathElement.getTotalLength();
+                        const midpointLength = pathLength / 2;
                         const offset = getRandomOffsetAlongPath();
-                        return midpoint + unitDirection * offset;
+
+                        let targetLength = midpointLength + offset;
+
+                        if (targetLength >= pathLength) {
+                            targetLength = midpointLength;
+                        }
+
+                        const point = pathElement.getPointAtLength(targetLength);
+                        return axis === 'x' ? point.x : point.y;
                     }
 
-                    linklabel
-                        .attr("x", d => calculateNewPosition(d, 'x'))
-                        .attr("y", d => calculateNewPosition(d, 'y'))
-                        .attr("text-anchor", "middle") // Center the text on its position
-                        .attr("dy", "-5") // Adjust the y-position to offset the text above the link
-                        .raise();
 
 
 
-                    group.attr("x", function (d) { return d.bounds.x; })
-                        .attr("y", function (d) { return d.bounds.y; })
-                        .attr("width", function (d) { return d.bounds.width(); })
-                        .attr("height", function (d) { return d.bounds.height(); })
-                        .lower();
 
-                    groupLabel.attr("x", function (d) { return d.bounds.x; })
-                        .attr("y", function (d) { return d.bounds.y; })
-                        .attr("text-anchor", "middle") // Center the text on its position
-                        .attr("dy", "-5") // Adjust the y-position to offset the text above the link
-                        .raise();
+                    node.append("title")
+                        .text(function (d) { return d.name; });
 
-                    link
-                        .attr("d", function (d) {
-                            var route = cola.makeEdgeBetween(d.source.innerBounds, d.target.innerBounds, 5);
-                            return lineFunction([route.sourceIntersection, route.arrowStart]);
-                        });   
+
+                    // Add a rectangle for each group and a label at the top of the group
+
+                    var group = svg.selectAll(".group")
+                        .data(groups)
+                        .enter().append("rect")
+                        .attr("class", "group")
+                        .attr("rx", 8).attr("ry", 8)
+                        .style("fill", function (d, i) { return color(i); })
+                        .call(colaLayout.drag);
+
+                    var groupLabel = svg.selectAll(".groupLabel")
+                        .data(groups)
+                        .enter().append("text")
+                        .attr("class", "groupLabel")
+                        .text(function (d) { return d.name; })
+                        .call(colaLayout.drag);
+
+
+                    colaLayout.on("tick", function () {
+
+
+
+                        node
+                            .each(function (d) { d.innerBounds = d.bounds.inflate(-1); })
+                            .attr("x", function (d) { return d.bounds.x; })
+                            .attr("y", function (d) { return d.bounds.y; })
+                            .attr("width", function (d) { return d.bounds.width(); })
+                            .attr("height", function (d) { return d.bounds.height(); });
+
+                        label
+                            .attr("x", d => d.x)
+                            .attr("y", d => d.y)
+                            .each(function (d) {
+                                var y = 0; // Initialize y offset for tspans
+                                d3.select(this).selectAll("tspan")
+                                    .attr("x", d.x) // Align tspans with the node's x position
+                                    .attr("dy", function () {
+                                        y += 1; // Increment y for each tspan to create line spacing
+                                        return y === 1 ? "0em" : "1em"; // Keep the first tspan in place, move others down
+                                    });
+                            })
+                            .raise();
+
+
+                        linkGroups.select("path.link")
+                            .attr("d", function (d) {
+                                var route = cola.makeEdgeBetween(d.source.innerBounds, d.target.innerBounds, 5);
+                                return lineFunction([route.sourceIntersection, route.arrowStart]);
+                            });
+
+                        linkGroups.select("text.linklabel")
+                            .attr("x", d => {
+                                const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
+                                return calculateNewPosition(d.x, pathElement, 'x');
+                            })
+                            .attr("y", d => {
+                                const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
+                                return calculateNewPosition(d.y, pathElement, 'y');
+                            });
+
+
+
+                        group.attr("x", function (d) { return d.bounds.x; })
+                            .attr("y", function (d) { return d.bounds.y; })
+                            .attr("width", function (d) { return d.bounds.width(); })
+                            .attr("height", function (d) { return d.bounds.height(); })
+                            .lower();
+
+                        groupLabel.attr("x", function (d) { return d.bounds.x; })
+                            .attr("y", function (d) { return d.bounds.y; })
+                            .attr("text-anchor", "middle") // Center the text on its position
+                            .attr("dy", "-5") // Adjust the y-position to offset the text above the link
+                            .raise();
+
+                    });
+
+                    colaLayout.start()
+                        .on("end", routeEdges);
 
                 });
-
-
-                colaLayout.start()
-                    .on("end", routeEdges);
-
-            });
-        </script>
+            </script>
 
         </div>
 
