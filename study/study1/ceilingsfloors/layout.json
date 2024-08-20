@@ -1,20 +1,25 @@
 {
     "fieldDirections": [
-      {
-        "fieldName": "above",
-        "directions": [
-          "above"
-        ]
-      }
+        {
+            "fieldName": "upstairs",
+            "directions": [
+                "directlyAbove"
+            ]
+        }
     ],
     "groupBy": [
-
+        {
+            "fieldName": "occupants",
+            "groupOn": "domain"
+        }
     ],
     "attributeFields": [
-      {
-        "fieldName": "occupants"
-      }
+
+        {
+            "fieldName": "units"
+        }
+
     ],
     "hideDisconnected": false,
     "hideDisconnectedBuiltIns": true
-  }
+}

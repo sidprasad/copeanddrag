@@ -1,0 +1,65 @@
+<alloy builddate="Tuesday, August 20th, 2024">
+<instance bitwidth="4" maxseq="-1" command="temporary-name_ceilingfloor_1" filename="/no-name.rkt" version="3.5"  >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Floor" ID="4" parentID="2">
+<atom label="Floor0"/><atom label="Floor1"/><atom label="Floor2"/><atom label="Floor3"/>
+</sig>
+
+<sig label="Person" ID="5" parentID="2">
+<atom label="Person0"/><atom label="Person1"/><atom label="Person2"/><atom label="Person3"/><atom label="Person4"/><atom label="Person5"/><atom label="Person6"/><atom label="Person7"/>
+</sig>
+
+<sig label="Unit" ID="6" parentID="2">
+<atom label="Unit0"/><atom label="Unit1"/><atom label="Unit2"/><atom label="Unit3"/><atom label="Unit4"/><atom label="Unit5"/>
+</sig>
+
+<field label="units" ID="7" parentID="4">
+<tuple><atom label="Floor0"/><atom label="Unit3"/></tuple>
+<tuple><atom label="Floor1"/><atom label="Unit2"/></tuple>
+<tuple><atom label="Floor2"/><atom label="Unit1"/></tuple>
+<tuple><atom label="Floor3"/><atom label="Unit0"/></tuple>
+<tuple><atom label="Floor3"/><atom label="Unit4"/></tuple>
+<tuple><atom label="Floor3"/><atom label="Unit5"/></tuple>
+<types><type ID="4"/><type ID="6"/></types>
+
+</field>
+
+<field label="occupants" ID="8" parentID="6">
+<tuple><atom label="Unit0"/><atom label="Person7"/></tuple>
+<tuple><atom label="Unit1"/><atom label="Person6"/></tuple>
+<tuple><atom label="Unit2"/><atom label="Person5"/></tuple>
+<tuple><atom label="Unit3"/><atom label="Person4"/></tuple>
+<tuple><atom label="Unit4"/><atom label="Person3"/></tuple>
+<tuple><atom label="Unit5"/><atom label="Person0"/></tuple>
+<tuple><atom label="Unit5"/><atom label="Person1"/></tuple>
+<tuple><atom label="Unit5"/><atom label="Person2"/></tuple>
+<types><type ID="6"/><type ID="5"/></types>
+
+</field>
+
+<field label="upstairs" ID="9" parentID="4">
+<tuple><atom label="Floor1"/><atom label="Floor0"/></tuple>
+<tuple><atom label="Floor2"/><atom label="Floor1"/></tuple>
+<tuple><atom label="Floor3"/><atom label="Floor2"/></tuple>
+<types><type ID="4"/><type ID="4"/></types>
+
+</field>
+
+
+</instance>
+
+<source filename="/no-name.rkt" content="// Couldn't open source file (/no-name.rkt) (info: (2 . posix)). Is the file saved?"></source>
+</alloy>

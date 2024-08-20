@@ -200,18 +200,12 @@ export class LayoutInstance {
 
                 // But also remove this edge from the graph.
                 g.removeEdge(edge.v, edge.w, edgeId);
+
+                // TODO: We may lose some good layout information here though.
+                // Could we somehow associate the group with the source (make them be close?)
                 
             }
         });
-
-
-        Object.keys(groups).forEach((key) => {
-            g.removeNode(key);
-        });
-
-
-
-
 
         return groups;
     }
@@ -296,9 +290,6 @@ export class LayoutInstance {
                 console.error("Failed to identify node type. Defaulting to showing node.", error);
             }
         });
-
-        
-
     }
 
 

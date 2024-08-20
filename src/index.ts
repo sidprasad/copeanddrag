@@ -10,7 +10,7 @@ import { PenroseInstance } from './penrose-gen/graphtopenrose';
 
 import { applyProjections } from './alloy-instance/src/projection';
 
-import { ConstraintValidator } from './cassowary-layout/constraint-validator';
+import { ConstraintValidator } from './webcola-gen/constraint-validator';
 
 const express = require('express');
 const path = require('path');

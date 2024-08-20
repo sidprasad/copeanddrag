@@ -98,6 +98,9 @@
                         <polygon points="0 0, 10 3.5, 0 7" />
                     </marker>
                 </defs>
+                <g class="zoomable">
+                    <!-- Your graph elements go here -->
+                </g>
             </svg>
             <script>
 
@@ -107,8 +110,14 @@
                     return (Math.random() - 0.5) * 20; // Random value between -10 and 10
                 }
 
+                // Create a zoom behavior
+                var zoom = d3.zoom()
+                    .scaleExtent([0.5, 5]) // Set the zoom scale limits
+                    .on("zoom", zoomed);
 
-
+                function zoomed() {
+                    d3.select(".zoomable").attr("transform", d3.event.transform);
+                }
 
                 window.addEventListener('load', function () {
 
@@ -118,7 +127,13 @@
                     var color = d3.scaleOrdinal(d3.schemeCategory20);
                     var width = <%- width %>, height = <%- height %>;
 
-                    var svg = d3.select("#svg");
+                    var svg_top = d3.select("#svg").call(zoom);
+
+
+                    var svg = d3.select(".zoomable");
+
+
+
                     var colaLayout = cola.d3adaptor(d3)
                         .convergenceThreshold(0.1) // TODO: What should we do here?
                         .avoidOverlaps(true)
@@ -136,7 +151,7 @@
                     // var fixedNode = {fixed: true, fixedWeight: 100},
                     // topLeft = { ...fixedNode, x: 0, y: 0, id : "_tl", height : 1, width : 1 },
                     // bottomRight = { ...fixedNode, x: width, y: height, id : "_br" , height : 1, width : 1};
-                    
+
                     // let tlIndex = nodes.push(topLeft) - 1;
                     // let brIndex = nodes.push(bottomRight) - 1;
 
@@ -178,7 +193,7 @@
                     var lineFunction = d3.line()
                         .x(function (d) { return d.x; })
                         .y(function (d) { return d.y; })
-                        .curve(d3.curveBasis); 
+                        .curve(d3.curveBasis);
 
 
 
@@ -191,14 +206,13 @@
                         }
 
                         // What I want to do is change the angle based on the number of edges between the same nodes
-                                // Function to calculate curvature based on number of edges and index
+                        // Function to calculate curvature based on number of edges and index
                         function calculateCurvature(edges, fromNode, toNode, edgeid) {
 
                             const sourceIndex = getNodeIndex(fromNode);
                             const targetIndex = getNodeIndex(toNode);
 
-                            const outEdges = edges.filter(edge => 
-                            {
+                            const outEdges = edges.filter(edge => {
                                 return edge.source.id == fromNode && edge.target.id == toNode;
                             });
 
@@ -210,10 +224,10 @@
                             return curvature;
                         }
 
-                        
+
                         link.attr("d", function (d, i) {
 
-                            
+
                             // UGH THIS SORT OF WORKS BUT ONLY SOMETIMES CURVES
                             // IN THE WRONG DIRECTION
 
@@ -249,9 +263,6 @@
                             .attr("text-anchor", "middle")
                             .raise();
                     };
-
-
-
 
                     const linkGroups = svg.selectAll(".link-group")
                         .data(edges)

@@ -134,6 +134,8 @@ export class WebColaLayout {
           this.colaConstraints.push(this.topConstraint(sourceNode, targetNode, minSepHeight));
         }
 
+
+        //// TODO: These are broken, need to fix them
         else if (direction === "directlyLeft") {
 
           this.colaConstraints.push(this.leftConstraint(targetNode, sourceNode, minSepWidth));
@@ -321,27 +323,29 @@ export class WebColaLayout {
   }
 
 
+  // TODO: These need to change to take lists of nodes (in how they are aligned?)
   horizontalAlignmentConstraint(node1: number, node2: number) {
     const alignmentConstraint = {
-      axis: 'x',
-      type : 'alignment',
-      offsets: [
-        { node: node1, offset: 0 },
-        { node: node2, offset: 0 }
-      ]
-    };
+
+      axis: 'y',
+      left: node1,
+      right: node2,
+      gap : 0,
+      'equality': true
+    }
     return alignmentConstraint;
   }
 
   verticalAlignmentConstraint(node1: number, node2: number) {
+
     const alignmentConstraint = {
-      axis: 'y',
-      type : 'alignment',
-      offsets: [
-        { node: node1, offset: 0 },
-        { node: node2, offset: 0 }
-      ]
-    };
+
+      axis: 'x',
+      left: node1,
+      right: node2,
+      gap : 0,
+      'equality': true
+    }
     return alignmentConstraint;
   }
 

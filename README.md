@@ -130,7 +130,8 @@ By default, we assign every `sig` a random color, that is respected by all atoms
 
 # TO ADD:
 
-- [] Aligned versions of directional layout (ie - aligned along x axis or y axis)
+- [x] Aligned versions of directional layout (ie - aligned along x axis or y axis)
+      - Done, but broken?
 - Groups: Information related to groups should not be lost, right?
     - [] Attributes of nodes related to groups should be shown (somehow?)
     - [] Spatial layout of groups:  Preserve relations between groups.
