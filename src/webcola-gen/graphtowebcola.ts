@@ -1,7 +1,7 @@
 import { Graph } from 'graphlib';
 import * as cola from 'webcola'; // Importing WebCola
 import { Group, Node, Link } from 'webcola';
-import { LayoutInstance } from '../layoutinstance';
+import { FieldDirection, LayoutInstance } from '../layoutinstance';
 import { AlloyInstance } from '../alloy-instance';
 
 
@@ -119,20 +119,44 @@ export class WebColaLayout {
 
       //colaConstraints.push(heirarchyConstraint(sourceNode, targetNode, minSeparation));
 
-      this.layoutInstance.getFieldLayout(relName).forEach((direction) => {
+      this.layoutInstance.getFieldLayout(relName).forEach((direction : FieldDirection) => {
+        
+        var constraint = null;
+        
         if (direction === "left") {
-          // Target node goes to the left of source node
           this.colaConstraints.push(this.leftConstraint(targetNode, sourceNode, minSepWidth));
         } else if (direction === "right") {
-          // Source node goes to the left of target node
           this.colaConstraints.push(this.leftConstraint(sourceNode, targetNode, minSepWidth));
         }
         else if (direction === "above") {
-          // Target node goes above source node
           this.colaConstraints.push(this.topConstraint(targetNode, sourceNode, minSepHeight));
         } else if (direction === "below") {
-          // Source node goes above target node
           this.colaConstraints.push(this.topConstraint(sourceNode, targetNode, minSepHeight));
+        }
+
+        else if (direction === "directlyLeft") {
+
+          this.colaConstraints.push(this.leftConstraint(targetNode, sourceNode, minSepWidth));
+          this.colaConstraints.push(this.horizontalAlignmentConstraint(targetNode, sourceNode));
+
+        }
+        else if (direction === "directlyRight") {
+
+          this.colaConstraints.push(this.leftConstraint(sourceNode, targetNode, minSepWidth));
+          this.colaConstraints.push(this.horizontalAlignmentConstraint(targetNode, sourceNode));
+
+        }
+        else if (direction === "directlyAbove") {
+
+          this.colaConstraints.push(this.topConstraint(targetNode, sourceNode, minSepHeight));
+          this.colaConstraints.push(this.verticalAlignmentConstraint(targetNode, sourceNode));
+        }
+        else if (direction === "directlyBelow") {
+
+          this.colaConstraints.push(this.topConstraint(sourceNode, targetNode, minSepHeight));
+          this.colaConstraints.push(this.verticalAlignmentConstraint(targetNode, sourceNode));
+
+          // And align along y axis
         }
       });
 
@@ -295,6 +319,32 @@ export class WebColaLayout {
     };
     return heirarchyConstraint;
   }
+
+
+  horizontalAlignmentConstraint(node1: number, node2: number) {
+    const alignmentConstraint = {
+      axis: 'x',
+      type : 'alignment',
+      offsets: [
+        { node: node1, offset: 0 },
+        { node: node2, offset: 0 }
+      ]
+    };
+    return alignmentConstraint;
+  }
+
+  verticalAlignmentConstraint(node1: number, node2: number) {
+    const alignmentConstraint = {
+      axis: 'y',
+      type : 'alignment',
+      offsets: [
+        { node: node1, offset: 0 },
+        { node: node2, offset: 0 }
+      ]
+    };
+    return alignmentConstraint;
+  }
+
 
 
   applyClosureConstraints() {

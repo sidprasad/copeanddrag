@@ -96,10 +96,34 @@ class ConstraintValidator {
 
 
     private webColaToCassowary(constraint) {
+        let axis = constraint.axis;
+        let strength = Strength.required;
+
+
+        if (constraint.type === 'alignment') {
+
+            let otherAxis = axis === 'x' ? 'y' : 'x';
+            let vars = constraint.offsets.map(offset => this.variables[offset.node][otherAxis]);
+            
+            // All vars should have the same value
+            for (let i = 1; i < vars.length; i++) {
+                try {
+                    this.solver.addConstraint(new Inequality(new Expression(vars[i]), LEQ, new Expression(vars[0]), strength));
+                    this.solver.addConstraint(new Inequality(new Expression(vars[i]), GEQ, new Expression(vars[0]), strength));
+                }
+                catch (e) {
+                    this.error = `Layout not satisfiable! Could not align nodes ${constraint.offsets.map(offset => this.colaNodes[offset.node].id).join(', ')} and satisfy other constraints.`;
+                    console.log(e);
+                    return;
+                }
+            }
+            return;
+        }
+
 
         // Parse the webcola constraints into cassowary constraints
 
-        let axis = constraint.axis;
+
         let left = constraint.left;
         let right = constraint.right;
         let gap = constraint.gap;
@@ -112,7 +136,7 @@ class ConstraintValidator {
 
         let rhs = new Expression(rightVar);
 
-        let strength = Strength.required;
+
 
         try {
             this.solver.addConstraint(new Inequality(lhs, LEQ, rhs, strength));

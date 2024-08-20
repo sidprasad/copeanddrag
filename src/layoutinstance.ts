@@ -7,6 +7,10 @@ import { isBuiltin } from './alloy-instance/src/type';
 
 
 
+export type FieldDirection = "above" | "below" | "left" | "right" | "directlyAbove" | "directlyBelow" | "directlyLeft" | "directlyRight";
+export type RotationDirection = "clockwise" | "counterclockwise";
+export type ClusterTarget = "domain" | "range";
+
 interface fieldDefinition {
     fieldName : string;
 }
@@ -27,11 +31,11 @@ interface LayoutSpec {
 }
 
 interface DirectionalRelation extends fieldDefinition {
-    directions : string[];
+    directions : FieldDirection[];
 }
 
 interface ClusterRelation  extends fieldDefinition {
-    groupOn? : string;
+    groupOn? : ClusterTarget;
 }
 
 interface AttributeDefinition extends fieldDefinition {}
@@ -43,7 +47,7 @@ interface SigColor extends sigDefinition {
 interface ProjectionDefinition extends sigDefinition {}
 
 interface ClosureDefinition extends fieldDefinition {
-    direction? : string;
+    direction? : RotationDirection;
 }
 
 const DEFAULT_LAYOUT : LayoutSpec = {
