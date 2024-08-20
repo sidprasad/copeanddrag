@@ -1,0 +1,20 @@
+{
+    "fieldDirections": [
+      {
+        "fieldName": "above",
+        "directions": [
+          "above"
+        ]
+      }
+    ],
+    "groupBy": [
+
+    ],
+    "attributeFields": [
+      {
+        "fieldName": "occupants"
+      }
+    ],
+    "hideDisconnected": false,
+    "hideDisconnectedBuiltIns": true
+  }
