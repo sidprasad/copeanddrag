@@ -1,6 +1,9 @@
 #lang forge
 
-abstract sig Mark {}
+abstract sig Mark {
+
+    next : one Mark
+}
 
 one sig XII extends Mark {}
 one sig III extends Mark {}
@@ -10,8 +13,7 @@ one sig IX extends Mark {}
 
 sig Clock {
     hour : one Mark,
-    minute : one Mark,
-    next : set Mark
+    minute : one Mark
 }
 
 pred wellformed {
