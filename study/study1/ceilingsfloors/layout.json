@@ -3,7 +3,7 @@
         {
             "fieldName": "upstairs",
             "directions": [
-                "directlyAbove"
+                "above"
             ]
         }
     ],

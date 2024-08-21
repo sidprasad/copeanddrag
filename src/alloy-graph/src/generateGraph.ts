@@ -12,7 +12,7 @@ import {
 import { first, last } from 'lodash';
 import { generateEdgeId, generateNodeId } from './ids';
 import { Graph, Edge } from 'graphlib';
-import { LayoutInstance } from '../../layoutinstance';
+
 
 
 
@@ -54,15 +54,15 @@ export function getRelationSTIndexes(
  */
 export function generateGraph(
   instance: AlloyInstance,
-  layout : LayoutInstance
+  hideDisconnected : boolean,
+  hideDisconnectedBuiltins : boolean,
 ): Graph {
 
 
   const graph = new Graph({ directed: true, multigraph: true });
 
   // Determine which nodes to exclude from the graph
-  const hideDisconnected = layout.hideDisconnected || false;
-  const hideDisconnectedBuiltins =  layout.hideDisconnectedBuiltIns || false;
+
   // Get the set of node ids and edges ids that are to be included in the graph
   const { nodeIds, edgeIds } = getVisibleGraphComponents(
     instance,

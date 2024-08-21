@@ -3,7 +3,7 @@ import * as http from 'http';
 import { AlloyAtom, AlloyDatum, AlloyInstance, AlloyType, parseAlloyXML } from './alloy-instance';
 import { generateGraph } from './alloy-graph';
 
-import { LayoutInstance } from './layoutinstance';
+import { LayoutInstance } from './layout/layoutinstance';
 
 import { WebColaLayout } from './webcola-gen/graphtowebcola';
 import { PenroseInstance } from './penrose-gen/graphtopenrose';
@@ -11,6 +11,7 @@ import { PenroseInstance } from './penrose-gen/graphtopenrose';
 import { applyProjections } from './alloy-instance/src/projection';
 
 import { ConstraintValidator } from './webcola-gen/constraint-validator';
+import { InstanceLayout } from './layout/interfaces';
 
 const express = require('express');
 const path = require('path');
@@ -39,49 +40,48 @@ function getFormContents(req: any) {
     return {instances, li, instanceNumber};
 }
 
-
-function applyLayoutProjections(ai : AlloyInstance, li : LayoutInstance) : AlloyInstance {
-
-    let projectedSigs : string[] = li.projectedSigs;
-    let projectedTypes : AlloyType[] = projectedSigs.map((sig) => ai.types[sig]);
-    // Then get the the atoms of the projected types
-    let projectedAtoms : AlloyAtom[] = projectedTypes.flatMap((type) => type.atoms);
-    let projectedAtomIds : string[] = projectedAtoms.map((atom) => atom.id);
-
-    // Get new instance, calling applyProjectioons
-    let projectedInstance = applyProjections(ai, projectedAtomIds);
-    return projectedInstance;
+function getLayout(req: any) : InstanceLayout { 
+    let {instances, li, instanceNumber} = getFormContents(req);
+    return li.generateLayout(instances[instanceNumber]);
 }
 
 
-app.post('/penrosefiles', (req, res) => {    
-    let {instances, li, instanceNumber} = getFormContents(req);
-    let instance = applyLayoutProjections(instances[instanceNumber], li);
 
-    let g = generateGraph(instance, li);
+// app.post('/penrosefiles', (req, res) => {    
+    
 
-    let pt = new PenroseInstance(g, li, instance);
 
-    let s = pt.substance;
-    let d = pt.domain;
-    let sty = pt.style;
-    res.render('penrosevjs', { 'substance': s, 'domain': d, 'style': sty });
+//     let pt = new PenroseInstance(g, li, instance);
 
-});
+//     let s = pt.substance;
+//     let d = pt.domain;
+//     let sty = pt.style;
+//     res.render('penrosevjs', { 'substance': s, 'domain': d, 'style': sty });
+
+// });
 
 
 
 app.post('/webcolafiles', (req, res) => {    
-    let {instances, li, instanceNumber} = getFormContents(req);
-    let instance = applyLayoutProjections(instances[instanceNumber], li);
 
 
-    let g = generateGraph(instance, li);
+    let layout = getLayout(req);
+    let cl = new WebColaLayout(layout);
+
+
+    let layoutNodes = layout.nodes;
+    let layoutEdges = layout.edges;
+    let layoutConstraints = layout.constraints;
+
+
+    let colaConstraints = cl.colaConstraints;
+    let colaNodes = cl.colaNodes;
+    let colaEdges = cl.colaEdges;
+    let colaGroups = cl.groupDefinitions;
     
-    let cl = new WebColaLayout(g, li, instance);
-    let colaDefinitions = cl.layout();
 
-    const constraintValidator = new ConstraintValidator(colaDefinitions.colaConstraints, colaDefinitions.colaNodes, colaDefinitions.colaGroups);
+
+    const constraintValidator = new ConstraintValidator(colaConstraints, colaNodes, colaGroups);
     const error = constraintValidator.validateConstraints();
     if (error) {
         console.error("Error validating constraints:", error);
@@ -90,18 +90,18 @@ app.post('/webcolafiles', (req, res) => {
         return;
     }
 
-    try {
-        // Serialize and then parse to strip non-serializable parts
-        let serializedColaNodes = JSON.parse(JSON.stringify(colaDefinitions.colaNodes));
-        let serializedColaEdges = JSON.parse(JSON.stringify(colaDefinitions.colaEdges));
-        let serializedColaConstraints = JSON.parse(JSON.stringify(colaDefinitions.colaConstraints));
-        let serializedColaGroups = JSON.parse(JSON.stringify(colaDefinitions.colaGroups));
-        res.render('webcolavis', { 'height': 800, 'width': 1000, 'colaNodes': serializedColaNodes, 'colaEdges': serializedColaEdges, 'colaConstraints' : serializedColaConstraints, 'colaGroups': serializedColaGroups });
-    } catch (error) {
-        console.error("Error serializing colaNodes, colaEdges, colaConstraints or colaGroups:", error);
-        // Handle the error appropriately
-        res.status(500).send("Internal Server Error");
-    }
+    res.render('webcolavis', { 
+        'height': cl.FIG_HEIGHT,
+        'width': cl.FIG_WIDTH,
+        'colaNodes': colaNodes,
+        'colaEdges': colaEdges,
+        'colaConstraints' : colaConstraints, 
+        'colaGroups': colaGroups,
+        layoutNodes,
+        layoutEdges,
+        layoutConstraints
+    
+    });
 });
 
 

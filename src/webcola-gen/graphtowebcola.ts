@@ -1,36 +1,41 @@
 import { Graph } from 'graphlib';
 import * as cola from 'webcola'; // Importing WebCola
-import { Group, Node, Link } from 'webcola';
-import { FieldDirection, LayoutInstance } from '../layoutinstance';
-import { AlloyInstance } from '../alloy-instance';
+import { Group, Node } from 'webcola';
+import { InstanceLayout, LayoutNode, LayoutEdge, LayoutConstraint, LeftConstraint, TopConstraint, AlignmentConstraint, isLeftConstraint, isTopConstraint, isAlignmentConstraint } from '../layout/interfaces';
+
 
 
 const nodeWidth = 50;
 const nodeHeight = 30;
 
-const minSepHeight = 15;
-const minSepWidth = 15;
-const minSeparation = Math.min(minSepHeight, minSepWidth);
+// const minSepHeight = 15;
+// const minSepWidth = 15;
+// const minSeparation = Math.min(minSepHeight, minSepWidth);
 
 
 
 
 
 type NodeWithMetadata = Node & { id: string, attributes: Record<string, string[]>, color: string };
-export { NodeWithMetadata };
+
+
+type EdgeWithMetadata = { 
+  source: number, 
+  target: number, 
+  relName: string, // This is the name of the relation for the edge
+  id: string , // Unique identifier for the edge
+  label : string // This is what is displayed on the edge
+};
+
+export { NodeWithMetadata, EdgeWithMetadata };
 
 export class WebColaLayout {
-  private graph: Graph;
-  private layoutInstance: LayoutInstance;
-  private alloyInstance: AlloyInstance;
 
-  private groupDefinitions: Record<string, string[]>;
-  private allGraphAttributes: Record<string, Record<string, string[]>>;
-  private nodeColors: Record<string, string>;
-
-  private colaConstraints: any[];
-
-  private colaNodes: NodeWithMetadata[];
+  private instanceLayout: InstanceLayout;
+  readonly colaConstraints: any[];
+  readonly colaNodes: NodeWithMetadata[];
+  readonly colaEdges : EdgeWithMetadata[];
+  readonly groupDefinitions: any;
 
   private readonly DEFAULT_X: number;
   private readonly DEFAULT_Y: number;
@@ -38,7 +43,7 @@ export class WebColaLayout {
   readonly FIG_WIDTH: number;
   readonly FIG_HEIGHT: number;
 
-  constructor(graph: Graph, layoutInstance: LayoutInstance, alloyInstance: AlloyInstance, fig_height: number = 800, fig_width: number = 800) {
+  constructor(instanceLayout : InstanceLayout, fig_height: number = 800, fig_width: number = 800) {
 
 
     this.FIG_HEIGHT = fig_height;
@@ -47,180 +52,34 @@ export class WebColaLayout {
     this.DEFAULT_Y = fig_height / 2;
 
 
-    this.graph = graph;
-    this.layoutInstance = layoutInstance;
-    this.alloyInstance = alloyInstance;
+    this.instanceLayout = instanceLayout;
+
+    this.colaNodes = instanceLayout.nodes.map(node => this.toColaNode(node));
+    this.colaEdges = instanceLayout.edges.map(edge => this.toColaEdge(edge));
+    this.groupDefinitions = this.determineGroups(instanceLayout.nodes);
+    this.colaConstraints = instanceLayout.constraints.map(constraint => this.toColaConstraint(constraint));
 
 
-    const changes = layoutInstance.applyGraphChangesRequiredByLayout(this.graph, this.alloyInstance);
-
-    this.groupDefinitions = changes.groups;
-    this.allGraphAttributes = changes.attributes;
-    this.nodeColors = changes.colors;
-
-    this.colaConstraints = [];
-
-    this.colaNodes = this.graph.nodes().map(node => {
-
-      const attributes = this.allGraphAttributes[node] || {};
-      const color = this.nodeColors[node] || "white";
-
-      const h = nodeHeight + minSepHeight;
-      const w = nodeWidth + minSepWidth;
-      return { id: node, x: this.DEFAULT_X, y: this.DEFAULT_Y, width: w, height: h, attributes: attributes, color: color };
-    });
   }
 
 
-  getNodeIndex(nodeId: string) {
+  private getNodeIndex(nodeId: string) {
     return this.colaNodes.findIndex(node => node.id === nodeId);
   }
 
   // Returns true if group1 is a subgroup of group2
-  isSubGroup(group1: string[], group2: string[]) {
+  private isSubGroup(group1: string[], group2: string[]) {
     return group1.every((node) => group2.includes(node));
   }
 
-  // Helper function to find the intersection of two arrays
-  intersect(array1: string[], array2: string[]): string[] {
-    return array1.filter(value => array2.includes(value));
-  }
-
-  layout() {
-
-    this.applyClosureConstraints();
-    const colaEdges = this.setupRelationalConstraints();
-    const colaGroups = this.determineGroupsAndSubgroups();
 
 
-
-
-    return {
-
-      colaNodes: this.colaNodes,
-      colaEdges: colaEdges,
-      colaConstraints: this.colaConstraints,
-      colaGroups: colaGroups
-    }
-  }
-
-
-  private setupRelationalConstraints() {
-
-    return this.graph.edges().map(edge => {
-      const edgeId = edge.name;
-
-      // Get the Edge label
-      const edgeLabel = this.graph.edge(edge.v, edge.w, edgeId);
-      const sourceNode = this.getNodeIndex(edge.v);
-
-      const relName = this.layoutInstance.getRelationName(this.graph, edge);
-      const targetNode = this.getNodeIndex(edge.w);
-
-      //colaConstraints.push(heirarchyConstraint(sourceNode, targetNode, minSeparation));
-
-      this.layoutInstance.getFieldLayout(relName).forEach((direction : FieldDirection) => {
-        
-        var constraint = null;
-        
-        if (direction === "left") {
-          this.colaConstraints.push(this.leftConstraint(targetNode, sourceNode, minSepWidth));
-        } else if (direction === "right") {
-          this.colaConstraints.push(this.leftConstraint(sourceNode, targetNode, minSepWidth));
-        }
-        else if (direction === "above") {
-          this.colaConstraints.push(this.topConstraint(targetNode, sourceNode, minSepHeight));
-        } else if (direction === "below") {
-          this.colaConstraints.push(this.topConstraint(sourceNode, targetNode, minSepHeight));
-        }
-
-
-        //// TODO: These are broken, need to fix them
-        else if (direction === "directlyLeft") {
-
-          this.colaConstraints.push(this.leftConstraint(targetNode, sourceNode, minSepWidth));
-          this.colaConstraints.push(this.horizontalAlignmentConstraint(targetNode, sourceNode));
-
-        }
-        else if (direction === "directlyRight") {
-
-          this.colaConstraints.push(this.leftConstraint(sourceNode, targetNode, minSepWidth));
-          this.colaConstraints.push(this.horizontalAlignmentConstraint(targetNode, sourceNode));
-
-        }
-        else if (direction === "directlyAbove") {
-
-          this.colaConstraints.push(this.topConstraint(targetNode, sourceNode, minSepHeight));
-          this.colaConstraints.push(this.verticalAlignmentConstraint(targetNode, sourceNode));
-        }
-        else if (direction === "directlyBelow") {
-
-          this.colaConstraints.push(this.topConstraint(sourceNode, targetNode, minSepHeight));
-          this.colaConstraints.push(this.verticalAlignmentConstraint(targetNode, sourceNode));
-
-          // And align along y axis
-        }
-      });
-
-      return {
-        source: sourceNode,
-        target: targetNode,
-        id: edgeId,
-        relName: edgeLabel
-      };
-    });
-  }
-
-
-  private orderNodesByEdges(edges): number[][] {
-    let edgesIndices = edges.map(edge => {
-      return {
-        v: this.getNodeIndex(edge.v),
-        w: this.getNodeIndex(edge.w)
-      };
-    });
-
-    let inNodes = edgesIndices.map(edge => edge.w);
-    let outNodes = edgesIndices.map(edge => edge.v);
-
-    // Root nodes have no incoming edges
-    let rootNodes = outNodes.filter(node => !inNodes.includes(node));
-
-    if (rootNodes.length === 0) {
-      // If there are no root nodes, just pick any node
-      rootNodes = [outNodes[0]];
-    }
-
-
-    return rootNodes.map((rootNode) => {
-      let visited = new Set<number>();
-      let traversalOrder = [];
-      let queue: number[] = [rootNode];
-
-      while (queue.length > 0) {
-        let node = queue.pop();
-        if (!visited.has(node)) {
-          visited.add(node);
-          traversalOrder.push(node);
-
-          // Get all the outgoing edges from this node
-          let outgoingEdges = edgesIndices.filter(edge => edge.v === node);
-          let outgoingNodes = outgoingEdges.map(edge => edge.w);
-
-          // Add the outgoing nodes to the queue
-          queue = queue.concat(outgoingNodes);
-        }
-      }
-      return traversalOrder;
-    });
-  }
-
-  private determineGroupsAndSubgroups() {
+  private determineGroupsAndSubgroups(groupDefinitions: Record<string, string[]>) {
     let subgroups: Record<string, string[]> = {};
 
 
-    Object.entries(this.groupDefinitions).forEach(([key1, value1]) => {
-      Object.entries(this.groupDefinitions).forEach(([key2, value2]) => {
+    Object.entries(groupDefinitions).forEach(([key1, value1]) => {
+      Object.entries(groupDefinitions).forEach(([key2, value2]) => {
 
         const avoidContainmentCycle =
           key1 !== key2 // Group is not a subgroup of itself
@@ -247,7 +106,7 @@ export class WebColaLayout {
 
     //Now modify groupDefinitions to be in the format that WebCola expects (ie indexed by node)
 
-    const colaGroupsBeforeSubgrouping = Object.entries(this.groupDefinitions).map(([key, value]) => {
+    const colaGroupsBeforeSubgrouping = Object.entries(groupDefinitions).map(([key, value]) => {
 
       let leaves = value.map((nodeId) => this.getNodeIndex(nodeId));
       let padding = 20;
@@ -280,7 +139,6 @@ export class WebColaLayout {
         let group = colaGroupsBeforeSubgrouping[groupIndex];
         leaves = leaves.filter((leaf) => !group.leaves.includes(leaf));
       });
-
 
       return { leaves, padding, name, groups };
     });
@@ -323,116 +181,81 @@ export class WebColaLayout {
   }
 
 
-  // TODO: These need to change to take lists of nodes (in how they are aligned?)
-  horizontalAlignmentConstraint(node1: number, node2: number) {
-    const alignmentConstraint = {
 
-      axis: 'y',
-      left: node1,
-      right: node2,
-      gap : 0,
-      'equality': true
+
+  private toColaNode(node: LayoutNode) : NodeWithMetadata {
+    
+    return {
+      id: node.id,
+      color: node.color,
+      attributes: node.attributes,
+      width: nodeWidth,
+      height: nodeHeight,
+      x : this.DEFAULT_X,
+      y : this.DEFAULT_Y
     }
-    return alignmentConstraint;
   }
 
-  verticalAlignmentConstraint(node1: number, node2: number) {
+  private toColaEdge(edge: LayoutEdge) : EdgeWithMetadata {
 
-    const alignmentConstraint = {
+    let sourceIndex = this.getNodeIndex(edge.source.id);
+    let targetIndex = this.getNodeIndex(edge.target.id);
 
-      axis: 'x',
-      left: node1,
-      right: node2,
-      gap : 0,
-      'equality': true
+    return {
+      source: sourceIndex,
+      target: targetIndex,
+      relName: edge.relationName,
+      id: edge.id,
+      label : edge.label
     }
-    return alignmentConstraint;
   }
 
 
+  private toColaConstraint(constraint : LayoutConstraint) : any {
 
-  applyClosureConstraints() {
+    // Switch on the type of constraint
+    if (isLeftConstraint(constraint)) {
+      return this.leftConstraint(this.getNodeIndex(constraint.left.id), this.getNodeIndex(constraint.right.id), constraint.minDistance);
+    }
 
-    const closures = this.layoutInstance.getClosures();
-    closures.forEach((closure) => {
-      this.applyClosureConstraint(closure.fieldName, closure.direction);
+    if(isTopConstraint(constraint)) {
+      return this.topConstraint(this.getNodeIndex(constraint.top.id), this.getNodeIndex(constraint.bottom.id), constraint.minDistance);
+    }
+
+    if(isAlignmentConstraint(constraint)) {
+
+      // Is this right or do I have to switch axes. Check.
+      const alignmentConstraint = {
+        axis: constraint.axis,
+        left: this.getNodeIndex(constraint.node1.id),
+        right: this.getNodeIndex(constraint.node2.id),
+        gap : 0,
+        'equality': true
+      }
+      return alignmentConstraint;
+
+    }
+    throw new Error("Constraint type not recognized");
+  }
+
+
+  private determineGroups(nodes: LayoutNode[])  {
+
+    // First get the groups from the nodes
+    let groups: Record<string, string[]> = {};
+
+    nodes.forEach(node => {
+      if (node.groups) {
+        node.groups.forEach(group => {
+          if (groups[group]) {
+            groups[group].push(node.id);
+          } else {
+            groups[group] = [node.id];
+          }
+        });
+      }
     });
-
+    return this.determineGroupsAndSubgroups(groups);
   }
 
-
-
-  applyClosureConstraint(relName: string, direction: string) {
-
-    let direction_mult: number = 0;
-
-    if (direction === "clockwise") {
-      direction_mult = 1;
-    }
-    else if (direction === "counterclockwise") {
-      direction_mult = -1;
-    }
-
-
-
-    // Now get all nodes that have the relation relName
-
-    let relationEdges = this.graph.edges().filter(edge => {
-      return this.layoutInstance.getRelationName(this.graph, edge) === relName;
-    });
-
-    if (relationEdges.length === 0) {
-      return;
-    }
-
-    let relatedNodeFragments = this.orderNodesByEdges(relationEdges);
-
-    var fragment_num = 0;
-
-    relatedNodeFragments.forEach((relatedNodes) => {
-
-      fragment_num++;
-
-      const c: NodeWithMetadata = {
-        id: `_${relName}_${fragment_num}`,
-        x: this.DEFAULT_X,
-        y: this.DEFAULT_Y,
-        width: 2,
-        height: 2,
-        attributes: {},
-        color: "transparent"
-      };
-
-      this.colaNodes.push(c);
-      let c_index = this.getNodeIndex(c.id);
-
-      // Now keep the related nodes a fixed distance from c
-      const fixedDistance = 30; // Example fixed distance
-      const angleStep = (direction_mult * 2 * Math.PI) / relatedNodes.length;
-
-
-      let index = 0;
-      relatedNodes.forEach(nodeIndex => {
-
-        const angle = index * angleStep;
-        const x_gap = fixedDistance * Math.cos(angle);
-        const y_gap = fixedDistance * Math.sin(angle);
-
-        if (x_gap > 0) {
-          this.colaConstraints.push(this.leftConstraint(c_index, nodeIndex, x_gap));
-        }
-        else {
-          this.colaConstraints.push(this.leftConstraint(nodeIndex, c_index, -x_gap));
-        }
-
-        if (y_gap > 0) {
-          this.colaConstraints.push(this.topConstraint(c_index, nodeIndex, y_gap));
-        }
-        else {
-          this.colaConstraints.push(this.topConstraint(nodeIndex, c_index, -y_gap));
-        }
-        index++;
-      });
-    });
-  }
 }

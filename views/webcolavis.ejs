@@ -85,8 +85,6 @@
             <button type="button" class="btn btn-outline-secondary"><a href="#svg"> WebCola Diagram </a></button>
             <button type="button" class="btn btn-outline-secondary"><a href="#constraints"> WebCola Alignment
                     Constraints </a></button>
-            <button type="button" class="btn btn-outline-secondary"><a href="#groups"> WebCola Group Definitions
-                </a></button>
             <button type="button" class="btn btn-outline-secondary"><a href="#graphDefs"> WebCola Graph Definitions
                 </a></button>
         </div>
@@ -135,7 +133,7 @@
 
 
                     var colaLayout = cola.d3adaptor(d3)
-                        .convergenceThreshold(0.1) // TODO: What should we do here?
+                        //.convergenceThreshold(0.1) // TODO: What should we do here?
                         .avoidOverlaps(true)
                         .handleDisconnected(true)
                         .size([width, height]);
@@ -144,33 +142,6 @@
                     var edges = <%- JSON.stringify(colaEdges) %>;
                     var constraints = <%- JSON.stringify(colaConstraints) %>;
                     var groups = <%- JSON.stringify(colaGroups) %>;
-
-
-
-                    // // Here add a top left and bottom right node with fixed positions
-                    // var fixedNode = {fixed: true, fixedWeight: 100},
-                    // topLeft = { ...fixedNode, x: 0, y: 0, id : "_tl", height : 1, width : 1 },
-                    // bottomRight = { ...fixedNode, x: width, y: height, id : "_br" , height : 1, width : 1};
-
-                    // let tlIndex = nodes.push(topLeft) - 1;
-                    // let brIndex = nodes.push(bottomRight) - 1;
-
-                    // for (var i = 0; i < nodes.length; i++) {
-
-                    //     if (i === tlIndex || i === brIndex) {
-                    //         continue;
-                    //     }
-                    //     let sepY = nodes[i].height / 2;
-                    //     let sepX = nodes[i].width / 2;
-
-
-                    //     constraints.push({ axis: 'x', type: 'separation', left: tlIndex, right: i, gap: sepX });
-                    //     constraints.push({ axis: 'y', type: 'separation', left: tlIndex, right: i, gap: sepY });
-                    //     constraints.push({ axis: 'x', type: 'separation', left: i, right: brIndex, gap: sepX });
-                    //     constraints.push({ axis: 'y', type: 'separation', left: i, right: brIndex, gap: sepY });
-                    // }
-
-
 
 
                     const LINK_DISTANCE = Math.min(width, height) / Math.sqrt(nodes.length);
@@ -450,17 +421,14 @@
 
         <div id="webcola">
 
-            <h3> Alignment Constraints </h3>
-            <pre id="constraints"> <%- JSON.stringify(colaConstraints, null,2) %>;%></pre>
-
-            <h3> Group Definitions</h3>
-            <pre id="groups"> <%- JSON.stringify(colaGroups, null,2) %>;%></pre>
+            <h3> Layout Constraints </h3>
+            <pre id="constraints"> <%- JSON.stringify(layoutConstraints, null,2) %>;%></pre>
 
             <h3 id="graphDefs"> Graph definitions </h3>
             <h4>Nodes</h4>
-            <pre id="nodes"> <%- JSON.stringify(colaNodes,null, 2) %>;%></pre>
+            <pre id="nodes"> <%- JSON.stringify(layoutNodes,null, 2) %>;%></pre>
             <h4>Edges</h4>
-            <pre id="edges"> <%- JSON.stringify(colaEdges, null,2) %>;%></pre>
+            <pre id="edges"> <%- JSON.stringify(layoutEdges, null,2) %>;%></pre>
 
         </div>
 
