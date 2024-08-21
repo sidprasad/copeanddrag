@@ -408,10 +408,10 @@ export class LayoutInstance {
     applyClosureConstraint(g: Graph, layoutNodes: LayoutNode[], relName: string, direction: string): LayoutConstraint[] {
         let direction_mult: number = 0;
         if (direction === "clockwise") {
-            direction_mult = -1;
+            direction_mult = 1;
         }
         else if (direction === "counterclockwise") {
-            direction_mult = 1; // IS THIS RIGHT OR THE OTHER WAY?
+            direction_mult = -1; // IS THIS RIGHT OR THE OTHER WAY?
         }
 
         let relationEdges = g.edges().filter(edge => {
@@ -436,8 +436,9 @@ export class LayoutInstance {
 
 
             // Now keep the related nodes a fixed distance from the centroid
-            const fixedDistance = 150; // Example fixed distance. This needs to change.
+            const fixedDistance = 50; // Example fixed distance. This needs to change.
             const angleStep = (direction_mult * 2 * Math.PI) / relatedNodes.length;
+
             let index = 0;
 
             relatedNodes.forEach(nodeId => {
@@ -496,7 +497,7 @@ export class LayoutInstance {
 
                     // Get all the outgoing edges from this node
                     let outgoingEdges = edges.filter(edge => edge.v === node);
-                    let outgoingNodes = edges.map(edge => edge.w);
+                    let outgoingNodes = outgoingEdges.map(edge => edge.w);
 
                     // Add the outgoing nodes to the queue
                     queue = queue.concat(outgoingNodes);
