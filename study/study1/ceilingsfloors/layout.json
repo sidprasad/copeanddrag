@@ -8,22 +8,20 @@
         },
 
         {
-            "fieldName": "units",
+            "fieldName": "blockA",
             "directions": [
                 "directlyRight"
             ]
-        }
-    ],
-    "groupBy": [
+        },
         {
-            "fieldName": "occupants",
-            "groupOn": "domain"
+            "fieldName": "blockB",
+            "directions": [
+                "directlyLeft"
+            ]
         }
     ],
-    "attributeFields": [
-
-
-    ],
+    "groupBy": [   ],
+    "attributeFields": [    ],
     "hideDisconnected": false,
     "hideDisconnectedBuiltIns": true
 }

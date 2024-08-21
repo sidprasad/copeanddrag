@@ -1,5 +1,5 @@
-<alloy builddate="Tuesday, August 20th, 2024">
-<instance bitwidth="4" maxseq="-1" command="temporary-name_ceilingfloor_1" filename="/no-name.rkt" version="3.5"  >
+<alloy builddate="Wednesday, August 21st, 2024">
+<instance bitwidth="4" maxseq="-1" command="temporary-name_mixedusebuilding_1" filename="/no-name.rkt" version="3.5"  >
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>
@@ -14,47 +14,44 @@
 <types> <type ID="2"/><type ID="2"/> </types>
 </field>
 
-<sig label="Floor" ID="4" parentID="2">
-<atom label="Floor0"/><atom label="Floor1"/><atom label="Floor2"/><atom label="Floor3"/>
+<sig label="Unit" ID="4" parentID="2">
+
 </sig>
 
-<sig label="Person" ID="5" parentID="2">
-<atom label="Person0"/><atom label="Person1"/><atom label="Person2"/><atom label="Person3"/><atom label="Person4"/><atom label="Person5"/><atom label="Person6"/><atom label="Person7"/>
+<sig label="Commercial" ID="5" parentID="4">
+<atom label="Commercial0"/><atom label="Commercial1"/><atom label="Commercial2"/><atom label="Commercial3"/>
 </sig>
 
-<sig label="Unit" ID="6" parentID="2">
-<atom label="Unit0"/><atom label="Unit1"/><atom label="Unit2"/><atom label="Unit3"/><atom label="Unit4"/><atom label="Unit5"/>
+<sig label="Residential" ID="6" parentID="4">
+<atom label="Residential0"/><atom label="Residential1"/><atom label="Residential2"/><atom label="Residential3"/>
 </sig>
 
-<field label="units" ID="7" parentID="4">
-<tuple><atom label="Floor0"/><atom label="Unit3"/></tuple>
-<tuple><atom label="Floor1"/><atom label="Unit2"/></tuple>
-<tuple><atom label="Floor2"/><atom label="Unit1"/></tuple>
-<tuple><atom label="Floor3"/><atom label="Unit0"/></tuple>
-<tuple><atom label="Floor3"/><atom label="Unit4"/></tuple>
-<tuple><atom label="Floor3"/><atom label="Unit5"/></tuple>
-<types><type ID="4"/><type ID="6"/></types>
+<sig label="Floor" ID="7" parentID="2">
+<atom label="Floor0"/><atom label="Floor1"/><atom label="Floor2"/>
+</sig>
+
+<field label="upstairs" ID="8" parentID="7">
+<tuple><atom label="Floor0"/><atom label="Floor1"/></tuple>
+<tuple><atom label="Floor1"/><atom label="Floor2"/></tuple>
+<types><type ID="7"/><type ID="7"/></types>
 
 </field>
 
-<field label="occupants" ID="8" parentID="6">
-<tuple><atom label="Unit0"/><atom label="Person7"/></tuple>
-<tuple><atom label="Unit1"/><atom label="Person6"/></tuple>
-<tuple><atom label="Unit2"/><atom label="Person5"/></tuple>
-<tuple><atom label="Unit3"/><atom label="Person4"/></tuple>
-<tuple><atom label="Unit4"/><atom label="Person3"/></tuple>
-<tuple><atom label="Unit5"/><atom label="Person0"/></tuple>
-<tuple><atom label="Unit5"/><atom label="Person1"/></tuple>
-<tuple><atom label="Unit5"/><atom label="Person2"/></tuple>
-<types><type ID="6"/><type ID="5"/></types>
+<field label="blockA" ID="9" parentID="7">
+<tuple><atom label="Floor0"/><atom label="Residential3"/></tuple>
+<tuple><atom label="Floor1"/><atom label="Residential2"/></tuple>
+<tuple><atom label="Floor2"/><atom label="Residential1"/></tuple>
+<types><type ID="7"/><type ID="4"/></types>
 
 </field>
 
-<field label="upstairs" ID="9" parentID="4">
-<tuple><atom label="Floor1"/><atom label="Floor0"/></tuple>
-<tuple><atom label="Floor2"/><atom label="Floor1"/></tuple>
-<tuple><atom label="Floor3"/><atom label="Floor2"/></tuple>
-<types><type ID="4"/><type ID="4"/></types>
+<field label="blockB" ID="10" parentID="7">
+<tuple><atom label="Floor0"/><atom label="Residential0"/></tuple>
+<tuple><atom label="Floor1"/><atom label="Commercial2"/></tuple>
+<tuple><atom label="Floor1"/><atom label="Commercial3"/></tuple>
+<tuple><atom label="Floor2"/><atom label="Commercial0"/></tuple>
+<tuple><atom label="Floor2"/><atom label="Commercial1"/></tuple>
+<types><type ID="7"/><type ID="4"/></types>
 
 </field>
 

@@ -5,8 +5,8 @@ import { InstanceLayout, LayoutNode, LayoutEdge, LayoutConstraint, LeftConstrain
 
 
 
-const nodeWidth = 50;
-const nodeHeight = 30;
+const nodeWidth = 70;
+const nodeHeight = 45;
 
 // const minSepHeight = 15;
 // const minSepWidth = 15;

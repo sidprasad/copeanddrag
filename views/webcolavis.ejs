@@ -150,7 +150,7 @@
 
 
                     const LINK_DISTANCE = Math.min(width, height) / Math.sqrt(nodes.length);
-
+                    console.log("Link distance: " + LINK_DISTANCE);
                     nodes.forEach(function (node) {
                         node.name = node.id;
                     });
@@ -196,7 +196,7 @@
                             let index = outEdges.findIndex(edge => edge.id == edgeid);
 
                             let curvature = (index % 2 === 0 ? 1 : -1) * (Math.floor(index / 2) + 1) * 0.1 * edgeCount;
-                            console.log(`${edgeid} is edge ${index} / ${edgeCount} from ${fromNode} to ${toNode}. Curvature: ${curvature}`);
+                            //console.log(`${edgeid} is edge ${index} / ${edgeCount} from ${fromNode} to ${toNode}. Curvature: ${curvature}`);
                             return curvature;
                         }
 
