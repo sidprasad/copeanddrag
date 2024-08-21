@@ -1,0 +1,16 @@
+{
+    "fieldDirections": [ 
+
+    ],
+    "groupBy": [
+    ],
+    "closures" : [
+        {
+            "fieldName": "next",
+            "direction" : "counterclockwise"
+        }
+    ],
+    "attributeFields": [      ],
+    "hideDisconnected": true,
+    "hideDisconnectedBuiltIns": true
+}
