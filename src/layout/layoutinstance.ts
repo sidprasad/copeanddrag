@@ -139,7 +139,11 @@ export class LayoutInstance {
                     groups[groupName].push(source);
                 }
                 else {
-                    groups[groupName] = [source];
+                    //groups[groupName] = [source];
+
+                    // CHANGE: ADD THE GROUP TARGET TO THE GROUP. MAYBE THIS HELPS
+                    // PRESERVE SOME LAYOUT INFORMATION
+                    groups[groupName] = [source, target];
                 }
 
                 // But also remove this edge from the graph.
