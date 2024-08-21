@@ -6,8 +6,8 @@
     ],
     "closures" : [
         {
-            "fieldName": "next",
-            "direction" : "counterclockwise"
+            "fieldName": "left",
+            "direction" : "clockwise"
         }
     ],
     "attributeFields": [      ],
