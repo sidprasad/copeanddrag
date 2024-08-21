@@ -1,0 +1,106 @@
+<alloy builddate="Wednesday, August 21st, 2024">
+<instance bitwidth="4" maxseq="-1" command="temporary-name_seatingchart_1" filename="/no-name.rkt" version="3.5"  >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Food" ID="4" parentID="2">
+
+</sig>
+
+<sig label="Chicken" ID="5" parentID="4">
+<atom label="Chicken0"/>
+</sig>
+
+<sig label="Cheese" ID="6" parentID="4">
+<atom label="Cheese0"/>
+</sig>
+
+<sig label="Egg" ID="7" parentID="4">
+<atom label="Egg0"/>
+</sig>
+
+<sig label="Ham" ID="8" parentID="4">
+<atom label="Ham0"/>
+</sig>
+
+<sig label="Person" ID="9" parentID="2">
+
+</sig>
+
+<sig label="Liliput" ID="10" parentID="9">
+<atom label="Liliput0"/><atom label="Liliput1"/><atom label="Liliput2"/>
+</sig>
+
+<sig label="Brobdingnag" ID="11" parentID="9">
+<atom label="Brobdingnag0"/><atom label="Brobdingnag1"/><atom label="Brobdingnag2"/>
+</sig>
+
+<sig label="Table" ID="12" parentID="2">
+<atom label="Table0"/><atom label="Table1"/><atom label="Table2"/>
+</sig>
+
+<sig label="Blefuscu" ID="13" parentID="9">
+<atom label="Blefuscu0"/><atom label="Blefuscu1"/><atom label="Blefuscu2"/><atom label="Blefuscu3"/>
+</sig>
+
+<field label="right" ID="14" parentID="9">
+<tuple><atom label="Liliput0"/><atom label="Liliput1"/></tuple>
+<tuple><atom label="Liliput1"/><atom label="Liliput0"/></tuple>
+<tuple><atom label="Liliput2"/><atom label="Brobdingnag0"/></tuple>
+<tuple><atom label="Blefuscu0"/><atom label="Blefuscu2"/></tuple>
+<tuple><atom label="Blefuscu1"/><atom label="Brobdingnag2"/></tuple>
+<tuple><atom label="Blefuscu2"/><atom label="Blefuscu3"/></tuple>
+<tuple><atom label="Blefuscu3"/><atom label="Liliput2"/></tuple>
+<tuple><atom label="Brobdingnag0"/><atom label="Brobdingnag1"/></tuple>
+<tuple><atom label="Brobdingnag1"/><atom label="Blefuscu0"/></tuple>
+<tuple><atom label="Brobdingnag2"/><atom label="Blefuscu1"/></tuple>
+<types><type ID="9"/><type ID="9"/></types>
+
+</field>
+
+<field label="table" ID="15" parentID="9">
+<tuple><atom label="Liliput0"/><atom label="Table2"/></tuple>
+<tuple><atom label="Liliput1"/><atom label="Table2"/></tuple>
+<tuple><atom label="Liliput2"/><atom label="Table1"/></tuple>
+<tuple><atom label="Blefuscu0"/><atom label="Table1"/></tuple>
+<tuple><atom label="Blefuscu1"/><atom label="Table0"/></tuple>
+<tuple><atom label="Blefuscu2"/><atom label="Table1"/></tuple>
+<tuple><atom label="Blefuscu3"/><atom label="Table1"/></tuple>
+<tuple><atom label="Brobdingnag0"/><atom label="Table1"/></tuple>
+<tuple><atom label="Brobdingnag1"/><atom label="Table1"/></tuple>
+<tuple><atom label="Brobdingnag2"/><atom label="Table0"/></tuple>
+<types><type ID="9"/><type ID="12"/></types>
+
+</field>
+
+<field label="eating" ID="16" parentID="9">
+<tuple><atom label="Liliput0"/><atom label="Cheese0"/></tuple>
+<tuple><atom label="Liliput1"/><atom label="Cheese0"/></tuple>
+<tuple><atom label="Liliput2"/><atom label="Chicken0"/></tuple>
+<tuple><atom label="Blefuscu0"/><atom label="Cheese0"/></tuple>
+<tuple><atom label="Blefuscu1"/><atom label="Ham0"/></tuple>
+<tuple><atom label="Blefuscu2"/><atom label="Ham0"/></tuple>
+<tuple><atom label="Blefuscu3"/><atom label="Egg0"/></tuple>
+<tuple><atom label="Brobdingnag0"/><atom label="Cheese0"/></tuple>
+<tuple><atom label="Brobdingnag1"/><atom label="Ham0"/></tuple>
+<tuple><atom label="Brobdingnag2"/><atom label="Egg0"/></tuple>
+<types><type ID="9"/><type ID="4"/></types>
+
+</field>
+
+
+</instance>
+
+<source filename="/no-name.rkt" content="// Couldn't open source file (/no-name.rkt) (info: (2 . posix)). Is the file saved?"></source>
+</alloy>

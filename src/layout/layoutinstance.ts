@@ -436,7 +436,7 @@ export class LayoutInstance {
 
 
             // Now keep the related nodes a fixed distance from the centroid
-            const fixedDistance = 30; // Example fixed distance
+            const fixedDistance = 100; // Example fixed distance
             const angleStep = (direction_mult * 2 * Math.PI) / relatedNodes.length;
             let index = 0;
 

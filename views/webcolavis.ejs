@@ -140,7 +140,7 @@
                     var colaLayout = cola.d3adaptor(d3)
                         //.convergenceThreshold(0.1) // TODO: What should we do here?
                         .avoidOverlaps(true)
-                        .handleDisconnected(false)
+                        .handleDisconnected(true)
                         .size([width, height]);
 
                     var nodes = <%- JSON.stringify(colaNodes) %>;

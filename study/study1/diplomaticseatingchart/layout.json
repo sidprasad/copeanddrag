@@ -1,0 +1,24 @@
+{
+    "fieldDirections": [ 
+
+    ],
+    "groupBy": [
+        {
+            "fieldName": "table"
+        }
+    ],
+    "closures" : [
+        {
+            "fieldName": "right",
+            "direction" : "clockwise"
+        }
+    ],
+    "attributeFields": [
+        {
+            "fieldName": "eating"
+          }
+      
+    ],
+    "hideDisconnected": true,
+    "hideDisconnectedBuiltIns": true
+  }
