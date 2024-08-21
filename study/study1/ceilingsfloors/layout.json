@@ -3,7 +3,14 @@
         {
             "fieldName": "upstairs",
             "directions": [
-                "above"
+                "directlyAbove"
+            ]
+        },
+
+        {
+            "fieldName": "units",
+            "directions": [
+                "directlyRight"
             ]
         }
     ],
@@ -15,9 +22,6 @@
     ],
     "attributeFields": [
 
-        {
-            "fieldName": "units"
-        }
 
     ],
     "hideDisconnected": false,

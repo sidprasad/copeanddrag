@@ -131,11 +131,16 @@
                     var svg = d3.select(".zoomable");
 
 
+                    const initialUnconstrainedIterations = 10; //unconstrained initial layout iterations
+                    const initialUserConstraintIterations = 100; // initial layout iterations with user-specified constraints
+                    const initialAllConstraintsIterations = 50; // initial layout iterations with all constraints including non-overlap
+                    const gridSnapIterations = 5; // iterations of "grid snap", which pulls nodes towards grid cell centers - grid of size node[0].width - only really makes sense if all nodes have the same width and heigh
+
 
                     var colaLayout = cola.d3adaptor(d3)
                         //.convergenceThreshold(0.1) // TODO: What should we do here?
                         .avoidOverlaps(true)
-                        .handleDisconnected(true)
+                        .handleDisconnected(false)
                         .size([width, height]);
 
                     var nodes = <%- JSON.stringify(colaNodes) %>;
@@ -411,7 +416,11 @@
 
                     });
 
-                    colaLayout.start()
+                    colaLayout.start(
+                        initialUnconstrainedIterations,
+                        initialUserConstraintIterations,
+                        initialAllConstraintsIterations,
+                        gridSnapIterations)
                         .on("end", routeEdges);
 
                 });
