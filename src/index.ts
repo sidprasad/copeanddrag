@@ -46,32 +46,15 @@ function getLayout(req: any) : InstanceLayout {
 }
 
 
-
-// app.post('/penrosefiles', (req, res) => {    
-    
-
-
-//     let pt = new PenroseInstance(g, li, instance);
-
-//     let s = pt.substance;
-//     let d = pt.domain;
-//     let sty = pt.style;
-//     res.render('penrosevjs', { 'substance': s, 'domain': d, 'style': sty });
-
-// });
-
-
-
 app.post('/webcolafiles', (req, res) => {    
-
 
     let layout = getLayout(req);
     let cl = new WebColaLayout(layout);
 
-
     let layoutNodes = layout.nodes;
     let layoutEdges = layout.edges;
     let layoutConstraints = layout.constraints;
+    let layoutGroups = layout.groups;
 
 
     let colaConstraints = cl.colaConstraints;

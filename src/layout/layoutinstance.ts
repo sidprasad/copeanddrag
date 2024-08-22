@@ -1,5 +1,4 @@
 
-import { group } from 'console';
 import { Graph, Edge } from 'graphlib';
 import { AlloyInstance, getAtomType, getInstanceTypes } from '../alloy-instance';
 import { isBuiltin, AlloyType } from '../alloy-instance/src/type';
@@ -7,7 +6,7 @@ import { AlloyAtom } from '../alloy-instance/src/atom';
 import { applyProjections } from '../alloy-instance/src/projection';
 
 import { LayoutSpec, ClosureDefinition, ClusterRelation, parseLayoutSpec } from './layoutspec';
-import { LayoutNode, LayoutEdge, LayoutConstraint, InstanceLayout, LeftConstraint, TopConstraint, AlignmentConstraint } from './interfaces';
+import { LayoutNode, LayoutEdge, LayoutConstraint, InstanceLayout, LeftConstraint, TopConstraint, AlignmentConstraint, LayoutGroup } from './interfaces';
 
 import { generateGraph } from '../alloy-graph';
 import { Layout } from 'webcola';
@@ -106,9 +105,9 @@ export class LayoutInstance {
      * @param g - The graph, which will be modified to remove the edges that are used to generate groups.
      * @returns A record of groups.
      */
-    private generateGroups(g: Graph): Record<string, string[]> {
+    private generateGroups(g: Graph): LayoutGroup[] {
 
-        let groups: Record<string, string[]> = {};
+        let groups: LayoutGroup[] = [];
         // Should we also remove the groups from the graph?
 
         let graphEdges = [...g.edges()];
@@ -123,35 +122,31 @@ export class LayoutInstance {
             const clusterSettings = this.getClusterSettings(relName);
 
             if (clusterSettings) {
-
-                // If so, add the targter as a group key,
-                // and the source as a value in the group
-
-                // Check if clusterSettings has a groupOn field
+                // Default to range, but check what is being grouped on.
                 const groupOn = clusterSettings.groupOn || this.DEFAULT_GROUP_ON;
-
-
-
                 let { source, target } = this.getGroupSourceAndTarget(edge, groupOn);
                 let groupName = target + ":" + this.getEdgeLabel(g, edge);
 
-                if (groups[groupName]) {
-                    groups[groupName].push(source);
+                // Check if the group already exists
+                let existingGroup : LayoutGroup = groups.find((group) => group.name === groupName);
+
+
+                if (existingGroup) {
+                    existingGroup.nodeIds.push(source);
                 }
                 else {
-                    groups[groupName] = [source];
 
-                    // CHANGE: ADD THE GROUP TARGET TO THE GROUP. MAYBE THIS HELPS
-                    // PRESERVE SOME LAYOUT INFORMATION
-                    //groups[groupName] = [source, target];
+                    let newGroup : LayoutGroup = 
+                    {   
+                        name: groupName,
+                        nodeIds: [source],
+                        keyNodeId: target 
+                    };
+                    groups.push(newGroup);
                 }
 
                 // But also remove this edge from the graph.
                 g.removeEdge(edge.v, edge.w, edgeId);
-
-                // TODO: We may lose some good layout information here though.
-                // Could we somehow associate the group with the source (make them be close?)
-
             }
         });
 
@@ -240,7 +235,7 @@ export class LayoutInstance {
         });
     }
 
-
+    // TODO: Replace this with that d3 function that generates a color based on an index
     private getRandomColor(): string {
         const letters = '0123456789ABCDEF';
         let color = '#';
@@ -325,12 +320,11 @@ export class LayoutInstance {
         const groups = this.generateGroups(g);
         const colors = this.colorNodesByType(g, a);
 
-
-        // Let's hydrate the nodes
         let layoutNodes: LayoutNode[] = g.nodes().map((nodeId) => {
-
             let color = colors[nodeId];
-            let nodeGroups = Object.keys(groups).filter((group) => groups[group].includes(nodeId));
+            let nodeGroups = groups
+                                .filter((group) => group.nodeIds.includes(nodeId))
+                                .map((group) => group.name);
             let nodeAttributes = attributes[nodeId] || {};
             return { id: nodeId, color: color, groups: nodeGroups, attributes: nodeAttributes };
         });
@@ -389,7 +383,7 @@ export class LayoutInstance {
                  id: edgeId};
             return e;
         });
-        return { nodes: layoutNodes, edges: layoutEdges, constraints: constraints };
+        return { nodes: layoutNodes, edges: layoutEdges, constraints: constraints, groups: groups };
     }
 
 

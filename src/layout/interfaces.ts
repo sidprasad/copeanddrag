@@ -1,4 +1,17 @@
 
+
+export interface LayoutGroup {
+
+    // The name of the group
+    name : string;
+
+    // The nodes that are in the group
+    nodeIds : string[];
+
+    // The key node of the group
+    keyNodeId : string;
+}
+
 interface LayoutNode {
     id: string;
     color : string;
@@ -62,4 +75,5 @@ export interface InstanceLayout {
     nodes: LayoutNode[];
     edges: LayoutEdge[];
     constraints: LayoutConstraint[];
+    groups: LayoutGroup[];
 }

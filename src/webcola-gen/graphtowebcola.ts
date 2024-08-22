@@ -1,30 +1,21 @@
-import { Graph } from 'graphlib';
-import * as cola from 'webcola'; // Importing WebCola
-import { Group, Node } from 'webcola';
-import { InstanceLayout, LayoutNode, LayoutEdge, LayoutConstraint, LeftConstraint, TopConstraint, AlignmentConstraint, isLeftConstraint, isTopConstraint, isAlignmentConstraint } from '../layout/interfaces';
+import { Node } from 'webcola';
+import { InstanceLayout, LayoutNode, LayoutEdge, LayoutConstraint, LayoutGroup, LeftConstraint, TopConstraint, AlignmentConstraint, isLeftConstraint, isTopConstraint, isAlignmentConstraint } from '../layout/interfaces';
 
 
 
 const nodeWidth = 70;
 const nodeHeight = 45;
 
-// const minSepHeight = 15;
-// const minSepWidth = 15;
-// const minSeparation = Math.min(minSepHeight, minSepWidth);
-
-
-
-
 
 type NodeWithMetadata = Node & { id: string, attributes: Record<string, string[]>, color: string };
 
 
-type EdgeWithMetadata = { 
-  source: number, 
-  target: number, 
+type EdgeWithMetadata = {
+  source: number,
+  target: number,
   relName: string, // This is the name of the relation for the edge
-  id: string , // Unique identifier for the edge
-  label : string // This is what is displayed on the edge
+  id: string, // Unique identifier for the edge
+  label: string // This is what is displayed on the edge
 };
 
 export { NodeWithMetadata, EdgeWithMetadata };
@@ -34,7 +25,7 @@ export class WebColaLayout {
   private instanceLayout: InstanceLayout;
   readonly colaConstraints: any[];
   readonly colaNodes: NodeWithMetadata[];
-  readonly colaEdges : EdgeWithMetadata[];
+  readonly colaEdges: EdgeWithMetadata[];
   readonly groupDefinitions: any;
 
   private readonly DEFAULT_X: number;
@@ -43,7 +34,7 @@ export class WebColaLayout {
   readonly FIG_WIDTH: number;
   readonly FIG_HEIGHT: number;
 
-  constructor(instanceLayout : InstanceLayout, fig_height: number = 800, fig_width: number = 800) {
+  constructor(instanceLayout: InstanceLayout, fig_height: number = 800, fig_width: number = 800) {
 
 
     this.FIG_HEIGHT = fig_height;
@@ -56,7 +47,11 @@ export class WebColaLayout {
 
     this.colaNodes = instanceLayout.nodes.map(node => this.toColaNode(node));
     this.colaEdges = instanceLayout.edges.map(edge => this.toColaEdge(edge));
-    this.groupDefinitions = this.determineGroups(instanceLayout.nodes);
+
+
+    this.groupDefinitions = this.determineGroups(instanceLayout.groups);
+
+
     this.colaConstraints = instanceLayout.constraints.map(constraint => this.toColaConstraint(constraint));
 
 
@@ -67,8 +62,132 @@ export class WebColaLayout {
     return this.colaNodes.findIndex(node => node.id === nodeId);
   }
 
-  // Returns true if group1 is a subgroup of group2
-  private isSubGroup(group1: string[], group2: string[]) {
+
+
+  private leftConstraint(leftNode: number, rightNode: number, sep: number) {
+    // Define a separation constraint to place node A to the left of node B
+    const separationConstraint = {
+      axis: 'x',
+      left: leftNode,
+      right: rightNode,
+      gap: sep,
+    };
+    return separationConstraint;
+  }
+
+
+  private topConstraint(topNode: number, bottomNode: number, sep: number) {
+    // Define a separation constraint to place node A above node B
+    const separationConstraint = {
+      axis: 'y',
+      left: topNode,
+      right: bottomNode,
+      gap: sep,
+    };
+    return separationConstraint;
+  }
+
+  private heirarchyConstraint(parentNodeIndex: number, childNodeIndex: number, sep: number) {
+
+    const heirarchyConstraint = {
+      type: 'hierarchy',
+      parent: parentNodeIndex,
+      child: childNodeIndex,
+      gap: sep,
+    };
+    return heirarchyConstraint;
+  }
+
+
+
+
+  private toColaNode(node: LayoutNode): NodeWithMetadata {
+
+    return {
+      id: node.id,
+      color: node.color,
+      attributes: node.attributes,
+      width: nodeWidth,
+      height: nodeHeight,
+      x: this.DEFAULT_X,
+      y: this.DEFAULT_Y
+    }
+  }
+
+  private toColaEdge(edge: LayoutEdge): EdgeWithMetadata {
+
+    let sourceIndex = this.getNodeIndex(edge.source.id);
+    let targetIndex = this.getNodeIndex(edge.target.id);
+
+    return {
+      source: sourceIndex,
+      target: targetIndex,
+      relName: edge.relationName,
+      id: edge.id,
+      label: edge.label
+    }
+  }
+
+
+  private toColaConstraint(constraint: LayoutConstraint): any {
+
+    // Switch on the type of constraint
+    if (isLeftConstraint(constraint)) {
+      return this.leftConstraint(this.getNodeIndex(constraint.left.id), this.getNodeIndex(constraint.right.id), constraint.minDistance);
+    }
+
+    if (isTopConstraint(constraint)) {
+      return this.topConstraint(this.getNodeIndex(constraint.top.id), this.getNodeIndex(constraint.bottom.id), constraint.minDistance);
+    }
+
+    if (isAlignmentConstraint(constraint)) {
+
+      // Is this right or do I have to switch axes. Check.
+      const alignmentConstraint = {
+        axis: constraint.axis,
+        left: this.getNodeIndex(constraint.node1.id),
+        right: this.getNodeIndex(constraint.node2.id),
+        gap: 0,
+        'equality': true
+      }
+      return alignmentConstraint;
+
+    }
+    throw new Error("Constraint type not recognized");
+  }
+
+
+  private determineGroups(groups: LayoutGroup[]): { leaves: number[], padding: number, name: string, groups: number[] }[] {
+
+
+      // Do we actually have to do this? Can we just use the groups as they are?
+
+      // No we actually have to break this down into subgroups
+
+
+      let groupsAsRecord: Record<string, string[]> = {};
+      groups.forEach(group => {
+        groupsAsRecord[group.name] = group.nodeIds;
+      });
+
+      let groupsAndSubgroups = this.determineGroupsAndSubgroups(groupsAsRecord);
+
+      groupsAndSubgroups.forEach((group) => {
+
+
+        let grp: LayoutGroup = groups.find(g => g.name === group.name);
+        let keyNode = grp.keyNodeId;
+        let keyIndex = this.getNodeIndex(keyNode);
+        group['keyNode'] = keyIndex;
+      });
+
+      return groupsAndSubgroups;
+
+    }
+
+
+    // Returns true if group1 is a subgroup of group2
+    private isSubGroup(group1: string[], group2: string[]) {
     return group1.every((node) => group2.includes(node));
   }
 
@@ -124,7 +243,7 @@ export class WebColaLayout {
 
       // if the group has no subgroups, return it as is
       if (!subgroups[name]) {
-        return { leaves, padding, name };
+        return { leaves, padding, name, groups: [] };
       }
 
       let groups = subgroups[name].map((subgroupName) => {
@@ -145,117 +264,4 @@ export class WebColaLayout {
 
     return colaGroups;
   }
-
-  leftConstraint(leftNode: number, rightNode: number, sep: number) {
-    // Define a separation constraint to place node A to the left of node B
-    const separationConstraint = {
-      axis: 'x',
-      left: leftNode,
-      right: rightNode,
-      gap: sep,
-    };
-    return separationConstraint;
-  }
-
-
-  topConstraint(topNode: number, bottomNode: number, sep: number) {
-    // Define a separation constraint to place node A above node B
-    const separationConstraint = {
-      axis: 'y',
-      left: topNode,
-      right: bottomNode,
-      gap: sep,
-    };
-    return separationConstraint;
-  }
-
-  heirarchyConstraint(parentNodeIndex: number, childNodeIndex: number, sep: number) {
-
-    const heirarchyConstraint = {
-      type: 'hierarchy',
-      parent: parentNodeIndex,
-      child: childNodeIndex,
-      gap: sep,
-    };
-    return heirarchyConstraint;
-  }
-
-
-
-
-  private toColaNode(node: LayoutNode) : NodeWithMetadata {
-    
-    return {
-      id: node.id,
-      color: node.color,
-      attributes: node.attributes,
-      width: nodeWidth,
-      height: nodeHeight,
-      x : this.DEFAULT_X,
-      y : this.DEFAULT_Y
-    }
-  }
-
-  private toColaEdge(edge: LayoutEdge) : EdgeWithMetadata {
-
-    let sourceIndex = this.getNodeIndex(edge.source.id);
-    let targetIndex = this.getNodeIndex(edge.target.id);
-
-    return {
-      source: sourceIndex,
-      target: targetIndex,
-      relName: edge.relationName,
-      id: edge.id,
-      label : edge.label
-    }
-  }
-
-
-  private toColaConstraint(constraint : LayoutConstraint) : any {
-
-    // Switch on the type of constraint
-    if (isLeftConstraint(constraint)) {
-      return this.leftConstraint(this.getNodeIndex(constraint.left.id), this.getNodeIndex(constraint.right.id), constraint.minDistance);
-    }
-
-    if(isTopConstraint(constraint)) {
-      return this.topConstraint(this.getNodeIndex(constraint.top.id), this.getNodeIndex(constraint.bottom.id), constraint.minDistance);
-    }
-
-    if(isAlignmentConstraint(constraint)) {
-
-      // Is this right or do I have to switch axes. Check.
-      const alignmentConstraint = {
-        axis: constraint.axis,
-        left: this.getNodeIndex(constraint.node1.id),
-        right: this.getNodeIndex(constraint.node2.id),
-        gap : 0,
-        'equality': true
-      }
-      return alignmentConstraint;
-
-    }
-    throw new Error("Constraint type not recognized");
-  }
-
-
-  private determineGroups(nodes: LayoutNode[])  {
-
-    // First get the groups from the nodes
-    let groups: Record<string, string[]> = {};
-
-    nodes.forEach(node => {
-      if (node.groups) {
-        node.groups.forEach(group => {
-          if (groups[group]) {
-            groups[group].push(node.id);
-          } else {
-            groups[group] = [node.id];
-          }
-        });
-      }
-    });
-    return this.determineGroupsAndSubgroups(groups);
-  }
-
 }
