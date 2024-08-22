@@ -133,6 +133,8 @@ export class LayoutInstance {
 
                 if (existingGroup) {
                     existingGroup.nodeIds.push(source);
+                    // But also remove this edge from the graph.
+                    g.removeEdge(edge.v, edge.w, edgeId);
                 }
                 else {
 
@@ -143,10 +145,11 @@ export class LayoutInstance {
                         keyNodeId: target 
                     };
                     groups.push(newGroup);
+                    // HACK: Don't remove the FIRST edge connecting node to group,
+                    // we can respect SOME spatiality?
                 }
 
-                // But also remove this edge from the graph.
-                g.removeEdge(edge.v, edge.w, edgeId);
+
             }
         });
 

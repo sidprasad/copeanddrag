@@ -2,6 +2,7 @@
 
 export interface LayoutGroup {
 
+
     // The name of the group
     name : string;
 

@@ -179,6 +179,7 @@ export class WebColaLayout {
         let keyNode = grp.keyNodeId;
         let keyIndex = this.getNodeIndex(keyNode);
         group['keyNode'] = keyIndex;
+        group['id'] = grp.name;
       });
 
       return groupsAndSubgroups;

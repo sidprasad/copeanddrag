@@ -148,6 +148,41 @@
                     var constraints = <%- JSON.stringify(colaConstraints) %>;
                     var groups = <%- JSON.stringify(colaGroups) %>;
 
+                    // function getRandomElement(array) {
+                    //     return array[Math.floor(Math.random() * array.length)];
+                    // }
+                    // function getRepresentativeNode(group) {
+                        
+                    //     if (group.leaves.length > 0) {
+                    //         return getRandomElement(group.leaves);
+                    //     } else if (group.groups.length > 0) {
+                    //         return getRepresentativeNode(getRandomElement(group.groups));
+                    //     }
+                    //     // Else somethign went wrong
+                    //     console.error("No representative node found for group: " + group);
+                    //     return 0;
+                    // }
+
+                    // function getStringAfterColon(str) {
+                    //     const parts = str.split(':');
+                    //     return parts.length > 1 ? parts[1].trim() : '';
+                    // }
+
+                    // // Add an edge between each group and its key node
+                    // groups.forEach(function (group) {
+
+                    //     let target = group.leaves
+
+
+                    //     edges.push({
+                    //         source: group.keyNode,
+                    //         target: getRepresentativeNode(group),
+                    //         id: group.id + "-" + group.keyNode,
+                    //         relName: group.relName || group.name
+                    //     });
+                    // });
+
+
 
                     const LINK_DISTANCE = Math.min(width, height) / Math.sqrt(nodes.length);
                     console.log("Link distance: " + LINK_DISTANCE);
@@ -348,7 +383,10 @@
                         .attr("class", "group")
                         .attr("rx", 8).attr("ry", 8)
                         .style("fill", function (d, i) { 
-                            return color(i); 
+                            
+                            var targetNode = nodes[d.keyNode];
+                            return targetNode.color;
+                            //return color(i); 
                         })
                         .call(colaLayout.drag);
 
@@ -362,6 +400,20 @@
 
                     colaLayout.on("tick", function () {
 
+                            group.attr("x", function (d) {
+                            // var targetNode = nodes[d.keyNode];
+                            // return targetNode.bounds.x;
+                                return d.bounds.x; 
+                            })
+                            .attr("y", function (d) {
+                                // var targetNode = nodes[d.keyNode];
+                                // return targetNode.bounds.y;
+                                    return d.bounds.y; 
+                                
+                                })
+                            .attr("width", function (d) { return d.bounds.width(); })
+                            .attr("height", function (d) { return d.bounds.height(); })
+                            .lower();
 
 
                         node
@@ -404,20 +456,7 @@
 
 
 
-                        group.attr("x", function (d) {
-                            // var targetNode = nodes[d.keyNode];
-                            // return targetNode.bounds.x;
-                                return d.bounds.x; 
-                            })
-                            .attr("y", function (d) {
-                                // var targetNode = nodes[d.keyNode];
-                                // return targetNode.bounds.y;
-                                    return d.bounds.y; 
-                                
-                                })
-                            .attr("width", function (d) { return d.bounds.width(); })
-                            .attr("height", function (d) { return d.bounds.height(); })
-                            .lower();
+
 
                         groupLabel.attr("x", function (d) { 
                             return d.bounds.x + d.bounds.width() / 2; 
