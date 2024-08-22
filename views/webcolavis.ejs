@@ -62,7 +62,7 @@
         .groupLabel {
             fill: black;
             font-family: Verdana;
-            font-size: 12px;
+            font-size: 10px;
             text-anchor: middle;
             cursor: move;
         }
@@ -347,7 +347,9 @@
                         .enter().append("rect")
                         .attr("class", "group")
                         .attr("rx", 8).attr("ry", 8)
-                        .style("fill", function (d, i) { return color(i); })
+                        .style("fill", function (d, i) { 
+                            return color(i); 
+                        })
                         .call(colaLayout.drag);
 
                     var groupLabel = svg.selectAll(".groupLabel")
@@ -408,10 +410,14 @@
                             .attr("height", function (d) { return d.bounds.height(); })
                             .lower();
 
-                        groupLabel.attr("x", function (d) { return d.bounds.x; })
-                            .attr("y", function (d) { return d.bounds.y; })
+                        groupLabel.attr("x", function (d) { 
+                            console.log(d.bounds);    
+                            
+                            return d.bounds.x + d.bounds.width() / 2; 
+                        
+                        }) // Center horizontally
+                            .attr("y", function (d) { return d.bounds.y + 12; })
                             .attr("text-anchor", "middle") // Center the text on its position
-                            .attr("dy", "-5") // Adjust the y-position to offset the text above the link
                             .raise();
 
                     });

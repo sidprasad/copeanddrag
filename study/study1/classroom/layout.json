@@ -7,6 +7,10 @@
         {
             "fieldName" : "right",
             "directions" : ["directlyRight"]
+        },
+        {
+            "fieldName": "seatedAt",
+            "directions" : ["left"]
         }
     ],
     "groupBy": [
