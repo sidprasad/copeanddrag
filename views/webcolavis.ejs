@@ -404,15 +404,22 @@
 
 
 
-                        group.attr("x", function (d) { return d.bounds.x; })
-                            .attr("y", function (d) { return d.bounds.y; })
+                        group.attr("x", function (d) {
+                            // var targetNode = nodes[d.keyNode];
+                            // return targetNode.bounds.x;
+                                return d.bounds.x; 
+                            })
+                            .attr("y", function (d) {
+                                // var targetNode = nodes[d.keyNode];
+                                // return targetNode.bounds.y;
+                                    return d.bounds.y; 
+                                
+                                })
                             .attr("width", function (d) { return d.bounds.width(); })
                             .attr("height", function (d) { return d.bounds.height(); })
                             .lower();
 
                         groupLabel.attr("x", function (d) { 
-                            console.log(d.bounds);    
-                            
                             return d.bounds.x + d.bounds.width() / 2; 
                         
                         }) // Center horizontally
