@@ -1,0 +1,20 @@
+{
+    "fieldDirections": [   ],
+    "groupBy": [
+
+        {
+            "fieldName": "cards",
+            "groupOn" : "domain"
+        }
+    ],
+    "closures": [
+        {
+            "fieldName": "left",
+            "direction" : "clockwise"
+        }
+    ],
+    "attributeFields": [
+    ],
+    "hideDisconnected": false,
+    "hideDisconnectedBuiltIns": true
+  }
