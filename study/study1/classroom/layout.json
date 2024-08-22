@@ -1,0 +1,23 @@
+{
+    "fieldDirections": [
+        {
+            "fieldName": "behind",
+            "directions" : ["directlyBelow"]
+        },
+        {
+            "fieldName" : "right",
+            "directions" : ["directlyRight"]
+        }
+    ],
+    "groupBy": [
+
+        {
+            "fieldName": "row",
+            "groupOn" : "range"
+        }
+    ],
+    "attributeFields": [
+    ],
+    "hideDisconnected": false,
+    "hideDisconnectedBuiltIns": true
+  }

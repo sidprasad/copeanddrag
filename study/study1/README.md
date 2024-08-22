@@ -6,6 +6,19 @@
 - Purpose: Formative, helps determine if lightweight diagrams are more easily 'grok'-able than Sterling output.
 
 
+# Study Elements
+
+
+
+
+
+
+
+
+
+
+
+
 ## SK
 
 - Lets say this is the final study. Need to justify why these N things (let's focus on what we chose in the tool, etc).

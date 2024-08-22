@@ -1,11 +1,6 @@
 #lang forge
 
 
-// TODO: Make this multiple tables (a banquet) with multiple people at each table.
-// This sells the idea of the implied closure (--> Gestalt principle of closure)
-
-// How can we have food shown better?
-
 abstract sig Food {}
 one sig Egg extends Food {}
 one sig Ham extends Food {}
