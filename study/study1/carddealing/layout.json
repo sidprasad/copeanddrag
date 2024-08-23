@@ -3,7 +3,7 @@
     "groupBy": [
 
         {
-            "fieldName": "cards",
+            "fieldName": "hand",
             "groupOn" : "domain"
         }
     ],

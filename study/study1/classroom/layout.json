@@ -11,6 +11,10 @@
         {
             "fieldName": "seatedAt",
             "directions" : ["left"]
+        },
+        {
+            "fieldName": "row",
+            "directions" : ["directlyRight"]
         }
     ],
     "groupBy": [

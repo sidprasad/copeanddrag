@@ -452,7 +452,8 @@
                             .attr("y", d => {
                                 const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
                                 return calculateNewPosition(d.y, pathElement, 'y');
-                            });
+                            })
+                            .raise();
 
 
 
