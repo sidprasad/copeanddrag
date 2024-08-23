@@ -9,7 +9,7 @@ import { LayoutSpec, ClosureDefinition, ClusterRelation, parseLayoutSpec } from 
 import { LayoutNode, LayoutEdge, LayoutConstraint, InstanceLayout, LeftConstraint, TopConstraint, AlignmentConstraint, LayoutGroup } from './interfaces';
 
 import { generateGraph } from '../alloy-graph';
-import { Layout } from 'webcola';
+
 
 
 export class LayoutInstance {
@@ -240,6 +240,7 @@ export class LayoutInstance {
 
     // TODO: Replace this with that d3 function that generates a color based on an index
     private getRandomColor(): string {
+
         const letters = '0123456789ABCDEF';
         let color = '#';
         for (let i = 0; i < 6; i++) {
