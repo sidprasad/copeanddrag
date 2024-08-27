@@ -360,22 +360,22 @@
                         })
                         .call(colaLayout.drag);
 
-                    var attributes = svg.selectAll(".attributes")
-                        .data(nodes)
-                        .enter().append("text")
-                        .attr("class", "attributes")
-                        .each(function (d) {
-                            var y = 0; // Initial y offset
+                    // var attributes = svg.selectAll(".attributes")
+                    //     .data(nodes)
+                    //     .enter().append("text")
+                    //     .attr("class", "attributes")
+                    //     .each(function (d) {
+                    //         var y = 0; // Initial y offset
 
-                            for (let key in d.attributes) {
-                                d3.select(this).append("tspan")
-                                    .attr("x", d.x) // Set the absolute x position of the first tspan to align with the parent text element
-                                    .attr("dy", `${y}px`) // Use dy only for vertical spacing from the previous tspan or the parent text element's y position
-                                    .text(key + ": " + d.attributes[key]);
-                                y += dy_for_linespacing; // Increment y offset for the next line
-                            }
-                        })
-                        .call(colaLayout.drag);
+                    //         for (let key in d.attributes) {
+                    //             d3.select(this).append("tspan")
+                    //                 .attr("x", d.x) // Set the absolute x position of the first tspan to align with the parent text element
+                    //                 .attr("dy", `${y}px`) // Use dy only for vertical spacing from the previous tspan or the parent text element's y position
+                    //                 .text(key + ": " + d.attributes[key]);
+                    //             y += dy_for_linespacing; // Increment y offset for the next line
+                    //         }
+                    //     })
+                    //     .call(colaLayout.drag);
 
 
                     // Helper function to calculate new position along the path
