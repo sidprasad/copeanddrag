@@ -1,10 +1,11 @@
+
 <!DOCTYPE html>
 
 <html lang="en">
 
 <head>
     <meta charset="utf-8" />
-    <title>Alloy Instance Diagram</title>
+    <title>Alloy Instance Layout</title>
     <style>
 
 
@@ -94,16 +95,10 @@
 <body>
     <div class="container">
         <h1>Diagram Instance</h1>
-        <div class="btn-group" role="group">
-            <button type="button" class="btn btn-outline-secondary"><a href="#svg"> WebCola Diagram </a></button>
-            <button type="button" class="btn btn-outline-secondary"><a href="#constraints"> WebCola Alignment
-                    Constraints </a></button>
-            <button type="button" class="btn btn-outline-secondary"><a href="#graphDefs"> WebCola Graph Definitions
-                </a></button>
-        </div>
-        <hr>
+
+
         <div class="container-fluid" id="svg-container" >
-            <svg id="svg" width="<%- width %>" height="<%- height %>" class="svg-border" >
+            <svg id="svg" width="800" height="800" class="svg-border" >
                 <defs>
                     <marker id="end-arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
                         <polygon points="0 0, 10 3.5, 0 7" />
@@ -135,7 +130,7 @@
                     const dy_for_linespacing = 5; // Adjust for spacing between lines
 
                     var color = d3.scaleOrdinal(d3.schemeCategory20);
-                    var width = <%- width %>, height = <%- height %>;
+                    var width = 800, height = 800;
 
                     var svg_top = d3.select("#svg").call(zoom);
 
@@ -155,10 +150,10 @@
                         .handleDisconnected(true)
                         .size([width, height]);
 
-                    var nodes = <%- JSON.stringify(colaNodes) %>;
-                    var edges = <%- JSON.stringify(colaEdges) %>;
-                    var constraints = <%- JSON.stringify(colaConstraints) %>;
-                    var groups = <%- JSON.stringify(colaGroups) %>;
+                    var nodes = [{"id":"Card0","color":"#96839C","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Card1","color":"#96839C","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Card2","color":"#96839C","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Card3","color":"#96839C","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Card4","color":"#96839C","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Card5","color":"#96839C","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Card6","color":"#96839C","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Person0","color":"#B92F22","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Person1","color":"#B92F22","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Person2","color":"#B92F22","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Dealer0","color":"#CC0C60","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"_left_0","color":"transparent","attributes":{},"width":70,"height":45,"x":400,"y":400}];
+                    var edges = [{"source":7,"target":8,"relName":"left","id":"Person<:left:Person0->Person1","label":"left"},{"source":8,"target":9,"relName":"left","id":"Person<:left:Person1->Person2","label":"left"},{"source":9,"target":10,"relName":"left","id":"Person<:left:Person2->Dealer0","label":"left"},{"source":10,"target":7,"relName":"left","id":"Person<:left:Dealer0->Person0","label":"left"},{"source":7,"target":4,"relName":"hand","id":"Person<:hand:Person0->Card4","label":"hand"},{"source":8,"target":2,"relName":"hand","id":"Person<:hand:Person1->Card2","label":"hand"},{"source":9,"target":0,"relName":"hand","id":"Person<:hand:Person2->Card0","label":"hand"}];
+                    var constraints = [{"axis":"x","left":11,"right":8,"gap":100},{"axis":"y","left":8,"right":11,"gap":0},{"axis":"x","left":11,"right":9,"gap":6.123233995736766e-15},{"axis":"y","left":11,"right":9,"gap":100},{"axis":"x","left":10,"right":11,"gap":100},{"axis":"y","left":11,"right":10,"gap":1.2246467991473532e-14},{"axis":"x","left":7,"right":11,"gap":1.8369701987210297e-14},{"axis":"y","left":7,"right":11,"gap":100}];
+                    var groups = [{"leaves":[4,5,6],"padding":20,"name":"Person0:hand","groups":[],"keyNode":7,"id":"Person0:hand"},{"leaves":[2,3],"padding":20,"name":"Person1:hand","groups":[],"keyNode":8,"id":"Person1:hand"},{"leaves":[0,1],"padding":20,"name":"Person2:hand","groups":[],"keyNode":9,"id":"Person2:hand"}];
 
 
                     const LINK_DISTANCE = Math.min(width, height) / Math.sqrt(nodes.length);
@@ -479,19 +474,6 @@
 
                 });
             </script>
-
-        </div>
-
-        <div id="webcola">
-
-            <h3> Layout Constraints </h3>
-            <pre id="constraints"> <%- JSON.stringify(layoutConstraints, null,2) %>;%></pre>
-
-            <h3 id="graphDefs"> Graph definitions </h3>
-            <h4>Nodes</h4>
-            <pre id="nodes"> <%- JSON.stringify(layoutNodes,null, 2) %>;%></pre>
-            <h4>Edges</h4>
-            <pre id="edges"> <%- JSON.stringify(layoutEdges, null,2) %>;%></pre>
 
         </div>
 

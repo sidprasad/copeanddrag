@@ -119,22 +119,15 @@ By default, we assign every `sig` a random color, that is respected by all atoms
 ### WebCola
 
 - [] Better Label Layout: https://medium.com/@adarshlilha/removing-label-overlapping-from-pretty-charts-8dd2e3581b71
-- [] I think WebCola struggles with groups that intersect but are not subgroups of one another
+- [] Struggles with groups that intersect but are not subgroups of one another
 - [] WebCola struggles with variable link length. 
     - Minimum link length does not always serve us, since it really tries to enforce that min length.
     - Perhaps we need to force super large links and also force all nodes within the frame?
-
 - [] Attributes for n-ary relations are broken (we lost the in-betweens in the attribute names)
 
-
-
-# TO ADD:
-
-- [x] Aligned versions of directional layout (ie - aligned along x axis or y axis)
-      - Done, but broken for WebCola. Not always respected, which is not good.
-
-
 - Groups: Information related to groups should not be lost, right?
-  - [] Centroids are not included in groups, which causes issues.
+  - [] Centroids are not necessarily included in groups, which causes issues.
 
-- How do we render Grids?
+- **Grids**
+- Arrows to groups not nodes in groups
+- Relation colors?
