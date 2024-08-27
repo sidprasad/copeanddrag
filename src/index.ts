@@ -8,7 +8,6 @@ import { LayoutInstance } from './layout/layoutinstance';
 import { WebColaLayout } from './webcola-gen/graphtowebcola';
 import { PenroseInstance } from './penrose-gen/graphtopenrose';
 
-import { applyProjections } from './alloy-instance/src/projection';
 
 import { ConstraintValidator } from './webcola-gen/constraint-validator';
 import { InstanceLayout } from './layout/interfaces';
