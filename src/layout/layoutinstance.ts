@@ -145,11 +145,8 @@ export class LayoutInstance {
                         keyNodeId: target 
                     };
                     groups.push(newGroup);
-                    // HACK: Don't remove the FIRST edge connecting node to group,
-                    // we can respect SOME spatiality?
+                    // HACK: Don't remove the FIRST edge connecting node to group, we can respect SOME spatiality?
                 }
-
-
             }
         });
 
@@ -335,7 +332,7 @@ export class LayoutInstance {
 
 
         // Now we apply the closure constraints
-        let constraints = this.applyClosureConstraints(g, layoutNodes);
+        let constraints = this.applyClosureConstraints(g, layoutNodes, groups);
 
 
         // Now edges and relational constraints
@@ -391,19 +388,19 @@ export class LayoutInstance {
     }
 
 
-    applyClosureConstraints(g: Graph, layoutNodes: LayoutNode[]): LayoutConstraint[] {
+    applyClosureConstraints(g: Graph, layoutNodes: LayoutNode[], groups : LayoutGroup[]): LayoutConstraint[] {
 
         const closures = this.getClosures();
 
         let constraints = closures.map((closure) => {
-            return this.applyClosureConstraint(g, layoutNodes, closure.fieldName, closure.direction);
+            return this.applyClosureConstraint(g, layoutNodes, closure.fieldName, closure.direction, groups);
         });
 
         return constraints.flat();
 
     }
 
-    applyClosureConstraint(g: Graph, layoutNodes: LayoutNode[], relName: string, direction: string): LayoutConstraint[] {
+    applyClosureConstraint(g: Graph, layoutNodes: LayoutNode[], relName: string, direction: string, groups : LayoutGroup[]): LayoutConstraint[] {
         let direction_mult: number = 0;
         if (direction === "clockwise") {
             direction_mult = 1;
@@ -432,8 +429,19 @@ export class LayoutInstance {
             };
             layoutNodes.push(fragmentCentroid);
 
+            // Check if the relatedNodes are all in a single group. If so, we should place the centroid in that group.
+            let group : LayoutGroup = groups.find((group) => relatedNodes.every((node) => group.nodeIds.includes(node)));
+            if (group) {
+                group.nodeIds.push(fragmentCentroid.id);
+            }
+
 
             // Now keep the related nodes a fixed distance from the centroid
+
+            // TODO: ISSUE: What if the nodes are in a group? The centroid must also be in that group
+            // this becomes tricky right?
+
+
             const fixedDistance = 100; // Example fixed distance. This needs to change.
             const angleStep = (direction_mult * 2 * Math.PI) / relatedNodes.length;
 
@@ -468,6 +476,77 @@ export class LayoutInstance {
 
 
 
+
+
+
+    private findDisconnectedComponents(edges): string[][] {
+        let inNodes = edges.map(edge => edge.w);
+        let outNodes = edges.map(edge => edge.v);
+    
+        // All nodes in the graph
+        let allNodes = new Set([...inNodes, ...outNodes]);
+    
+        // List to store all connected components
+        let components: string[][] = [];
+    
+        // Set to keep track of visited nodes
+        let visited = new Set<string>();
+    
+        // Function to perform BFS and find all nodes in the same connected component
+        const bfs = (startNode: string): string[] => {
+            let queue: string[] = [startNode];
+            let component: string[] = [];
+    
+            while (queue.length > 0) {
+                let node = queue.shift();
+                if (!visited.has(node)) {
+                    visited.add(node);
+                    component.push(node);
+    
+                    // Get all the outgoing and incoming edges from this node
+                    let neighbors = edges
+                        .filter(edge => edge.v === node || edge.w === node)
+                        .map(edge => (edge.v === node ? edge.w : edge.v));
+    
+                    // Add unvisited neighbors to the queue
+                    neighbors.forEach(neighbor => {
+                        if (!visited.has(neighbor)) {
+                            queue.push(neighbor);
+                        }
+                    });
+                }
+            }
+    
+            return component;
+        };
+    
+        // Iterate over all nodes and find all connected components
+        allNodes.forEach(node => {
+            if (!visited.has(node)) {
+                let component = bfs(node);
+                components.push(component);
+            }
+        });
+    
+        return components;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // TODO: This is broken :((((
     private orderNodesByEdges(edges): string[][] {
 
         let inNodes = edges.map(edge => edge.w);
@@ -476,10 +555,27 @@ export class LayoutInstance {
         // Root nodes have no incoming edges
         let rootNodes = outNodes.filter(node => !inNodes.includes(node));
 
-        if (rootNodes.length === 0) {
-            // If there are no root nodes, just pick any node
-            rootNodes = [outNodes[0]];
-        }
+        let graphComponents = this.findDisconnectedComponents(edges);
+        /*
+
+            The bug is here. We need to find roots, OR we need to find a node for each disconnected component.
+
+        */
+
+        graphComponents.forEach((component) => {
+            // Ensure a root node is present in each component
+            let containsARoot = component.some(node => rootNodes.includes(node));
+
+            if (!containsARoot) {
+                rootNodes.push(component[0]);
+            }
+
+        });
+
+        // if (rootNodes.length === 0) {
+        //     // If there are no root nodes, just pick any node
+        //     rootNodes = [outNodes[0]];
+        // }
 
 
         return rootNodes.map((rootNode) => {

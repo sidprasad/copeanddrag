@@ -6,9 +6,22 @@
     <meta charset="utf-8" />
     <title>Webcola Alloy Instance Layout</title>
     <style>
+
+
+        #svg-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* Adjust as needed */
+        }
+        .svg-border {
+            border: 2px solid black;
+        }
+
+
         .node {
             /* stroke: black; */
-            fill: white;
+            /*fill: white;*/
             stroke-width: 1.5px;
             cursor: move;
         }
@@ -21,7 +34,7 @@
         }
 
         .link {
-            stroke: darkslategrey;
+            stroke: black;
             fill: none;
             stroke-width: 1px;
             stroke-opacity: 1;
@@ -80,7 +93,7 @@
 
 <body>
     <div class="container">
-        <h1>WebCola Instance</h1>
+        <h1>Diagram Instance</h1>
         <div class="btn-group" role="group">
             <button type="button" class="btn btn-outline-secondary"><a href="#svg"> WebCola Diagram </a></button>
             <button type="button" class="btn btn-outline-secondary"><a href="#constraints"> WebCola Alignment
@@ -89,8 +102,8 @@
                 </a></button>
         </div>
         <hr>
-        <div class="container-fluid" id="svg-container">
-            <svg id="svg" width="<%- width %>" height="<%- height %>">
+        <div class="container-fluid" id="svg-container" >
+            <svg id="svg" width="<%- width %>" height="<%- height %>" class="svg-border" >
                 <defs>
                     <marker id="end-arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
                         <polygon points="0 0, 10 3.5, 0 7" />
@@ -101,7 +114,6 @@
                 </g>
             </svg>
             <script>
-
 
                 // Function to generate a random offset along the path
                 function getRandomOffsetAlongPath() {
@@ -148,41 +160,6 @@
                     var constraints = <%- JSON.stringify(colaConstraints) %>;
                     var groups = <%- JSON.stringify(colaGroups) %>;
 
-                    // function getRandomElement(array) {
-                    //     return array[Math.floor(Math.random() * array.length)];
-                    // }
-                    // function getRepresentativeNode(group) {
-                        
-                    //     if (group.leaves.length > 0) {
-                    //         return getRandomElement(group.leaves);
-                    //     } else if (group.groups.length > 0) {
-                    //         return getRepresentativeNode(getRandomElement(group.groups));
-                    //     }
-                    //     // Else somethign went wrong
-                    //     console.error("No representative node found for group: " + group);
-                    //     return 0;
-                    // }
-
-                    // function getStringAfterColon(str) {
-                    //     const parts = str.split(':');
-                    //     return parts.length > 1 ? parts[1].trim() : '';
-                    // }
-
-                    // // Add an edge between each group and its key node
-                    // groups.forEach(function (group) {
-
-                    //     let target = group.leaves
-
-
-                    //     edges.push({
-                    //         source: group.keyNode,
-                    //         target: getRepresentativeNode(group),
-                    //         id: group.id + "-" + group.keyNode,
-                    //         relName: group.relName || group.name
-                    //     });
-                    // });
-
-
 
                     const LINK_DISTANCE = Math.min(width, height) / Math.sqrt(nodes.length);
                     console.log("Link distance: " + LINK_DISTANCE);
@@ -206,8 +183,6 @@
                         .y(function (d) { return d.y; })
                         .curve(d3.curveBasis);
 
-
-
                     var routeEdges = function () {
                         colaLayout.prepareEdgeRouting(margin / 3);
                         console.log("Routing edges");
@@ -219,19 +194,23 @@
                         // What I want to do is change the angle based on the number of edges between the same nodes
                         // Function to calculate curvature based on number of edges and index
                         function calculateCurvature(edges, fromNode, toNode, edgeid) {
-
                             const sourceIndex = getNodeIndex(fromNode);
                             const targetIndex = getNodeIndex(toNode);
 
-                            const outEdges = edges.filter(edge => {
-                                return edge.source.id == fromNode && edge.target.id == toNode;
+                            // Get all edges between the two nodes, regardless of direction
+                            const allEdges = edges.filter(edge => {
+                                return (edge.source.id == fromNode && edge.target.id == toNode) ||
+                                    (edge.source.id == toNode && edge.target.id == fromNode);
                             });
 
-                            const edgeCount = outEdges.length;
-                            let index = outEdges.findIndex(edge => edge.id == edgeid);
+                            const edgeCount = allEdges.length;
+                            let index = allEdges.findIndex(edge => edge.id == edgeid);
 
-                            let curvature = (index % 2 === 0 ? 1 : -1) * (Math.floor(index / 2) + 1) * 0.1 * edgeCount;
-                            //console.log(`${edgeid} is edge ${index} / ${edgeCount} from ${fromNode} to ${toNode}. Curvature: ${curvature}`);
+                                // Calculate curvature
+                            let curvature = 0;
+                            if (edgeCount > 1) {
+                                curvature = (index % 2 === 0 ? 1 : -1) * (Math.floor(index / 2) + 1) * 0.1 * edgeCount;
+                            }
                             return curvature;
                         }
 
@@ -239,22 +218,60 @@
                         link.attr("d", function (d, i) {
 
 
-                            // UGH THIS SORT OF WORKS BUT ONLY SOMETIMES CURVES
-                            // IN THE WRONG DIRECTION
+                            // UGH THIS SORT OF WORKS BUT ONLY SOMETIMES CURVES IN THE WRONG DIRECTION
 
                             var route = colaLayout.routeEdge(d);
+
+
+                            // If there are only two points in the route, get the midpoint of the route and add it to the route
+                            if (route.length === 2) {
+                                const midpoint = {
+                                    x: (route[0].x + route[1].x) / 2,
+                                    y: (route[0].y + route[1].y) / 2
+                                };
+                                route.splice(1, 0, midpoint);
+                            }
+
                             // Calculate the curvature for the current edge
                             var curvature = calculateCurvature(edges, d.source.id, d.target.id, d.id);
 
-                            // Apply curvature to the control points
+                            // Determine the direction of the edge
+                            var dx = route[1].x - route[0].x;
+                            var dy = route[1].y - route[0].y;
+                            var angle = Math.atan2(dy, dx);
+                            var distance = Math.sqrt(dx * dx + dy * dy);
+                            /*
+                            Angle 0: The edge is horizontal and points to the right.
+                            Angle π/2 (90 degrees): The edge is vertical and points upwards.
+                            Angle π (180 degrees): The edge is horizontal and points to the left.
+                            Angle -π/2 (-90 degrees): The edge is vertical and points downwards.
+                            */
+
+                            //Apply curvature to the control points (but this does not help with the direction)
                             route.forEach(function (point, index) {
-                                if (index > 0 && index < route.length - 1) {
-                                    point.x += curvature * (point.y - route[0].y);
-                                    point.y += curvature * (point.x - route[0].x);
+
+
+                                if (index > 0 && index < route.length - 1 && curvature !== 0) {
+                                    console.log(d.source.id + " to " + d.target.id);
+
+
+                                    // Adjust the control points based on the direction
+                                    // var offsetX = curvature * Math.cos(angle + Math.PI / 2);
+                                    // var offsetY = curvature * Math.sin(angle + Math.PI / 2);
+                                    var offsetX = curvature * Math.abs(Math.sin(angle)) * distance;
+                                    var offsetY = curvature * Math.abs(Math.cos(angle)) * distance;
+
+                                    console.log("offset: " + offsetX + ", " + offsetY, " angle: ", angle, "curvature: " + curvature);
+                                    point.x += offsetX;
+                                    point.y += offsetY;
                                 }
                             });
 
+
+
                             return lineFunction(route);
+
+
                         });
 
                         // Update label positions after routing edges
@@ -290,17 +307,27 @@
                         .text(d => d.relName);
 
 
+                    function isHiddenNode(node) {
+                        return node.name.startsWith("_");
+                    }
+
 
                     var node = svg.selectAll(".node")
                         .data(nodes)
                         .enter().append("rect") // Changed from circle to rect
                         .attr("class", "node")
-                        .attr("width", function (d) { return d.width; }) // Use node's width
+                        .attr("width", function (d) { 
+                            return d.width;   
+                        }) // Use node's width
                         .attr("height", function (d) { return d.height; }) // Use node's height
                         .attr("x", function (d) { return -d.width / 2; }) // Center the rectangle on the node's x
                         .attr("y", function (d) { return -d.height / 2; }) // Center the rectangle on the node's y
                         .attr("stroke", function (d) { return d.color; }) // Outline color of the node
                         .attr("stroke-width", 1.5) // Adjust the stroke width as needed
+                        .attr("fill", function (d) {
+                            let f = isHiddenNode(d) ? "transparent" : "white";
+                            return f;
+                        }) 
                         .call(colaLayout.drag);
 
                     var label = svg.selectAll(".label")
@@ -309,7 +336,7 @@
                         .attr("class", "label")
                         .each(function (d) {
 
-                            if (d.name.startsWith("_")) {
+                            if (isHiddenNode(d)) {
                                 return;
                             }
 
@@ -367,10 +394,6 @@
                         return axis === 'x' ? point.x : point.y;
                     }
 
-
-
-
-
                     node.append("title")
                         .text(function (d) { return d.name; });
 
@@ -383,11 +406,10 @@
                         .attr("class", "group")
                         .attr("rx", 8).attr("ry", 8)
                         .style("fill", function (d, i) { 
-                            
                             var targetNode = nodes[d.keyNode];
                             return targetNode.color;
-                            //return color(i); 
                         })
+                        .attr("fill-opacity", 0.3)
                         .call(colaLayout.drag);
 
                     var groupLabel = svg.selectAll(".groupLabel")
@@ -401,16 +423,12 @@
                     colaLayout.on("tick", function () {
 
                             group.attr("x", function (d) {
-                            // var targetNode = nodes[d.keyNode];
-                            // return targetNode.bounds.x;
                                 return d.bounds.x; 
                             })
                             .attr("y", function (d) {
-                                // var targetNode = nodes[d.keyNode];
-                                // return targetNode.bounds.y;
-                                    return d.bounds.y; 
-                                
-                                })
+                                return d.bounds.y; 
+                            })
+
                             .attr("width", function (d) { return d.bounds.width(); })
                             .attr("height", function (d) { return d.bounds.height(); })
                             .lower();

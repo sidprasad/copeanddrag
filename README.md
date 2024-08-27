@@ -135,9 +135,6 @@ By default, we assign every `sig` a random color, that is respected by all atoms
 
 
 - Groups: Information related to groups should not be lost, right?
-    - [] Attributes of nodes related to groups should be shown (somehow?)
-    - [] Spatial layout of groups:  Preserve relations between groups.
-    - [] Eg. if G1 is above G2, then all contents of G1 must be above G2.
-    - Tried to solve this by including *nodes* in their groups. But this creates OTHER issues in terms of layout (bc groups have to be rectangles and exclude other nodes)
+  - [] Centroids are not included in groups, which causes issues.
 
 - How do we render Grids?
