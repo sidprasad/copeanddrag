@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 
 <html lang="en">
@@ -94,16 +95,10 @@
 <body>
     <div class="container">
         <h1>Diagram Instance</h1>
-        <div class="btn-group" role="group">
-            <button type="button" class="btn btn-outline-secondary"><a href="#svg"> WebCola Diagram </a></button>
-            <button type="button" class="btn btn-outline-secondary"><a href="#constraints"> WebCola Alignment
-                    Constraints </a></button>
-            <button type="button" class="btn btn-outline-secondary"><a href="#graphDefs"> WebCola Graph Definitions
-                </a></button>
-        </div>
+
         <hr>
         <div class="container-fluid" id="svg-container" >
-            <svg id="svg" width="<%- width %>" height="<%- height %>" class="svg-border" >
+            <svg id="svg" width="800" height="800" class="svg-border" >
                 <defs>
                     <marker id="end-arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
                         <polygon points="0 0, 10 3.5, 0 7" />
@@ -135,7 +130,7 @@
                     const dy_for_linespacing = 5; // Adjust for spacing between lines
 
                     var color = d3.scaleOrdinal(d3.schemeCategory20);
-                    var width = <%- width %>, height = <%- height %>;
+                    var width = 800, height = 800;
 
                     var svg_top = d3.select("#svg").call(zoom);
 
@@ -155,10 +150,10 @@
                         .handleDisconnected(true)
                         .size([width, height]);
 
-                    var nodes = <%- JSON.stringify(colaNodes) %>;
-                    var edges = <%- JSON.stringify(colaEdges) %>;
-                    var constraints = <%- JSON.stringify(colaConstraints) %>;
-                    var groups = <%- JSON.stringify(colaGroups) %>;
+                    var nodes = [{"id":"Student2","color":"#EE8808","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Magoo0","color":"#BBD647","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Table0","color":"#FA522E","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Table1","color":"#FA522E","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Table2","color":"#FA522E","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Table3","color":"#FA522E","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Table4","color":"#FA522E","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Row0","color":"#5FEEB8","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Row1","color":"#5FEEB8","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Row2","color":"#5FEEB8","attributes":{},"width":70,"height":45,"x":400,"y":400}];
+                    var edges = [{"source":8,"target":9,"relName":"behind","id":"Row<:behind:Row1->Row2","label":"behind"},{"source":9,"target":7,"relName":"behind","id":"Row<:behind:Row2->Row0","label":"behind"},{"source":2,"target":7,"relName":"row","id":"Table<:row:Table0->Row0","label":"row"},{"source":3,"target":8,"relName":"row","id":"Table<:row:Table1->Row1","label":"row"},{"source":4,"target":9,"relName":"row","id":"Table<:row:Table2->Row2","label":"row"},{"source":5,"target":4,"relName":"right","id":"Table<:right:Table3->Table2","label":"right"},{"source":6,"target":3,"relName":"right","id":"Table<:right:Table4->Table1","label":"right"},{"source":1,"target":2,"relName":"seatedAt","id":"Student<:seatedAt:Magoo0->Table0","label":"seatedAt"},{"source":0,"target":4,"relName":"seatedAt","id":"Student<:seatedAt:Student2->Table2","label":"seatedAt"}];
+                    var constraints = [{"axis":"y","left":8,"right":9,"gap":15},{"axis":"x","left":9,"right":8,"gap":0,"equality":true},{"axis":"y","left":9,"right":7,"gap":15},{"axis":"x","left":7,"right":9,"gap":0,"equality":true},{"axis":"x","left":2,"right":7,"gap":15},{"axis":"y","left":7,"right":2,"gap":0,"equality":true},{"axis":"x","left":3,"right":8,"gap":15},{"axis":"y","left":8,"right":3,"gap":0,"equality":true},{"axis":"x","left":4,"right":9,"gap":15},{"axis":"y","left":9,"right":4,"gap":0,"equality":true},{"axis":"x","left":5,"right":4,"gap":15},{"axis":"y","left":4,"right":5,"gap":0,"equality":true},{"axis":"x","left":6,"right":3,"gap":15},{"axis":"y","left":3,"right":6,"gap":0,"equality":true},{"axis":"x","left":2,"right":1,"gap":15},{"axis":"x","left":4,"right":0,"gap":15}];
+                    var groups = [{"leaves":[2],"padding":20,"name":"Row0:row","groups":[],"keyNode":7,"id":"Row0:row"},{"leaves":[3,6],"padding":20,"name":"Row1:row","groups":[],"keyNode":8,"id":"Row1:row"},{"leaves":[4,5],"padding":20,"name":"Row2:row","groups":[],"keyNode":9,"id":"Row2:row"}];
 
 
                     const LINK_DISTANCE = Math.min(width, height) / Math.sqrt(nodes.length);
@@ -482,18 +477,6 @@
 
         </div>
 
-        <div id="webcola">
-
-            <h3> Layout Constraints </h3>
-            <pre id="constraints"> <%- JSON.stringify(layoutConstraints, null,2) %>;%></pre>
-
-            <h3 id="graphDefs"> Graph definitions </h3>
-            <h4>Nodes</h4>
-            <pre id="nodes"> <%- JSON.stringify(layoutNodes,null, 2) %>;%></pre>
-            <h4>Edges</h4>
-            <pre id="edges"> <%- JSON.stringify(layoutEdges, null,2) %>;%></pre>
-
-        </div>
 
     </div>
 

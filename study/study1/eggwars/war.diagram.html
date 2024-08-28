@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 
 <html lang="en">
@@ -94,16 +95,10 @@
 <body>
     <div class="container">
         <h1>Diagram Instance</h1>
-        <div class="btn-group" role="group">
-            <button type="button" class="btn btn-outline-secondary"><a href="#svg"> WebCola Diagram </a></button>
-            <button type="button" class="btn btn-outline-secondary"><a href="#constraints"> WebCola Alignment
-                    Constraints </a></button>
-            <button type="button" class="btn btn-outline-secondary"><a href="#graphDefs"> WebCola Graph Definitions
-                </a></button>
-        </div>
+
         <hr>
         <div class="container-fluid" id="svg-container" >
-            <svg id="svg" width="<%- width %>" height="<%- height %>" class="svg-border" >
+            <svg id="svg" width="800" height="800" class="svg-border" >
                 <defs>
                     <marker id="end-arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
                         <polygon points="0 0, 10 3.5, 0 7" />
@@ -135,7 +130,7 @@
                     const dy_for_linespacing = 5; // Adjust for spacing between lines
 
                     var color = d3.scaleOrdinal(d3.schemeCategory20);
-                    var width = <%- width %>, height = <%- height %>;
+                    var width = 800, height = 800;
 
                     var svg_top = d3.select("#svg").call(zoom);
 
@@ -155,10 +150,10 @@
                         .handleDisconnected(true)
                         .size([width, height]);
 
-                    var nodes = <%- JSON.stringify(colaNodes) %>;
-                    var edges = <%- JSON.stringify(colaEdges) %>;
-                    var constraints = <%- JSON.stringify(colaConstraints) %>;
-                    var groups = <%- JSON.stringify(colaGroups) %>;
+                    var nodes = [{"id":"Chicken0","color":"#4C57C7","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Cheese0","color":"#21AD69","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Egg0","color":"#6E6683","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Ham0","color":"#EBDAF8","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Liliput0","color":"#5390AC","attributes":{"eating":["Cheese0"]},"width":70,"height":45,"x":400,"y":400},{"id":"Liliput1","color":"#5390AC","attributes":{"eating":["Cheese0"]},"width":70,"height":45,"x":400,"y":400},{"id":"Liliput2","color":"#5390AC","attributes":{"eating":["Chicken0"]},"width":70,"height":45,"x":400,"y":400},{"id":"Brobdingnag0","color":"#4FDDF7","attributes":{"eating":["Cheese0"]},"width":70,"height":45,"x":400,"y":400},{"id":"Brobdingnag1","color":"#4FDDF7","attributes":{"eating":["Ham0"]},"width":70,"height":45,"x":400,"y":400},{"id":"Brobdingnag2","color":"#4FDDF7","attributes":{"eating":["Egg0"]},"width":70,"height":45,"x":400,"y":400},{"id":"Table0","color":"#FE91A8","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Table1","color":"#FE91A8","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Table2","color":"#FE91A8","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Blefuscu0","color":"#78A5D8","attributes":{"eating":["Cheese0"]},"width":70,"height":45,"x":400,"y":400},{"id":"Blefuscu1","color":"#78A5D8","attributes":{"eating":["Ham0"]},"width":70,"height":45,"x":400,"y":400},{"id":"Blefuscu2","color":"#78A5D8","attributes":{"eating":["Ham0"]},"width":70,"height":45,"x":400,"y":400},{"id":"Blefuscu3","color":"#78A5D8","attributes":{"eating":["Egg0"]},"width":70,"height":45,"x":400,"y":400},{"id":"_right_0","color":"transparent","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"_right_1","color":"transparent","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"_right_2","color":"transparent","attributes":{},"width":70,"height":45,"x":400,"y":400}];
+                    var edges = [{"source":4,"target":5,"relName":"right","id":"Person<:right:Liliput0->Liliput1","label":"right"},{"source":5,"target":4,"relName":"right","id":"Person<:right:Liliput1->Liliput0","label":"right"},{"source":6,"target":7,"relName":"right","id":"Person<:right:Liliput2->Brobdingnag0","label":"right"},{"source":13,"target":15,"relName":"right","id":"Person<:right:Blefuscu0->Blefuscu2","label":"right"},{"source":14,"target":9,"relName":"right","id":"Person<:right:Blefuscu1->Brobdingnag2","label":"right"},{"source":15,"target":16,"relName":"right","id":"Person<:right:Blefuscu2->Blefuscu3","label":"right"},{"source":16,"target":6,"relName":"right","id":"Person<:right:Blefuscu3->Liliput2","label":"right"},{"source":7,"target":8,"relName":"right","id":"Person<:right:Brobdingnag0->Brobdingnag1","label":"right"},{"source":8,"target":13,"relName":"right","id":"Person<:right:Brobdingnag1->Blefuscu0","label":"right"},{"source":9,"target":14,"relName":"right","id":"Person<:right:Brobdingnag2->Blefuscu1","label":"right"},{"source":4,"target":12,"relName":"table","id":"Person<:table:Liliput0->Table2","label":"table"},{"source":6,"target":11,"relName":"table","id":"Person<:table:Liliput2->Table1","label":"table"},{"source":14,"target":10,"relName":"table","id":"Person<:table:Blefuscu1->Table0","label":"table"}];
+                    var constraints = [{"axis":"x","left":17,"right":5,"gap":100},{"axis":"y","left":5,"right":17,"gap":0},{"axis":"x","left":4,"right":17,"gap":100},{"axis":"y","left":17,"right":4,"gap":1.2246467991473532e-14},{"axis":"x","left":18,"right":7,"gap":100},{"axis":"y","left":7,"right":18,"gap":0},{"axis":"x","left":18,"right":8,"gap":50.000000000000014},{"axis":"y","left":18,"right":8,"gap":86.60254037844386},{"axis":"x","left":13,"right":18,"gap":49.99999999999998},{"axis":"y","left":18,"right":13,"gap":86.60254037844388},{"axis":"x","left":15,"right":18,"gap":100},{"axis":"y","left":18,"right":15,"gap":1.2246467991473532e-14},{"axis":"x","left":16,"right":18,"gap":50.00000000000004},{"axis":"y","left":16,"right":18,"gap":86.60254037844385},{"axis":"x","left":18,"right":6,"gap":49.999999999999936},{"axis":"y","left":6,"right":18,"gap":86.6025403784439},{"axis":"x","left":19,"right":9,"gap":100},{"axis":"y","left":9,"right":19,"gap":0},{"axis":"x","left":14,"right":19,"gap":100},{"axis":"y","left":19,"right":14,"gap":1.2246467991473532e-14}];
+                    var groups = [{"leaves":[4,5,17],"padding":20,"name":"Table2:table","groups":[],"keyNode":12,"id":"Table2:table"},{"leaves":[6,13,15,16,7,8,18],"padding":20,"name":"Table1:table","groups":[],"keyNode":11,"id":"Table1:table"},{"leaves":[14,9,19],"padding":20,"name":"Table0:table","groups":[],"keyNode":10,"id":"Table0:table"}];
 
 
                     const LINK_DISTANCE = Math.min(width, height) / Math.sqrt(nodes.length);
@@ -482,18 +477,6 @@
 
         </div>
 
-        <div id="webcola">
-
-            <h3> Layout Constraints </h3>
-            <pre id="constraints"> <%- JSON.stringify(layoutConstraints, null,2) %>;%></pre>
-
-            <h3 id="graphDefs"> Graph definitions </h3>
-            <h4>Nodes</h4>
-            <pre id="nodes"> <%- JSON.stringify(layoutNodes,null, 2) %>;%></pre>
-            <h4>Edges</h4>
-            <pre id="edges"> <%- JSON.stringify(layoutEdges, null,2) %>;%></pre>
-
-        </div>
 
     </div>
 
