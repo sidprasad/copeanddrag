@@ -125,9 +125,6 @@ By default, we assign every `sig` a random color, that is respected by all atoms
     - Perhaps we need to force super large links and also force all nodes within the frame?
 - [] Attributes for n-ary relations are broken (we lost the in-betweens in the attribute names)
 
-- Groups: Information related to groups should not be lost, right?
-  - [] Centroids are not necessarily included in groups, which causes issues.
-
 - **Grids**
 - Arrows to groups not nodes in groups
 - Relation colors?
