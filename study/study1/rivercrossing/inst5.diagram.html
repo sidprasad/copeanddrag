@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 
 <html lang="en">
@@ -94,16 +95,10 @@
 <body>
     <div class="container">
         <h1>Diagram Instance</h1>
-        <div class="btn-group" role="group">
-            <button type="button" class="btn btn-outline-secondary"><a href="#svg"> WebCola Diagram </a></button>
-            <button type="button" class="btn btn-outline-secondary"><a href="#constraints"> WebCola Alignment
-                    Constraints </a></button>
-            <button type="button" class="btn btn-outline-secondary"><a href="#graphDefs"> WebCola Graph Definitions
-                </a></button>
-        </div>
+
         <hr>
         <div class="container-fluid" id="svg-container" >
-            <svg id="svg" width="<%- width %>" height="<%- height %>" class="svg-border" >
+            <svg id="svg" width="800" height="800" class="svg-border" >
                 <defs>
                     <marker id="end-arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
                         <polygon points="0 0, 10 3.5, 0 7" />
@@ -135,7 +130,7 @@
                     const dy_for_linespacing = 5; // Adjust for spacing between lines
 
                     var color = d3.scaleOrdinal(d3.schemeCategory20);
-                    var width = <%- width %>, height = <%- height %>;
+                    var width = 800, height = 800;
 
                     var svg_top = d3.select("#svg").call(zoom);
 
@@ -155,10 +150,10 @@
                         .handleDisconnected(true)
                         .size([width, height]);
 
-                    var nodes = <%- JSON.stringify(colaNodes) %>;
-                    var edges = <%- JSON.stringify(colaEdges) %>;
-                    var constraints = <%- JSON.stringify(colaConstraints) %>;
-                    var groups = <%- JSON.stringify(colaGroups) %>;
+                    var nodes = [{"id":"GWBoat0","color":"#763175","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Goat0","color":"#A9DE3C","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Goat1","color":"#A9DE3C","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Goat2","color":"#A9DE3C","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Wolf0","color":"#208DDE","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Wolf1","color":"#208DDE","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Wolf2","color":"#208DDE","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Near0","color":"#EE5653","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Far0","color":"#734BDC","attributes":{},"width":70,"height":45,"x":400,"y":400}];
+                    var edges = [{"source":7,"target":2,"relName":"animals","id":"Position<:animals:Near0->Goat1","label":"animals"},{"source":8,"target":1,"relName":"animals","id":"Position<:animals:Far0->Goat0","label":"animals"},{"source":0,"target":8,"relName":"location","id":"GWBoat<:location:GWBoat0->Far0","label":"location"}];
+                    var constraints = [];
+                    var groups = [{"leaves":[2,5],"padding":20,"name":"Near0:animals","groups":[],"keyNode":7,"id":"Near0:animals"},{"leaves":[1,3,4,6],"padding":20,"name":"Far0:animals","groups":[],"keyNode":8,"id":"Far0:animals"}];
 
 
                     const LINK_DISTANCE = Math.min(width, height) / Math.sqrt(nodes.length);
@@ -479,19 +474,6 @@
 
                 });
             </script>
-
-        </div>
-
-        <div id="webcola">
-
-            <h3> Layout Constraints </h3>
-            <pre id="constraints"> <%- JSON.stringify(layoutConstraints, null,2) %>;%></pre>
-
-            <h3 id="graphDefs"> Graph definitions </h3>
-            <h4>Nodes</h4>
-            <pre id="nodes"> <%- JSON.stringify(layoutNodes,null, 2) %>;%></pre>
-            <h4>Edges</h4>
-            <pre id="edges"> <%- JSON.stringify(layoutEdges, null,2) %>;%></pre>
 
         </div>
 
