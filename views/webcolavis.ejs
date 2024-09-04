@@ -463,7 +463,8 @@
                         })
                         .attr("fill-opacity", 0.3)
                         .call(colaLayout.drag);
-
+                    
+                    // TODO: Uncomment to reenable group labels
                     var groupLabel = svg.selectAll(".groupLabel")
                         .data(groups)
                         .enter().append("text")
@@ -547,14 +548,13 @@
 
 
 
-
                         groupLabel.attr("x", function (d) { 
                             return d.bounds.x + d.bounds.width() / 2; 
                         
                         }) // Center horizontally
                         .attr("y", function (d) { return d.bounds.y + 12; })
                         .attr("text-anchor", "middle") // Center the text on its position
-                        .raise();
+                        .lower();
 
 
                         linkGroups.select("text.linklabel").raise();

@@ -232,7 +232,7 @@ export class WebColaLayout {
     const colaGroupsBeforeSubgrouping = Object.entries(groupDefinitions).map(([key, value]) => {
 
       let leaves = value.map((nodeId) => this.getNodeIndex(nodeId));
-      let padding = 20;
+      let padding = 5;
       let name = key;
 
       return { leaves, padding, name };
