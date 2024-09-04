@@ -119,6 +119,9 @@ export class WebColaLayout {
     let sourceIndex = this.getNodeIndex(edge.source.id);
     let targetIndex = this.getNodeIndex(edge.target.id);
 
+
+
+
     return {
       source: sourceIndex,
       target: targetIndex,

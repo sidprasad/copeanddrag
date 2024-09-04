@@ -126,5 +126,11 @@ By default, we assign every `sig` a random color, that is respected by all atoms
 - [] Attributes for n-ary relations are broken (we lost the in-betweens in the attribute names)
 
 - **Grids**
-- Arrows to groups not nodes in groups
+
 - Relation colors?
+
+### Issues
+
+-[x] Zoom to fit in box
+- [] Arrows to groups not nodes in groups
+- [] Avoid nodes touching nodes if possible
