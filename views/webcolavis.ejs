@@ -159,7 +159,9 @@
                     var edges = <%- JSON.stringify(colaEdges) %>;
                     var constraints = <%- JSON.stringify(colaConstraints) %>;
                     var groups = <%- JSON.stringify(colaGroups) %>;
-
+                    function getNodeIndex(nodeId) {
+                            return nodes.findIndex(node => node.id === nodeId);
+                        }
 
                     const LINK_DISTANCE = Math.min(width, height) / Math.sqrt(nodes.length);
                     console.log("Link distance: " + LINK_DISTANCE);
@@ -187,9 +189,7 @@
                         colaLayout.prepareEdgeRouting(margin / 3);
                         console.log("Routing edges");
 
-                        function getNodeIndex(nodeId) {
-                            return nodes.findIndex(node => node.id === nodeId);
-                        }
+
 
                         // What I want to do is change the angle based on the number of edges between the same nodes
                         // Function to calculate curvature based on number of edges and index
@@ -218,9 +218,60 @@
                         link.attr("d", function (d, i) {
 
 
-                            // UGH THIS SORT OF WORKS BUT ONLY SOMETIMES CURVES IN THE WRONG DIRECTION
+                            // TODO: Will the edge hack break this?
+                            /*
+
+                                If so, we need to do something about it. Maybe dont route edges for the group edges in the same way.
+                                Or calculate route differently.
+                            */
 
                             var route = colaLayout.routeEdge(d);
+
+                            let n = d.id;
+                            if (n.startsWith("_g_")) {
+
+                                let target = d.target;
+
+                                // This actually deals with subsumed groups, since only
+                                // the innermost group will include the element in its leaves.
+                                let targetGroup = groups.find(group => {
+                                    let leaves = group.leaves.map(leaf => leaf.id);
+                                    return leaves.includes(target.id);
+
+                                });
+
+                                function closestPointOnRect(bounds, point) {
+                                    // Destructure the rectangle bounds
+                                    const { x, y, X, Y } = bounds;
+
+                                    // Calculate the rectangle's edges
+                                    const left = x;
+                                    const right = X;
+                                    const top = y;
+                                    const bottom = Y;
+
+                                    // Clamp the point's coordinates to the rectangle's bounds
+                                    const closestX = Math.max(left, Math.min(point.x, right));
+                                    const closestY = Math.max(top, Math.min(point.y, bottom));
+
+                                    return { x: closestX, y: closestY };
+                                }
+
+                                let newTargetCoords = closestPointOnRect(targetGroup.bounds, route[0]);
+                                
+
+                                let currentTarget = route[route.length - 1];
+                                currentTarget.x = newTargetCoords.x;
+                                currentTarget.y = newTargetCoords.y;
+                                // Not ideal but we dont want odd curves.
+                                if (route.length > 2) {
+                                    route.splice(1, route.length - 2);
+                                }
+
+
+                            }
+
+
 
 
                             // If there are only two points in the route, get the midpoint of the route and add it to the route
@@ -252,8 +303,6 @@
 
 
                                 if (index > 0 && index < route.length - 1 && curvature !== 0) {
-                                    console.log(d.source.id + " to " + d.target.id);
-
 
                                     // Adjust the control points based on the direction
                                     // var offsetX = curvature * Math.cos(angle + Math.PI / 2);
@@ -290,6 +339,26 @@
                             })
                             .attr("text-anchor", "middle")
                             .raise();
+
+                            /**** This bit ensures we zoom to fit ***/
+                            
+
+                                const bbox = svg.node().getBBox();
+                                const padding = 10; // Padding in pixels
+
+                                const viewBox = [
+                                    bbox.x - padding,
+                                    bbox.y - padding,
+                                    bbox.width + 2 * padding,
+                                    bbox.height + 2 * padding
+                                ].join(' ');
+
+
+                                const topSvg = d3.select("#svg");
+                                topSvg.attr('viewBox', viewBox);
+                            /*************************************/
+
+
                     };
 
                     const linkGroups = svg.selectAll(".link-group")
@@ -394,7 +463,8 @@
                         })
                         .attr("fill-opacity", 0.3)
                         .call(colaLayout.drag);
-
+                    
+                    // TODO: Uncomment to reenable group labels
                     var groupLabel = svg.selectAll(".groupLabel")
                         .data(groups)
                         .enter().append("text")
@@ -441,7 +511,26 @@
 
                         linkGroups.select("path.link")
                             .attr("d", function (d) {
-                                var route = cola.makeEdgeBetween(d.source.innerBounds, d.target.innerBounds, 5);
+                                
+                                let source = d.source;
+                                let target = d.target;
+
+                                let n = d.id;
+                                if (n.startsWith("_g_")) {
+                                    // This actually deals with subsumed groups, since only
+                                    // the innermost group will include the element in its leaves.
+                                    let targetGroup = groups.find(group => {
+                                        let leaves = group.leaves.map(leaf => leaf.id);
+                                        return leaves.includes(target.id);
+
+                                    });
+                                    target = targetGroup;
+                                    target.innerBounds = target.bounds.inflate(-1);
+
+                                }
+
+
+                                var route = cola.makeEdgeBetween(source.innerBounds, target.innerBounds, 5);
                                 return lineFunction([route.sourceIntersection, route.arrowStart]);
                             });
 
@@ -459,14 +548,16 @@
 
 
 
-
                         groupLabel.attr("x", function (d) { 
                             return d.bounds.x + d.bounds.width() / 2; 
                         
                         }) // Center horizontally
-                            .attr("y", function (d) { return d.bounds.y + 12; })
-                            .attr("text-anchor", "middle") // Center the text on its position
-                            .raise();
+                        .attr("y", function (d) { return d.bounds.y + 12; })
+                        .attr("text-anchor", "middle") // Center the text on its position
+                        .lower();
+
+
+                        linkGroups.select("text.linklabel").raise();
 
                     });
 

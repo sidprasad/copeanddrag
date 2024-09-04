@@ -146,6 +146,18 @@ export class LayoutInstance {
                     };
                     groups.push(newGroup);
                     // HACK: Don't remove the FIRST edge connecting node to group, we can respect SOME spatiality?
+
+
+
+                    const edgeLabel = this.getEdgeLabel(g, edge);
+
+                    const groupEdgePrefix = "_g_"
+                    const newId = groupEdgePrefix + edgeId;
+                                        // Maybe remove the edge and then add it again.
+                                        g.removeEdge(edge.v, edge.w, edgeId);
+                    g.setEdge(edge.v, edge.w, edgeLabel, newId );
+
+
                 }
             }
         });
@@ -533,20 +545,6 @@ export class LayoutInstance {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // TODO: This is broken :((((
     private orderNodesByEdges(edges): string[][] {
 
         let inNodes = edges.map(edge => edge.w);
@@ -556,12 +554,6 @@ export class LayoutInstance {
         let rootNodes = outNodes.filter(node => !inNodes.includes(node));
 
         let graphComponents = this.findDisconnectedComponents(edges);
-        /*
-
-            The bug is here. We need to find roots, OR we need to find a node for each disconnected component.
-
-        */
-
         graphComponents.forEach((component) => {
             // Ensure a root node is present in each component
             let containsARoot = component.some(node => rootNodes.includes(node));
@@ -571,12 +563,6 @@ export class LayoutInstance {
             }
 
         });
-
-        // if (rootNodes.length === 0) {
-        //     // If there are no root nodes, just pick any node
-        //     rootNodes = [outNodes[0]];
-        // }
-
 
         return rootNodes.map((rootNode) => {
             let visited = new Set<number>();
