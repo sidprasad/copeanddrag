@@ -132,5 +132,5 @@ By default, we assign every `sig` a random color, that is respected by all atoms
 ### Issues
 
 -[x] Zoom to fit in box
-- [] Arrows to groups not nodes in groups
+- [x] Arrows to groups not nodes in groups
 - [] Avoid nodes touching nodes if possible
