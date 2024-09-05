@@ -129,8 +129,6 @@ By default, we assign every `sig` a random color, that is respected by all atoms
 
 - Relation colors?
 
-### Issues
+## TODO:
 
--[x] Zoom to fit in box
-- [x] Arrows to groups not nodes in groups
-- [] Avoid nodes touching nodes if possible
+- [] Group rendering now broken when grouping on DOMAIN!
