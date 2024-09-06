@@ -1,0 +1,23 @@
+{
+    "fieldDirections": [
+        {
+            "fieldName": "hour",
+            "directions": ["above"]
+        },
+        {
+            "fieldName": "minute",
+            "directions": ["above"]
+        }
+    ],
+    "groupBy": [
+    ],
+    "closures": [
+        {
+            "fieldName": "next",
+            "direction": "clockwise"
+        }
+    ],
+    "attributeFields": [],
+    "hideDisconnected": false,
+    "hideDisconnectedBuiltIns": true
+}
