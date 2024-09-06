@@ -1,4 +1,4 @@
-<alloy builddate="Thursday, September 5th, 2024">
+<alloy builddate="Friday, September 6th, 2024">
 <instance bitwidth="4" maxseq="-1" command="temporary-name_clock_1" filename="/no-name.rkt" version="3.5"  >
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
@@ -19,49 +19,45 @@
 </sig>
 
 <sig label="IX" ID="5" parentID="4">
-<atom label="IX"/><atom label="ix"/>
+<atom label="IX"/>
 </sig>
 
-<sig label="Clock" ID="6" parentID="2">
-<atom label="Metropolis"/><atom label="Gotham"/>
+<sig label="XII" ID="6" parentID="4">
+<atom label="XII"/>
 </sig>
 
-<sig label="XII" ID="7" parentID="4">
-<atom label="XII"/><atom label="xii"/>
+<sig label="III" ID="7" parentID="4">
+<atom label="III"/>
 </sig>
 
-<sig label="III" ID="8" parentID="4">
-<atom label="iii"/><atom label="III"/>
+<sig label="VI" ID="8" parentID="4">
+<atom label="VI"/>
 </sig>
 
-<sig label="VI" ID="9" parentID="4">
-<atom label="vi"/><atom label="VI"/>
+<sig label="City" ID="9" parentID="2">
+<atom label="Delhi"/><atom label="Lahore"/>
 </sig>
 
-<field label="hour" ID="10" parentID="6">
-<tuple><atom label="Metropolis"/><atom label="iii"/></tuple>
-<tuple><atom label="Gotham"/><atom label="VI"/></tuple>
-<types><type ID="6"/><type ID="4"/></types>
-
-</field>
-
-<field label="next" ID="11" parentID="4">
+<field label="next" ID="10" parentID="4">
 <tuple><atom label="IX"/><atom label="XII"/></tuple>
 <tuple><atom label="XII"/><atom label="III"/></tuple>
-<tuple><atom label="iii"/><atom label="vi"/></tuple>
 <tuple><atom label="III"/><atom label="VI"/></tuple>
-<tuple><atom label="vi"/><atom label="ix"/></tuple>
-<tuple><atom label="ix"/><atom label="xii"/></tuple>
-<tuple><atom label="xii"/><atom label="iii"/></tuple>
 <tuple><atom label="VI"/><atom label="IX"/></tuple>
 <types><type ID="4"/><type ID="4"/></types>
 
 </field>
 
-<field label="minute" ID="12" parentID="6">
-<tuple><atom label="Metropolis"/><atom label="vi"/></tuple>
-<tuple><atom label="Gotham"/><atom label="IX"/></tuple>
-<types><type ID="6"/><type ID="4"/></types>
+<field label="hour" ID="11" parentID="9">
+<tuple><atom label="Delhi"/><atom label="VI"/></tuple>
+<tuple><atom label="Lahore"/><atom label="VI"/></tuple>
+<types><type ID="9"/><type ID="4"/></types>
+
+</field>
+
+<field label="minute" ID="12" parentID="9">
+<tuple><atom label="Delhi"/><atom label="IX"/></tuple>
+<tuple><atom label="Lahore"/><atom label="III"/></tuple>
+<types><type ID="9"/><type ID="4"/></types>
 
 </field>
 

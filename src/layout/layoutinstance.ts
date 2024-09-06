@@ -430,8 +430,13 @@ export class LayoutInstance {
         let relatedNodeFragments = this.orderNodesByEdges(relationEdges);
         var fragment_num = 0;
 
+
+
+        let centroids: LayoutNode[] = [];
+
         let constraints: LayoutConstraint[] = [];
         relatedNodeFragments.forEach((relatedNodes) => {
+            const minRadius = 100; // Example fixed distance. This needs to change.
 
             const fragmentCentroid: LayoutNode = {
                 id: `_${relName}_${fragment_num++}`,
@@ -440,6 +445,28 @@ export class LayoutInstance {
                 color: "transparent"
             };
             layoutNodes.push(fragmentCentroid);
+
+
+
+            /*
+                For each centroid, make sure it is 'n' to the right of the previous centroid.
+                Or 'n' distance from the previous centroid.
+            */
+            if(centroids.length > 0) {
+                var prevCentroid = centroids[centroids.length - 1];
+                const nodeHeightEstimate = 100;
+                const centroidDist = minRadius + nodeHeightEstimate;
+
+                // Push left and top constraints (down and right layout)
+                constraints.push(this.leftConstraint(prevCentroid.id, fragmentCentroid.id, centroidDist, layoutNodes));
+
+                constraints.push(this.topConstraint(prevCentroid.id, fragmentCentroid.id, centroidDist, layoutNodes));
+            }
+
+
+            // Then add it to the list.
+            centroids.push(fragmentCentroid);
+
 
             // Check if the relatedNodes are all in a single group. If so, we should place the centroid in that group.
             let group : LayoutGroup = groups.find((group) => relatedNodes.every((node) => group.nodeIds.includes(node)));
@@ -450,11 +477,7 @@ export class LayoutInstance {
 
             // Now keep the related nodes a fixed distance from the centroid
 
-            // TODO: ISSUE: What if the nodes are in a group? The centroid must also be in that group
-            // this becomes tricky right?
 
-
-            const fixedDistance = 100; // Example fixed distance. This needs to change.
             const angleStep = (direction_mult * 2 * Math.PI) / relatedNodes.length;
 
             let index = 0;
@@ -462,8 +485,8 @@ export class LayoutInstance {
             relatedNodes.forEach(nodeId => {
 
                 const angle = index * angleStep;
-                const x_gap = fixedDistance * Math.cos(angle);
-                const y_gap = fixedDistance * Math.sin(angle);
+                const x_gap = minRadius * Math.cos(angle);
+                const y_gap = minRadius * Math.sin(angle);
 
                 if (x_gap > 0) {
                     constraints.push(this.leftConstraint(fragmentCentroid.id, nodeId, x_gap, layoutNodes));

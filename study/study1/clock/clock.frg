@@ -13,37 +13,35 @@ sig IX extends Mark {}
 
 
 
-sig Clock {
+sig City {
     hour : one Mark,
     minute : one Mark
 }
 
 
+// Time difference of 30 minutes
+
+inst IST {
+    City = `Delhi + `Lahore
 
 
-
-
-inst DC {
-    Clock = `Gotham + `Metropolis
-
-
-    XII = `XII + `xii
-    III = `III + `iii
-    VI = `VI + `vi
-    IX = `IX + `ix
+    XII = `XII 
+    III = `III 
+    VI = `VI 
+    IX = `IX 
     Mark = XII + III + VI + IX
 
-    next  =(`XII->`III + `III->`VI + `VI->`IX + `IX->`XII) +
-            (`xii->`iii + `iii->`vi + `vi->`ix + `ix->`xii)
+    next  =(`XII->`III + `III->`VI + `VI->`IX + `IX->`XII) 
+//          +  (`xii->`iii + `iii->`vi + `vi->`ix + `ix->`xii)
 
-    `Gotham.hour =`VI 
-    `Gotham.minute =`IX
+    `Delhi.hour =`VI 
+    `Delhi.minute =`IX
 
-    `Metropolis.hour = `iii 
-    `Metropolis.minute =`vi 
+    `Lahore.hour = `VI 
+    `Lahore.minute =`III 
 
 }
 
 run { 
     
-} for DC
+} for IST
