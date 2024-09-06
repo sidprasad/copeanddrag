@@ -114,6 +114,8 @@ By default, we assign every `sig` a random color, that is respected by all atoms
 
 
 - [] Currently only show a visualizations for a single alloy instance in the datum
+- [] Fragment shapes should not overlap
+  - Effectively, fragment centroids should be at least the radius of the fragment to the left 
 
 
 ### WebCola
@@ -129,8 +131,3 @@ By default, we assign every `sig` a random color, that is respected by all atoms
 
 - Relation colors?
 
-## TODO:
-
-- [] Group rendering now broken when grouping on DOMAIN!
-- [] Fragment shapes should not overlap
-  - Effectively, fragment centroids should be at least the radius of the fragment to the left 
