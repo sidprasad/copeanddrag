@@ -14,7 +14,7 @@
         },
         {
             "fieldName": "row",
-            "directions" : ["directlyRight"]
+            "directions" : ["directlyLeft"]
         }
     ],
     "groupBy": [

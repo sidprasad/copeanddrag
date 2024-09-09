@@ -22,7 +22,7 @@ sig City {
 // Time difference of 30 minutes
 
 inst IST {
-    City = `Delhi + `Lahore
+    City = `Metropolis + `Gotham
 
 
     XII = `XII 
@@ -34,11 +34,11 @@ inst IST {
     next  =(`XII->`III + `III->`VI + `VI->`IX + `IX->`XII) 
 //          +  (`xii->`iii + `iii->`vi + `vi->`ix + `ix->`xii)
 
-    `Delhi.hour =`VI 
-    `Delhi.minute =`IX
+    `Metropolis.hour =`VI 
+    `Metropolis.minute =`IX
 
-    `Lahore.hour = `VI 
-    `Lahore.minute =`III 
+    `Gotham.hour = `VI 
+    `Gotham.minute =`III 
 
 }
 

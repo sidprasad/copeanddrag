@@ -83,8 +83,6 @@
     </style>
 
     <script src="https://marvl.infotech.monash.edu/webcola/extern/graphlib-dot.min.js"></script>
-    <!-- Minified version -->
-    <!-- <script src="http://marvl.infotech.monash.edu/webcola/cola.min.js"></script> -->
     <!-- Full version -->
     <script src="https://marvl.infotech.monash.edu/webcola/cola.min.js"></script>
 
@@ -94,8 +92,7 @@
 
 <body>
     <div class="container">
-        <h1>Diagram Instance</h1>
-
+        <p> This is an interactive diagram. You can drag graph nodes around or zoom in and out.</p>
         <hr>
         <div class="container-fluid" id="svg-container" >
             <svg id="svg" width="800" height="800" class="svg-border" >
@@ -150,11 +147,13 @@
                         .handleDisconnected(true)
                         .size([width, height]);
 
-                    var nodes = [{"id":"Student2","color":"#EE8808","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Magoo0","color":"#BBD647","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Table0","color":"#FA522E","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Table1","color":"#FA522E","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Table2","color":"#FA522E","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Table3","color":"#FA522E","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Table4","color":"#FA522E","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Row0","color":"#5FEEB8","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Row1","color":"#5FEEB8","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Row2","color":"#5FEEB8","attributes":{},"width":70,"height":45,"x":400,"y":400}];
-                    var edges = [{"source":8,"target":9,"relName":"behind","id":"Row<:behind:Row1->Row2","label":"behind"},{"source":9,"target":7,"relName":"behind","id":"Row<:behind:Row2->Row0","label":"behind"},{"source":2,"target":7,"relName":"row","id":"Table<:row:Table0->Row0","label":"row"},{"source":3,"target":8,"relName":"row","id":"Table<:row:Table1->Row1","label":"row"},{"source":4,"target":9,"relName":"row","id":"Table<:row:Table2->Row2","label":"row"},{"source":5,"target":4,"relName":"right","id":"Table<:right:Table3->Table2","label":"right"},{"source":6,"target":3,"relName":"right","id":"Table<:right:Table4->Table1","label":"right"},{"source":1,"target":2,"relName":"seatedAt","id":"Student<:seatedAt:Magoo0->Table0","label":"seatedAt"},{"source":0,"target":4,"relName":"seatedAt","id":"Student<:seatedAt:Student2->Table2","label":"seatedAt"}];
-                    var constraints = [{"axis":"y","left":8,"right":9,"gap":15},{"axis":"x","left":9,"right":8,"gap":0,"equality":true},{"axis":"y","left":9,"right":7,"gap":15},{"axis":"x","left":7,"right":9,"gap":0,"equality":true},{"axis":"x","left":2,"right":7,"gap":15},{"axis":"y","left":7,"right":2,"gap":0,"equality":true},{"axis":"x","left":3,"right":8,"gap":15},{"axis":"y","left":8,"right":3,"gap":0,"equality":true},{"axis":"x","left":4,"right":9,"gap":15},{"axis":"y","left":9,"right":4,"gap":0,"equality":true},{"axis":"x","left":5,"right":4,"gap":15},{"axis":"y","left":4,"right":5,"gap":0,"equality":true},{"axis":"x","left":6,"right":3,"gap":15},{"axis":"y","left":3,"right":6,"gap":0,"equality":true},{"axis":"x","left":2,"right":1,"gap":15},{"axis":"x","left":4,"right":0,"gap":15}];
-                    var groups = [{"leaves":[2],"padding":20,"name":"Row0:row","groups":[],"keyNode":7,"id":"Row0:row"},{"leaves":[3,6],"padding":20,"name":"Row1:row","groups":[],"keyNode":8,"id":"Row1:row"},{"leaves":[4,5],"padding":20,"name":"Row2:row","groups":[],"keyNode":9,"id":"Row2:row"}];
-
+                    var nodes = [{"id":"Student2","color":"#E8B2A3","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Magoo0","color":"#E7AE07","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Table0","color":"#1145E0","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Table1","color":"#1145E0","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Table2","color":"#1145E0","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Table3","color":"#1145E0","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Table4","color":"#1145E0","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Row0","color":"#FAD021","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Row1","color":"#FAD021","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Row2","color":"#FAD021","attributes":{},"width":70,"height":45,"x":400,"y":400}];
+                    var edges = [{"source":8,"target":9,"relName":"behind","id":"Row<:behind:Row1->Row2","label":"behind"},{"source":9,"target":7,"relName":"behind","id":"Row<:behind:Row2->Row0","label":"behind"},{"source":5,"target":4,"relName":"right","id":"Table<:right:Table3->Table2","label":"right"},{"source":6,"target":3,"relName":"right","id":"Table<:right:Table4->Table1","label":"right"},{"source":1,"target":2,"relName":"seatedAt","id":"Student<:seatedAt:Magoo0->Table0","label":"seatedAt"},{"source":0,"target":4,"relName":"seatedAt","id":"Student<:seatedAt:Student2->Table2","label":"seatedAt"},{"source":2,"target":7,"relName":"row","id":"_g_Table<:row:Table0->Row0","label":"row"},{"source":3,"target":8,"relName":"row","id":"_g_Table<:row:Table1->Row1","label":"row"},{"source":4,"target":9,"relName":"row","id":"_g_Table<:row:Table2->Row2","label":"row"}];
+                    var constraints = [{"axis":"y","left":8,"right":9,"gap":15},{"axis":"x","left":9,"right":8,"gap":0,"equality":true},{"axis":"y","left":9,"right":7,"gap":15},{"axis":"x","left":7,"right":9,"gap":0,"equality":true},{"axis":"x","left":5,"right":4,"gap":15},{"axis":"y","left":4,"right":5,"gap":0,"equality":true},{"axis":"x","left":6,"right":3,"gap":15},{"axis":"y","left":3,"right":6,"gap":0,"equality":true},{"axis":"x","left":2,"right":1,"gap":15},{"axis":"x","left":4,"right":0,"gap":15},{"axis":"x","left":7,"right":2,"gap":15},{"axis":"y","left":7,"right":2,"gap":0,"equality":true},{"axis":"x","left":8,"right":3,"gap":15},{"axis":"y","left":8,"right":3,"gap":0,"equality":true},{"axis":"x","left":9,"right":4,"gap":15},{"axis":"y","left":9,"right":4,"gap":0,"equality":true}];
+                    var groups = [{"leaves":[2],"padding":5,"name":"Row0:row","groups":[],"keyNode":7,"id":"Row0:row"},{"leaves":[3,6],"padding":5,"name":"Row1:row","groups":[],"keyNode":8,"id":"Row1:row"},{"leaves":[4,5],"padding":5,"name":"Row2:row","groups":[],"keyNode":9,"id":"Row2:row"}];
+                    function getNodeIndex(nodeId) {
+                            return nodes.findIndex(node => node.id === nodeId);
+                        }
 
                     const LINK_DISTANCE = Math.min(width, height) / Math.sqrt(nodes.length);
                     console.log("Link distance: " + LINK_DISTANCE);
@@ -182,9 +181,7 @@
                         colaLayout.prepareEdgeRouting(margin / 3);
                         console.log("Routing edges");
 
-                        function getNodeIndex(nodeId) {
-                            return nodes.findIndex(node => node.id === nodeId);
-                        }
+
 
                         // What I want to do is change the angle based on the number of edges between the same nodes
                         // Function to calculate curvature based on number of edges and index
@@ -213,9 +210,100 @@
                         link.attr("d", function (d, i) {
 
 
-                            // UGH THIS SORT OF WORKS BUT ONLY SOMETIMES CURVES IN THE WRONG DIRECTION
+                            // TODO: Will the edge hack break this?
+                            /*
+
+                                If so, we need to do something about it. Maybe dont route edges for the group edges in the same way.
+                                Or calculate route differently.
+                            */
 
                             var route = colaLayout.routeEdge(d);
+
+                            let n = d.id;
+                            if (n.startsWith("_g_")) {
+                                let source = d.source;
+                                let target = d.target;
+
+                                let sourceIndex = getNodeIndex(source.id);
+                                let targetIndex = getNodeIndex(target.id);
+
+                                // Depends on the source group and the target group.
+
+
+                                // This actually deals with subsumed groups, since only
+                                // the innermost group will include the element in its leaves.
+                                let targetGroup = groups.find(group => {
+                                    let leaves = group.leaves.map(leaf => leaf.id);
+                                    return leaves.includes(target.id);
+
+                                });
+
+                                let sourceGroup = groups.find(group => {
+                                    let leaves = group.leaves.map(leaf => leaf.id);
+                                    return leaves.includes(source.id);
+
+                                });
+
+                                const groupIsTarget = targetGroup && targetGroup.keyNode === sourceIndex;
+                                const groupIsSource = sourceGroup && sourceGroup.keyNode === targetIndex;
+
+                                if (groupIsSource && groupIsTarget) {
+                                    alert('Something is very wrong!');
+                                }
+
+
+                                // Only one of source group and target group can be a group.
+
+                                // Within source group, see if the target is the key
+
+                                function closestPointOnRect(bounds, point) {
+                                    // Destructure the rectangle bounds
+                                    const { x, y, X, Y } = bounds;
+
+                                    // Calculate the rectangle's edges
+                                    const left = x;
+                                    const right = X;
+                                    const top = y;
+                                    const bottom = Y;
+
+                                    // Clamp the point's coordinates to the rectangle's bounds
+                                    const closestX = Math.max(left, Math.min(point.x, right));
+                                    const closestY = Math.max(top, Math.min(point.y, bottom));
+
+                                    return { x: closestX, y: closestY };
+                                }
+
+
+
+
+                                if (groupIsTarget) {
+                                    let newTargetCoords = closestPointOnRect(targetGroup.bounds, route[0]);
+                                    let currentTarget = route[route.length - 1];
+                                    currentTarget.x = newTargetCoords.x;
+                                    currentTarget.y = newTargetCoords.y;
+
+
+                                }
+                                else if (groupIsSource) {
+                                    let newSourceCoords = closestPointOnRect(sourceGroup.bounds, route[route.length - 1]);
+                                    let currentSource = route[0];
+                                    currentSource.x = newSourceCoords.x;
+                                    currentSource.y = newSourceCoords.y;
+
+                                }
+                                else {
+                                    console.log("This is a group edge, but neither source nor target is a group.", d);
+                                }
+                                
+                                // Not ideal but we dont want odd curves.
+                                if (route.length > 2) {
+                                    route.splice(1, route.length - 2);
+                                }
+
+
+                            }
+
+
 
 
                             // If there are only two points in the route, get the midpoint of the route and add it to the route
@@ -247,8 +335,6 @@
 
 
                                 if (index > 0 && index < route.length - 1 && curvature !== 0) {
-                                    console.log(d.source.id + " to " + d.target.id);
-
 
                                     // Adjust the control points based on the direction
                                     // var offsetX = curvature * Math.cos(angle + Math.PI / 2);
@@ -285,6 +371,26 @@
                             })
                             .attr("text-anchor", "middle")
                             .raise();
+
+                            /**** This bit ensures we zoom to fit ***/
+                            
+
+                                const bbox = svg.node().getBBox();
+                                const padding = 10; // Padding in pixels
+
+                                const viewBox = [
+                                    bbox.x - padding,
+                                    bbox.y - padding,
+                                    bbox.width + 2 * padding,
+                                    bbox.height + 2 * padding
+                                ].join(' ');
+
+
+                                const topSvg = d3.select("#svg");
+                                topSvg.attr('viewBox', viewBox);
+                            /*************************************/
+
+
                     };
 
                     const linkGroups = svg.selectAll(".link-group")
@@ -389,12 +495,17 @@
                         })
                         .attr("fill-opacity", 0.3)
                         .call(colaLayout.drag);
-
+                    
+                    // TODO: Uncomment to reenable group labels
                     var groupLabel = svg.selectAll(".groupLabel")
                         .data(groups)
                         .enter().append("text")
                         .attr("class", "groupLabel")
-                        .text(function (d) { return d.name; })
+                        .text(function (d) { 
+                            // TODO: Added this
+                            return "";
+                            //return d.name; 
+                        })
                         .call(colaLayout.drag);
 
 
@@ -436,7 +547,26 @@
 
                         linkGroups.select("path.link")
                             .attr("d", function (d) {
-                                var route = cola.makeEdgeBetween(d.source.innerBounds, d.target.innerBounds, 5);
+                                
+                                let source = d.source;
+                                let target = d.target;
+
+                                let n = d.id;
+                                if (n.startsWith("_g_")) {
+                                    // This actually deals with subsumed groups, since only
+                                    // the innermost group will include the element in its leaves.
+                                    let targetGroup = groups.find(group => {
+                                        let leaves = group.leaves.map(leaf => leaf.id);
+                                        return leaves.includes(target.id);
+
+                                    });
+                                    target = targetGroup;
+                                    target.innerBounds = target.bounds.inflate(-1);
+
+                                }
+
+
+                                var route = cola.makeEdgeBetween(source.innerBounds, target.innerBounds, 5);
                                 return lineFunction([route.sourceIntersection, route.arrowStart]);
                             });
 
@@ -454,14 +584,16 @@
 
 
 
-
                         groupLabel.attr("x", function (d) { 
                             return d.bounds.x + d.bounds.width() / 2; 
                         
                         }) // Center horizontally
-                            .attr("y", function (d) { return d.bounds.y + 12; })
-                            .attr("text-anchor", "middle") // Center the text on its position
-                            .raise();
+                        .attr("y", function (d) { return d.bounds.y + 12; })
+                        .attr("text-anchor", "middle") // Center the text on its position
+                        .lower();
+
+
+                        linkGroups.select("text.linklabel").raise();
 
                     });
 
@@ -477,6 +609,534 @@
 
         </div>
 
+        <!-- <div id="webcola">
+
+            <h3> Layout Constraints </h3>
+            <pre id="constraints"> [
+  {
+    "top": {
+      "id": "Row1",
+      "color": "#FAD021",
+      "groups": [],
+      "attributes": {}
+    },
+    "bottom": {
+      "id": "Row2",
+      "color": "#FAD021",
+      "groups": [],
+      "attributes": {}
+    },
+    "minDistance": 15
+  },
+  {
+    "axis": "x",
+    "node1": {
+      "id": "Row2",
+      "color": "#FAD021",
+      "groups": [],
+      "attributes": {}
+    },
+    "node2": {
+      "id": "Row1",
+      "color": "#FAD021",
+      "groups": [],
+      "attributes": {}
+    }
+  },
+  {
+    "top": {
+      "id": "Row2",
+      "color": "#FAD021",
+      "groups": [],
+      "attributes": {}
+    },
+    "bottom": {
+      "id": "Row0",
+      "color": "#FAD021",
+      "groups": [],
+      "attributes": {}
+    },
+    "minDistance": 15
+  },
+  {
+    "axis": "x",
+    "node1": {
+      "id": "Row0",
+      "color": "#FAD021",
+      "groups": [],
+      "attributes": {}
+    },
+    "node2": {
+      "id": "Row2",
+      "color": "#FAD021",
+      "groups": [],
+      "attributes": {}
+    }
+  },
+  {
+    "left": {
+      "id": "Table3",
+      "color": "#1145E0",
+      "groups": [
+        "Row2:row"
+      ],
+      "attributes": {}
+    },
+    "right": {
+      "id": "Table2",
+      "color": "#1145E0",
+      "groups": [
+        "Row2:row"
+      ],
+      "attributes": {}
+    },
+    "minDistance": 15
+  },
+  {
+    "axis": "y",
+    "node1": {
+      "id": "Table2",
+      "color": "#1145E0",
+      "groups": [
+        "Row2:row"
+      ],
+      "attributes": {}
+    },
+    "node2": {
+      "id": "Table3",
+      "color": "#1145E0",
+      "groups": [
+        "Row2:row"
+      ],
+      "attributes": {}
+    }
+  },
+  {
+    "left": {
+      "id": "Table4",
+      "color": "#1145E0",
+      "groups": [
+        "Row1:row"
+      ],
+      "attributes": {}
+    },
+    "right": {
+      "id": "Table1",
+      "color": "#1145E0",
+      "groups": [
+        "Row1:row"
+      ],
+      "attributes": {}
+    },
+    "minDistance": 15
+  },
+  {
+    "axis": "y",
+    "node1": {
+      "id": "Table1",
+      "color": "#1145E0",
+      "groups": [
+        "Row1:row"
+      ],
+      "attributes": {}
+    },
+    "node2": {
+      "id": "Table4",
+      "color": "#1145E0",
+      "groups": [
+        "Row1:row"
+      ],
+      "attributes": {}
+    }
+  },
+  {
+    "left": {
+      "id": "Table0",
+      "color": "#1145E0",
+      "groups": [
+        "Row0:row"
+      ],
+      "attributes": {}
+    },
+    "right": {
+      "id": "Magoo0",
+      "color": "#E7AE07",
+      "groups": [],
+      "attributes": {}
+    },
+    "minDistance": 15
+  },
+  {
+    "left": {
+      "id": "Table2",
+      "color": "#1145E0",
+      "groups": [
+        "Row2:row"
+      ],
+      "attributes": {}
+    },
+    "right": {
+      "id": "Student2",
+      "color": "#E8B2A3",
+      "groups": [],
+      "attributes": {}
+    },
+    "minDistance": 15
+  },
+  {
+    "left": {
+      "id": "Row0",
+      "color": "#FAD021",
+      "groups": [],
+      "attributes": {}
+    },
+    "right": {
+      "id": "Table0",
+      "color": "#1145E0",
+      "groups": [
+        "Row0:row"
+      ],
+      "attributes": {}
+    },
+    "minDistance": 15
+  },
+  {
+    "axis": "y",
+    "node1": {
+      "id": "Row0",
+      "color": "#FAD021",
+      "groups": [],
+      "attributes": {}
+    },
+    "node2": {
+      "id": "Table0",
+      "color": "#1145E0",
+      "groups": [
+        "Row0:row"
+      ],
+      "attributes": {}
+    }
+  },
+  {
+    "left": {
+      "id": "Row1",
+      "color": "#FAD021",
+      "groups": [],
+      "attributes": {}
+    },
+    "right": {
+      "id": "Table1",
+      "color": "#1145E0",
+      "groups": [
+        "Row1:row"
+      ],
+      "attributes": {}
+    },
+    "minDistance": 15
+  },
+  {
+    "axis": "y",
+    "node1": {
+      "id": "Row1",
+      "color": "#FAD021",
+      "groups": [],
+      "attributes": {}
+    },
+    "node2": {
+      "id": "Table1",
+      "color": "#1145E0",
+      "groups": [
+        "Row1:row"
+      ],
+      "attributes": {}
+    }
+  },
+  {
+    "left": {
+      "id": "Row2",
+      "color": "#FAD021",
+      "groups": [],
+      "attributes": {}
+    },
+    "right": {
+      "id": "Table2",
+      "color": "#1145E0",
+      "groups": [
+        "Row2:row"
+      ],
+      "attributes": {}
+    },
+    "minDistance": 15
+  },
+  {
+    "axis": "y",
+    "node1": {
+      "id": "Row2",
+      "color": "#FAD021",
+      "groups": [],
+      "attributes": {}
+    },
+    "node2": {
+      "id": "Table2",
+      "color": "#1145E0",
+      "groups": [
+        "Row2:row"
+      ],
+      "attributes": {}
+    }
+  }
+];</pre>
+
+            <h3 id="graphDefs"> Graph definitions </h3>
+            <h4>Nodes</h4>
+            <pre id="nodes"> [
+  {
+    "id": "Student2",
+    "color": "#E8B2A3",
+    "groups": [],
+    "attributes": {}
+  },
+  {
+    "id": "Magoo0",
+    "color": "#E7AE07",
+    "groups": [],
+    "attributes": {}
+  },
+  {
+    "id": "Table0",
+    "color": "#1145E0",
+    "groups": [
+      "Row0:row"
+    ],
+    "attributes": {}
+  },
+  {
+    "id": "Table1",
+    "color": "#1145E0",
+    "groups": [
+      "Row1:row"
+    ],
+    "attributes": {}
+  },
+  {
+    "id": "Table2",
+    "color": "#1145E0",
+    "groups": [
+      "Row2:row"
+    ],
+    "attributes": {}
+  },
+  {
+    "id": "Table3",
+    "color": "#1145E0",
+    "groups": [
+      "Row2:row"
+    ],
+    "attributes": {}
+  },
+  {
+    "id": "Table4",
+    "color": "#1145E0",
+    "groups": [
+      "Row1:row"
+    ],
+    "attributes": {}
+  },
+  {
+    "id": "Row0",
+    "color": "#FAD021",
+    "groups": [],
+    "attributes": {}
+  },
+  {
+    "id": "Row1",
+    "color": "#FAD021",
+    "groups": [],
+    "attributes": {}
+  },
+  {
+    "id": "Row2",
+    "color": "#FAD021",
+    "groups": [],
+    "attributes": {}
+  }
+];</pre>
+            <h4>Edges</h4>
+            <pre id="edges"> [
+  {
+    "source": {
+      "id": "Row1",
+      "color": "#FAD021",
+      "groups": [],
+      "attributes": {}
+    },
+    "target": {
+      "id": "Row2",
+      "color": "#FAD021",
+      "groups": [],
+      "attributes": {}
+    },
+    "label": "behind",
+    "relationName": "behind",
+    "id": "Row<:behind:Row1->Row2"
+  },
+  {
+    "source": {
+      "id": "Row2",
+      "color": "#FAD021",
+      "groups": [],
+      "attributes": {}
+    },
+    "target": {
+      "id": "Row0",
+      "color": "#FAD021",
+      "groups": [],
+      "attributes": {}
+    },
+    "label": "behind",
+    "relationName": "behind",
+    "id": "Row<:behind:Row2->Row0"
+  },
+  {
+    "source": {
+      "id": "Table3",
+      "color": "#1145E0",
+      "groups": [
+        "Row2:row"
+      ],
+      "attributes": {}
+    },
+    "target": {
+      "id": "Table2",
+      "color": "#1145E0",
+      "groups": [
+        "Row2:row"
+      ],
+      "attributes": {}
+    },
+    "label": "right",
+    "relationName": "right",
+    "id": "Table<:right:Table3->Table2"
+  },
+  {
+    "source": {
+      "id": "Table4",
+      "color": "#1145E0",
+      "groups": [
+        "Row1:row"
+      ],
+      "attributes": {}
+    },
+    "target": {
+      "id": "Table1",
+      "color": "#1145E0",
+      "groups": [
+        "Row1:row"
+      ],
+      "attributes": {}
+    },
+    "label": "right",
+    "relationName": "right",
+    "id": "Table<:right:Table4->Table1"
+  },
+  {
+    "source": {
+      "id": "Magoo0",
+      "color": "#E7AE07",
+      "groups": [],
+      "attributes": {}
+    },
+    "target": {
+      "id": "Table0",
+      "color": "#1145E0",
+      "groups": [
+        "Row0:row"
+      ],
+      "attributes": {}
+    },
+    "label": "seatedAt",
+    "relationName": "seatedAt",
+    "id": "Student<:seatedAt:Magoo0->Table0"
+  },
+  {
+    "source": {
+      "id": "Student2",
+      "color": "#E8B2A3",
+      "groups": [],
+      "attributes": {}
+    },
+    "target": {
+      "id": "Table2",
+      "color": "#1145E0",
+      "groups": [
+        "Row2:row"
+      ],
+      "attributes": {}
+    },
+    "label": "seatedAt",
+    "relationName": "seatedAt",
+    "id": "Student<:seatedAt:Student2->Table2"
+  },
+  {
+    "source": {
+      "id": "Table0",
+      "color": "#1145E0",
+      "groups": [
+        "Row0:row"
+      ],
+      "attributes": {}
+    },
+    "target": {
+      "id": "Row0",
+      "color": "#FAD021",
+      "groups": [],
+      "attributes": {}
+    },
+    "label": "row",
+    "relationName": "row",
+    "id": "_g_Table<:row:Table0->Row0"
+  },
+  {
+    "source": {
+      "id": "Table1",
+      "color": "#1145E0",
+      "groups": [
+        "Row1:row"
+      ],
+      "attributes": {}
+    },
+    "target": {
+      "id": "Row1",
+      "color": "#FAD021",
+      "groups": [],
+      "attributes": {}
+    },
+    "label": "row",
+    "relationName": "row",
+    "id": "_g_Table<:row:Table1->Row1"
+  },
+  {
+    "source": {
+      "id": "Table2",
+      "color": "#1145E0",
+      "groups": [
+        "Row2:row"
+      ],
+      "attributes": {}
+    },
+    "target": {
+      "id": "Row2",
+      "color": "#FAD021",
+      "groups": [],
+      "attributes": {}
+    },
+    "label": "row",
+    "relationName": "row",
+    "id": "_g_Table<:row:Table2->Row2"
+  }
+];</pre>
+
+        </div> -->
 
     </div>
 
