@@ -1,0 +1,27 @@
+{
+    "fieldDirections": [],
+    "groupBy": [
+        {
+            "fieldName": "fruit",
+            "groupOn" : "domain"
+        }
+    ],
+    "closures": [],
+    "attributeFields": [],
+    "hideDisconnected": false,
+    "hideDisconnectedBuiltIns": true,
+    "sigColors": [
+        {
+            "sigName": "Orange",
+            "color": "orange"
+        },
+        {
+            "sigName": "Apple",
+            "color": "red"
+        },
+        {
+            "sigName": "Pear",
+            "color": "green"
+        }
+    ]
+}
