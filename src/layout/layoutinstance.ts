@@ -10,6 +10,8 @@ import { LayoutNode, LayoutEdge, LayoutConstraint, InstanceLayout, LeftConstrain
 
 import { generateGraph } from '../alloy-graph';
 
+import {chroma, scale} from 'chroma-js';
+
 
 
 export class LayoutInstance {
@@ -248,7 +250,7 @@ export class LayoutInstance {
     }
 
     // TODO: Replace this with that d3 function that generates a color based on an index
-    private getRandomColor(): string {
+    private getRandomColor(index : number): string {
 
         const letters = '0123456789ABCDEF';
         let color = '#';
@@ -264,15 +266,24 @@ export class LayoutInstance {
 
         let types = getInstanceTypes(a);
 
+        let numTypes = types.length;
+
+        // Do this so that we can have more colors than types
+        let colorScale = scale('Set1').mode('lch').colors(numTypes * 2);
+
+        // Ensure that we have colors that are NOT in the sigColors
+        let usedColors = Object.values(this._sigColors);
+        colorScale = colorScale.filter((color) => !usedColors.includes(color));
+
         // For each type, assign a unique, random color
-        types.forEach((type) => {
+        types.forEach((type, index) => {
 
             // If the type has a color specified, use that
             if (this._sigColors[type.id]) {
                 colorsByType[type.id] = this._sigColors[type.id];
             }
             else {
-                colorsByType[type.id] = this.getRandomColor();
+                colorsByType[type.id] = colorScale[index];
             }
         });
 
