@@ -12,8 +12,8 @@
     "hideDisconnectedBuiltIns": true,
     "sigColors": [
         {
-            "sigName": "Orange",
-            "color": "orange"
+            "sigName": "Banana",
+            "color": "#FDDA0D"
         },
         {
             "sigName": "Apple",
@@ -22,6 +22,10 @@
         {
             "sigName": "Pear",
             "color": "green"
+        },
+        {
+            "sigName": "Basket",
+            "color": "grey"
         }
     ]
 }

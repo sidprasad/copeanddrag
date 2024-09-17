@@ -10,7 +10,7 @@ abstract sig Fruit {
 }
 
 sig Apple extends Fruit {}
-sig Orange extends Fruit {}
+sig Banana extends Fruit {}
 sig Pear extends Fruit {}
 
 sig Basket {
@@ -24,7 +24,7 @@ pred noSpoiledFruit(b: Basket) {
 pred wellformed {
     Status = Fresh + Rotten
     all f : Fruit | {
-        f in Apple + Orange + Pear
+        f in Apple + Banana + Pear
         some b : Basket | f in b.fruit
     }
 
@@ -45,4 +45,4 @@ run {
     setUp
 
 
- } for exactly 3 Basket, exactly 5 Apple, exactly 5 Orange, exactly 3 Pear
+ } for exactly 3 Basket, exactly 5 Apple, exactly 5 Banana, exactly 3 Pear

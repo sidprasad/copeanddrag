@@ -1,0 +1,55 @@
+<alloy builddate="Tuesday, September 17th, 2024">
+<instance bitwidth="4" maxseq="-1" command="temporary-name_face_1" filename="/no-name.rkt" version="3.5"  >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="FacePart" ID="4" parentID="2">
+
+</sig>
+
+<sig label="Mouth" ID="5" parentID="4">
+<atom label="Mouth"/>
+</sig>
+
+<sig label="Nose" ID="6" parentID="4">
+<atom label="Nose"/>
+</sig>
+
+<sig label="Face" ID="7" parentID="2">
+<atom label="Face"/>
+</sig>
+
+<sig label="Eye" ID="8" parentID="4">
+<atom label="EyeLeft"/><atom label="EyeRight"/>
+</sig>
+
+<field label="right" ID="9" parentID="7">
+<tuple><atom label="Face"/><atom label="EyeLeft"/><atom label="EyeRight"/></tuple>
+<types><type ID="7"/><type ID="4"/><type ID="4"/></types>
+
+</field>
+
+<field label="below" ID="10" parentID="7">
+<tuple><atom label="Face"/><atom label="Nose"/><atom label="Mouth"/></tuple>
+<tuple><atom label="Face"/><atom label="EyeLeft"/><atom label="Nose"/></tuple>
+<tuple><atom label="Face"/><atom label="EyeRight"/><atom label="Nose"/></tuple>
+<types><type ID="7"/><type ID="4"/><type ID="4"/></types>
+
+</field>
+
+
+</instance>
+
+<source filename="/no-name.rkt" content="// Couldn't open source file (/no-name.rkt) (info: (2 . posix)). Is the file saved?"></source>
+</alloy>

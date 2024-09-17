@@ -1,0 +1,25 @@
+{
+    "fieldDirections": [
+        {
+            "fieldName" : "right",
+            "directions" : ["directlyRight"]
+        },
+        { "fieldName" : "below",
+          "directions" : ["directlyBelow"]
+        }
+    ],
+    "groupBy": [
+    ],
+    "closures": [],
+    "attributeFields": [],
+    "hideDisconnected": false,
+    "hideDisconnectedBuiltIns": true,
+    "sigColors": [
+      
+    ],
+    "projections": [
+        {
+            "sigName": "Face"
+        }
+    ]
+}
