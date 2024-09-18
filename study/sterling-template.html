@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Zoomable Image</title>
+    <style>
+        #svg-container {
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #zoomable-image {
+            width: 100%;
+            height: auto;
+        }
+
+        .svg-border {
+            border: 2px solid black;
+        }
+    </style>
+    <!-- Include D3.js library -->
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+</head>
+
+<body>
+
+    <div class="container">
+
+
+        <div class="container-fluid" id="svg-container">
+            <svg id="diagram" width="800"
+                height="800" class="svg-border">
+                <g class="zoomable">
+                <!-- YOUR SVG HERE -->
+                </g>
+            </svg>
+        </div>
+    </div>
+    <script>
+        // Add zoom behavior
+        const zoom = d3.zoom()
+            .scaleExtent([0.1, 10]) // Set the zoom scale extent
+            .on('zoom', zoomed);
+
+        function zoomed(event) {
+            d3.select('.zoomable').attr('transform', event.transform);
+        }
+        const diagram = d3.select('#diagram');
+        diagram.call(zoom);
+
+
+        // Select all nodes and make them draggable
+        const nodes = d3.selectAll('.nodes g');
+
+        function getNodePositions() {
+            const positions = {};
+            nodes.each(function () {
+                const node = d3.select(this);
+                const transform = node.attr('transform');
+                const translate = transform.match(/translate\(([^, ]+)[, ]+([^)]+)\)/);
+                if (translate) {
+                    const x = parseFloat(translate[1]);
+                    const y = parseFloat(translate[2]);
+                    positions[node.attr('id')] = { x, y };
+                }
+            });
+            console.log(positions);
+            return positions;
+        }
+
+        // Store the initial positions of the nodes
+        const nodePositions = getNodePositions();
+
+        function getEdgeSourceAndTarget(edgeId) {
+            // First find the id of the last : character and get the substring after it
+            const byParts = edgeId.split(':');
+            let rel = byParts[byParts.length - 1];
+
+            const [sourceId, targetId] = rel.split('->');
+            return { sourceId, targetId };
+        }
+
+        function updatePath(path, startX, startY, endX, endY) {
+            const controlPoint1 = `${(startX + endX) / 2},${startY}`;
+            const controlPoint2 = `${(startX + endX) / 2},${endY}`;
+            const newD = `M${startX},${startY} C${controlPoint1},${controlPoint2},${endX},${endY}`;
+            path.attr('d', newD);
+        }
+
+        function getIntersectionPoint(node, targetNode) {
+            const dx = targetNode.x - node.x;
+            const dy = targetNode.y - node.y;
+            const absDx = Math.abs(dx);
+            const absDy = Math.abs(dy);
+
+            let x = node.x;
+            let y = node.y;
+
+            const halfWidth = 50;
+            const halfHeight = 30;
+
+            if (absDx > absDy) {
+                x += dx > 0 ? halfWidth : -halfWidth;
+                y += dy * (halfWidth / absDx);
+            } else {
+                x += dx * (halfHeight / absDy);
+                y += dy > 0 ? halfHeight : -halfHeight;
+            }
+
+            return { x, y };
+        }
+
+        function updateEdges(nodeId) {
+            const node = nodePositions[nodeId];
+            // Update edges where the node is the source
+            d3.selectAll(`g[id*=":${nodeId}->"]`).each(function () {
+                const edge = d3.select(this);
+                const edgeId = edge.attr('id');
+
+                const { sourceId, targetId } = getEdgeSourceAndTarget(edgeId);
+                //assert (sourceId === nodeId);
+
+                const targetNode = nodePositions[targetId];
+                const sourceIntersection = getIntersectionPoint(node, targetNode);
+                const targetIntersection = getIntersectionPoint(targetNode, node);
+                edge.select('path').each(function () {
+                    updatePath(d3.select(this), sourceIntersection.x, sourceIntersection.y, targetIntersection.x, targetIntersection.y);
+                });
+
+                // Update the position of the label
+                edge.select('text').attr('x', (sourceIntersection.x + targetIntersection.x) / 2)
+                    .attr('y', (sourceIntersection.y + targetIntersection.y) / 2);
+            });
+
+            // Update edges where the node is the target
+            d3.selectAll(`g[id*="->${nodeId}"]`).each(function () {
+                const edge = d3.select(this);
+                const edgeId = edge.attr('id');
+
+                const { sourceId, targetId } = getEdgeSourceAndTarget(edgeId);
+                //assert (targetId === nodeId);
+
+                const sourceNode = nodePositions[sourceId];
+                const sourceIntersection = getIntersectionPoint(sourceNode, node);
+                const targetIntersection = getIntersectionPoint(node, sourceNode);
+                edge.select('path').each(function () {
+                    updatePath(d3.select(this), sourceIntersection.x, sourceIntersection.y, targetIntersection.x, targetIntersection.y);
+                });
+
+                // Update the position of the label
+                edge.select('text').attr('x', (sourceIntersection.x + targetIntersection.x) / 2)
+                    .attr('y', (sourceIntersection.y + targetIntersection.y) / 2);
+            });
+        }
+
+        nodes
+            .call(d3.drag()
+                .on('start', dragStarted)
+                .on('drag', dragged)
+                .on('end', dragEnded));
+
+        function dragStarted(event, d) {
+            d3.select(this).raise().attr('stroke', 'black');
+        }
+
+        function dragged(event, d) {
+            const nodeId = d3.select(this).attr('id');
+            nodePositions[nodeId].x = event.x;
+            nodePositions[nodeId].y = event.y;
+            d3.select(this).attr('transform', `translate(${event.x}, ${event.y})`);
+            updateEdges(nodeId); // Update the edges during the drag event
+        }
+
+        function dragEnded(event, d) {
+            d3.select(this).attr('stroke', null);
+        }
+
+
+
+        /**** This bit ensures we zoom to fit ***/
+        const bbox = d3.select('.zoomable').node().getBBox();
+        const padding = 10; // Padding in pixels
+
+        const viewBox = [
+            bbox.x - padding,
+            bbox.y - padding,
+            bbox.width + 2 * padding,
+            bbox.height + 2 * padding
+        ].join(' ');
+
+
+        const topSvg = d3.select("#diagram");
+        topSvg.attr('viewBox', viewBox);
+        /*************************************/
+
+    </script>
+</body>
+
+</html>
