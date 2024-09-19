@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Zoomable Image</title>
+    <style>
+        #svg-container {
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #zoomable-image {
+            width: 100%;
+            height: auto;
+        }
+
+        .svg-border {
+            border: 2px solid black;
+        }
+    </style>
+    <!-- Include D3.js library -->
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+</head>
+
+<body>
+
+    <div class="container">
+
+
+        <div class="container-fluid" id="svg-container">
+            <svg id="diagram" width="800" height="800" class="svg-border">
+                <g class="zoomable">
+                    <g
+                        transform="matrix(0.8072167433022015,0,0,0.8072167433022015,72.14236683050632,-33.807316489561636)">
+                        <g id="">
+                            <defs>
+                                <marker id="arrow-10-[#333]" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="10"
+                                    markerHeight="10" markerUnits="userSpaceOnUse" orient="auto" fill="#333">
+                                    <path d="M 0 0 L 10 5 L 0 10 z"></path>
+                                </marker>
+                            </defs>
+                            <g class="nodes">
+                                <g id="Commercial0" transform="translate(200 240)">
+                                    <rect x="-50" y="-30" width="100" height="60"
+                                        style="stroke: rgb(209, 41, 255); stroke-width: 1; fill: rgb(255, 255, 255);">
+                                    </rect><text x="0" y="0" dy="0.33em"
+                                        style="font-family: monospace; font-size: 14px; text-anchor: middle; user-select: none; fill: rgb(51, 51, 51);">Commercial0</text>
+                                </g>
+                                <g id="Commercial1" transform="translate(400 240)">
+                                    <rect x="-50" y="-30" width="100" height="60"
+                                        style="stroke: rgb(209, 41, 255); stroke-width: 1; fill: rgb(255, 255, 255);">
+                                    </rect><text x="0" y="0" dy="0.33em"
+                                        style="font-family: monospace; font-size: 14px; text-anchor: middle; user-select: none; fill: rgb(51, 51, 51);">Commercial1</text>
+                                </g>
+                                <g id="Commercial2" transform="translate(-300 80)">
+                                    <rect x="-50" y="-30" width="100" height="60"
+                                        style="stroke: rgb(209, 41, 255); stroke-width: 1; fill: rgb(255, 255, 255);">
+                                    </rect><text x="0" y="0" dy="0.33em"
+                                        style="font-family: monospace; font-size: 14px; text-anchor: middle; user-select: none; fill: rgb(51, 51, 51);">Commercial2</text>
+                                </g>
+                                <g id="Commercial3" transform="translate(-100 80)">
+                                    <rect x="-50" y="-30" width="100" height="60"
+                                        style="stroke: rgb(209, 41, 255); stroke-width: 1; fill: rgb(255, 255, 255);">
+                                    </rect><text x="0" y="0" dy="0.33em"
+                                        style="font-family: monospace; font-size: 14px; text-anchor: middle; user-select: none; fill: rgb(51, 51, 51);">Commercial3</text>
+                                </g>
+                                <g id="Residential0" transform="translate(-400 -80)">
+                                    <rect x="-50" y="-30" width="100" height="60"
+                                        style="stroke: rgb(209, 192, 0); stroke-width: 1; fill: rgb(255, 255, 255);">
+                                    </rect><text x="0" y="0" dy="0.33em"
+                                        style="font-family: monospace; font-size: 14px; text-anchor: middle; user-select: none; fill: rgb(51, 51, 51);">Residential0</text>
+                                </g>
+                                <g id="Residential1" transform="translate(0 240)">
+                                    <rect x="-50" y="-30" width="100" height="60"
+                                        style="stroke: rgb(209, 192, 0); stroke-width: 1; fill: rgb(255, 255, 255);">
+                                    </rect><text x="0" y="0" dy="0.33em"
+                                        style="font-family: monospace; font-size: 14px; text-anchor: middle; user-select: none; fill: rgb(51, 51, 51);">Residential1</text>
+                                </g>
+                                <g id="Residential2" transform="translate(100 80)">
+                                    <rect x="-50" y="-30" width="100" height="60"
+                                        style="stroke: rgb(209, 192, 0); stroke-width: 1; fill: rgb(255, 255, 255);">
+                                    </rect><text x="0" y="0" dy="0.33em"
+                                        style="font-family: monospace; font-size: 14px; text-anchor: middle; user-select: none; fill: rgb(51, 51, 51);">Residential2</text>
+                                </g>
+                                <g id="Residential3" transform="translate(-200 -80)">
+                                    <rect x="-50" y="-30" width="100" height="60"
+                                        style="stroke: rgb(209, 192, 0); stroke-width: 1; fill: rgb(255, 255, 255);">
+                                    </rect><text x="0" y="0" dy="0.33em"
+                                        style="font-family: monospace; font-size: 14px; text-anchor: middle; user-select: none; fill: rgb(51, 51, 51);">Residential3</text>
+                                </g>
+                                <g id="Floor0" transform="translate(-300 -240)">
+                                    <rect x="-50" y="-30" width="100" height="60"
+                                        style="stroke: rgb(34, 164, 25); stroke-width: 1; fill: rgb(255, 255, 255);">
+                                    </rect><text x="0" y="0" dy="0.33em"
+                                        style="font-family: monospace; font-size: 14px; text-anchor: middle; user-select: none; fill: rgb(51, 51, 51);">Floor0</text>
+                                </g>
+                                <g id="Floor1" transform="translate(0 -80)">
+                                    <rect x="-50" y="-30" width="100" height="60"
+                                        style="stroke: rgb(34, 164, 25); stroke-width: 1; fill: rgb(255, 255, 255);">
+                                    </rect><text x="0" y="0" dy="0.33em"
+                                        style="font-family: monospace; font-size: 14px; text-anchor: middle; user-select: none; fill: rgb(51, 51, 51);">Floor1</text>
+                                </g>
+                                <g id="Floor2" transform="translate(300 80)">
+                                    <rect x="-50" y="-30" width="100" height="60"
+                                        style="stroke: rgb(34, 164, 25); stroke-width: 1; fill: rgb(255, 255, 255);">
+                                    </rect><text x="0" y="0" dy="0.33em"
+                                        style="font-family: monospace; font-size: 14px; text-anchor: middle; user-select: none; fill: rgb(51, 51, 51);">Floor2</text>
+                                </g>
+                            </g>
+                            <g class="edges">
+                                <g id="Floor<:upstairs:Floor0->Floor1">
+                                    <path marker-end="url(#arrow-10-[#333])"
+                                        style="stroke: rgb(51, 51, 51); stroke-width: 1; fill: none;"
+                                        d="M-250,-226.66666666666669L-208.33333333333334,-215.55555555555557C-166.66666666666666,-204.44444444444446,-83.33333333333333,-182.22222222222226,-41.66838742295901,-164.44443045722116C-0.0034415125846862793,-146.66663869222006,-0.006883025169372559,-133.3332773844401,-0.008603781461715698,-126.66659673055013L-0.010324537754058838,-119.99991607666016">
+                                    </path>
+                                    <path
+                                        d="M-250,-226.66666666666669L-208.33333333333334,-215.55555555555557C-166.66666666666666,-204.44444444444446,-83.33333333333333,-182.22222222222226,-41.666666666666664,-162.7777777777778C-4.736951571734001e-15,-143.33333333333334,-9.473903143468002e-15,-126.66666666666667,-1.1842378929335004e-14,-118.33333333333333L-1.4210854715202004e-14,-110"
+                                        stroke="transparent" stroke-width="11" fill="none"></path><text
+                                        x="-109.79955291748047" y="-187.6427001953125" dy="0.33em"
+                                        style="font-family: monospace; font-size: 12px; text-anchor: middle; user-select: none;">upstairs</text>
+                                </g>
+                                <g id="Floor<:upstairs:Floor1->Floor2">
+                                    <path marker-end="url(#arrow-10-[#333])"
+                                        style="stroke: rgb(51, 51, 51); stroke-width: 1; fill: none;"
+                                        d="M50,-66.66666666666667L91.66666666666667,-55.555555555555564C133.33333333333334,-44.44444444444445,216.66666666666666,-22.222222222222225,258.3316141764323,-4.444430457221138C299.99656168619794,13.333361307779947,299.9931233723958,26.666722615559895,299.9914042154948,33.33340326944987L299.98968505859375,40.000083923339844">
+                                    </path>
+                                    <path
+                                        d="M50,-66.66666666666667L91.66666666666667,-55.555555555555564C133.33333333333334,-44.44444444444445,216.66666666666666,-22.222222222222225,258.3333333333333,-2.7777777777777786C300,16.666666666666668,300,33.333333333333336,300,41.666666666666664L300,50"
+                                        stroke="transparent" stroke-width="11" fill="none"></path><text
+                                        x="190.2004852294922" y="-27.642681121826172" dy="0.33em"
+                                        style="font-family: monospace; font-size: 12px; text-anchor: middle; user-select: none;">upstairs</text>
+                                </g>
+                                <g id="Floor<:blockA:Floor0->Residential3">
+                                    <path marker-end="url(#arrow-10-[#333])"
+                                        style="stroke: rgb(51, 51, 51); stroke-width: 1; fill: none;"
+                                        d="M-262.5,-210L-252.08333333333334,-201.66666666666666C-241.66666666666666,-193.33333333333334,-220.83333333333334,-176.66666666666666,-210.41709899902344,-161.66666539510092C-200.00086466471353,-146.66666412353516,-200.0017293294271,-133.3333282470703,-200.00216166178384,-126.66666030883789L-200.00259399414062,-119.99999237060547">
+                                    </path>
+                                    <path
+                                        d="M-262.5,-210L-252.08333333333334,-201.66666666666666C-241.66666666666666,-193.33333333333334,-220.83333333333334,-176.66666666666666,-210.41666666666666,-160C-200,-143.33333333333334,-200,-126.66666666666667,-200,-118.33333333333333L-200,-110"
+                                        stroke="transparent" stroke-width="11" fill="none"></path><text
+                                        x="-216.44517517089844" y="-168.35423278808594" dy="0.33em"
+                                        style="font-family: monospace; font-size: 12px; text-anchor: middle; user-select: none;">blockA</text>
+                                </g>
+                                <g id="Floor<:blockA:Floor1->Residential2">
+                                    <path marker-end="url(#arrow-10-[#333])"
+                                        style="stroke: rgb(51, 51, 51); stroke-width: 1; fill: none;"
+                                        d="M37.50000000000003,-50L47.916666666666686,-41.666666666666664C58.33333333333335,-33.333333333333336,79.16666666666667,-16.666666666666668,89.58290227254231,-1.6666666666666667C99.99913787841797,13.333333333333334,99.99827575683594,26.666666666666668,99.99784469604492,33.333333333333336L99.9974136352539,40">
+                                    </path>
+                                    <path
+                                        d="M37.50000000000003,-50L47.916666666666686,-41.666666666666664C58.33333333333335,-33.333333333333336,79.16666666666667,-16.666666666666668,89.58333333333333,0C100,16.666666666666668,100,33.333333333333336,100,41.666666666666664L100,50"
+                                        stroke="transparent" stroke-width="11" fill="none"></path><text
+                                        x="83.55503845214844" y="-8.354424476623535" dy="0.33em"
+                                        style="font-family: monospace; font-size: 12px; text-anchor: middle; user-select: none;">blockA</text>
+                                </g>
+                                <g id="Floor<:blockA:Floor2->Residential1">
+                                    <path marker-end="url(#arrow-10-[#333])"
+                                        style="stroke: rgb(51, 51, 51); stroke-width: 1; fill: none;"
+                                        d="M250,93.33333333333333L208.33333333333334,104.44444444444444C166.66666666666666,115.55555555555554,83.33333333333333,137.77777777777777,41.66838761993373,155.55556064181857C0.0034419065341353416,173.33334350585938,0.006883813068270683,186.66668701171875,0.008604766335338354,193.33335876464844L0.010325719602406025,200.00003051757812">
+                                    </path>
+                                    <path
+                                        d="M250,93.33333333333333L208.33333333333334,104.44444444444444C166.66666666666666,115.55555555555554,83.33333333333333,137.77777777777777,41.666666666666664,157.22222222222223C-4.736951571734001e-15,176.66666666666666,-9.473903143468002e-15,193.33333333333334,-1.1842378929335004e-14,201.66666666666666L-1.4210854715202004e-14,210"
+                                        stroke="transparent" stroke-width="11" fill="none"></path><text
+                                        x="109.79956817626953" y="132.3572998046875" dy="0.33em"
+                                        style="font-family: monospace; font-size: 12px; text-anchor: middle; user-select: none;">blockA</text>
+                                </g>
+                                <g id="Floor<:blockB:Floor0->Residential0">
+                                    <path marker-end="url(#arrow-10-[#333])"
+                                        style="stroke: rgb(51, 51, 51); stroke-width: 1; fill: none;"
+                                        d="M-337.5,-210L-347.9166666666667,-201.66666666666666C-358.3333333333333,-193.33333333333334,-379.1666666666667,-176.66666666666666,-389.58290100097656,-161.66666666666666C-399.99913533528644,-146.66666666666666,-399.99827067057294,-133.33333333333334,-399.9978383382161,-126.66666666666667L-399.9974060058594,-120">
+                                    </path>
+                                    <path
+                                        d="M-337.5,-210L-347.9166666666667,-201.66666666666666C-358.3333333333333,-193.33333333333334,-379.1666666666667,-176.66666666666666,-389.5833333333333,-160C-400,-143.33333333333334,-400,-126.66666666666667,-400,-118.33333333333333L-400,-110"
+                                        stroke="transparent" stroke-width="11" fill="none"></path><text
+                                        x="-383.55487060546875" y="-168.35423278808594" dy="0.33em"
+                                        style="font-family: monospace; font-size: 12px; text-anchor: middle; user-select: none;">blockB</text>
+                                </g>
+                                <g id="Floor<:blockB:Floor1->Commercial2">
+                                    <path marker-end="url(#arrow-10-[#333])"
+                                        style="stroke: rgb(51, 51, 51); stroke-width: 1; fill: none;"
+                                        d="M-50,-66.66666666666667L-91.66666666666667,-55.555555555555564C-133.33333333333334,-44.44444444444445,-216.66666666666666,-22.222222222222225,-258.3316141764323,-4.444430457221138C-299.99656168619794,13.333361307779947,-299.9931233723958,26.666722615559895,-299.9914042154948,33.33340326944987L-299.98968505859375,40.000083923339844">
+                                    </path>
+                                    <path
+                                        d="M-50,-66.66666666666667L-91.66666666666667,-55.555555555555564C-133.33333333333334,-44.44444444444445,-216.66666666666666,-22.222222222222225,-258.3333333333333,-2.7777777777777786C-300,16.666666666666668,-300,33.333333333333336,-300,41.666666666666664L-300,50"
+                                        stroke="transparent" stroke-width="11" fill="none"></path><text
+                                        x="-190.2004852294922" y="-27.642681121826172" dy="0.33em"
+                                        style="font-family: monospace; font-size: 12px; text-anchor: middle; user-select: none;">blockB</text>
+                                </g>
+                                <g id="Floor<:blockB:Floor1->Commercial3">
+                                    <path marker-end="url(#arrow-10-[#333])"
+                                        style="stroke: rgb(51, 51, 51); stroke-width: 1; fill: none;"
+                                        d="M-37.49999999999998,-50L-47.91666666666665,-41.666666666666664C-58.333333333333314,-33.333333333333336,-79.16666666666666,-16.666666666666668,-89.58290227254231,-1.6666666666666667C-99.99913787841797,13.333333333333334,-99.99827575683594,26.666666666666668,-99.99784469604492,33.333333333333336L-99.9974136352539,40">
+                                    </path>
+                                    <path
+                                        d="M-37.49999999999998,-50L-47.91666666666665,-41.666666666666664C-58.333333333333314,-33.333333333333336,-79.16666666666666,-16.666666666666668,-89.58333333333333,0C-100,16.666666666666668,-100,33.333333333333336,-100,41.666666666666664L-100,50"
+                                        stroke="transparent" stroke-width="11" fill="none"></path><text
+                                        x="-83.55503845214844" y="-8.354424476623535" dy="0.33em"
+                                        style="font-family: monospace; font-size: 12px; text-anchor: middle; user-select: none;">blockB</text>
+                                </g>
+                                <g id="Floor<:blockB:Floor2->Commercial0">
+                                    <path marker-end="url(#arrow-10-[#333])"
+                                        style="stroke: rgb(51, 51, 51); stroke-width: 1; fill: none;"
+                                        d="M262.5,110L252.08333333333334,118.33333333333333C241.66666666666666,126.66666666666667,220.83333333333334,143.33333333333334,210.41709899902344,158.33333333333334C200.00086466471353,173.33333333333334,200.0017293294271,186.66666666666666,200.00216166178384,193.33333333333334L200.00259399414062,200">
+                                    </path>
+                                    <path
+                                        d="M262.5,110L252.08333333333334,118.33333333333333C241.66666666666666,126.66666666666667,220.83333333333334,143.33333333333334,210.41666666666666,160C200,176.66666666666666,200,193.33333333333334,200,201.66666666666666L200,210"
+                                        stroke="transparent" stroke-width="11" fill="none"></path><text
+                                        x="216.44517517089844" y="151.64576721191406" dy="0.33em"
+                                        style="font-family: monospace; font-size: 12px; text-anchor: middle; user-select: none;">blockB</text>
+                                </g>
+                                <g id="Floor<:blockB:Floor2->Commercial1">
+                                    <path marker-end="url(#arrow-10-[#333])"
+                                        style="stroke: rgb(51, 51, 51); stroke-width: 1; fill: none;"
+                                        d="M337.5,110L347.9166666666667,118.33333333333333C358.3333333333333,126.66666666666667,379.1666666666667,143.33333333333334,389.58290100097656,158.33333333333334C399.99913533528644,173.33333333333334,399.99827067057294,186.66666666666666,399.9978383382161,193.33333333333334L399.9974060058594,200">
+                                    </path>
+                                    <path
+                                        d="M337.5,110L347.9166666666667,118.33333333333333C358.3333333333333,126.66666666666667,379.1666666666667,143.33333333333334,389.5833333333333,160C400,176.66666666666666,400,193.33333333333334,400,201.66666666666666L400,210"
+                                        stroke="transparent" stroke-width="11" fill="none"></path><text
+                                        x="383.55487060546875" y="151.64576721191406" dy="0.33em"
+                                        style="font-family: monospace; font-size: 12px; text-anchor: middle; user-select: none;">blockB</text>
+                                </g>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </svg>
+        </div>
+    </div>
+    <script>
+        // Add zoom behavior
+        const zoom = d3.zoom()
+            .scaleExtent([0.1, 10]) // Set the zoom scale extent
+            .on('zoom', zoomed);
+
+        function zoomed(event) {
+            d3.select('.zoomable').attr('transform', event.transform);
+        }
+        const diagram = d3.select('#diagram');
+        diagram.call(zoom);
+
+
+        // Select all nodes and make them draggable
+        const nodes = d3.selectAll('.nodes g');
+
+        function getNodePositions() {
+            const positions = {};
+            nodes.each(function () {
+                const node = d3.select(this);
+                const transform = node.attr('transform');
+                const translate = transform.match(/translate\(([^, ]+)[, ]+([^)]+)\)/);
+                if (translate) {
+                    const x = parseFloat(translate[1]);
+                    const y = parseFloat(translate[2]);
+                    positions[node.attr('id')] = { x, y };
+                }
+            });
+            console.log(positions);
+            return positions;
+        }
+
+        // Store the initial positions of the nodes
+        const nodePositions = getNodePositions();
+
+        function getEdgeSourceAndTarget(edgeId) {
+            // First find the id of the last : character and get the substring after it
+            const byParts = edgeId.split(':');
+            let rel = byParts[byParts.length - 1];
+
+            const [sourceId, targetId] = rel.split('->');
+            return { sourceId, targetId };
+        }
+
+        function updatePath(path, startX, startY, endX, endY) {
+            const controlPoint1 = `${(startX + endX) / 2},${startY}`;
+            const controlPoint2 = `${(startX + endX) / 2},${endY}`;
+            const newD = `M${startX},${startY} C${controlPoint1},${controlPoint2},${endX},${endY}`;
+            path.attr('d', newD);
+        }
+
+        function getIntersectionPoint(node, targetNode) {
+            const dx = targetNode.x - node.x;
+            const dy = targetNode.y - node.y;
+            const absDx = Math.abs(dx);
+            const absDy = Math.abs(dy);
+
+            let x = node.x;
+            let y = node.y;
+
+            const halfWidth = 50;
+            const halfHeight = 30;
+
+            if (absDx > absDy) {
+                x += dx > 0 ? halfWidth : -halfWidth;
+                y += dy * (halfWidth / absDx);
+            } else {
+                x += dx * (halfHeight / absDy);
+                y += dy > 0 ? halfHeight : -halfHeight;
+            }
+
+            return { x, y };
+        }
+
+        function updateEdges(nodeId) {
+            const node = nodePositions[nodeId];
+            // Update edges where the node is the source
+            d3.selectAll(`g[id*=":${nodeId}->"]`).each(function () {
+                const edge = d3.select(this);
+                const edgeId = edge.attr('id');
+
+                const { sourceId, targetId } = getEdgeSourceAndTarget(edgeId);
+                //assert (sourceId === nodeId);
+
+                const targetNode = nodePositions[targetId];
+                const sourceIntersection = getIntersectionPoint(node, targetNode);
+                const targetIntersection = getIntersectionPoint(targetNode, node);
+                edge.select('path').each(function () {
+                    updatePath(d3.select(this), sourceIntersection.x, sourceIntersection.y, targetIntersection.x, targetIntersection.y);
+                });
+
+                // Update the position of the label
+                edge.select('text').attr('x', (sourceIntersection.x + targetIntersection.x) / 2)
+                    .attr('y', (sourceIntersection.y + targetIntersection.y) / 2);
+            });
+
+            // Update edges where the node is the target
+            d3.selectAll(`g[id*="->${nodeId}"]`).each(function () {
+                const edge = d3.select(this);
+                const edgeId = edge.attr('id');
+
+                const { sourceId, targetId } = getEdgeSourceAndTarget(edgeId);
+                //assert (targetId === nodeId);
+
+                const sourceNode = nodePositions[sourceId];
+                const sourceIntersection = getIntersectionPoint(sourceNode, node);
+                const targetIntersection = getIntersectionPoint(node, sourceNode);
+                edge.select('path').each(function () {
+                    updatePath(d3.select(this), sourceIntersection.x, sourceIntersection.y, targetIntersection.x, targetIntersection.y);
+                });
+
+                // Update the position of the label
+                edge.select('text').attr('x', (sourceIntersection.x + targetIntersection.x) / 2)
+                    .attr('y', (sourceIntersection.y + targetIntersection.y) / 2);
+            });
+        }
+
+        nodes
+            .call(d3.drag()
+                .on('start', dragStarted)
+                .on('drag', dragged)
+                .on('end', dragEnded));
+
+        function dragStarted(event, d) {
+            d3.select(this).raise().attr('stroke', 'black');
+        }
+
+        function dragged(event, d) {
+            const nodeId = d3.select(this).attr('id');
+            nodePositions[nodeId].x = event.x;
+            nodePositions[nodeId].y = event.y;
+            d3.select(this).attr('transform', `translate(${event.x}, ${event.y})`);
+            updateEdges(nodeId); // Update the edges during the drag event
+        }
+
+        function dragEnded(event, d) {
+            d3.select(this).attr('stroke', null);
+        }
+
+
+
+        /**** This bit ensures we zoom to fit ***/
+        const bbox = d3.select('.zoomable').node().getBBox();
+        const padding = 10; // Padding in pixels
+
+        const viewBox = [
+            bbox.x - padding,
+            bbox.y - padding,
+            bbox.width + 2 * padding,
+            bbox.height + 2 * padding
+        ].join(' ');
+
+
+        const topSvg = d3.select("#diagram");
+        topSvg.attr('viewBox', viewBox);
+        /*************************************/
+
+    </script>
+</body>
+
+</html>
