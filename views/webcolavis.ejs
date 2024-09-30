@@ -54,6 +54,10 @@
             cursor: move;
         }
 
+        .icon {
+            fill : transparent;
+        }
+
         .link-label {
 
             fill: black;
@@ -479,6 +483,7 @@
                     }
 
 
+
                     var node = svg.selectAll(".node")
                         .data(nodes)
                         .enter().append("rect") 
@@ -492,10 +497,33 @@
                         .attr("stroke", function (d) { return d.color; }) // Outline color of the node
                         .attr("stroke-width", 1.5) // Adjust the stroke width as needed
                         .attr("fill", function (d) {
-                            let f = isHiddenNode(d) ? "transparent" : "white";
+                            let f = isHiddenNode(d) || (d.icon != null) ? "transparent" : "white";
                             return f;
                         }) 
                         .call(colaLayout.drag);
+
+                    // node.filter(d => d.icon) // Filter nodes that have an icon
+                    //     .append("image")
+                    //     .attr("xlink:href", d => d.icon)
+                    //     .attr("width", function(d) { return d.width * 0.8; }) // Scale down the icon to fit inside the rectangle
+                    //     .attr("height", function(d) { return d.height * 0.8; }) // Scale down the icon to fit inside the rectangle
+                    //     .attr("x", function(d) { return -d.width * 0.4; }) // Center the icon horizontally
+                    //     .attr("y", function(d) { return -d.height * 0.4; }); // Center the icon vertically
+
+
+                    var icons = svg.selectAll(".icon")
+                                .data(nodes)
+                                .filter(d => d.icon)
+                                .enter()
+                        .append("image")
+                        .attr("xlink:href", d => d.icon)
+                        .attr("width", function(d) { return d.width * 0.8; }) // Scale down the icon to fit inside the rectangle
+                        .attr("height", function(d) { return d.height * 0.8; }) // Scale down the icon to fit inside the rectangle
+                        .attr("x", function(d) { return -d.width * 0.4; }) // Center the icon horizontally
+                        .attr("y", function(d) { return -d.height * 0.4; }) // Center the icon vertically
+                        .call(colaLayout.drag);
+
+
 
                     var label = svg.selectAll(".label")
                         .data(nodes)
@@ -609,6 +637,10 @@
                                     });
                             })
                             .raise();
+
+                        icons
+                        .attr("x", d => d.x)
+                        .attr("y", d => d.y);
 
 
                         linkGroups.select("path.link")

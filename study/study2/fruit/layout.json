@@ -27,5 +27,13 @@
             "sigName": "Basket",
             "color": "grey"
         }
+    ],
+    "sigIcons" : [
+        {
+            "path": "https://www.iconpacks.net/icons/2/free-apple-icon-3155-thumb.png",
+            "sigName": "Apple",
+            "height" : 50,
+            "width" : 50
+        }
     ]
 }

@@ -275,34 +275,6 @@ export class LayoutInstance {
         return color;
     }
 
-    private getIconsByType(g: Graph, a: AlloyInstance): Record<string, string> {
-
-        let nodes = [...g.nodes()];
-        
-        let iconsByType: Record<string, IconDefinition> = {};
-
-        // For each type, assign a unique, random color
-        types.forEach((type, index) => {
-    
-            // If the type has a color specified, use that
-            if (this._sigIcons[type.id]) {
-                colorsByType[type.id] = this._sigColors[type.id];
-            }
-            else {
-                colorsByType[type.id] = colorScale[index];
-            }
-        });
-
-
-        let colorsByNode = {};
-        nodes.forEach((node) => {
-            // Get the type of the node
-            let type = getAtomType(a, node);
-            let color = colorsByType[type.id];
-            colorsByNode[node] = color;
-        });
-        return colorsByNode;
-    }
 
     private colorNodesByType(g: Graph, a: AlloyInstance): Record<string, string> {
 
@@ -517,7 +489,9 @@ export class LayoutInstance {
                 id: `_${relName}_${fragment_num++}`,
                 attributes: {},
                 groups: [],
-                color: "transparent"
+                color: "transparent",
+                width : 10,
+                height: 10,
             };
             layoutNodes.push(fragmentCentroid);
 
