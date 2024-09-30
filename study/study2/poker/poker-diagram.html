@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 
 <html lang="en">
@@ -6,6 +7,7 @@
     <meta charset="utf-8" />
     <title>Alloy Instance Diagram</title>
     <style>
+
 
         #svg-container {
             display: flex;
@@ -90,11 +92,12 @@
 
 <body>
     <div class="container">
-
+        <p> This is an interactive diagram. You can drag graph nodes around or zoom in and out.</p>
+        <hr>
         <div class="container-fluid" id="svg-container" >
-            <svg id="svg" width="<%- width %>" height="<%- height %>" class="svg-border" >
+            <svg id="svg" width="800" height="800" class="svg-border" >
                 <defs>
-                    <marker id="end-arrow" markerWidth="10" markerHeight="7" refX="7" refY="3.5" orient="auto">
+                    <marker id="end-arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
                         <polygon points="0 0, 10 3.5, 0 7" />
                     </marker>
                 </defs>
@@ -103,16 +106,6 @@
                 </g>
             </svg>
             <script>
-
-                // Function to adjust a point to stay on the rectangle perimeter
-                function adjustPointToRectanglePerimeter(point, rect) {
-                    const { x, y, width, height } = rect;
-                    if (point.x < x) point.x = x;
-                    if (point.x > x + width) point.x = x + width;
-                    if (point.y < y) point.y = y;
-                    if (point.y > y + height) point.y = y + height;
-                    return point;
-                }
 
                 // Function to generate a random offset along the path
                 function getRandomOffsetAlongPath() {
@@ -134,7 +127,7 @@
                     const dy_for_linespacing = 5; // Adjust for spacing between lines
 
                     var color = d3.scaleOrdinal(d3.schemeCategory20);
-                    var width = <%- width %>, height = <%- height %>;
+                    var width = 800, height = 800;
 
                     var svg_top = d3.select("#svg").call(zoom);
 
@@ -154,10 +147,10 @@
                         .handleDisconnected(true)
                         .size([width, height]);
 
-                    var nodes = <%- JSON.stringify(colaNodes) %>;
-                    var edges = <%- JSON.stringify(colaEdges) %>;
-                    var constraints = <%- JSON.stringify(colaConstraints) %>;
-                    var groups = <%- JSON.stringify(colaGroups) %>;
+                    var nodes = [{"id":"Player0","color":"#d34c59","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Player1","color":"#d34c59","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Player2","color":"#d34c59","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Player3","color":"#d34c59","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Player4","color":"#d34c59","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Player5","color":"#d34c59","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Player6","color":"#d34c59","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"Dealer0","color":"#f84569","attributes":{},"width":70,"height":45,"x":400,"y":400},{"id":"_left_0","color":"transparent","attributes":{},"width":70,"height":45,"x":400,"y":400}];
+                    var edges = [{"source":6,"target":7,"relName":"holding","id":"Player<:holding:Player6->Dealer0","label":"holding"},{"source":0,"target":6,"relName":"left","id":"Player<:left:Player0->Player6","label":"left"},{"source":1,"target":5,"relName":"left","id":"Player<:left:Player1->Player5","label":"left"},{"source":2,"target":4,"relName":"left","id":"Player<:left:Player2->Player4","label":"left"},{"source":3,"target":2,"relName":"left","id":"Player<:left:Player3->Player2","label":"left"},{"source":4,"target":0,"relName":"left","id":"Player<:left:Player4->Player0","label":"left"},{"source":5,"target":3,"relName":"left","id":"Player<:left:Player5->Player3","label":"left"},{"source":6,"target":1,"relName":"left","id":"Player<:left:Player6->Player1","label":"left"},{"source":0,"target":4,"relName":"right","id":"Player<:right:Player0->Player4","label":"right"},{"source":1,"target":6,"relName":"right","id":"Player<:right:Player1->Player6","label":"right"},{"source":2,"target":3,"relName":"right","id":"Player<:right:Player2->Player3","label":"right"},{"source":3,"target":5,"relName":"right","id":"Player<:right:Player3->Player5","label":"right"},{"source":4,"target":2,"relName":"right","id":"Player<:right:Player4->Player2","label":"right"},{"source":5,"target":1,"relName":"right","id":"Player<:right:Player5->Player1","label":"right"},{"source":6,"target":0,"relName":"right","id":"Player<:right:Player6->Player0","label":"right"}];
+                    var constraints = [{"axis":"x","left":8,"right":6,"gap":100},{"axis":"y","left":6,"right":8,"gap":0},{"axis":"x","left":8,"right":1,"gap":62.34898018587336},{"axis":"y","left":8,"right":1,"gap":78.18314824680299},{"axis":"x","left":5,"right":8,"gap":22.252093395631434},{"axis":"y","left":8,"right":5,"gap":97.49279121818236},{"axis":"x","left":3,"right":8,"gap":90.09688679024191},{"axis":"y","left":8,"right":3,"gap":43.38837391175582},{"axis":"x","left":2,"right":8,"gap":90.09688679024191},{"axis":"y","left":2,"right":8,"gap":43.3883739117558},{"axis":"x","left":4,"right":8,"gap":22.25209339563146},{"axis":"y","left":4,"right":8,"gap":97.49279121818236},{"axis":"x","left":8,"right":0,"gap":62.34898018587334},{"axis":"y","left":0,"right":8,"gap":78.18314824680299}];
+                    var groups = [];
                     function getNodeIndex(nodeId) {
                             return nodes.findIndex(node => node.id === nodeId);
                         }
@@ -216,19 +209,17 @@
 
                         link.attr("d", function (d, i) {
 
+
+                            // TODO: Will the edge hack break this?
+                            /*
+
+                                If so, we need to do something about it. Maybe dont route edges for the group edges in the same way.
+                                Or calculate route differently.
+                            */
+
                             var route = colaLayout.routeEdge(d);
 
-
-                            // Get all edges between the two nodes, regardless of direction
-                            const allEdgesBetweenSourceAndTarget = edges.filter(edge => {
-                                return (edge.source.id == d.source.id && edge.target.id == d.target.id) ||
-                                    (edge.source.id == d.target.id && edge.target.id == d.source.id);
-                            });
-
-
-
                             let n = d.id;
-                            // This is a special case for group edges
                             if (n.startsWith("_g_")) {
                                 let source = d.source;
                                 let target = d.target;
@@ -324,100 +315,44 @@
                                 route.splice(1, 0, midpoint);
                             }
 
-
-
+                            // Calculate the curvature for the current edge
+                            var curvature = calculateCurvature(edges, d.source.id, d.target.id, d.id);
 
                             // Determine the direction of the edge
                             var dx = route[1].x - route[0].x;
                             var dy = route[1].y - route[0].y;
                             var angle = Math.atan2(dy, dx);
                             var distance = Math.sqrt(dx * dx + dy * dy);
+                            /*
+                            Angle 0: The edge is horizontal and points to the right.
+                            Angle π/2 (90 degrees): The edge is vertical and points upwards.
+                            Angle π (180 degrees): The edge is horizontal and points to the left.
+                            Angle -π/2 (-90 degrees): The edge is vertical and points downwards.
+                            */
 
-
-
-                            /** Here, we do some point of incidence adjustment IF the number of edges between the same nodes is greater than 1 */
-                            if (allEdgesBetweenSourceAndTarget.length > 1)
-                            {
-                                const minDistance = 5; // Minimum distance between edges (divided by 2)
-                                const edgeIndex = allEdgesBetweenSourceAndTarget.findIndex(edge => edge.id === d.id);
-
-                                // Start with a small offset and grow it based on the edge index. But start with min offset of 5
-                                const offset = (edgeIndex % 2 === 0 ? 1 : -1) * (Math.floor(edgeIndex / 2) + 1) * minDistance;
-
-                                // Now we should apply the offset to the start and end points of the route, depending on the angle.
-                                
-                                if (route.length > 1)
-                                {
-                                    const startIndex = 0;
-                                    const endIndex = route.length - 1;
-
-                                    /*
-                                    
-                                    
-                                    Angle π (180 degrees): The edge is horizontal and points to the left.
-                                    
-                                    */
-
-                                    // Angle 0: The edge is horizontal and points to the right.
-                                    // As a result, offset along the y axis.
-                                    if (angle === 0) {
-                                        route[startIndex].y += offset;
-                                        route[endIndex].y += offset;
-                                    }
-                                    // Angle π/2 (90 degrees): The edge is vertical and points upwards.
-                                    // As a result, adjust along the x axis.
-                                    else if (angle === Math.PI / 2) {
-                                        route[startIndex].x += offset;
-                                        route[endIndex].x += offset;
-                                    }
-                                    // Angle π (180 degrees): The edge is horizontal and points to the left.
-                                    // As a result, offset along the y axis. (I think we still ADD the offset)
-                                    else if (angle === Math.PI) {
-                                        route[startIndex].y += offset;
-                                        route[endIndex].y += offset;
-                                    }
-                                    // Angle -π/2 (-90 degrees): The edge is vertical and points downwards.
-                                    // As a result, adjust along the x axis.
-                                    else if (angle === -Math.PI / 2) {
-                                        route[startIndex].x += offset;
-                                        route[endIndex].x += offset;
-                                    }
-
-                                    else {
-                                        console.log("Edge angle is not one of the expected values: ", angle);
-                                    }
-
-                                    // And ensure it stays on the rectangle perimeter
-                                    //route[startIndex] = adjustPointToRectanglePerimeter(route[startIndex], edge.source.innerBounds);
-                                    //route[endIndex] = adjustPointToRectanglePerimeter(route[endIndex], edge.target.innerBounds);
-                                }
-
-                            }
-
-
-
-
-
-
-
-
-
-                            // Calculate the curvature for the current edge
-                            var curvature = calculateCurvature(edges, d.source.id, d.target.id, d.id);
                             //Apply curvature to the control points (but this does not help with the direction)
                             route.forEach(function (point, index) {
+
+
                                 if (index > 0 && index < route.length - 1 && curvature !== 0) {
 
                                     // Adjust the control points based on the direction
+                                    // var offsetX = curvature * Math.cos(angle + Math.PI / 2);
+                                    // var offsetY = curvature * Math.sin(angle + Math.PI / 2);
                                     var offsetX = curvature * Math.abs(Math.sin(angle)) * distance;
                                     var offsetY = curvature * Math.abs(Math.cos(angle)) * distance;
 
+                                    console.log("offset: " + offsetX + ", " + offsetY, " angle: ", angle, "curvature: " + curvature);
                                     point.x += offsetX;
                                     point.y += offsetY;
                                 }
                             });
 
+
+
                             return lineFunction(route);
+
+
                         });
 
                         // Update label positions after routing edges
@@ -438,6 +373,8 @@
                             .raise();
 
                             /**** This bit ensures we zoom to fit ***/
+                            
+
                                 const bbox = svg.node().getBBox();
                                 const padding = 10; // Padding in pixels
 
@@ -671,6 +608,541 @@
             </script>
 
         </div>
+
+        <!-- <div id="webcola">
+
+            <h3> Layout Constraints </h3>
+            <pre id="constraints"> [
+  {
+    "left": {
+      "id": "_left_0",
+      "attributes": {},
+      "groups": [],
+      "color": "transparent"
+    },
+    "right": {
+      "id": "Player6",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "minDistance": 100
+  },
+  {
+    "top": {
+      "id": "Player6",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "bottom": {
+      "id": "_left_0",
+      "attributes": {},
+      "groups": [],
+      "color": "transparent"
+    },
+    "minDistance": 0
+  },
+  {
+    "left": {
+      "id": "_left_0",
+      "attributes": {},
+      "groups": [],
+      "color": "transparent"
+    },
+    "right": {
+      "id": "Player1",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "minDistance": 62.34898018587336
+  },
+  {
+    "top": {
+      "id": "_left_0",
+      "attributes": {},
+      "groups": [],
+      "color": "transparent"
+    },
+    "bottom": {
+      "id": "Player1",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "minDistance": 78.18314824680299
+  },
+  {
+    "left": {
+      "id": "Player5",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "right": {
+      "id": "_left_0",
+      "attributes": {},
+      "groups": [],
+      "color": "transparent"
+    },
+    "minDistance": 22.252093395631434
+  },
+  {
+    "top": {
+      "id": "_left_0",
+      "attributes": {},
+      "groups": [],
+      "color": "transparent"
+    },
+    "bottom": {
+      "id": "Player5",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "minDistance": 97.49279121818236
+  },
+  {
+    "left": {
+      "id": "Player3",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "right": {
+      "id": "_left_0",
+      "attributes": {},
+      "groups": [],
+      "color": "transparent"
+    },
+    "minDistance": 90.09688679024191
+  },
+  {
+    "top": {
+      "id": "_left_0",
+      "attributes": {},
+      "groups": [],
+      "color": "transparent"
+    },
+    "bottom": {
+      "id": "Player3",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "minDistance": 43.38837391175582
+  },
+  {
+    "left": {
+      "id": "Player2",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "right": {
+      "id": "_left_0",
+      "attributes": {},
+      "groups": [],
+      "color": "transparent"
+    },
+    "minDistance": 90.09688679024191
+  },
+  {
+    "top": {
+      "id": "Player2",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "bottom": {
+      "id": "_left_0",
+      "attributes": {},
+      "groups": [],
+      "color": "transparent"
+    },
+    "minDistance": 43.3883739117558
+  },
+  {
+    "left": {
+      "id": "Player4",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "right": {
+      "id": "_left_0",
+      "attributes": {},
+      "groups": [],
+      "color": "transparent"
+    },
+    "minDistance": 22.25209339563146
+  },
+  {
+    "top": {
+      "id": "Player4",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "bottom": {
+      "id": "_left_0",
+      "attributes": {},
+      "groups": [],
+      "color": "transparent"
+    },
+    "minDistance": 97.49279121818236
+  },
+  {
+    "left": {
+      "id": "_left_0",
+      "attributes": {},
+      "groups": [],
+      "color": "transparent"
+    },
+    "right": {
+      "id": "Player0",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "minDistance": 62.34898018587334
+  },
+  {
+    "top": {
+      "id": "Player0",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "bottom": {
+      "id": "_left_0",
+      "attributes": {},
+      "groups": [],
+      "color": "transparent"
+    },
+    "minDistance": 78.18314824680299
+  }
+];</pre>
+
+            <h3 id="graphDefs"> Graph definitions </h3>
+            <h4>Nodes</h4>
+            <pre id="nodes"> [
+  {
+    "id": "Player0",
+    "color": "#d34c59",
+    "groups": [],
+    "attributes": {}
+  },
+  {
+    "id": "Player1",
+    "color": "#d34c59",
+    "groups": [],
+    "attributes": {}
+  },
+  {
+    "id": "Player2",
+    "color": "#d34c59",
+    "groups": [],
+    "attributes": {}
+  },
+  {
+    "id": "Player3",
+    "color": "#d34c59",
+    "groups": [],
+    "attributes": {}
+  },
+  {
+    "id": "Player4",
+    "color": "#d34c59",
+    "groups": [],
+    "attributes": {}
+  },
+  {
+    "id": "Player5",
+    "color": "#d34c59",
+    "groups": [],
+    "attributes": {}
+  },
+  {
+    "id": "Player6",
+    "color": "#d34c59",
+    "groups": [],
+    "attributes": {}
+  },
+  {
+    "id": "Dealer0",
+    "color": "#f84569",
+    "groups": [],
+    "attributes": {}
+  },
+  {
+    "id": "_left_0",
+    "attributes": {},
+    "groups": [],
+    "color": "transparent"
+  }
+];</pre>
+            <h4>Edges</h4>
+            <pre id="edges"> [
+  {
+    "source": {
+      "id": "Player6",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "target": {
+      "id": "Dealer0",
+      "color": "#f84569",
+      "groups": [],
+      "attributes": {}
+    },
+    "label": "holding",
+    "relationName": "holding",
+    "id": "Player<:holding:Player6->Dealer0"
+  },
+  {
+    "source": {
+      "id": "Player0",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "target": {
+      "id": "Player6",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "label": "left",
+    "relationName": "left",
+    "id": "Player<:left:Player0->Player6"
+  },
+  {
+    "source": {
+      "id": "Player1",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "target": {
+      "id": "Player5",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "label": "left",
+    "relationName": "left",
+    "id": "Player<:left:Player1->Player5"
+  },
+  {
+    "source": {
+      "id": "Player2",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "target": {
+      "id": "Player4",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "label": "left",
+    "relationName": "left",
+    "id": "Player<:left:Player2->Player4"
+  },
+  {
+    "source": {
+      "id": "Player3",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "target": {
+      "id": "Player2",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "label": "left",
+    "relationName": "left",
+    "id": "Player<:left:Player3->Player2"
+  },
+  {
+    "source": {
+      "id": "Player4",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "target": {
+      "id": "Player0",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "label": "left",
+    "relationName": "left",
+    "id": "Player<:left:Player4->Player0"
+  },
+  {
+    "source": {
+      "id": "Player5",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "target": {
+      "id": "Player3",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "label": "left",
+    "relationName": "left",
+    "id": "Player<:left:Player5->Player3"
+  },
+  {
+    "source": {
+      "id": "Player6",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "target": {
+      "id": "Player1",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "label": "left",
+    "relationName": "left",
+    "id": "Player<:left:Player6->Player1"
+  },
+  {
+    "source": {
+      "id": "Player0",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "target": {
+      "id": "Player4",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "label": "right",
+    "relationName": "right",
+    "id": "Player<:right:Player0->Player4"
+  },
+  {
+    "source": {
+      "id": "Player1",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "target": {
+      "id": "Player6",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "label": "right",
+    "relationName": "right",
+    "id": "Player<:right:Player1->Player6"
+  },
+  {
+    "source": {
+      "id": "Player2",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "target": {
+      "id": "Player3",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "label": "right",
+    "relationName": "right",
+    "id": "Player<:right:Player2->Player3"
+  },
+  {
+    "source": {
+      "id": "Player3",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "target": {
+      "id": "Player5",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "label": "right",
+    "relationName": "right",
+    "id": "Player<:right:Player3->Player5"
+  },
+  {
+    "source": {
+      "id": "Player4",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "target": {
+      "id": "Player2",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "label": "right",
+    "relationName": "right",
+    "id": "Player<:right:Player4->Player2"
+  },
+  {
+    "source": {
+      "id": "Player5",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "target": {
+      "id": "Player1",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "label": "right",
+    "relationName": "right",
+    "id": "Player<:right:Player5->Player1"
+  },
+  {
+    "source": {
+      "id": "Player6",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "target": {
+      "id": "Player0",
+      "color": "#d34c59",
+      "groups": [],
+      "attributes": {}
+    },
+    "label": "right",
+    "relationName": "right",
+    "id": "Player<:right:Player6->Player0"
+  }
+];</pre>
+
+        </div> -->
 
     </div>
 
