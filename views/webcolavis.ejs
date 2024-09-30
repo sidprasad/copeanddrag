@@ -40,13 +40,13 @@
             marker-end: url(#end-arrow);
         }
 
-        .linkarrow {
+        /* .linkarrow {
             stroke: darkslategrey;
             fill: darkslategrey;
             stroke-width: 0px;
             stroke-opacity: 0.7;
             marker-end: url(#end-arrow);
-        }
+        } */
 
         .linkoutline {
             stroke: white;
@@ -104,13 +104,28 @@
             </svg>
             <script>
 
-                // Function to adjust a point to stay on the rectangle perimeter
                 function adjustPointToRectanglePerimeter(point, rect) {
                     const { x, y, width, height } = rect;
-                    if (point.x < x) point.x = x;
-                    if (point.x > x + width) point.x = x + width;
-                    if (point.y < y) point.y = y;
-                    if (point.y > y + height) point.y = y + height;
+                    const padding = 3; // Padding in pixels
+
+                    const tl_X = x - padding;
+                    const tl_Y = y - padding;
+                    const br_X = x + width + padding;
+                    const br_Y = y + height + padding;
+
+                    if (point.x < tl_X ){
+                        point.x = tl_X;
+                    } 
+                    else if (point.x > br_X) {
+                        point.x = br_X;
+                    }
+
+                    if (point.y < tl_Y) {
+                        point.y = tl_Y;
+                    }
+                    else if (point.y > br_Y) {
+                        point.y = br_Y;
+                    }
                     return point;
                 }
 
@@ -353,53 +368,49 @@
 
                                     /*
                                     
-                                    
+                                    Angle 0: The edge is horizontal and points to the right.
+                                    Angle π/2 (90 degrees): The edge is vertical and points upwards.
                                     Angle π (180 degrees): The edge is horizontal and points to the left.
-                                    
+                                    Angle -π/2 (-90 degrees): The edge is vertical and points downwards.
                                     */
+                                    function getDominantDirection(angle) {
+                                        // Normalize angle between -π and π
+                                        angle = ((angle + Math.PI) % (2 * Math.PI)) - Math.PI;
+                                        
+                                        if (angle >= -Math.PI / 4 && angle <= Math.PI / 4) {
+                                            return 'right'; // Dominant direction is right
+                                        } else if (angle > Math.PI / 4 && angle < 3 * Math.PI / 4) {
+                                            return 'up'; // Dominant direction is up
+                                        } else if (angle >= 3 * Math.PI / 4 || angle <= -3 * Math.PI / 4) {
+                                            return 'left'; // Dominant direction is left
+                                        } else if (angle > -3 * Math.PI / 4 && angle < -Math.PI / 4) {
+                                            return 'down'; // Dominant direction is down
+                                        }
+                                        return null; // Default to null if something unexpected happens
+                                    }
+                                    let direction = getDominantDirection(angle);
 
-                                    // Angle 0: The edge is horizontal and points to the right.
+
                                     // As a result, offset along the y axis.
-                                    if (angle === 0) {
+                                    if (direction === 'right' || direction === 'left') {
                                         route[startIndex].y += offset;
                                         route[endIndex].y += offset;
                                     }
-                                    // Angle π/2 (90 degrees): The edge is vertical and points upwards.
-                                    // As a result, adjust along the x axis.
-                                    else if (angle === Math.PI / 2) {
-                                        route[startIndex].x += offset;
-                                        route[endIndex].x += offset;
-                                    }
-                                    // Angle π (180 degrees): The edge is horizontal and points to the left.
-                                    // As a result, offset along the y axis. (I think we still ADD the offset)
-                                    else if (angle === Math.PI) {
-                                        route[startIndex].y += offset;
-                                        route[endIndex].y += offset;
-                                    }
-                                    // Angle -π/2 (-90 degrees): The edge is vertical and points downwards.
-                                    // As a result, adjust along the x axis.
-                                    else if (angle === -Math.PI / 2) {
+                                    // else if direction is up or down, offset along the x axis
+                                    else if (direction === 'up' || direction === 'down') {
                                         route[startIndex].x += offset;
                                         route[endIndex].x += offset;
                                     }
 
-                                    else {
-                                        console.log("Edge angle is not one of the expected values: ", angle);
-                                    }
+                                    // Ignore the other directions, if they do crop up.
 
                                     // And ensure it stays on the rectangle perimeter
-                                    //route[startIndex] = adjustPointToRectanglePerimeter(route[startIndex], edge.source.innerBounds);
-                                    //route[endIndex] = adjustPointToRectanglePerimeter(route[endIndex], edge.target.innerBounds);
+                                    console.log("Adjusting points to rectangle perimeter");
+                                    route[startIndex] = adjustPointToRectanglePerimeter(route[startIndex], d.source.innerBounds);
+                                    route[endIndex] = adjustPointToRectanglePerimeter(route[endIndex], d.target.innerBounds);
                                 }
 
                             }
-
-
-
-
-
-
-
 
 
                             // Calculate the curvature for the current edge
@@ -628,10 +639,12 @@
 
                                 }
 
-
+                                
                                 var route = cola.makeEdgeBetween(source.innerBounds, target.innerBounds, 5);
                                 return lineFunction([route.sourceIntersection, route.arrowStart]);
-                            });
+                            })
+                            .attr("marker-end", "url(#end-arrow)") // Ensure the marker-end attribute is set
+                            .raise(); // Raise the path to the top
 
                         linkGroups.select("text.linklabel")
                             .attr("x", d => {
@@ -657,6 +670,10 @@
 
 
                         linkGroups.select("text.linklabel").raise();
+                        
+                        // Can we get all end-arrow markers and raise them?
+                        svg.selectAll("marker").raise();
+                        
 
                     });
 
