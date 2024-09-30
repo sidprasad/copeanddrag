@@ -4,7 +4,7 @@ import { AlloyInstance, getAtomType, getInstanceTypes } from '../alloy-instance'
 import { isBuiltin, AlloyType } from '../alloy-instance/src/type';
 import { AlloyAtom } from '../alloy-instance/src/atom';
 import { applyProjections } from '../alloy-instance/src/projection';
-
+import { IconDefinition } from './layoutspec';
 import { LayoutSpec, ClosureDefinition, ClusterRelation, parseLayoutSpec } from './layoutspec';
 import { LayoutNode, LayoutEdge, LayoutConstraint, InstanceLayout, LeftConstraint, TopConstraint, AlignmentConstraint, LayoutGroup } from './interfaces';
 
@@ -16,11 +16,16 @@ import {chroma, scale} from 'chroma-js';
 
 export class LayoutInstance {
 
+    readonly DEFAULT_NODE_ICON_PATH : string = null;
+    readonly DEFAULT_NODE_HEIGHT = 45;
+    readonly DEFAULT_NODE_WIDTH = 70;
+
     private readonly _layoutSpec: LayoutSpec;
     readonly DEFAULT_GROUP_ON: string = "range";
 
     private readonly _sigColors: Record<string, string>;
 
+    private readonly _sigIcons: Record<string, IconDefinition>;
 
     public readonly minSepHeight = 15;
     public readonly minSepWidth = 15;
@@ -35,6 +40,16 @@ export class LayoutInstance {
                 this._sigColors[sigColor.sigName] = sigColor.color;
             });
         }
+
+        // Icons need to be supported here.
+
+        this._sigIcons = {};
+        if (this._layoutSpec.sigIcons) {
+            this._layoutSpec.sigIcons.forEach((sigIcon) => {
+                this._sigIcons[sigIcon.sigName] = sigIcon;
+            });
+        }
+
 
 
         if (this._layoutSpec.closures) {
@@ -260,12 +275,39 @@ export class LayoutInstance {
         return color;
     }
 
-    private colorNodesByType(g: Graph, a: AlloyInstance): Record<string, string> {
-        let colorsByType: Record<string, string> = {};
+    private getIconsByType(g: Graph, a: AlloyInstance): Record<string, string> {
+
         let nodes = [...g.nodes()];
+        
+        let iconsByType: Record<string, IconDefinition> = {};
 
+        // For each type, assign a unique, random color
+        types.forEach((type, index) => {
+    
+            // If the type has a color specified, use that
+            if (this._sigIcons[type.id]) {
+                colorsByType[type.id] = this._sigColors[type.id];
+            }
+            else {
+                colorsByType[type.id] = colorScale[index];
+            }
+        });
+
+
+        let colorsByNode = {};
+        nodes.forEach((node) => {
+            // Get the type of the node
+            let type = getAtomType(a, node);
+            let color = colorsByType[type.id];
+            colorsByNode[node] = color;
+        });
+        return colorsByNode;
+    }
+
+    private colorNodesByType(g: Graph, a: AlloyInstance): Record<string, string> {
+
+        let nodes = [...g.nodes()];
         let types = getInstanceTypes(a);
-
         let numTypes = types.length;
 
         // Do this so that we can have more colors than types
@@ -275,9 +317,12 @@ export class LayoutInstance {
         let usedColors = Object.values(this._sigColors);
         colorScale = colorScale.filter((color) => !usedColors.includes(color));
 
+        let colorsByType: Record<string, string> = {};
+
+
         // For each type, assign a unique, random color
         types.forEach((type, index) => {
-
+    
             // If the type has a color specified, use that
             if (this._sigColors[type.id]) {
                 colorsByType[type.id] = this._sigColors[type.id];
@@ -345,12 +390,31 @@ export class LayoutInstance {
         const colors = this.colorNodesByType(g, a);
 
         let layoutNodes: LayoutNode[] = g.nodes().map((nodeId) => {
+
+            let type = getAtomType(a, nodeId);
+            let iconPath : string = this._sigIcons[type.id] ? this._sigIcons[type.id].path : this.DEFAULT_NODE_ICON_PATH;
+            const nodeHeight = this._sigIcons[type.id] ? this._sigIcons[type.id].height :this.DEFAULT_NODE_HEIGHT;
+            const nodeWidth = this._sigIcons[type.id] ? this._sigIcons[type.id].width : this.DEFAULT_NODE_WIDTH;
+
+            // TODO: ensure that iconPath exists
+
+
+
             let color = colors[nodeId];
             let nodeGroups = groups
                                 .filter((group) => group.nodeIds.includes(nodeId))
                                 .map((group) => group.name);
             let nodeAttributes = attributes[nodeId] || {};
-            return { id: nodeId, color: color, groups: nodeGroups, attributes: nodeAttributes };
+            return { 
+                id: nodeId, 
+                color: color, 
+                groups: nodeGroups, 
+                attributes: nodeAttributes,
+                icon: iconPath,
+                height: nodeHeight,
+                width: nodeWidth
+
+             };
         });
 
 

@@ -18,6 +18,9 @@ interface LayoutNode {
     color : string;
     groups?: string[];
     attributes?: Record<string, string[]>;
+    icon? : string;
+    width : number;
+    height : number;
 }
 
 

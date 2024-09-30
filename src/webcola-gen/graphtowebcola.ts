@@ -3,11 +3,13 @@ import { InstanceLayout, LayoutNode, LayoutEdge, LayoutConstraint, LayoutGroup, 
 
 
 
-const nodeWidth = 70;
-const nodeHeight = 45;
 
-
-type NodeWithMetadata = Node & { id: string, attributes: Record<string, string[]>, color: string };
+type NodeWithMetadata = Node & 
+  { id: string, 
+    attributes: Record<string, string[]>, 
+    color: string 
+    icon: string
+  };
 
 
 type EdgeWithMetadata = {
@@ -36,12 +38,10 @@ export class WebColaLayout {
 
   constructor(instanceLayout: InstanceLayout, fig_height: number = 800, fig_width: number = 800) {
 
-
     this.FIG_HEIGHT = fig_height;
     this.FIG_WIDTH = fig_width;
     this.DEFAULT_X = fig_width / 2;
     this.DEFAULT_Y = fig_height / 2;
-
 
     this.instanceLayout = instanceLayout;
 
@@ -53,7 +53,6 @@ export class WebColaLayout {
 
 
     this.colaConstraints = instanceLayout.constraints.map(constraint => this.toColaConstraint(constraint));
-
 
   }
 
@@ -107,10 +106,11 @@ export class WebColaLayout {
       id: node.id,
       color: node.color,
       attributes: node.attributes,
-      width: nodeWidth,
-      height: nodeHeight,
+      width: node.width,
+      height: node.height,
       x: this.DEFAULT_X,
-      y: this.DEFAULT_Y
+      y: this.DEFAULT_Y,
+      icon: node.icon
     }
   }
 
@@ -118,7 +118,6 @@ export class WebColaLayout {
 
     let sourceIndex = this.getNodeIndex(edge.source.id);
     let targetIndex = this.getNodeIndex(edge.target.id);
-
 
 
 

@@ -3,6 +3,7 @@ export type FieldDirection = "above" | "below" | "left" | "right" | "directlyAbo
 export type RotationDirection = "clockwise" | "counterclockwise";
 export type ClusterTarget = "domain" | "range";
 
+
 export interface fieldDefinition {
     fieldName : string;
 }
@@ -20,6 +21,7 @@ export interface LayoutSpec {
     sigColors? : SigColor[];
     projections? : ProjectionDefinition[];
     closures? : ClosureDefinition[];
+    sigIcons? : IconDefinition[];
 }
 
 export interface DirectionalRelation extends fieldDefinition {
@@ -42,6 +44,13 @@ export interface ClosureDefinition extends fieldDefinition {
     direction? : RotationDirection;
 }
 
+export interface IconDefinition extends sigDefinition {
+
+    path : string;
+    height : number;
+    width : number;
+}
+
 const DEFAULT_LAYOUT : LayoutSpec = {
     fieldDirections: [],
     groupBy: [],
@@ -49,7 +58,8 @@ const DEFAULT_LAYOUT : LayoutSpec = {
     hideDisconnected: false,
     hideDisconnectedBuiltIns: true,
     sigColors: [],
-    projections: []
+    projections: [],
+    sigIcons: []
 };
 
 export function parseLayoutSpec(spec : string) : LayoutSpec {
