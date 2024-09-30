@@ -116,18 +116,23 @@ By default, we assign every `sig` a random color, that is respected by all atoms
 - [] Currently only show a visualizations for a single alloy instance in the datum
 - [] Fragment shapes should not overlap
   - Effectively, fragment centroids should be at least the radius of the fragment to the left 
+- **Grids**
+
+- Relation colors?
+
+- Icons for `sigs`
+- Prevent Label overlap:
+  - [] Better Label Layout: https://medium.com/@adarshlilha/removing-label-overlapping-from-pretty-charts-8dd2e3581b71
+
+- [] Attributes for n-ary relations are broken (we lost the in-betweens in the attribute names)
 
 
 ### WebCola
 
-- [] Better Label Layout: https://medium.com/@adarshlilha/removing-label-overlapping-from-pretty-charts-8dd2e3581b71
+
 - [] Struggles with groups that intersect but are not subgroups of one another
 - [] WebCola struggles with variable link length. 
     - Minimum link length does not always serve us, since it really tries to enforce that min length.
     - Perhaps we need to force super large links and also force all nodes within the frame?
-- [] Attributes for n-ary relations are broken (we lost the in-betweens in the attribute names)
 
-- **Grids**
-
-- Relation colors?
 
