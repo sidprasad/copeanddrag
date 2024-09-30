@@ -486,11 +486,12 @@
 
                     var node = svg.selectAll(".node")
                         .data(nodes)
-                        .enter().append("rect") 
+                        .enter().append("g") // Create a group for each node
                         .attr("class", "node")
-                        .attr("width", function (d) { 
-                            return d.width;   
-                        })
+                        .call(colaLayout.drag);
+
+                    node.append("rect")
+                        .attr("width", function (d) { return d.width; })
                         .attr("height", function (d) { return d.height; }) // Use node's height
                         .attr("x", function (d) { return -d.width / 2; }) // Center the rectangle on the node's x
                         .attr("y", function (d) { return -d.height / 2; }) // Center the rectangle on the node's y
@@ -499,29 +500,16 @@
                         .attr("fill", function (d) {
                             let f = isHiddenNode(d) || (d.icon != null) ? "transparent" : "white";
                             return f;
-                        }) 
-                        .call(colaLayout.drag);
+                        });
 
-                    // node.filter(d => d.icon) // Filter nodes that have an icon
-                    //     .append("image")
-                    //     .attr("xlink:href", d => d.icon)
-                    //     .attr("width", function(d) { return d.width * 0.8; }) // Scale down the icon to fit inside the rectangle
-                    //     .attr("height", function(d) { return d.height * 0.8; }) // Scale down the icon to fit inside the rectangle
-                    //     .attr("x", function(d) { return -d.width * 0.4; }) // Center the icon horizontally
-                    //     .attr("y", function(d) { return -d.height * 0.4; }); // Center the icon vertically
-
-
-                    var icons = svg.selectAll(".icon")
-                                .data(nodes)
-                                .filter(d => d.icon)
-                                .enter()
+                    node.filter(d => d.icon) // Filter nodes that have an icon
                         .append("image")
                         .attr("xlink:href", d => d.icon)
                         .attr("width", function(d) { return d.width * 0.8; }) // Scale down the icon to fit inside the rectangle
                         .attr("height", function(d) { return d.height * 0.8; }) // Scale down the icon to fit inside the rectangle
                         .attr("x", function(d) { return -d.width * 0.4; }) // Center the icon horizontally
-                        .attr("y", function(d) { return -d.height * 0.4; }) // Center the icon vertically
-                        .call(colaLayout.drag);
+                        .attr("y", function(d) { return -d.height * 0.4; }); // Center the icon vertically
+
 
 
 
@@ -533,7 +521,7 @@
 
                             if (isHiddenNode(d)) {
                                 return;
-                            }
+                            }                            
 
                             // Append tspan for d.name
                             d3.select(this).append("tspan")
@@ -617,12 +605,19 @@
                             .lower();
 
 
-                        node
+                        node.select("rect")
                             .each(function (d) { d.innerBounds = d.bounds.inflate(-1); })
                             .attr("x", function (d) { return d.bounds.x; })
                             .attr("y", function (d) { return d.bounds.y; })
                             .attr("width", function (d) { return d.bounds.width(); })
                             .attr("height", function (d) { return d.bounds.height(); });
+                        
+                        node.select("image")
+                        .attr("x", function(d) { return d.bounds.x; }) 
+                        .attr("y", function(d) { return d.bounds.y; }); 
+
+
+
 
                         label
                             .attr("x", d => d.x)
@@ -637,10 +632,6 @@
                                     });
                             })
                             .raise();
-
-                        icons
-                        .attr("x", d => d.x)
-                        .attr("y", d => d.y);
 
 
                         linkGroups.select("path.link")
