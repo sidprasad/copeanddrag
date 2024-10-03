@@ -5,7 +5,7 @@
             "directions" : ["directlyRight"]
         },
         { "fieldName" : "below",
-          "directions" : ["directlyBelow"]
+          "directions" : ["below"]
         }
     ],
     "groupBy": [
@@ -20,6 +20,26 @@
     "projections": [
         {
             "sigName": "Face"
+        }
+    ],
+    "sigIcons" : [
+        {
+            "path": "https://i.etsystatic.com/36262552/r/il/8404e0/4377696057/il_1588xN.4377696057_1atk.jpg",
+            "sigName": "Eye",
+            "height" : 40,
+            "width" : 40
+        },
+        {
+            "path": "https://img.freepik.com/free-vector/isolated-human-nose_1308-15914.jpg",
+            "sigName": "Nose",
+            "height" : 70,
+            "width" : 70
+        },
+        {
+            "path": "https://www.clker.com//cliparts/9/d/7/7/1194986546365265948mouth_-_body_part_nicu_b_03.svg.hi.png",
+            "sigName": "Mouth",
+            "height" : 40,
+            "width" : 100
         }
     ]
 }

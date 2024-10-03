@@ -120,7 +120,6 @@ By default, we assign every `sig` a random color, that is respected by all atoms
 
 - Relation colors?
 
-- Icons for `sigs`
 - Prevent Label overlap:
   - [] Better Label Layout: https://medium.com/@adarshlilha/removing-label-overlapping-from-pretty-charts-8dd2e3581b71
 
