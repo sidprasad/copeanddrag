@@ -44,7 +44,24 @@ function getLayout(req: any): InstanceLayout {
     return li.generateLayout(instances[instanceNumber]);
 }
 
+app.get('/diagram', (req, res) => {
 
+
+    res.render('diagram', {
+        'height': 0,
+        'width': 0,
+        'colaNodes': [],
+        'colaEdges': [],
+        'colaConstraints': [],
+        'colaGroups': [],
+        instanceNumber: 0,
+        num_instances: 0,
+        layoutAnnotation: "",
+        alloyDatum: ""
+    });
+
+
+});
 
 app.post('/diagram', (req, res) => {
 
@@ -53,8 +70,16 @@ app.post('/diagram', (req, res) => {
     const layoutAnnotation = req.body.layoutannotation;
 
     let { instances, li, instanceNumber } = getFormContents(req);
-    let layout = li.generateLayout(instances[instanceNumber]);
+
     let num_instances = instances.length;
+
+    if (instanceNumber >= num_instances) {
+        res.status(418).send("Instance number out of range");
+        return;
+    }
+
+    let layout = li.generateLayout(instances[instanceNumber]);
+
 
     let cl = new WebColaLayout(layout);
     let colaConstraints = cl.colaConstraints;

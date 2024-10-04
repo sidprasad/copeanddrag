@@ -5,6 +5,13 @@
 <head>
     <meta charset="utf-8" />
     <title>Lightweight Diagram</title>
+
+    <!-- Include Bootstrap CSS, JQuery, etc -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
     <style>
         #svg-container {
             display: flex;
@@ -140,9 +147,13 @@
                 </svg>
             </div>
             <div id="controls" class="col">
-                <div id="minimap" class="container">
-                    Instance <%- instanceNumber %> of <%- num_instances %>
+                    <!-- This needs to get much nicer. -->
+
+                    <% if (num_instances > 0) { %>
+                        <p>Instance <%- instanceNumber %> of <%- num_instances %></p>
+                    <% } %>
                     <hr>
+
                     <form id="controlsForm" method="post" action="/diagram">
                         <div class="form-group">
                             <label for="alloydatum">Alloy Instance</label>
@@ -161,7 +172,6 @@
                         </div>
                         <button type="submit" id='cola' class="btn btn-primary">Load Diagram</button>
                     </form>
-                </div>
             </div>
         </div>
     </div>
