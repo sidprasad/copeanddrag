@@ -97,8 +97,8 @@ app.post('/diagram', (req, res) => {
     }
 
 
-    let height = cl.FIG_HEIGHT /2;
-    let width = cl.FIG_WIDTH /2;
+    let height = cl.FIG_HEIGHT ;
+    let width = cl.FIG_WIDTH ;
 
     res.render('diagram', {
         'height': height,
@@ -155,8 +155,6 @@ app.post('/webcolafiles', (req, res) => {
 
     });
 });
-
-
 
 
 

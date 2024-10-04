@@ -11,7 +11,9 @@
     "groupBy": [
     ],
     "closures": [],
-    "attributeFields": [],
+    "attributeFields": [
+
+    ],
     "hideDisconnected": false,
     "hideDisconnectedBuiltIns": true,
     "sigColors": [
@@ -39,7 +41,7 @@
             "path": "https://www.clker.com//cliparts/9/d/7/7/1194986546365265948mouth_-_body_part_nicu_b_03.svg.hi.png",
             "sigName": "Mouth",
             "height" : 40,
-            "width" : 100
+            "width" : 200
         }
     ]
 }
