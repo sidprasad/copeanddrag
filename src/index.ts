@@ -28,10 +28,12 @@ function getFormContents(req: any) {
 
     let ad: AlloyDatum = parseAlloyXML(alloyDatum);
     let instances = ad.instances;
+    let loopBack = ad.loopBack || -1;
+
 
     let li = new LayoutInstance(layoutAnnotation);
 
-    return { instances, li, instanceNumber };
+    return { instances, li, instanceNumber, loopBack };
 }
 
 function getLayout(req: any): InstanceLayout {
@@ -64,13 +66,16 @@ app.post('/diagram', (req, res) => {
     const alloyDatum = req.body.alloydatum;
     const layoutAnnotation = req.body.layoutannotation;
 
-    let { instances, li, instanceNumber } = getFormContents(req);
+
+    let { instances, li, instanceNumber, loopBack} = getFormContents(req);
 
     let num_instances = instances.length;
 
     if (instanceNumber >= num_instances) {
         res.status(418).send("Instance number out of range");
         return;
+    } else if (loopBack != 0 && !loopBack) {
+        loopBack = 0;
     }
 
     let layout = li.generateLayout(instances[instanceNumber]);
@@ -110,7 +115,8 @@ app.post('/diagram', (req, res) => {
         instanceNumber,
         num_instances,
         layoutAnnotation,
-        alloyDatum
+        alloyDatum,
+        loopBack
     });
 });
 

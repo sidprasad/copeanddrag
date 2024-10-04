@@ -110,6 +110,9 @@
             } else {
                 console.error('Missing required data for layout');
             }
+
+
+
         });
     </script>
     <style>
@@ -129,10 +132,42 @@
             margin-left: 20px; /* Optional: Add some space between the two divs */
         }
     </style>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true });
+
+      
+    </script>
 </head>
 
 <body>
     <div class="container-fluid">
+        <% if (num_instances > 1) { %>
+            <div class="row">
+                <div class="col">
+                    <p>Temporal Mini-Map </p>
+                    <div class="mermaid">
+                        graph LR;
+                        <% for (var i = 0; i < num_instances; i++) { %>
+                            <% if (i === instanceNumber) { %>
+                                A<%= i %>((<%= i %>)):::highlight;
+                            <% } else { %>
+                                A<%= i %>((<%= i %>));
+                            <% } %>
+                            <% if (i < num_instances - 1) { %>
+                                A<%= i %> --> A<%= i + 1 %>;
+                            <% } %>
+                        <% } %>
+                        <% if (loopBack >= 0 && loopBack < num_instances) { %>
+                            A<%= num_instances - 1 %> --> A<%= loopBack %>;
+                        <% } %>
+                        classDef highlight fill:#f96,stroke:#333,stroke-width:2px;
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+            <% } %>
         <div class="row">
             <div id="svg-container" class="col">
                 <svg id="svg" width="<%- width %>" height="<%- height %>" class="svg-border">
@@ -149,10 +184,6 @@
             <div id="controls" class="col">
                     <!-- This needs to get much nicer. -->
 
-                    <% if (num_instances > 0) { %>
-                        <p>Instance <%- instanceNumber %> of <%- num_instances %></p>
-                    <% } %>
-                    <hr>
 
                     <form id="controlsForm" method="post" action="/diagram">
                         <div class="form-group">
@@ -166,7 +197,7 @@
                                 name="layoutannotation"><%= layoutAnnotation ? layoutAnnotation : '' %></textarea>
                         </div>
                         <div class="form-group">
-                            <label for="instancenumber">Instance Number To Render (Default to 0)</label>
+                            <label for="instancenumber">Temporal Instance </label>
                             <input type="number" class="form-control" id="instancenumber" name="instancenumber"
                                 value=<%- instanceNumber %>>
                         </div>
@@ -175,6 +206,7 @@
             </div>
         </div>
     </div>
+
 </body>
 
 
