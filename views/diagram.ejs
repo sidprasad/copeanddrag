@@ -134,9 +134,20 @@
     </style>
     <script type="module">
         import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-        mermaid.initialize({ startOnLoad: true });
+        const config = {
+      startOnLoad: true,
+      flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'cardinal' },
+      securityLevel: 'loose',
+    };
+    mermaid.initialize(config);
 
-      
+    window.stateclick = function (i) {
+        // First, set the instance number's value to i
+        document.getElementById('instancenumber').value = i;
+        // Now submit the form
+        document.getElementById('controlsForm').submit();
+
+    };
     </script>
 </head>
 
@@ -157,6 +168,7 @@
                             <% if (i < num_instances - 1) { %>
                                 A<%= i %> --> A<%= i + 1 %>;
                             <% } %>
+                            click A<%= i %> call stateclick("<%= i %>");
                         <% } %>
                         <% if (loopBack >= 0 && loopBack < num_instances) { %>
                             A<%= num_instances - 1 %> --> A<%= loopBack %>;
