@@ -156,7 +156,8 @@
         <% if (num_instances > 1) { %>
             <div class="row">
                 <div class="col">
-                    <p>Temporal Mini-Map </p>
+                    <h3 class="justify-content">Temporal Mini-Map </h3>
+
                     <div class="mermaid">
                         graph LR;
                         <% for (var i = 0; i < num_instances; i++) { %>
@@ -194,27 +195,29 @@
                 </svg>
             </div>
             <div id="controls" class="col">
-                    <!-- This needs to get much nicer. -->
+                <!-- Collapsible Button -->
+                <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#controlsFormCollapse" aria-expanded="false" aria-controls="controlsFormCollapse">
+                    View Controls
+                </button>
 
-
+                <!-- Collapsible Form -->
+                <div class="collapse card" id="controlsFormCollapse">
                     <form id="controlsForm" method="post" action="/diagram">
                         <div class="form-group">
                             <label for="alloydatum">Alloy Instance</label>
-                            <textarea class="form-control" id="alloydatum" rows="5"
-                                name="alloydatum"><%= alloyDatum ? alloyDatum : '' %></textarea>
+                            <textarea class="form-control" id="alloydatum" rows="5" name="alloydatum"><%= alloyDatum ? alloyDatum : '' %></textarea>
                         </div>
                         <div class="form-group">
                             <label for="layoutannotation">Layout Annotation</label>
-                            <textarea class="form-control" id="layoutannotation" rows="5"
-                                name="layoutannotation"><%= layoutAnnotation ? layoutAnnotation : '' %></textarea>
+                            <textarea class="form-control" id="layoutannotation" rows="5" name="layoutannotation"><%= layoutAnnotation ? layoutAnnotation : '' %></textarea>
                         </div>
                         <div class="form-group">
-                            <label for="instancenumber">Temporal Instance </label>
-                            <input type="number" class="form-control" id="instancenumber" name="instancenumber"
-                                value=<%- instanceNumber %>>
+                            <label for="instancenumber">Temporal Instance</label>
+                            <input type="number" class="form-control" id="instancenumber" name="instancenumber" value="<%- instanceNumber %>">
                         </div>
                         <button type="submit" id='cola' class="btn btn-primary">Load Diagram</button>
                     </form>
+                </div>
             </div>
         </div>
     </div>
