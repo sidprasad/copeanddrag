@@ -21,11 +21,6 @@ app.use(express.json());
 app.set('view engine', 'ejs');
 
 
-
-
-
-
-
 function getFormContents(req: any) {
     const alloyDatum = req.body.alloydatum;
     const layoutAnnotation = req.body.layoutannotation;
@@ -101,9 +96,13 @@ app.post('/diagram', (req, res) => {
         return;
     }
 
+
+    let height = cl.FIG_HEIGHT /2;
+    let width = cl.FIG_WIDTH /2;
+
     res.render('diagram', {
-        'height': cl.FIG_HEIGHT,
-        'width': cl.FIG_WIDTH,
+        'height': height,
+        'width': width,
         'colaNodes': colaNodes,
         'colaEdges': colaEdges,
         'colaConstraints': colaConstraints,
@@ -114,10 +113,6 @@ app.post('/diagram', (req, res) => {
         alloyDatum
     });
 });
-
-
-
-
 
 
 app.post('/webcolafiles', (req, res) => {

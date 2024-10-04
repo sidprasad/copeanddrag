@@ -132,7 +132,7 @@
 </head>
 
 <body>
-    <div class="container">
+    <div class="container-fluid">
         <div class="row">
             <div id="svg-container" class="col">
                 <svg id="svg" width="<%- width %>" height="<%- height %>" class="svg-border">
@@ -168,7 +168,7 @@
                         <div class="form-group">
                             <label for="instancenumber">Instance Number To Render (Default to 0)</label>
                             <input type="number" class="form-control" id="instancenumber" name="instancenumber"
-                                value="0">
+                                value=<%- instanceNumber %>>
                         </div>
                         <button type="submit" id='cola' class="btn btn-primary">Load Diagram</button>
                     </form>
