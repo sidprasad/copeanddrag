@@ -22,26 +22,80 @@ app.set('view engine', 'ejs');
 
 
 
+
+
+
+
 function getFormContents(req: any) {
     const alloyDatum = req.body.alloydatum;
     const layoutAnnotation = req.body.layoutannotation;
     const instanceNumber = parseInt(req.body.instancenumber);
 
-    let ad : AlloyDatum = parseAlloyXML(alloyDatum);
+    let ad: AlloyDatum = parseAlloyXML(alloyDatum);
     let instances = ad.instances;
 
     let li = new LayoutInstance(layoutAnnotation);
 
-    return {instances, li, instanceNumber};
+    return { instances, li, instanceNumber };
 }
 
-function getLayout(req: any) : InstanceLayout { 
-    let {instances, li, instanceNumber} = getFormContents(req);
+function getLayout(req: any): InstanceLayout {
+    let { instances, li, instanceNumber } = getFormContents(req);
     return li.generateLayout(instances[instanceNumber]);
 }
 
 
-app.post('/webcolafiles', (req, res) => {    
+
+app.post('/diagram', (req, res) => {
+
+
+    const alloyDatum = req.body.alloydatum;
+    const layoutAnnotation = req.body.layoutannotation;
+
+    let { instances, li, instanceNumber } = getFormContents(req);
+    let layout = li.generateLayout(instances[instanceNumber]);
+    let num_instances = instances.length;
+
+    let cl = new WebColaLayout(layout);
+    let colaConstraints = cl.colaConstraints;
+    let colaNodes = cl.colaNodes;
+    let colaEdges = cl.colaEdges;
+    let colaGroups = cl.groupDefinitions;
+
+
+
+    const constraintValidator = new ConstraintValidator(colaConstraints, colaNodes, colaGroups);
+    const error = constraintValidator.validateConstraints();
+    if (error) {
+
+        // TODO: THe reporting here should be more meaningful at some point.
+
+        console.error("Error validating constraints:", error);
+        // This is "I am a teapot" error code, which is a joke error code.
+        res.status(418).send(error);
+        return;
+    }
+
+    res.render('diagram', {
+        'height': cl.FIG_HEIGHT,
+        'width': cl.FIG_WIDTH,
+        'colaNodes': colaNodes,
+        'colaEdges': colaEdges,
+        'colaConstraints': colaConstraints,
+        'colaGroups': colaGroups,
+        instanceNumber,
+        num_instances,
+        layoutAnnotation,
+        alloyDatum
+    });
+});
+
+
+
+
+
+
+app.post('/webcolafiles', (req, res) => {
 
     let layout = getLayout(req);
     let cl = new WebColaLayout(layout);
@@ -56,7 +110,7 @@ app.post('/webcolafiles', (req, res) => {
     let colaNodes = cl.colaNodes;
     let colaEdges = cl.colaEdges;
     let colaGroups = cl.groupDefinitions;
-    
+
 
 
     const constraintValidator = new ConstraintValidator(colaConstraints, colaNodes, colaGroups);
@@ -68,17 +122,17 @@ app.post('/webcolafiles', (req, res) => {
         return;
     }
 
-    res.render('webcolavis', { 
+    res.render('webcolavis', {
         'height': cl.FIG_HEIGHT,
         'width': cl.FIG_WIDTH,
         'colaNodes': colaNodes,
         'colaEdges': colaEdges,
-        'colaConstraints' : colaConstraints, 
+        'colaConstraints': colaConstraints,
         'colaGroups': colaGroups,
         layoutNodes,
         layoutEdges,
         layoutConstraints
-    
+
     });
 });
 

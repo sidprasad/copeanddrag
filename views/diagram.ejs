@@ -6,13 +6,14 @@
     <meta charset="utf-8" />
     <title>Lightweight Diagram</title>
     <style>
-
         #svg-container {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh; /* Adjust as needed */
+            height: 100vh;
+            /* Adjust as needed */
         }
+
         .svg-border {
             border: 2px solid black;
         }
@@ -55,7 +56,7 @@
         }
 
         .icon {
-            fill : transparent;
+            fill: transparent;
         }
 
         .link-label {
@@ -83,42 +84,88 @@
     <!-- Include d3 here -->
     <script src="https://d3js.org/d3.v4.min.js"></script>
 
-        <!-- Include your custom JavaScript file -->
+    <!-- Include your custom JavaScript file -->
     <script src="/js/renderer.js" defer></script>
-</head>
-
-<body>
-    <div class="container">
-
-        <div class="container-fluid" id="svg-container" >
-            <svg id="svg" width="<%- width %>" height="<%- height %>" class="svg-border" >
-                <defs>
-                    <marker id="end-arrow" markerWidth="15" markerHeight="10" refX="12" refY="5" orient="auto">
-                        <polygon points="0 0, 15 5, 0 10" />
-                    </marker>
-                </defs>
-                <g class="zoomable">
-                    <!-- Your graph elements go here -->
-                </g>
-            </svg>
-
-        </div>
-
-    </div>
     <script>
 
         window.addEventListener('load', function () {
+
+
+
             var width = <%- width %>, height = <%- height %>;
             var nodes = <%- JSON.stringify(colaNodes) %>;
             var edges = <%- JSON.stringify(colaEdges) %>;
             var constraints = <%- JSON.stringify(colaConstraints) %>;
             var groups = <%- JSON.stringify(colaGroups) %>;
 
-            setupLayout(d3, nodes, edges, constraints, groups, width, height)
+            if (width && height && nodes && edges && constraints && groups) {
+                setupLayout(d3, nodes, edges, constraints, groups, width, height);
+            } else {
+                console.error('Missing required data for layout');
+            }
         });
     </script>
+    <style>
+        .container {
+            display: flex;
+            flex-direction: row;
+        }
 
+        #svg-container {
+            flex: 1;
+            order: 1;
+        }
 
+        #controls {
+            flex: 0 0 300px; /* Adjust the width as needed */
+            order: 2;
+            margin-left: 20px; /* Optional: Add some space between the two divs */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div id="svg-container" class="col">
+                <svg id="svg" width="<%- width %>" height="<%- height %>" class="svg-border">
+                    <defs>
+                        <marker id="end-arrow" markerWidth="15" markerHeight="10" refX="12" refY="5" orient="auto">
+                            <polygon points="0 0, 15 5, 0 10" />
+                        </marker>
+                    </defs>
+                    <g class="zoomable">
+                        <!-- Your graph elements go here -->
+                    </g>
+                </svg>
+            </div>
+            <div id="controls" class="col">
+                <div id="minimap" class="container">
+                    Instance <%- instanceNumber %> of <%- num_instances %>
+                    <hr>
+                    <form id="controlsForm" method="post" action="/diagram">
+                        <div class="form-group">
+                            <label for="alloydatum">Alloy Instance</label>
+                            <textarea class="form-control" id="alloydatum" rows="5"
+                                name="alloydatum"><%= alloyDatum ? alloyDatum : '' %></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="layoutannotation">Layout Annotation</label>
+                            <textarea class="form-control" id="layoutannotation" rows="5"
+                                name="layoutannotation"><%= layoutAnnotation ? layoutAnnotation : '' %></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="instancenumber">Instance Number To Render (Default to 0)</label>
+                            <input type="number" class="form-control" id="instancenumber" name="instancenumber"
+                                value="0">
+                        </div>
+                        <button type="submit" id='cola' class="btn btn-primary">Load Diagram</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
+
 
 </html>
