@@ -135,19 +135,40 @@
     <script type="module">
         import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
         const config = {
-      startOnLoad: true,
-      flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'cardinal' },
-      securityLevel: 'loose',
-    };
-    mermaid.initialize(config);
+            startOnLoad: true,
+            flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'cardinal' },
+            securityLevel: 'loose',
+        };
+        mermaid.initialize(config);
 
-    window.stateclick = function (i) {
-        // First, set the instance number's value to i
-        document.getElementById('instancenumber').value = i;
-        // Now submit the form
-        document.getElementById('controlsForm').submit();
+        window.stateclick = function (i) {
+            // First, set the instance number's value to i
+            document.getElementById('instancenumber').value = i;
+            // Now submit the form
+            document.getElementById('controlsForm').submit();
 
-    };
+        };
+
+        // Restore collapse state (TODO: THIS DOESN'T WORK)
+        const controlsFormCollapse = document.getElementById('controlsFormCollapse');
+            const collapseButton = document.querySelector('[data-bs-target="#controlsFormCollapse"]');
+            const isCollapsed = localStorage.getItem('controlsFormCollapse') === 'true';
+
+            if (isCollapsed) {
+                controlsFormCollapse.classList.add('show');
+                collapseButton.setAttribute('aria-expanded', 'true');
+            }
+
+            // Save collapse state
+            controlsFormCollapse.addEventListener('shown.bs.collapse', function () {
+                localStorage.setItem('controlsFormCollapse', 'true');
+            });
+
+            controlsFormCollapse.addEventListener('hidden.bs.collapse', function () {
+                localStorage.setItem('controlsFormCollapse', 'false');
+            });
+
+
     </script>
 </head>
 
@@ -178,8 +199,9 @@
                     </div>
                 </div>
             </div>
-
+            <br>
             <hr>
+            <br>
             <% } %>
         <div class="row">
             <div id="svg-container" class="col">
