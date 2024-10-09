@@ -97,8 +97,6 @@
 
         window.addEventListener('load', function () {
 
-
-
             var width = <%- width %>, height = <%- height %>;
             var nodes = <%- JSON.stringify(colaNodes) %>;
             var edges = <%- JSON.stringify(colaEdges) %>;
@@ -110,9 +108,6 @@
             } else {
                 console.error('Missing required data for layout');
             }
-
-
-
         });
     </script>
     <style>
