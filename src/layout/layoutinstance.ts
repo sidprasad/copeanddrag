@@ -17,8 +17,8 @@ import {chroma, scale} from 'chroma-js';
 export class LayoutInstance {
 
     readonly DEFAULT_NODE_ICON_PATH : string = null;
-    readonly DEFAULT_NODE_HEIGHT = 45;
-    readonly DEFAULT_NODE_WIDTH = 70;
+    readonly DEFAULT_NODE_HEIGHT = 60;
+    readonly DEFAULT_NODE_WIDTH = 100;
 
     private readonly _layoutSpec: LayoutSpec;
     readonly DEFAULT_GROUP_ON: string = "range";
@@ -355,6 +355,7 @@ export class LayoutInstance {
     public generateLayout(a: AlloyInstance): InstanceLayout {
         let ai = this.applyLayoutProjections(a);
         let g: Graph = generateGraph(ai, this.hideDisconnected, this.hideDisconnectedBuiltIns);
+
 
 
         const attributes = this.generateAttributes(g);

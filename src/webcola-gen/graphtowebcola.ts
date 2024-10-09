@@ -1,4 +1,5 @@
 import { Node } from 'webcola';
+import * as dagre from 'dagre';
 import { InstanceLayout, LayoutNode, LayoutEdge, LayoutConstraint, LayoutGroup, LeftConstraint, TopConstraint, AlignmentConstraint, isLeftConstraint, isTopConstraint, isAlignmentConstraint } from '../layout/interfaces';
 
 
@@ -33,6 +34,8 @@ export class WebColaLayout {
   private readonly DEFAULT_X: number;
   private readonly DEFAULT_Y: number;
 
+  private dagre_graph : any;
+
   readonly FIG_WIDTH: number;
   readonly FIG_HEIGHT: number;
 
@@ -40,10 +43,35 @@ export class WebColaLayout {
 
     this.FIG_HEIGHT = fig_height;
     this.FIG_WIDTH = fig_width;
+    
     this.DEFAULT_X = fig_width / 2;
     this.DEFAULT_Y = fig_height / 2;
 
     this.instanceLayout = instanceLayout;
+
+
+    // Can I create a DAGRE graph here.
+    try {
+      let g = new dagre.graphlib.Graph();
+      g.setGraph({});
+      g.setDefaultEdgeLabel(() => ({}));
+  
+      instanceLayout.nodes.forEach(node => {
+        g.setNode(node.id, { width: node.width, height: node.height });
+      });
+  
+      instanceLayout.edges.forEach(edge => {
+        g.setEdge(edge.source, edge.target);
+      });
+      dagre.layout(g);
+
+      this.dagre_graph = g;
+    }
+    catch (e) {
+      console.log(e);
+      this.dagre_graph = null;
+    }
+
 
     this.colaNodes = instanceLayout.nodes.map(node => this.toColaNode(node));
     this.colaEdges = instanceLayout.edges.map(edge => this.toColaEdge(edge));
@@ -102,14 +130,24 @@ export class WebColaLayout {
 
   private toColaNode(node: LayoutNode): NodeWithMetadata {
 
+    let x = this.DEFAULT_X;
+    let y = this.DEFAULT_Y;
+    if (this.dagre_graph) {
+      // Get the corresponding node in the DAGRE graph
+      let dagre_node = this.dagre_graph.node(node.id);
+      x = dagre_node.x;
+      y = dagre_node.y;
+    }
+
+
     return {
       id: node.id,
       color: node.color,
       attributes: node.attributes,
       width: node.width,
       height: node.height,
-      x: this.DEFAULT_X,
-      y: this.DEFAULT_Y,
+      x: x,
+      y: y,
       icon: node.icon
     }
   }
