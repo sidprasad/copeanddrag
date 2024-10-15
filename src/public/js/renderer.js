@@ -117,7 +117,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
 
         link.attr("d", function (d, i) {
-
+            console.log("Routing edge: ", d);
             var route = colaLayout.routeEdge(d);
 
 
@@ -381,16 +381,15 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .call(colaLayout.drag);
 
     node.append("rect")
-        .on("click", function (d) { 
-            d.fixed = true 
-        }) 
         .attr("width", function (d) { return d.width; })
         .attr("height", function (d) { return d.height; }) // Use node's height
         .attr("x", function (d) { 
-            return d.x - d.width / 2; 
+            //return d.x - d.width / 2; 
+            return -d.width / 2;
         }) // Center the rectangle on the node's x
         .attr("y", function (d) {
-             return d.y - d.height / 2;  
+             //return d.y - d.height / 2;
+                return -d.height / 2;
             }) // Center the rectangle on the node's y
         .attr("stroke", function (d) { return d.color; }) // Outline color of the node
         .attr("stroke-width", 1.5) // Adjust the stroke width as needed
