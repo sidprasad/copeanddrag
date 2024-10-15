@@ -48,23 +48,24 @@ export class WebColaLayout {
     this.DEFAULT_Y = fig_height / 2;
 
     this.instanceLayout = instanceLayout;
-      // Determine rankdir based on a heuristic
-    const rankdir = this.determineFlow(instanceLayout.nodes.length, instanceLayout.edges.length);
+
 
 
     // Can I create a DAGRE graph here.
     try {
-      
+      // Determine rankdir based on a heuristic
+      //const rankdir = "TB" // this.determineFlow(instanceLayout.nodes.length, instanceLayout.edges.length);
       let g = new dagre.graphlib.Graph({ multigraph: true });
-      g.setGraph({ nodesep: 50, ranksep: 200, rankdir: rankdir });
+      g.setGraph({ nodesep: 50, ranksep: 100, rankdir: "TB" });
+
       g.setDefaultEdgeLabel(() => ({}));
   
       instanceLayout.nodes.forEach(node => {
-        g.setNode(node.id, { width: node.width, height: node.height });
+        g.setNode(node.id, { label: node.id, width: node.width, height: node.height });
       });
   
       instanceLayout.edges.forEach(edge => {
-        g.setEdge(edge.source, edge.target, { minlen: 20 });
+        g.setEdge(edge.source.id, edge.target.id);
       });
       dagre.layout(g);
 
@@ -111,6 +112,7 @@ export class WebColaLayout {
       left: leftNode,
       right: rightNode,
       gap: sep,
+      weight: 100
     };
     return separationConstraint;
   }
@@ -123,6 +125,7 @@ export class WebColaLayout {
       left: topNode,
       right: bottomNode,
       gap: sep,
+      weight: 100
     };
     return separationConstraint;
   }
@@ -143,15 +146,23 @@ export class WebColaLayout {
 
   private toColaNode(node: LayoutNode): NodeWithMetadata {
 
+    let fixedNode = {fixed: 0, fixedWeight: 5};
     let x = this.DEFAULT_X;
     let y = this.DEFAULT_Y;
+
+
+
     if (this.dagre_graph) {
       // Get the corresponding node in the DAGRE graph
       let dagre_node = this.dagre_graph.node(node.id);
+      let width = dagre_node.width;
+      let height = dagre_node.height;
+
       x = dagre_node.x;
       y = dagre_node.y;
+      fixedNode = {fixed: 1, fixedWeight: 5};
     }
-    let fixedNode = {fixed: 1, fixedWeight: 5};
+
 
     return {
       ...fixedNode,
