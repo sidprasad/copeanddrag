@@ -475,7 +475,9 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             var targetNode = nodes[d.keyNode];
             return targetNode.color;
         })
-        .attr("fill-opacity", 0.3)
+        .attr("stroke", "black") // Add black outline
+        .attr("stroke-width", 1) // Set the width of the outline
+        .attr("fill-opacity", 0.2)
         .call(colaLayout.drag);
 
     // TODO: Uncomment to reenable group labels

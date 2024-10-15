@@ -48,13 +48,15 @@ export class WebColaLayout {
     this.DEFAULT_Y = fig_height / 2;
 
     this.instanceLayout = instanceLayout;
+      // Determine rankdir based on a heuristic
+    const rankdir = this.determineFlow(instanceLayout.nodes.length, instanceLayout.edges.length);
 
 
     // Can I create a DAGRE graph here.
     try {
       
       let g = new dagre.graphlib.Graph({ multigraph: true });
-      g.setGraph({ nodesep: 50, ranksep: 100, rankdir: 'TB' });
+      g.setGraph({ nodesep: 50, ranksep: 200, rankdir: rankdir });
       g.setDefaultEdgeLabel(() => ({}));
   
       instanceLayout.nodes.forEach(node => {
@@ -85,6 +87,16 @@ export class WebColaLayout {
 
   }
 
+
+  private determineFlow(numNodes: number, numEdges: number): 'TB' | 'LR' {
+    const aspectRatio = this.FIG_WIDTH / this.FIG_HEIGHT;
+    if (numNodes > numEdges) {
+      return aspectRatio > 1 ? 'LR' : 'TB';
+    } else {
+      return aspectRatio > 1 ? 'TB' : 'LR';
+    }
+  }
+  
 
   private getNodeIndex(nodeId: string) {
     return this.colaNodes.findIndex(node => node.id === nodeId);
@@ -139,7 +151,7 @@ export class WebColaLayout {
       x = dagre_node.x;
       y = dagre_node.y;
     }
-    let fixedNode = {fixed: 10, fixedWeight: 100};
+    let fixedNode = {fixed: 1, fixedWeight: 5};
 
     return {
       ...fixedNode,
