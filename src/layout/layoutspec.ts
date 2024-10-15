@@ -71,6 +71,12 @@ const DEFAULT_LAYOUT : LayoutSpec = {
 };
 
 export function parseLayoutSpec(spec : string) : LayoutSpec {
+
+    if (!spec) {
+        return DEFAULT_LAYOUT;
+    }
+
+
     try {
         return JSON.parse(spec) as LayoutSpec;
     } catch (error) {

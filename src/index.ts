@@ -41,7 +41,7 @@ function getLayout(req: any): InstanceLayout {
     return li.generateLayout(instances[instanceNumber]);
 }
 
-app.get('/diagram', (req, res) => {
+app.get('/', (req, res) => {
 
 
     res.render('diagram', {
@@ -60,7 +60,7 @@ app.get('/diagram', (req, res) => {
 
 });
 
-app.post('/diagram', (req, res) => {
+app.post('/', (req, res) => {
 
 
     const alloyDatum = req.body.alloydatum;
@@ -121,46 +121,6 @@ app.post('/diagram', (req, res) => {
 });
 
 
-app.post('/webcolafiles', (req, res) => {
-
-    let layout = getLayout(req);
-    let cl = new WebColaLayout(layout);
-
-    let layoutNodes = layout.nodes;
-    let layoutEdges = layout.edges;
-    let layoutConstraints = layout.constraints;
-    let layoutGroups = layout.groups;
-
-
-    let colaConstraints = cl.colaConstraints;
-    let colaNodes = cl.colaNodes;
-    let colaEdges = cl.colaEdges;
-    let colaGroups = cl.groupDefinitions;
-
-
-
-    const constraintValidator = new ConstraintValidator(colaConstraints, colaNodes, colaGroups);
-    const error = constraintValidator.validateConstraints();
-    if (error) {
-        console.error("Error validating constraints:", error);
-        // This is "I am a teapot" error code, which is a joke error code.
-        res.status(418).send(error);
-        return;
-    }
-
-    res.render('webcolavis', {
-        'height': cl.FIG_HEIGHT,
-        'width': cl.FIG_WIDTH,
-        'colaNodes': colaNodes,
-        'colaEdges': colaEdges,
-        'colaConstraints': colaConstraints,
-        'colaGroups': colaGroups,
-        layoutNodes,
-        layoutEdges,
-        layoutConstraints
-
-    });
-});
 
 
 
