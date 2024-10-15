@@ -562,7 +562,6 @@ export class LayoutInstance {
     }
 
 
-<<<<<<< HEAD
 
     applySigConstraints(ai: AlloyInstance, layoutNodes: LayoutNode[]): LayoutConstraint[] {
 
@@ -625,8 +624,6 @@ export class LayoutInstance {
     }
 
 
-=======
->>>>>>> main
     private findDisconnectedComponents(edges): string[][] {
                     let inNodes = edges.map(edge => edge.w);
                     let outNodes = edges.map(edge => edge.v);
