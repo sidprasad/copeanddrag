@@ -560,10 +560,6 @@ export class LayoutInstance {
     }
 
 
-
-
-
-
     private findDisconnectedComponents(edges): string[][] {
         let inNodes = edges.map(edge => edge.w);
         let outNodes = edges.map(edge => edge.v);

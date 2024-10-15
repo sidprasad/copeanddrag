@@ -52,8 +52,8 @@ export class WebColaLayout {
 
     // Can I create a DAGRE graph here.
     try {
-      let g = new dagre.graphlib.Graph();
-      g.setGraph({});
+      const g = new dagre.graphlib.Graph({ multigraph: true });
+      g.setGraph({ nodesep: 50, ranksep: 100, rankdir: 'TB' });
       g.setDefaultEdgeLabel(() => ({}));
   
       instanceLayout.nodes.forEach(node => {
@@ -132,11 +132,15 @@ export class WebColaLayout {
 
     let x = this.DEFAULT_X;
     let y = this.DEFAULT_Y;
+
+    let fixed = 0;
+
     if (this.dagre_graph) {
       // Get the corresponding node in the DAGRE graph
       let dagre_node = this.dagre_graph.node(node.id);
       x = dagre_node.x;
       y = dagre_node.y;
+      fixed = 1;
     }
 
 
@@ -148,7 +152,8 @@ export class WebColaLayout {
       height: node.height,
       x: x,
       y: y,
-      icon: node.icon
+      icon: node.icon,
+      fixed: fixed
     }
   }
 
@@ -173,10 +178,34 @@ export class WebColaLayout {
 
     // Switch on the type of constraint
     if (isLeftConstraint(constraint)) {
+      
+      // Get the two nodes that are being constrained
+      let node1 = this.colaNodes[this.getNodeIndex(constraint.left.id)];
+      let node2 = this.colaNodes[this.getNodeIndex(constraint.right.id)];
+      //      // Set fixed to 0 here.
+      node1.fixed = 0;
+      node2.fixed = 0;  
+      
+      
       return this.leftConstraint(this.getNodeIndex(constraint.left.id), this.getNodeIndex(constraint.right.id), constraint.minDistance);
+
+
+
+
     }
 
     if (isTopConstraint(constraint)) {
+
+
+      // Get the two nodes that are being constrained
+      let node1 = this.colaNodes[this.getNodeIndex(constraint.top.id)];
+      let node2 = this.colaNodes[this.getNodeIndex(constraint.bottom.id)];
+      //      // Set fixed to 0 here.
+      node1.fixed = 0;
+      node2.fixed = 0;
+
+
+
       return this.topConstraint(this.getNodeIndex(constraint.top.id), this.getNodeIndex(constraint.bottom.id), constraint.minDistance);
     }
 
@@ -190,6 +219,19 @@ export class WebColaLayout {
         gap: 0,
         'equality': true
       }
+      
+      // FInd the two cola nodes that are being aligned
+      let node1 = this.colaNodes[this.getNodeIndex(constraint.node1.id)];
+      let node2 = this.colaNodes[this.getNodeIndex(constraint.node2.id)];
+      //      // Set fixed to 0 here.
+      node1.fixed = 0;
+      node2.fixed = 0;
+      
+
+
+
+
+
       return alignmentConstraint;
 
     }
