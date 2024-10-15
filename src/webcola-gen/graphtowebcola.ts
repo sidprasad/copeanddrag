@@ -93,6 +93,10 @@ export class WebColaLayout {
 
   private leftConstraint(leftNode: number, rightNode: number, sep: number) {
     // Define a separation constraint to place node A to the left of node B
+
+
+
+
     const separationConstraint = {
       axis: 'x',
       left: leftNode,
@@ -185,9 +189,11 @@ export class WebColaLayout {
       //      // Set fixed to 0 here.
       node1.fixed = 0;
       node2.fixed = 0;  
+
+      let distance = constraint.minDistance + (node1.width / 2) + (node2.width / 2);
       
       
-      return this.leftConstraint(this.getNodeIndex(constraint.left.id), this.getNodeIndex(constraint.right.id), constraint.minDistance);
+      return this.leftConstraint(this.getNodeIndex(constraint.left.id), this.getNodeIndex(constraint.right.id), distance);
 
 
 
@@ -203,10 +209,10 @@ export class WebColaLayout {
       //      // Set fixed to 0 here.
       node1.fixed = 0;
       node2.fixed = 0;
+      let distance = constraint.minDistance + (node1.height / 2) + (node2.height / 2);
 
 
-
-      return this.topConstraint(this.getNodeIndex(constraint.top.id), this.getNodeIndex(constraint.bottom.id), constraint.minDistance);
+      return this.topConstraint(this.getNodeIndex(constraint.top.id), this.getNodeIndex(constraint.bottom.id), distance);
     }
 
     if (isAlignmentConstraint(constraint)) {
@@ -227,11 +233,6 @@ export class WebColaLayout {
       node1.fixed = 0;
       node2.fixed = 0;
       
-
-
-
-
-
       return alignmentConstraint;
 
     }
