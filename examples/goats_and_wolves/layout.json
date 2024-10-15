@@ -1,14 +1,23 @@
 {
-  "fieldDirections": [
-  ],
+  "fieldDirections": [],
   "groupBy": [
     {
       "fieldName": "animals",
       "groupOn": "domain"
     }
   ],
-  "attributeFields": [
+  "sigDirections": [
+    {
+      "sigName": "Near",
+      "directions": [
+        "left"
+      ],
+      "target": {
+        "sigName": "Far"
+      }
+    }
   ],
+  "attributeFields": [],
   "hideDisconnected": false,
   "hideDisconnectedBuiltIns": true
 }

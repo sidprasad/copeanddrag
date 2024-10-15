@@ -352,9 +352,6 @@ export class LayoutInstance {
         let ai = this.applyLayoutProjections(a);
         let g: Graph = generateGraph(ai, this.hideDisconnected, this.hideDisconnectedBuiltIns);
 
-
-
-
         const attributes = this.generateAttributes(g);
         const groups = this.generateGroups(g);
         const colors = this.colorNodesByType(g, a);
