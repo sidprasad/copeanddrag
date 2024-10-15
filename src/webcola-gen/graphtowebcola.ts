@@ -61,7 +61,7 @@ export class WebColaLayout {
       });
   
       instanceLayout.edges.forEach(edge => {
-        g.setEdge(edge.source, edge.target);
+        g.setEdge(edge.source.id, edge.target.id);
       });
       dagre.layout(g);
 

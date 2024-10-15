@@ -59,9 +59,11 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     }
 
     const LINK_DISTANCE = Math.min(width, height) / Math.sqrt(nodes.length);
-    console.log("Link distance: " + LINK_DISTANCE);
+
     nodes.forEach(function (node) {
         node.name = node.id;
+        // //node.fixed = 1;
+        // node.fixedWeight = 1000;
     });
 
 
