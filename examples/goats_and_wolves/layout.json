@@ -10,7 +10,7 @@
     {
       "sigName": "Near",
       "directions": [
-        "left"
+        "directlyRight"
       ],
       "target": {
         "sigName": "Far"
