@@ -74,7 +74,7 @@ export function parseLayoutSpec(spec : string) : LayoutSpec {
     try {
         return JSON.parse(spec) as LayoutSpec;
     } catch (error) {
-        console.error("Failed to parse annotation spec, falling back on default layout.", error);
+        console.error("USING default layout + DAGRE", error);
         return DEFAULT_LAYOUT;
     }
 }

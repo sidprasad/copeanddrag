@@ -52,8 +52,9 @@ export class WebColaLayout {
 
     // Can I create a DAGRE graph here.
     try {
-      let g = new dagre.graphlib.Graph();
-      g.setGraph({});
+      
+      let g = new dagre.graphlib.Graph({ multigraph: true });
+      g.setGraph({ nodesep: 50, ranksep: 100, rankdir: 'TB' });
       g.setDefaultEdgeLabel(() => ({}));
   
       instanceLayout.nodes.forEach(node => {
@@ -61,7 +62,7 @@ export class WebColaLayout {
       });
   
       instanceLayout.edges.forEach(edge => {
-        g.setEdge(edge.source, edge.target);
+        g.setEdge(edge.source, edge.target, { minlen: 20 });
       });
       dagre.layout(g);
 
@@ -138,9 +139,10 @@ export class WebColaLayout {
       x = dagre_node.x;
       y = dagre_node.y;
     }
-
+    let fixedNode = {fixed: 10, fixedWeight: 100};
 
     return {
+      ...fixedNode,
       id: node.id,
       color: node.color,
       attributes: node.attributes,

@@ -15,6 +15,15 @@
       "target": {
         "sigName": "Far"
       }
+    },
+    {
+      "sigName": "Wolf",
+      "directions": [
+        "above"
+      ],
+      "target": {
+        "sigName": "Goat"
+      }
     }
   ],
   "attributeFields": [],
