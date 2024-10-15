@@ -117,6 +117,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
 
         link.attr("d", function (d, i) {
+            // TODO: Something wrong here
             console.log("Routing edge: ", d);
             var route = colaLayout.routeEdge(d);
 
