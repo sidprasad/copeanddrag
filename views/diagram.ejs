@@ -34,10 +34,11 @@
         }
 
         .group {
-            /* stroke: #fff;
-            stroke-width: 1.5px; */
+            stroke: black;
+            stroke-width: 1px;
             cursor: move;
-            opacity: 0.3;
+            opacity: 0.4;
+
         }
 
         .link {
@@ -219,7 +220,7 @@
 
                 <!-- Collapsible Form -->
                 <div class="collapse card" id="controlsFormCollapse">
-                    <form id="controlsForm" method="post" action="/diagram">
+                    <form id="controlsForm" method="post" action="/">
                         <div class="form-group">
                             <label for="alloydatum">Alloy Instance</label>
                             <textarea class="form-control" id="alloydatum" rows="5" name="alloydatum"><%= alloyDatum ? alloyDatum : '' %></textarea>

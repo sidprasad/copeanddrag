@@ -59,7 +59,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     }
 
     const LINK_DISTANCE = Math.min(width, height) / Math.sqrt(nodes.length);
-    console.log("Link distance: " + LINK_DISTANCE);
+
     nodes.forEach(function (node) {
         node.name = node.id;
     });
@@ -80,6 +80,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .links(edges)
         .constraints(constraints)
         .groups(groups)
+        .groupCompactness(1e-3)
         .jaccardLinkLengths(LINK_DISTANCE, 2);
 
     var lineFunction = d3.line()
@@ -91,6 +92,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     var routeEdges = function () {
         colaLayout.prepareEdgeRouting(margin / 3);
         console.log("Routing edges");
+
+
 
         // What I want to do is change the angle based on the number of edges between the same nodes
         // Function to calculate curvature based on number of edges and index
@@ -117,8 +120,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
 
         link.attr("d", function (d, i) {
-            // TODO: Something wrong here
-            console.log("Routing edge: ", d);
+
             var route = colaLayout.routeEdge(d);
 
 
@@ -384,14 +386,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     node.append("rect")
         .attr("width", function (d) { return d.width; })
         .attr("height", function (d) { return d.height; }) // Use node's height
-        .attr("x", function (d) { 
-            //return d.x - d.width / 2; 
-            return -d.width / 2;
-        }) // Center the rectangle on the node's x
-        .attr("y", function (d) {
-             //return d.y - d.height / 2;
-                return -d.height / 2;
-            }) // Center the rectangle on the node's y
+        .attr("x", function (d) { return -d.width / 2; }) // Center the rectangle on the node's x
+        .attr("y", function (d) { return -d.height / 2; }) // Center the rectangle on the node's y
         .attr("stroke", function (d) { return d.color; }) // Outline color of the node
         .attr("stroke-width", 1.5) // Adjust the stroke width as needed
         .attr("fill", function (d) {
@@ -404,9 +400,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .attr("xlink:href", d => d.icon)
         .attr("width", function (d) { return d.width * 0.8; }) // Scale down the icon to fit inside the rectangle
         .attr("height", function (d) { return d.height * 0.8; }) // Scale down the icon to fit inside the rectangle
-
-        ///// TODO : Is this right? Shouldn't we subtract from the current position?
-
         .attr("x", function (d) { return -d.width * 0.4; }) // Center the icon horizontally
         .attr("y", function (d) { return -d.height * 0.4; }); // Center the icon vertically
 
@@ -475,9 +468,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             var targetNode = nodes[d.keyNode];
             return targetNode.color;
         })
-        .attr("stroke", "black") // Add black outline
-        .attr("stroke-width", 1) // Set the width of the outline
-        .attr("fill-opacity", 0.2)
+        .attr("fill-opacity", 0.3)
         .call(colaLayout.drag);
 
     // TODO: Uncomment to reenable group labels

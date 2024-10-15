@@ -134,4 +134,5 @@ By default, we assign every `sig` a random color, that is respected by all atoms
     - Minimum link length does not always serve us, since it really tries to enforce that min length.
     - Perhaps we need to force super large links and also force all nodes within the frame?
 
-- We do not default to DAGRE, I think.
+- Heirarchy
+  - Need some weak webcola heirarchy constraints along some relations (if directional, then add heirarchy?)
