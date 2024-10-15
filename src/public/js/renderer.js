@@ -62,8 +62,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
     nodes.forEach(function (node) {
         node.name = node.id;
-        // //node.fixed = 1;
-        // node.fixedWeight = 1000;
     });
 
 
@@ -82,6 +80,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .links(edges)
         .constraints(constraints)
         .groups(groups)
+        .groupCompactness(1e-3)
         .jaccardLinkLengths(LINK_DISTANCE, 2);
 
     var lineFunction = d3.line()
