@@ -5,18 +5,18 @@ import { isBuiltin, AlloyType } from '../alloy-instance/src/type';
 import { AlloyAtom } from '../alloy-instance/src/atom';
 import { applyProjections } from '../alloy-instance/src/projection';
 import { IconDefinition } from './layoutspec';
-import { LayoutSpec, ClosureDefinition, ClusterRelation, parseLayoutSpec } from './layoutspec';
+import { LayoutSpec, ClosureDefinition, ClusterRelation, parseLayoutSpec, SigDirection } from './layoutspec';
 import { LayoutNode, LayoutEdge, LayoutConstraint, InstanceLayout, LeftConstraint, TopConstraint, AlignmentConstraint, LayoutGroup } from './interfaces';
 
 import { generateGraph } from '../alloy-graph';
 
-import {chroma, scale} from 'chroma-js';
+import { chroma, scale } from 'chroma-js';
 
 
 
 export class LayoutInstance {
 
-    readonly DEFAULT_NODE_ICON_PATH : string = null;
+    readonly DEFAULT_NODE_ICON_PATH: string = null;
     readonly DEFAULT_NODE_HEIGHT = 60;
     readonly DEFAULT_NODE_WIDTH = 100;
 
@@ -40,8 +40,6 @@ export class LayoutInstance {
                 this._sigColors[sigColor.sigName] = sigColor.color;
             });
         }
-
-        // Icons need to be supported here.
 
         this._sigIcons = {};
         if (this._layoutSpec.sigIcons) {
@@ -145,7 +143,7 @@ export class LayoutInstance {
                 let groupName = target + ":" + this.getEdgeLabel(g, edge);
 
                 // Check if the group already exists
-                let existingGroup : LayoutGroup = groups.find((group) => group.name === groupName);
+                let existingGroup: LayoutGroup = groups.find((group) => group.name === groupName);
 
 
                 if (existingGroup) {
@@ -155,11 +153,11 @@ export class LayoutInstance {
                 }
                 else {
 
-                    let newGroup : LayoutGroup = 
-                    {   
+                    let newGroup: LayoutGroup =
+                    {
                         name: groupName,
                         nodeIds: [source],
-                        keyNodeId: target 
+                        keyNodeId: target
                     };
                     groups.push(newGroup);
                     // HACK: Don't remove the FIRST edge connecting node to group, we can respect SOME spatiality?
@@ -170,9 +168,9 @@ export class LayoutInstance {
 
                     const groupEdgePrefix = "_g_"
                     const newId = groupEdgePrefix + edgeId;
-                                        // Maybe remove the edge and then add it again.
-                                        g.removeEdge(edge.v, edge.w, edgeId);
-                    g.setEdge(edge.v, edge.w, edgeLabel, newId );
+                    // Maybe remove the edge and then add it again.
+                    g.removeEdge(edge.v, edge.w, edgeId);
+                    g.setEdge(edge.v, edge.w, edgeLabel, newId);
 
 
                 }
@@ -200,8 +198,6 @@ export class LayoutInstance {
 
         graphEdges.forEach((edge) => {
             const edgeId = edge.name;
-
-
             const relName = this.getRelationName(g, edge);
             const isAttributeRel = this.isAttributeField(relName);
 
@@ -265,7 +261,7 @@ export class LayoutInstance {
     }
 
     // TODO: Replace this with that d3 function that generates a color based on an index
-    private getRandomColor(index : number): string {
+    private getRandomColor(index: number): string {
 
         const letters = '0123456789ABCDEF';
         let color = '#';
@@ -294,7 +290,7 @@ export class LayoutInstance {
 
         // For each type, assign a unique, random color
         types.forEach((type, index) => {
-    
+
             // If the type has a color specified, use that
             if (this._sigColors[type.id]) {
                 colorsByType[type.id] = this._sigColors[type.id];
@@ -356,17 +352,17 @@ export class LayoutInstance {
         let ai = this.applyLayoutProjections(a);
         let g: Graph = generateGraph(ai, this.hideDisconnected, this.hideDisconnectedBuiltIns);
 
-
-
         const attributes = this.generateAttributes(g);
         const groups = this.generateGroups(g);
         const colors = this.colorNodesByType(g, a);
 
+
+
         let layoutNodes: LayoutNode[] = g.nodes().map((nodeId) => {
 
             let type = getAtomType(a, nodeId);
-            let iconPath : string = this._sigIcons[type.id] ? this._sigIcons[type.id].path : this.DEFAULT_NODE_ICON_PATH;
-            const nodeHeight = this._sigIcons[type.id] ? this._sigIcons[type.id].height :this.DEFAULT_NODE_HEIGHT;
+            let iconPath: string = this._sigIcons[type.id] ? this._sigIcons[type.id].path : this.DEFAULT_NODE_ICON_PATH;
+            const nodeHeight = this._sigIcons[type.id] ? this._sigIcons[type.id].height : this.DEFAULT_NODE_HEIGHT;
             const nodeWidth = this._sigIcons[type.id] ? this._sigIcons[type.id].width : this.DEFAULT_NODE_WIDTH;
 
             // TODO: ensure that iconPath exists
@@ -375,30 +371,35 @@ export class LayoutInstance {
 
             let color = colors[nodeId];
             let nodeGroups = groups
-                                .filter((group) => group.nodeIds.includes(nodeId))
-                                .map((group) => group.name);
+                .filter((group) => group.nodeIds.includes(nodeId))
+                .map((group) => group.name);
             let nodeAttributes = attributes[nodeId] || {};
-            return { 
-                id: nodeId, 
-                color: color, 
-                groups: nodeGroups, 
+            return {
+                id: nodeId,
+                color: color,
+                groups: nodeGroups,
                 attributes: nodeAttributes,
                 icon: iconPath,
                 height: nodeHeight,
                 width: nodeWidth
-
-             };
+            };
         });
 
 
+        let constraints: LayoutConstraint[] = this.applySigConstraints(ai, layoutNodes);
+
+
+
         // Now we apply the closure constraints
-        let constraints = this.applyClosureConstraints(g, layoutNodes, groups);
+        let closureConstraints = this.applyClosureConstraints(g, layoutNodes, groups);
+        // Append the closure constraints to the constraints
+        constraints = constraints.concat(closureConstraints);
 
 
         // Now edges and relational constraints
         let layoutEdges: LayoutEdge[] = g.edges().map((edge) => {
             const edgeId = edge.name;
-            const edgeLabel : string = g.edge(edge.v, edge.w, edgeId);
+            const edgeLabel: string = g.edge(edge.v, edge.w, edgeId);
 
             let source = layoutNodes.find((node) => node.id === edge.v);
             let target = layoutNodes.find((node) => node.id === edge.w);
@@ -436,19 +437,20 @@ export class LayoutInstance {
                 }
             });
 
-            let e : LayoutEdge = { 
+            let e: LayoutEdge = {
                 source: source,
-                 target: target,
-                 label: edgeLabel,
-                 relationName: relName,
-                 id: edgeId};
+                target: target,
+                label: edgeLabel,
+                relationName: relName,
+                id: edgeId
+            };
             return e;
         });
         return { nodes: layoutNodes, edges: layoutEdges, constraints: constraints, groups: groups };
     }
 
 
-    applyClosureConstraints(g: Graph, layoutNodes: LayoutNode[], groups : LayoutGroup[]): LayoutConstraint[] {
+    applyClosureConstraints(g: Graph, layoutNodes: LayoutNode[], groups: LayoutGroup[]): LayoutConstraint[] {
 
         const closures = this.getClosures();
 
@@ -460,7 +462,7 @@ export class LayoutInstance {
 
     }
 
-    applyClosureConstraint(g: Graph, layoutNodes: LayoutNode[], relName: string, direction: string, groups : LayoutGroup[]): LayoutConstraint[] {
+    applyClosureConstraint(g: Graph, layoutNodes: LayoutNode[], relName: string, direction: string, groups: LayoutGroup[]): LayoutConstraint[] {
         let direction_mult: number = 0;
         if (direction === "clockwise") {
             direction_mult = 1;
@@ -491,7 +493,7 @@ export class LayoutInstance {
                 attributes: {},
                 groups: [],
                 color: "transparent",
-                width : 10,
+                width: 10,
                 height: 10,
             };
             layoutNodes.push(fragmentCentroid);
@@ -502,7 +504,7 @@ export class LayoutInstance {
                 For each centroid, make sure it is 'n' to the right of the previous centroid.
                 Or 'n' distance from the previous centroid.
             */
-            if(centroids.length > 0) {
+            if (centroids.length > 0) {
                 var prevCentroid = centroids[centroids.length - 1];
                 const nodeHeightEstimate = 100;
                 const centroidDist = minRadius + nodeHeightEstimate;
@@ -519,7 +521,7 @@ export class LayoutInstance {
 
 
             // Check if the relatedNodes are all in a single group. If so, we should place the centroid in that group.
-            let group : LayoutGroup = groups.find((group) => relatedNodes.every((node) => group.nodeIds.includes(node)));
+            let group: LayoutGroup = groups.find((group) => relatedNodes.every((node) => group.nodeIds.includes(node)));
             if (group) {
                 group.nodeIds.push(fragmentCentroid.id);
             }
@@ -560,135 +562,197 @@ export class LayoutInstance {
     }
 
 
-    private findDisconnectedComponents(edges): string[][] {
-        let inNodes = edges.map(edge => edge.w);
-        let outNodes = edges.map(edge => edge.v);
-    
-        // All nodes in the graph
-        let allNodes = new Set([...inNodes, ...outNodes]);
-    
-        // List to store all connected components
-        let components: string[][] = [];
-    
-        // Set to keep track of visited nodes
-        let visited = new Set<string>();
-    
-        // Function to perform BFS and find all nodes in the same connected component
-        const bfs = (startNode: string): string[] => {
-            let queue: string[] = [startNode];
-            let component: string[] = [];
-    
-            while (queue.length > 0) {
-                let node = queue.shift();
-                if (!visited.has(node)) {
-                    visited.add(node);
-                    component.push(node);
-    
-                    // Get all the outgoing and incoming edges from this node
-                    let neighbors = edges
-                        .filter(edge => edge.v === node || edge.w === node)
-                        .map(edge => (edge.v === node ? edge.w : edge.v));
-    
-                    // Add unvisited neighbors to the queue
-                    neighbors.forEach(neighbor => {
-                        if (!visited.has(neighbor)) {
-                            queue.push(neighbor);
-                        }
+
+    applySigConstraints(ai: AlloyInstance, layoutNodes: LayoutNode[]): LayoutConstraint[] {
+
+        let constraints: LayoutConstraint[] = [];
+        let sigDirections = this._layoutSpec.sigDirections || [];
+        let nodeTypes = getInstanceTypes(ai);
+
+        sigDirections.forEach((sigDirection) => {
+            let sourceType = nodeTypes.find((type) => type.id === sigDirection.sigName);
+            let targetType = nodeTypes.find((type) => type.id === sigDirection.target.sigName);
+
+            if (sourceType && targetType) {
+                let sourceNodes = layoutNodes.filter((node) => getAtomType(ai, node.id).id === sourceType.id);
+                let targetNodes = layoutNodes.filter((node) => getAtomType(ai, node.id).id === targetType.id);
+
+                let sourceNodeIds = sourceNodes.map((node) => node.id);
+                let targetNodeIds = targetNodes.map((node) => node.id);
+
+                let directions = sigDirection.directions || [];
+
+                // Now for each direction, and each source node, we need to ensure that the target node is in the right place.
+                directions.forEach((direction) => {
+                    sourceNodeIds.forEach((sourceNodeId) => {
+                        targetNodeIds.forEach((targetNodeId) => {
+
+                            if (direction == "left") {
+                                constraints.push(this.leftConstraint(targetNodeId, sourceNodeId, this.minSepWidth, layoutNodes));
+                            }
+                            else if (direction == "above") {
+                                constraints.push(this.topConstraint(targetNodeId, sourceNodeId, this.minSepHeight, layoutNodes));
+                            }
+                            else if (direction == "right") {
+                                constraints.push(this.leftConstraint(sourceNodeId, targetNodeId, this.minSepWidth, layoutNodes));
+                            }
+                            else if (direction == "below") {
+                                constraints.push(this.topConstraint(sourceNodeId, targetNodeId, this.minSepHeight, layoutNodes));
+                            }
+                            else if (direction == "directlyLeft") {
+                                constraints.push(this.leftConstraint(targetNodeId, sourceNodeId, this.minSepWidth, layoutNodes));
+                                constraints.push(this.ensureSameYConstraint(targetNodeId, sourceNodeId, layoutNodes));
+                            }
+                            else if (direction == "directlyAbove") {
+                                constraints.push(this.topConstraint(targetNodeId, sourceNodeId, this.minSepHeight, layoutNodes));
+                                constraints.push(this.ensureSameXConstraint(targetNodeId, sourceNodeId, layoutNodes));
+                            }
+                            else if (direction == "directlyRight") {
+                                constraints.push(this.leftConstraint(sourceNodeId, targetNodeId, this.minSepWidth, layoutNodes));
+                                constraints.push(this.ensureSameYConstraint(targetNodeId, sourceNodeId, layoutNodes));
+                            }
+                            else if (direction == "directlyBelow") {
+                                constraints.push(this.topConstraint(sourceNodeId, targetNodeId, this.minSepHeight, layoutNodes));
+                                constraints.push(this.ensureSameXConstraint(targetNodeId, sourceNodeId, layoutNodes));
+                            }
+                        });
                     });
-                }
-            }
-    
-            return component;
-        };
-    
-        // Iterate over all nodes and find all connected components
-        allNodes.forEach(node => {
-            if (!visited.has(node)) {
-                let component = bfs(node);
-                components.push(component);
+                });
             }
         });
-    
-        return components;
+        return constraints;
     }
+
+
+    private findDisconnectedComponents(edges): string[][] {
+                    let inNodes = edges.map(edge => edge.w);
+                    let outNodes = edges.map(edge => edge.v);
+
+                    // All nodes in the graph
+                    let allNodes = new Set([...inNodes, ...outNodes]);
+
+                    // List to store all connected components
+                    let components: string[][] = [];
+
+                    // Set to keep track of visited nodes
+                    let visited = new Set<string>();
+
+                    // Function to perform BFS and find all nodes in the same connected component
+                    const bfs = (startNode: string): string[] => {
+                        let queue: string[] = [startNode];
+                        let component: string[] = [];
+
+                        while (queue.length > 0) {
+                            let node = queue.shift();
+                            if (!visited.has(node)) {
+                                visited.add(node);
+                                component.push(node);
+
+                                // Get all the outgoing and incoming edges from this node
+                                let neighbors = edges
+                                    .filter(edge => edge.v === node || edge.w === node)
+                                    .map(edge => (edge.v === node ? edge.w : edge.v));
+
+                                // Add unvisited neighbors to the queue
+                                neighbors.forEach(neighbor => {
+                                    if (!visited.has(neighbor)) {
+                                        queue.push(neighbor);
+                                    }
+                                });
+                            }
+                        }
+
+                        return component;
+                    };
+
+                    // Iterate over all nodes and find all connected components
+                    allNodes.forEach(node => {
+                        if (!visited.has(node)) {
+                            let component = bfs(node);
+                            components.push(component);
+                        }
+                    });
+
+                    return components;
+                }
 
 
 
     private orderNodesByEdges(edges): string[][] {
 
-        let inNodes = edges.map(edge => edge.w);
-        let outNodes = edges.map(edge => edge.v);
+                    let inNodes = edges.map(edge => edge.w);
+                    let outNodes = edges.map(edge => edge.v);
 
-        // Root nodes have no incoming edges
-        let rootNodes = outNodes.filter(node => !inNodes.includes(node));
+                    // Root nodes have no incoming edges
+                    let rootNodes = outNodes.filter(node => !inNodes.includes(node));
 
-        let graphComponents = this.findDisconnectedComponents(edges);
-        graphComponents.forEach((component) => {
-            // Ensure a root node is present in each component
-            let containsARoot = component.some(node => rootNodes.includes(node));
+                    let graphComponents = this.findDisconnectedComponents(edges);
+                    graphComponents.forEach((component) => {
+                        // Ensure a root node is present in each component
+                        let containsARoot = component.some(node => rootNodes.includes(node));
 
-            if (!containsARoot) {
-                rootNodes.push(component[0]);
-            }
+                        if (!containsARoot) {
+                            rootNodes.push(component[0]);
+                        }
 
-        });
+                    });
 
-        return rootNodes.map((rootNode) => {
-            let visited = new Set<number>();
-            let traversalOrder = [];
-            let queue: number[] = [rootNode];
+                    return rootNodes.map((rootNode) => {
+                        let visited = new Set<number>();
+                        let traversalOrder = [];
+                        let queue: number[] = [rootNode];
 
-            while (queue.length > 0) {
-                let node = queue.pop();
-                if (!visited.has(node)) {
-                    visited.add(node);
-                    traversalOrder.push(node);
+                        while (queue.length > 0) {
+                            let node = queue.pop();
+                            if (!visited.has(node)) {
+                                visited.add(node);
+                                traversalOrder.push(node);
 
-                    // Get all the outgoing edges from this node
-                    let outgoingEdges = edges.filter(edge => edge.v === node);
-                    let outgoingNodes = outgoingEdges.map(edge => edge.w);
+                                // Get all the outgoing edges from this node
+                                let outgoingEdges = edges.filter(edge => edge.v === node);
+                                let outgoingNodes = outgoingEdges.map(edge => edge.w);
 
-                    // Add the outgoing nodes to the queue
-                    queue = queue.concat(outgoingNodes);
+                                // Add the outgoing nodes to the queue
+                                queue = queue.concat(outgoingNodes);
+                            }
+                        }
+                        return traversalOrder;
+                    });
                 }
-            }
-            return traversalOrder;
-        });
-    }
 
 
 
     private leftConstraint(leftId: string, rightId: string, minDistance: number, layoutNodes: LayoutNode[]): LeftConstraint {
 
-        let left = layoutNodes.find((node) => node.id === leftId);
-        let right = layoutNodes.find((node) => node.id === rightId);
+                    let left = layoutNodes.find((node) => node.id === leftId);
+                    let right = layoutNodes.find((node) => node.id === rightId);
 
-        return { left: left, right: right, minDistance: minDistance };
-    }
+                    return { left: left, right: right, minDistance: minDistance };
+                }
 
     private topConstraint(topId: string, bottomId: string, minDistance: number, layoutNodes: LayoutNode[]): TopConstraint {
 
-        let top = layoutNodes.find((node) => node.id === topId);
-        let bottom = layoutNodes.find((node) => node.id === bottomId);
+                    let top = layoutNodes.find((node) => node.id === topId);
+                    let bottom = layoutNodes.find((node) => node.id === bottomId);
 
-        return { top: top, bottom: bottom, minDistance: minDistance };
-    }
+                    return { top: top, bottom: bottom, minDistance: minDistance };
+                }
 
     private ensureSameYConstraint(node1Id: string, node2Id: string, layoutNodes: LayoutNode[]): AlignmentConstraint {
 
-        let node1 = layoutNodes.find((node) => node.id === node1Id);
-        let node2 = layoutNodes.find((node) => node.id === node2Id);
+                    let node1 = layoutNodes.find((node) => node.id === node1Id);
+                    let node2 = layoutNodes.find((node) => node.id === node2Id);
 
-        return { axis: "y", node1: node1, node2: node2 };
-    }
+                    return { axis: "y", node1: node1, node2: node2 };
+                }
 
     private ensureSameXConstraint(node1Id: string, node2Id: string, layoutNodes: LayoutNode[]): AlignmentConstraint {
 
-        let node1 = layoutNodes.find((node) => node.id === node1Id);
-        let node2 = layoutNodes.find((node) => node.id === node2Id);
+                    let node1 = layoutNodes.find((node) => node.id === node1Id);
+                    let node2 = layoutNodes.find((node) => node.id === node2Id);
 
-        return { axis: "x", node1: node1, node2: node2 };
-    }
+                    return { axis: "x", node1: node1, node2: node2 };
+                }
 
 
 

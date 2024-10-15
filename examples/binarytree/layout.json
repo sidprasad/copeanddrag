@@ -21,6 +21,6 @@
       "fieldName": "value"
     }
   ],
-  "hideDisconnected": true,
-  "hideDisconnectedBuiltIns": true
+  "hideDisconnected": false,
+  "hideDisconnectedBuiltIns": false
 }

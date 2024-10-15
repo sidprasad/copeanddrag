@@ -14,10 +14,12 @@ export interface sigDefinition {
 
 export interface LayoutSpec {
     fieldDirections : DirectionalRelation[];
+    sigDirections : SigDirection[];
     groupBy : ClusterRelation[];
     attributeFields : AttributeDefinition[];
     hideDisconnected? : boolean;
     hideDisconnectedBuiltIns? : boolean;
+
     sigColors? : SigColor[];
     projections? : ProjectionDefinition[];
     closures? : ClosureDefinition[];
@@ -25,6 +27,11 @@ export interface LayoutSpec {
 }
 
 export interface DirectionalRelation extends fieldDefinition {
+    directions : FieldDirection[];
+}
+
+export interface SigDirection extends sigDefinition {
+    target : sigDefinition;
     directions : FieldDirection[];
 }
 
@@ -53,6 +60,7 @@ export interface IconDefinition extends sigDefinition {
 
 const DEFAULT_LAYOUT : LayoutSpec = {
     fieldDirections: [],
+    sigDirections: [],
     groupBy: [],
     attributeFields: [],
     hideDisconnected: false,
@@ -72,7 +80,7 @@ export function parseLayoutSpec(spec : string) : LayoutSpec {
     try {
         return JSON.parse(spec) as LayoutSpec;
     } catch (error) {
-        console.error("Failed to parse annotation spec, falling back on default layout.", error);
+        console.error("USING default layout + DAGRE", error);
         return DEFAULT_LAYOUT;
     }
 }
