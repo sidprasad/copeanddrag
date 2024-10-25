@@ -58,7 +58,7 @@ export interface IconDefinition extends sigDefinition {
     width : number;
 }
 
-const DEFAULT_LAYOUT : LayoutSpec = {
+export const DEFAULT_LAYOUT : LayoutSpec = {
     fieldDirections: [],
     sigDirections: [],
     groupBy: [],

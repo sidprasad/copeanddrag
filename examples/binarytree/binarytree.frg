@@ -4,8 +4,7 @@
 // Define the Binary Tree signature
 sig Node {
     left: lone Node,
-    right: lone Node,
-    value : one Int
+    right: lone Node
 }
 
 
@@ -33,4 +32,4 @@ pred binaryTree {
 
 
 // Run the binary tree model
-run {binaryTree} for exactly 5 Node
+run {binaryTree} for exactly 9 Node

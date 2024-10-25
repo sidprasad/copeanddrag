@@ -1,0 +1,86 @@
+#svg-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    /* Adjust as needed */
+}
+
+.svg-border {
+    border: 2px solid black;
+}
+
+
+.node {
+    /* stroke: black; */
+    /*fill: white;*/
+    stroke-width: 1.5px;
+    cursor: move;
+}
+
+.group {
+    stroke: black;
+    stroke-width: 1px;
+    cursor: move;
+    opacity: 0.4;
+
+}
+
+.link {
+    stroke: black;
+    fill: none;
+    stroke-width: 1px;
+    stroke-opacity: 1;
+    marker-end: url(#end-arrow);
+}
+
+.linkoutline {
+    stroke: white;
+    stroke-width: 4px;
+    fill: none;
+}
+
+.label {
+    fill: black;
+    font-family: system-ui;
+    font-size: 10px;
+    text-anchor: middle;
+    cursor: move;
+}
+
+.icon {
+    fill: transparent;
+}
+
+.link-label {
+
+    fill: black;
+    font-family: Verdana;
+    font-size: 10px;
+    text-anchor: middle;
+    cursor: move;
+}
+
+.groupLabel {
+    fill: black;
+    font-family: Verdana;
+    font-size: 10px;
+    text-anchor: middle;
+    cursor: move;
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+}
+
+#svg-container {
+    flex: 1;
+    order: 1;
+}
+
+#controls {
+    flex: 0 0 300px; /* Adjust the width as needed */
+    order: 2;
+    margin-left: 20px; /* Optional: Add some space between the two divs */
+}

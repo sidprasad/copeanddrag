@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>Lightweight Diagram</title>
+    <title>Cope and Drag</title>
 
     <!-- Include Bootstrap CSS, JQuery, etc -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -12,78 +12,7 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 
-    <style>
-        #svg-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            /* Adjust as needed */
-        }
-
-        .svg-border {
-            border: 2px solid black;
-        }
-
-
-        .node {
-            /* stroke: black; */
-            /*fill: white;*/
-            stroke-width: 1.5px;
-            cursor: move;
-        }
-
-        .group {
-            stroke: black;
-            stroke-width: 1px;
-            cursor: move;
-            opacity: 0.4;
-
-        }
-
-        .link {
-            stroke: black;
-            fill: none;
-            stroke-width: 1px;
-            stroke-opacity: 1;
-            marker-end: url(#end-arrow);
-        }
-
-        .linkoutline {
-            stroke: white;
-            stroke-width: 4px;
-            fill: none;
-        }
-
-        .label {
-            fill: black;
-            font-family: system-ui;
-            font-size: 10px;
-            text-anchor: middle;
-            cursor: move;
-        }
-
-        .icon {
-            fill: transparent;
-        }
-
-        .link-label {
-
-            fill: black;
-            font-family: Verdana;
-            font-size: 10px;
-            text-anchor: middle;
-            cursor: move;
-        }
-
-        .groupLabel {
-            fill: black;
-            font-family: Verdana;
-            font-size: 10px;
-            text-anchor: middle;
-            cursor: move;
-        }
-    </style>
+    <link rel="stylesheet" href="/css/diagramstyle.css">
 
     <script src="https://marvl.infotech.monash.edu/webcola/extern/graphlib-dot.min.js"></script>
     <!-- Full version -->
@@ -95,7 +24,6 @@
     <!-- Include your custom JavaScript file -->
     <script src="/js/renderer.js" defer></script>
     <script>
-
         window.addEventListener('load', function () {
 
             var width = <%- width %>, height = <%- height %>;
@@ -111,23 +39,7 @@
             }
         });
     </script>
-    <style>
-        .container {
-            display: flex;
-            flex-direction: row;
-        }
 
-        #svg-container {
-            flex: 1;
-            order: 1;
-        }
-
-        #controls {
-            flex: 0 0 300px; /* Adjust the width as needed */
-            order: 2;
-            margin-left: 20px; /* Optional: Add some space between the two divs */
-        }
-    </style>
     <script type="module">
         import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
         const config = {
@@ -144,99 +56,17 @@
             document.getElementById('controlsForm').submit();
 
         };
-
-        // Restore collapse state (TODO: THIS DOESN'T WORK)
-        const controlsFormCollapse = document.getElementById('controlsFormCollapse');
-            const collapseButton = document.querySelector('[data-bs-target="#controlsFormCollapse"]');
-            const isCollapsed = localStorage.getItem('controlsFormCollapse') === 'true';
-
-            if (isCollapsed) {
-                controlsFormCollapse.classList.add('show');
-                collapseButton.setAttribute('aria-expanded', 'true');
-            }
-
-            // Save collapse state
-            controlsFormCollapse.addEventListener('shown.bs.collapse', function () {
-                localStorage.setItem('controlsFormCollapse', 'true');
-            });
-
-            controlsFormCollapse.addEventListener('hidden.bs.collapse', function () {
-                localStorage.setItem('controlsFormCollapse', 'false');
-            });
-
-
     </script>
 </head>
 
 <body>
     <div class="container-fluid">
-        <% if (num_instances > 1) { %>
-            <div class="row">
-                <div class="col">
-                    <h3 class="justify-content">Temporal Mini-Map </h3>
+        <%- include('temporalminimap') %>
 
-                    <div class="mermaid">
-                        graph LR;
-                        <% for (var i = 0; i < num_instances; i++) { %>
-                            <% if (i === instanceNumber) { %>
-                                A<%= i %>((<%= i %>)):::highlight;
-                            <% } else { %>
-                                A<%= i %>((<%= i %>));
-                            <% } %>
-                            <% if (i < num_instances - 1) { %>
-                                A<%= i %> --> A<%= i + 1 %>;
-                            <% } %>
-                            click A<%= i %> call stateclick("<%= i %>");
-                        <% } %>
-                        <% if (loopBack >= 0 && loopBack < num_instances) { %>
-                            A<%= num_instances - 1 %> --> A<%= loopBack %>;
-                        <% } %>
-                        classDef highlight fill:#f96,stroke:#333,stroke-width:2px;
-                    </div>
-                </div>
-            </div>
-            <br>
-            <hr>
-            <br>
-            <% } %>
         <div class="row">
-            <div id="svg-container" class="col">
-                <svg id="svg" width="<%- width %>" height="<%- height %>" class="svg-border">
-                    <defs>
-                        <marker id="end-arrow" markerWidth="15" markerHeight="10" refX="12" refY="5" orient="auto">
-                            <polygon points="0 0, 15 5, 0 10" />
-                        </marker>
-                    </defs>
-                    <g class="zoomable">
-                        <!-- Your graph elements go here -->
-                    </g>
-                </svg>
-            </div>
-            <div id="controls" class="col">
-                <!-- Collapsible Button -->
-                <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#controlsFormCollapse" aria-expanded="false" aria-controls="controlsFormCollapse">
-                    View Controls
-                </button>
+            <%- include('diagramsvg') %>
 
-                <!-- Collapsible Form -->
-                <div class="collapse card" id="controlsFormCollapse">
-                    <form id="controlsForm" method="post" action="/">
-                        <div class="form-group">
-                            <label for="alloydatum">Alloy Instance</label>
-                            <textarea class="form-control" id="alloydatum" rows="5" name="alloydatum"><%= alloyDatum ? alloyDatum : '' %></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="layoutannotation">Layout Annotation</label>
-                            <textarea class="form-control" id="layoutannotation" rows="5" name="layoutannotation"><%= layoutAnnotation ? layoutAnnotation : '' %></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="instancenumber">Temporal Instance</label>
-                            <input type="number" class="form-control" id="instancenumber" name="instancenumber" value="<%- instanceNumber %>">
-                        </div>
-                        <button type="submit" id='cola' class="btn btn-primary">Load Diagram</button>
-                    </form>
-                </div>
-            </div>
+            <%- include('controls') %>
         </div>
     </div>
 

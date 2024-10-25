@@ -7,6 +7,8 @@ import { LayoutInstance } from './layout/layoutinstance';
 import { WebColaLayout } from './webcola-gen/graphtowebcola';
 import { ConstraintValidator } from './webcola-gen/constraint-validator';
 import { InstanceLayout } from './layout/interfaces';
+import {copeToLayoutSpec} from './cope-lang/cope-parser';
+import { parseLayoutSpec } from './layout/layoutspec';
 
 const express = require('express');
 const path = require('path');
@@ -24,14 +26,19 @@ app.set('view engine', 'ejs');
 function getFormContents(req: any) {
     const alloyDatum = req.body.alloydatum;
     const layoutAnnotation = req.body.layoutannotation;
+    const cope = req.body.cope;
+
     const instanceNumber = parseInt(req.body.instancenumber);
 
     let ad: AlloyDatum = parseAlloyXML(alloyDatum);
     let instances = ad.instances;
     let loopBack = ad.loopBack || -1;
 
+    let coopeNonEmpty = cope && cope.length > 0;
 
-    let li = new LayoutInstance(layoutAnnotation);
+    let layoutSpec = coopeNonEmpty ? copeToLayoutSpec(cope) : parseLayoutSpec(layoutAnnotation);
+
+    let li = new LayoutInstance(layoutSpec);
 
     return { instances, li, instanceNumber, loopBack };
 }
@@ -54,7 +61,8 @@ app.get('/', (req, res) => {
         instanceNumber: 0,
         num_instances: 0,
         layoutAnnotation: "",
-        alloyDatum: ""
+        alloyDatum: "",
+        cope: ""
     });
 
 
@@ -65,6 +73,7 @@ app.post('/', (req, res) => {
 
     const alloyDatum = req.body.alloydatum;
     const layoutAnnotation = req.body.layoutannotation;
+    const cope = req.body.cope;
 
 
     let { instances, li, instanceNumber, loopBack} = getFormContents(req);
@@ -116,7 +125,8 @@ app.post('/', (req, res) => {
         num_instances,
         layoutAnnotation,
         alloyDatum,
-        loopBack
+        loopBack,
+        cope
     });
 });
 

@@ -31,8 +31,8 @@ export class LayoutInstance {
     public readonly minSepWidth = 15;
 
 
-    constructor(layoutSpecAsString: string) {
-        this._layoutSpec = parseLayoutSpec(layoutSpecAsString);
+    constructor(layoutSpec: LayoutSpec) {
+        this._layoutSpec = layoutSpec;
 
         this._sigColors = {};
         if (this._layoutSpec.sigColors) {

@@ -1,0 +1,29 @@
+<div id="controls" class="col">
+    <!-- Collapsible Button -->
+    <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#controlsFormCollapse" aria-expanded="false" aria-controls="controlsFormCollapse">
+        View Controls
+    </button>
+
+    <!-- Collapsible Form -->
+    <div class="collapse card" id="controlsFormCollapse">
+        <form id="controlsForm" method="post" action="/">
+            <div class="form-group">
+                <label for="alloydatum">Alloy Instance</label>
+                <textarea class="form-control" id="alloydatum" rows="5" name="alloydatum"><%= alloyDatum ? alloyDatum : '' %></textarea>
+            </div>
+            <div class="form-group">
+                <label for="layoutannotation">Layout Annotation</label>
+                <textarea class="form-control" id="layoutannotation" rows="5" name="layoutannotation"><%= layoutAnnotation ? layoutAnnotation : '' %></textarea>
+            </div>
+            <div class="form-group">
+                <label for="layoutannotation">Cope Program</label>
+                <textarea class="form-control" id="cope" rows="5" name="cope"><%= cope ? cope : '' %></textarea>
+            </div>
+            <div class="form-group">
+                <label for="instancenumber">Temporal Instance</label>
+                <input type="number" class="form-control" id="instancenumber" name="instancenumber" value="<%- instanceNumber %>">
+            </div>
+            <button type="submit" id='cola' class="btn btn-primary">Load Diagram</button>
+        </form>
+    </div>
+</div>
