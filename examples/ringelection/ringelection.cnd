@@ -1,29 +1,9 @@
-{
-    "fieldDirections": [
-        {
-            "fieldName": "next",
-            "directions": [
-                "right"
-            ]
-        }
-    ],
-    "groupBy": [ ],
-    "attributeFields": [
-        {
-            "fieldName": "ID"
-        }
-    ],
-    "closures": [
-        {
-            "fieldName": "successor"
-        }
-    ],
-    "hideDisconnected": false,
-    "hideDisconnectedBuiltIns": true,
-    "sigColors": [],
-    "projections": [
-        {
-            "sigName": "Election"
-        }
-    ]
-}
+constraints:
+    - orientation: {field: next, directions : [directlyRight] }
+    - cyclic : {field: successor}
+directives:
+    - attribute : { field: ID }
+    - attribute : {field: highestSeenID}
+    - flag : hideDisconnected
+    - projection : {sig : Election}
+    - projection : {sig: State}
