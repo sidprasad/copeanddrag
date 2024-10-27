@@ -335,13 +335,34 @@ export class LayoutInstance {
 
     private applyLayoutProjections(ai: AlloyInstance): AlloyInstance {
 
+        // TODO: HACK
+        function checkThisScope(sig: string): string {
+            // Remove "this/" from the sig
+            return "this/" + sig;
+        }
+
         let projectedSigs: string[] = this.projectedSigs;
         let projectedTypes: AlloyType[] = projectedSigs.map((sig) => ai.types[sig]);
-        // Then get the the atoms of the projected types
-        let projectedAtoms: AlloyAtom[] = projectedTypes.flatMap((type) => type.atoms);
-        let projectedAtomIds: string[] = projectedAtoms.map((atom) => atom.id);
 
-        // Get new instance, calling applyProjectioons
+        // Now we should have a map from each type to its atoms
+        let atomsPerProjectedType : Record<string, string[]> = {};
+        projectedTypes.forEach((type) => {
+            atomsPerProjectedType[type.id] = type.atoms.map((atom) => atom.id);
+        });
+
+
+        let projectedAtomIds : string[] = [];
+
+        Object.entries(atomsPerProjectedType).forEach(([typeId, atomIds]) => {
+
+
+            // TODO: Here, we need to actually get a user to select the atom from a dropdown. If none is selected, we should default to the first atom.
+
+            if(atomIds.length > 0){
+                projectedAtomIds.push(atomIds[0]);
+            }
+        });
+
         let projectedInstance = applyProjections(ai, projectedAtomIds);
         return projectedInstance;
     }
