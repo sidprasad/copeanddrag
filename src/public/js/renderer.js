@@ -582,6 +582,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         svg.selectAll("marker").raise();
 
 
+        linkGroups.select("text.linklabel").raise(); // Ensure link labels are raised
+
     });
 
     colaLayout.start(

@@ -16,6 +16,8 @@ import { chroma, scale } from 'chroma-js';
 
 export class LayoutInstance {
 
+
+    readonly hideThisEdge = "_h_"
     readonly DEFAULT_NODE_ICON_PATH: string = null;
     readonly DEFAULT_NODE_HEIGHT = 60;
     readonly DEFAULT_NODE_WIDTH = 100;
@@ -145,11 +147,25 @@ export class LayoutInstance {
                 // Check if the group already exists
                 let existingGroup: LayoutGroup = groups.find((group) => group.name === groupName);
 
-
+                const edgeLabel = this.getEdgeLabel(g, edge);
                 if (existingGroup) {
                     existingGroup.nodeIds.push(source);
                     // But also remove this edge from the graph.
                     g.removeEdge(edge.v, edge.w, edgeId);
+
+
+                    /// WHAT IF WE WANT TO KEEP THE EDGE?
+
+
+                    const newId = this.hideThisEdge + edgeId;
+                    // Maybe remove the edge and then add it again.
+                    g.removeEdge(edge.v, edge.w, edgeId);
+                    g.setEdge(edge.v, edge.w, edgeLabel, newId);
+
+
+                    //////////////////////////
+
+
                 }
                 else {
 
@@ -164,7 +180,7 @@ export class LayoutInstance {
 
 
 
-                    const edgeLabel = this.getEdgeLabel(g, edge);
+
 
                     const groupEdgePrefix = "_g_"
                     const newId = groupEdgePrefix + edgeId;
@@ -467,6 +483,12 @@ export class LayoutInstance {
             };
             return e;
         });
+
+
+        // Filter out all edges that are hidden
+        layoutEdges = layoutEdges.filter((edge) => !edge.id.startsWith(this.hideThisEdge));
+
+
         return { nodes: layoutNodes, edges: layoutEdges, constraints: constraints, groups: groups };
     }
 
