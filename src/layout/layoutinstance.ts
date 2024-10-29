@@ -349,44 +349,65 @@ export class LayoutInstance {
 
 
 
-    private applyLayoutProjections(ai: AlloyInstance): AlloyInstance {
-
-        // TODO: HACK
-        function checkThisScope(sig: string): string {
-            // Remove "this/" from the sig
-            return "this/" + sig;
-        }
+    private applyLayoutProjections(ai: AlloyInstance, projections: Record<string, string>): { projectedInstance: AlloyInstance, finalProjectionChoices: { type: string, projectedAtom: string, atoms: string[] }[] } {
 
         let projectedSigs: string[] = this.projectedSigs;
         let projectedTypes: AlloyType[] = projectedSigs.map((sig) => ai.types[sig]);
 
+
         // Now we should have a map from each type to its atoms
-        let atomsPerProjectedType : Record<string, string[]> = {};
+        let atomsPerProjectedType: Record<string, string[]> = {};
         projectedTypes.forEach((type) => {
             atomsPerProjectedType[type.id] = type.atoms.map((atom) => atom.id);
         });
 
 
-        let projectedAtomIds : string[] = [];
+
+
+        let projectedAtomIds: string[] = [];
 
         Object.entries(atomsPerProjectedType).forEach(([typeId, atomIds]) => {
 
 
             // TODO: Here, we need to actually get a user to select the atom from a dropdown. If none is selected, we should default to the first atom.
 
-            if(atomIds.length > 0){
-                projectedAtomIds.push(atomIds[0]);
+            if (atomIds.length > 0) {
+
+
+                // Check if projections[typeId] exists
+                if (projections[typeId]) {
+                    projectedAtomIds.push(projections[typeId]);
+                }
+                else {
+                    let to_project = atomIds[0];
+                    projections[typeId] = to_project;
+                    projectedAtomIds.push(to_project);
+                }
             }
         });
 
+        // finalProjectionChoices : { type : string, projectedAtom : string, atoms : string[]} 
+        let finalProjectionChoices = Object.entries(projections).map(([typeId, atomId]) => {
+            let atoms = atomsPerProjectedType[typeId];
+            return { type: typeId, projectedAtom: atomId, atoms: atoms };
+        });
+
         let projectedInstance = applyProjections(ai, projectedAtomIds);
-        return projectedInstance;
+        return { projectedInstance, finalProjectionChoices };
     }
 
 
 
-    public generateLayout(a: AlloyInstance): InstanceLayout {
-        let ai = this.applyLayoutProjections(a);
+    public generateLayout(a: AlloyInstance, projections: Record<string, string>): { layout: InstanceLayout, projectionData: { type: string, projectedAtom: string, atoms: string[] }[] } {
+
+
+        // projections = Record<Projected type, projected atoms>
+
+        let projectionResult = this.applyLayoutProjections(a, projections);
+
+        let ai = projectionResult.projectedInstance;
+        let projectionData = projectionResult.finalProjectionChoices;
+
         let g: Graph = generateGraph(ai, this.hideDisconnected, this.hideDisconnectedBuiltIns);
 
         const attributes = this.generateAttributes(g);
@@ -489,7 +510,8 @@ export class LayoutInstance {
         layoutEdges = layoutEdges.filter((edge) => !edge.id.startsWith(this.hideThisEdge));
 
 
-        return { nodes: layoutNodes, edges: layoutEdges, constraints: constraints, groups: groups };
+        let layout = { nodes: layoutNodes, edges: layoutEdges, constraints: constraints, groups: groups };
+        return { layout, projectionData };
     }
 
 
@@ -668,134 +690,134 @@ export class LayoutInstance {
 
 
     private findDisconnectedComponents(edges): string[][] {
-                    let inNodes = edges.map(edge => edge.w);
-                    let outNodes = edges.map(edge => edge.v);
+        let inNodes = edges.map(edge => edge.w);
+        let outNodes = edges.map(edge => edge.v);
 
-                    // All nodes in the graph
-                    let allNodes = new Set([...inNodes, ...outNodes]);
+        // All nodes in the graph
+        let allNodes = new Set([...inNodes, ...outNodes]);
 
-                    // List to store all connected components
-                    let components: string[][] = [];
+        // List to store all connected components
+        let components: string[][] = [];
 
-                    // Set to keep track of visited nodes
-                    let visited = new Set<string>();
+        // Set to keep track of visited nodes
+        let visited = new Set<string>();
 
-                    // Function to perform BFS and find all nodes in the same connected component
-                    const bfs = (startNode: string): string[] => {
-                        let queue: string[] = [startNode];
-                        let component: string[] = [];
+        // Function to perform BFS and find all nodes in the same connected component
+        const bfs = (startNode: string): string[] => {
+            let queue: string[] = [startNode];
+            let component: string[] = [];
 
-                        while (queue.length > 0) {
-                            let node = queue.shift();
-                            if (!visited.has(node)) {
-                                visited.add(node);
-                                component.push(node);
+            while (queue.length > 0) {
+                let node = queue.shift();
+                if (!visited.has(node)) {
+                    visited.add(node);
+                    component.push(node);
 
-                                // Get all the outgoing and incoming edges from this node
-                                let neighbors = edges
-                                    .filter(edge => edge.v === node || edge.w === node)
-                                    .map(edge => (edge.v === node ? edge.w : edge.v));
+                    // Get all the outgoing and incoming edges from this node
+                    let neighbors = edges
+                        .filter(edge => edge.v === node || edge.w === node)
+                        .map(edge => (edge.v === node ? edge.w : edge.v));
 
-                                // Add unvisited neighbors to the queue
-                                neighbors.forEach(neighbor => {
-                                    if (!visited.has(neighbor)) {
-                                        queue.push(neighbor);
-                                    }
-                                });
-                            }
-                        }
-
-                        return component;
-                    };
-
-                    // Iterate over all nodes and find all connected components
-                    allNodes.forEach(node => {
-                        if (!visited.has(node)) {
-                            let component = bfs(node);
-                            components.push(component);
+                    // Add unvisited neighbors to the queue
+                    neighbors.forEach(neighbor => {
+                        if (!visited.has(neighbor)) {
+                            queue.push(neighbor);
                         }
                     });
-
-                    return components;
                 }
+            }
+
+            return component;
+        };
+
+        // Iterate over all nodes and find all connected components
+        allNodes.forEach(node => {
+            if (!visited.has(node)) {
+                let component = bfs(node);
+                components.push(component);
+            }
+        });
+
+        return components;
+    }
 
 
 
     private orderNodesByEdges(edges): string[][] {
 
-                    let inNodes = edges.map(edge => edge.w);
-                    let outNodes = edges.map(edge => edge.v);
+        let inNodes = edges.map(edge => edge.w);
+        let outNodes = edges.map(edge => edge.v);
 
-                    // Root nodes have no incoming edges
-                    let rootNodes = outNodes.filter(node => !inNodes.includes(node));
+        // Root nodes have no incoming edges
+        let rootNodes = outNodes.filter(node => !inNodes.includes(node));
 
-                    let graphComponents = this.findDisconnectedComponents(edges);
-                    graphComponents.forEach((component) => {
-                        // Ensure a root node is present in each component
-                        let containsARoot = component.some(node => rootNodes.includes(node));
+        let graphComponents = this.findDisconnectedComponents(edges);
+        graphComponents.forEach((component) => {
+            // Ensure a root node is present in each component
+            let containsARoot = component.some(node => rootNodes.includes(node));
 
-                        if (!containsARoot) {
-                            rootNodes.push(component[0]);
-                        }
+            if (!containsARoot) {
+                rootNodes.push(component[0]);
+            }
 
-                    });
+        });
 
-                    return rootNodes.map((rootNode) => {
-                        let visited = new Set<number>();
-                        let traversalOrder = [];
-                        let queue: number[] = [rootNode];
+        return rootNodes.map((rootNode) => {
+            let visited = new Set<number>();
+            let traversalOrder = [];
+            let queue: number[] = [rootNode];
 
-                        while (queue.length > 0) {
-                            let node = queue.pop();
-                            if (!visited.has(node)) {
-                                visited.add(node);
-                                traversalOrder.push(node);
+            while (queue.length > 0) {
+                let node = queue.pop();
+                if (!visited.has(node)) {
+                    visited.add(node);
+                    traversalOrder.push(node);
 
-                                // Get all the outgoing edges from this node
-                                let outgoingEdges = edges.filter(edge => edge.v === node);
-                                let outgoingNodes = outgoingEdges.map(edge => edge.w);
+                    // Get all the outgoing edges from this node
+                    let outgoingEdges = edges.filter(edge => edge.v === node);
+                    let outgoingNodes = outgoingEdges.map(edge => edge.w);
 
-                                // Add the outgoing nodes to the queue
-                                queue = queue.concat(outgoingNodes);
-                            }
-                        }
-                        return traversalOrder;
-                    });
+                    // Add the outgoing nodes to the queue
+                    queue = queue.concat(outgoingNodes);
                 }
+            }
+            return traversalOrder;
+        });
+    }
 
 
 
     private leftConstraint(leftId: string, rightId: string, minDistance: number, layoutNodes: LayoutNode[]): LeftConstraint {
 
-                    let left = layoutNodes.find((node) => node.id === leftId);
-                    let right = layoutNodes.find((node) => node.id === rightId);
+        let left = layoutNodes.find((node) => node.id === leftId);
+        let right = layoutNodes.find((node) => node.id === rightId);
 
-                    return { left: left, right: right, minDistance: minDistance };
-                }
+        return { left: left, right: right, minDistance: minDistance };
+    }
 
     private topConstraint(topId: string, bottomId: string, minDistance: number, layoutNodes: LayoutNode[]): TopConstraint {
 
-                    let top = layoutNodes.find((node) => node.id === topId);
-                    let bottom = layoutNodes.find((node) => node.id === bottomId);
+        let top = layoutNodes.find((node) => node.id === topId);
+        let bottom = layoutNodes.find((node) => node.id === bottomId);
 
-                    return { top: top, bottom: bottom, minDistance: minDistance };
-                }
+        return { top: top, bottom: bottom, minDistance: minDistance };
+    }
 
     private ensureSameYConstraint(node1Id: string, node2Id: string, layoutNodes: LayoutNode[]): AlignmentConstraint {
 
-                    let node1 = layoutNodes.find((node) => node.id === node1Id);
-                    let node2 = layoutNodes.find((node) => node.id === node2Id);
+        let node1 = layoutNodes.find((node) => node.id === node1Id);
+        let node2 = layoutNodes.find((node) => node.id === node2Id);
 
-                    return { axis: "y", node1: node1, node2: node2 };
-                }
+        return { axis: "y", node1: node1, node2: node2 };
+    }
 
     private ensureSameXConstraint(node1Id: string, node2Id: string, layoutNodes: LayoutNode[]): AlignmentConstraint {
 
-                    let node1 = layoutNodes.find((node) => node.id === node1Id);
-                    let node2 = layoutNodes.find((node) => node.id === node2Id);
+        let node1 = layoutNodes.find((node) => node.id === node1Id);
+        let node2 = layoutNodes.find((node) => node.id === node2Id);
 
-                    return { axis: "x", node1: node1, node2: node2 };
-                }
+        return { axis: "x", node1: node1, node2: node2 };
+    }
 
 
 

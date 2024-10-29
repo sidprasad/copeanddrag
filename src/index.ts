@@ -28,6 +28,23 @@ function getFormContents(req: any) {
     const layoutAnnotation = req.body.layoutannotation;
     const cope = req.body.cope;
 
+
+    /*
+
+        Get ALL form elements ending with _projection
+    */
+    let projections : Record<string, string>= {};
+    let keys = Object.keys(req.body);
+    for (let key of keys) {
+        if (key.endsWith("_projection")) {
+
+            //First get the key up to '_projection'
+            let projectedType = key.substring(0, key.length - "_projection".length);
+            let projectedAtom = req.body[key];
+            projections[projectedType] = projectedAtom;
+        }
+    }
+
     const instanceNumber = parseInt(req.body.instancenumber);
 
     let ad: AlloyDatum = parseAlloyXML(alloyDatum);
@@ -40,13 +57,13 @@ function getFormContents(req: any) {
 
     let li = new LayoutInstance(layoutSpec);
 
-    return { instances, li, instanceNumber, loopBack };
+    return { instances, li, instanceNumber, loopBack, projections };
 }
 
-function getLayout(req: any): InstanceLayout {
-    let { instances, li, instanceNumber } = getFormContents(req);
-    return li.generateLayout(instances[instanceNumber]);
-}
+// function getLayout(req: any): InstanceLayout {
+//     let { instances, li, instanceNumber, projections } = getFormContents(req);
+//     return li.generateLayout(instances[instanceNumber]);
+// }
 
 app.get('/', (req, res) => {
 
@@ -62,7 +79,8 @@ app.get('/', (req, res) => {
         num_instances: 0,
         layoutAnnotation: "",
         alloyDatum: "",
-        cope: ""
+        cope: "",
+        projectionData : []
     });
 
 
@@ -75,8 +93,7 @@ app.post('/', (req, res) => {
     const layoutAnnotation = req.body.layoutannotation;
     const cope = req.body.cope;
 
-
-    let { instances, li, instanceNumber, loopBack} = getFormContents(req);
+    let { instances, li, instanceNumber, loopBack, projections} = getFormContents(req);
 
     let num_instances = instances.length;
 
@@ -87,7 +104,7 @@ app.post('/', (req, res) => {
         loopBack = 0;
     }
 
-    let layout = li.generateLayout(instances[instanceNumber]);
+    let {layout, projectionData }  = li.generateLayout(instances[instanceNumber], projections);
 
 
     let cl = new WebColaLayout(layout);
@@ -126,7 +143,8 @@ app.post('/', (req, res) => {
         layoutAnnotation,
         alloyDatum,
         loopBack,
-        cope
+        cope,
+        projectionData
     });
 });
 

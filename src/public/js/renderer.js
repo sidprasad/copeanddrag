@@ -82,6 +82,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .groups(groups)
         .groupCompactness(1e-3)
         .jaccardLinkLengths(LINK_DISTANCE, 2);
+        //.linkDistance(50); // I *think* this is minimum link distance
 
     var lineFunction = d3.line()
         .x(function (d) { return d.x; })

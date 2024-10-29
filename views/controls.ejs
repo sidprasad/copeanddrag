@@ -7,6 +7,7 @@
     <!-- Collapsible Form -->
     <div class="collapse card" id="controlsFormCollapse">
         <form id="controlsForm" method="post" action="/">
+            <button type="submit" id='cola' class="btn btn-primary">Load Diagram</button>
             <div class="form-group">
                 <label for="alloydatum">Alloy Instance</label>
                 <textarea class="form-control" id="alloydatum" rows="5" name="alloydatum"><%= alloyDatum ? alloyDatum : '' %></textarea>
@@ -23,7 +24,27 @@
                 <label for="instancenumber">Temporal Instance</label>
                 <input type="number" class="form-control" id="instancenumber" name="instancenumber" value="<%- instanceNumber %>">
             </div>
-            <button type="submit" id='cola' class="btn btn-primary">Load Diagram</button>
+
+            <!-- Here, projections is a list of type { type : string, projectedAtom : string, atoms : string[]} 
+             
+                If projections is non-empty, then show each type as a form input  and projectedAtom as the selected element of atoms
+            -->
+            <% if (projectionData.length > 0) { %>
+                <h4>Projections</h4>
+                <% projectionData.forEach(function(projection) { %>
+                    <div class="form-group">
+                        <label for="<%= projection.type %>_projection"><%= projection.type %></label>
+                        <select class="form-control" id="<%= projection.type %>_projection" name="<%= projection.type %>_projection">
+                            <% projection.atoms.forEach(function(atom) { %>
+                                <option value="<%= atom %>" <%= projection.projectedAtom === atom ? 'selected' : '' %>><%= atom %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+                <% }); %>
+            <% } %>
+
+
+            
         </form>
     </div>
 </div>
