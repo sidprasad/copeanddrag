@@ -68,7 +68,7 @@ class ConstraintValidator {
                 }
 
 
-                if (!this.isSubGroup(group, otherGroup)) {
+                if (!this.isSubGroup(group, otherGroup) && !this.isSubGroup(otherGroup, group)) {
 
                     let intersection = this.groupIntersection(group, otherGroup);
                     overlappingNonSubgroups = intersection.length > 0;
