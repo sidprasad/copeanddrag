@@ -353,7 +353,20 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         topSvg.attr('viewBox', viewBox);
         /*************************************/
 
+        linkGroups.on("mouseover", function (d) {
+            const relName = d.relName;
+            d3.selectAll(".link")
+                .filter(link => link.relName === relName)
+                .classed("highlighted", true);
+            })
+            .on("mouseout", function(event, d) {
+                console.log("Mouse out");
+                const relName = d.relName;
+                d3.selectAll(".link")
+                    .classed("highlighted", false);
 
+                
+            });
     };
 
 

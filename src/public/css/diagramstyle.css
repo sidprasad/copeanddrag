@@ -84,3 +84,9 @@
     order: 2;
     margin-left: 20px; /* Optional: Add some space between the two divs */
 }
+
+.link.highlighted {
+    stroke: black; /* Change this to your desired highlight color */
+    stroke-width: 3px; /* Change this to your desired highlight width */
+}
+
