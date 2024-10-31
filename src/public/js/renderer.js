@@ -114,7 +114,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             // Calculate curvature
             let curvature = 0;
             if (edgeCount > 1) {
-                curvature = (index % 2 === 0 ? 1 : -1) * (Math.floor(index / 2) + 1) * 0.1 * edgeCount;
+                curvature = (index % 2 === 0 ? 1 : -1) * (Math.floor(index / 2) + 1) * 0.15 * edgeCount;
             }
             return curvature;
         }
@@ -243,7 +243,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
             /** Here, we do some point of incidence adjustment IF the number of edges between the same nodes is greater than 1 */
             if (allEdgesBetweenSourceAndTarget.length > 1) {
-                const minDistance = 5; // Minimum distance between edges (divided by 2)
+                const minDistance = 10; // Minimum distance between edges (divided by 2)
                 const edgeIndex = allEdgesBetweenSourceAndTarget.findIndex(edge => edge.id === d.id);
 
                 // Start with a small offset and grow it based on the edge index. But start with min offset of 5
@@ -306,6 +306,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             var curvature = calculateCurvature(edges, d.source.id, d.target.id, d.id);
             //Apply curvature to the control points (but this does not help with the direction)
             route.forEach(function (point, index) {
+
+
                 if (index > 0 && index < route.length - 1 && curvature !== 0) {
 
                     // Adjust the control points based on the direction
