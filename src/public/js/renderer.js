@@ -322,6 +322,18 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             return lineFunction(route);
         });
 
+
+        // Function to check for overlap
+        function isOverlapping(label1, label2) {
+            const bbox1 = label1.getBBox();
+            const bbox2 = label2.getBBox();
+            return !(bbox2.x > bbox1.x + bbox1.width ||
+                    bbox2.x + bbox2.width < bbox1.x ||
+                    bbox2.y > bbox1.y + bbox1.height ||
+                    bbox2.y + bbox2.height < bbox1.y);
+        }
+
+
         // Update label positions after routing edges
         linkGroups.select("text.linklabel")
             .attr("x", function (d) {
@@ -336,7 +348,21 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 const midpoint = pathElement.getPointAtLength(pathLength / 2);
                 return midpoint.y;
             })
-            .attr("text-anchor", "middle")
+            .attr("text-anchor", "end")
+            .each(function(d, i, nodes) {
+                const currentLabel = this;
+                let overlap = false;
+                d3.selectAll("text.linklabel").each(function() {
+                    if (this !== currentLabel && isOverlapping(currentLabel, this)) {
+                        overlap = true;
+                    }
+                });
+                if (overlap) {
+                    d3.select(this)
+                        .attr("text-anchor", "start")
+                        .attr("dx", 2); // Adjust the position to avoid overlap
+                }
+            })
             .raise();
 
         /**** This bit ensures we zoom to fit ***/

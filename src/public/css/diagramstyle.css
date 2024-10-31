@@ -27,7 +27,7 @@
 }
 
 .link {
-    stroke: black;
+    stroke: #333330;
     fill: none;
     stroke-width: 1px;
     stroke-opacity: 1;
@@ -52,13 +52,14 @@
     fill: transparent;
 }
 
-.link-label {
-
+.linklabel {
     fill: black;
     font-family: Verdana;
     font-size: 10px;
-    text-anchor: middle;
     cursor: move;
+    stroke: white; /* Add white outline */
+    stroke-width: 1px; /* Adjust the width of the outline */
+    paint-order: stroke; /* Ensure the stroke is painted first */
 }
 
 .groupLabel {
