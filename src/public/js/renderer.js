@@ -75,13 +75,18 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .handleDisconnected(true)
         .size([width, height]);
 
+    const min_sep = 50;
+    const default_node_width = 70;
+    
+
     colaLayout
         .nodes(nodes)
         .links(edges)
         .constraints(constraints)
         .groups(groups)
         .groupCompactness(1e-3)
-        .jaccardLinkLengths(LINK_DISTANCE, 2);
+        .flowLayout("y", 100) // This is in line with the DAGRE estimate
+        .symmetricDiffLinkLengths(min_sep + default_node_width, 0.1);
         //.linkDistance(50); // I *think* this is minimum link distance
 
     var lineFunction = d3.line()
