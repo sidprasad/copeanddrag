@@ -12,6 +12,7 @@ import { parseLayoutSpec } from './layout/layoutspec';
 
 const express = require('express');
 const path = require('path');
+import * as fs from 'fs';
 
 
 const app = express();
@@ -60,10 +61,7 @@ function getFormContents(req: any) {
     return { instances, li, instanceNumber, loopBack, projections };
 }
 
-// function getLayout(req: any): InstanceLayout {
-//     let { instances, li, instanceNumber, projections } = getFormContents(req);
-//     return li.generateLayout(instances[instanceNumber]);
-// }
+
 
 app.get('/', (req, res) => {
 
@@ -151,6 +149,96 @@ app.post('/', (req, res) => {
 
 
 
+
+// Need to do this better, but for now, 
+// reuse code.
+app.get('/example/:name', (req, res) => {
+    // Get the example name
+    let exampleName = req.params.name;
+
+    // Define the path to the /examples directory
+    const examplesDir = path.join(path.join(__dirname, '..', 'examples'), exampleName);
+
+    // Check if the directory exists
+    if (!fs.existsSync(examplesDir)) {
+        res.status(404).send('Example not found');
+        return;
+    }
+
+
+   const datumFile = path.join(examplesDir, 'datum.xml');
+   const cndFile = path.join(examplesDir, 'layout.cnd');
+
+   // Ignore for now
+   let displayConfig = path.join(examplesDir, 'displayConfig.yml');
+
+    // Ensure the files exist
+    if (!fs.existsSync(datumFile) || !fs.existsSync(cndFile)) {
+        res.status(404).send('Example not found');
+        return;
+    }
+
+    // Read the files
+    const alloyDatum = fs.readFileSync(datumFile, 'utf8');
+    const cope = fs.readFileSync(cndFile, 'utf8');
+    
+    // Eventually, read these from the displayConfig file
+    const instanceNumber = 0;
+    const projections : Record<string, string>= {};
+
+    let ad: AlloyDatum = parseAlloyXML(alloyDatum);
+    let instances = ad.instances;
+    let num_instances = instances.length;
+    let loopBack = ad.loopBack || -1;
+    let layoutSpec = copeToLayoutSpec(cope);
+    let li = new LayoutInstance(layoutSpec);
+
+    
+
+    //// It is not good hygiene to repeat code like this.
+
+    let {layout, projectionData }  = li.generateLayout(instances[instanceNumber], projections);
+
+
+    let cl = new WebColaLayout(layout);
+    let colaConstraints = cl.colaConstraints;
+    let colaNodes = cl.colaNodes;
+    let colaEdges = cl.colaEdges;
+    let colaGroups = cl.groupDefinitions;
+
+    const constraintValidator = new ConstraintValidator(colaConstraints, colaNodes, colaGroups);
+    const error = constraintValidator.validateConstraints();
+    if (error) {
+
+        // TODO: THe reporting here should be more meaningful at some point.
+        console.error("Error validating constraints:", error);
+        // This is "I am a teapot" error code, which is a joke error code.
+        res.status(418).send(error);
+        return;
+    }
+
+
+    let height = cl.FIG_HEIGHT ;
+    let width = cl.FIG_WIDTH ;
+
+    res.render('diagram', {
+        'height': height,
+        'width': width,
+        'colaNodes': colaNodes,
+        'colaEdges': colaEdges,
+        'colaConstraints': colaConstraints,
+        'colaGroups': colaGroups,
+        instanceNumber,
+        num_instances,
+        layoutAnnotation : "",
+        alloyDatum,
+        loopBack,
+        cope,
+        projectionData
+    });
+
+
+});
 
 const server = http.createServer(app);
 
