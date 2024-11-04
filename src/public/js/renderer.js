@@ -386,20 +386,51 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         topSvg.attr('viewBox', viewBox);
         /*************************************/
 
-        linkGroups.on("mouseover", function (d) {
-            const relName = d.relName;
+
+
+        function highlightRelation(relName) {
             d3.selectAll(".link")
                 .filter(link => link.relName === relName)
                 .classed("highlighted", true);
+        }
+
+        // Get a set of all relNames
+        const relNames = new Set(edges.map(edge => edge.relName));
+        // For each relName, add a LI element to the ul with id "relationList", with the relName as text and hover event to highlight the relation,
+        // also a mouseout event to remove the highlight
+
+
+        // Maybe these should be checkboxes instead of just text?
+        // I wory about the removal of the highlight on uncheck
+        const relationList = d3.select("#relationList");
+        relationList.selectAll("li")
+            .data(Array.from(relNames))
+            .enter()
+            .append("li")
+            .text(d => d)
+            .on("mouseover", function (d) {
+                highlightRelation(d);
+                // Also make the text bold
+                d3.select(this).style("font-weight", "bold");
+
             })
-            .on("mouseout", function(event, d) {
-                console.log("Mouse out");
-                const relName = d.relName;
+            .on("mouseout", function (event, d) {
                 d3.selectAll(".link")
                     .classed("highlighted", false);
-
-                
+                // Also make the text normal
+                d3.select(this).style("font-weight", "normal");
             });
+
+
+
+        // linkGroups.on("mouseover", function (d) {
+        //     const relName = d.relName;
+        //     highlightRelation(relName);
+        //     })
+        //     .on("mouseout", function(event, d) {
+        //         d3.selectAll(".link")
+        //             .classed("highlighted", false);
+        //     });
     };
 
 
