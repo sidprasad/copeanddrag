@@ -1,10 +1,10 @@
 constraints:
     - cyclic : {field : next}
-    - orientation : {field: left, directions: [left, above]}
+    - cyclic : {field: left, direction: counterclockwise}
+    - cyclic : {field: right, direction: counterclockwise}
 directives:
     - flag: hideDisconnected
     - projection : {sig: this/Table}
-    - attribute : {field: right}
     - icon:
         sig: this/Fork
         icon:
