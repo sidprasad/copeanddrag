@@ -1,0 +1,158 @@
+<alloy builddate="2021-11-19T05:45:51.188Z">
+
+<instance bitwidth="4" maxseq="1" mintrace="-1" maxtrace="-1" command="Run SomeState for 1 but 2 Tick, 2 Bool, exactly 5 Process expect 1" filename="c:\Users\nivsi\Desktop\papers\forge\copeanddrag\alloy\alloy-examples\ring-orientation\stable-orient-ring.als" tracelength="1" backloop="0">
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="String" ID="3" parentID="2" builtin="yes">
+</sig>
+
+<sig label="this/Process" ID="4" parentID="2">
+   <atom label="Process$0"/>
+   <atom label="Process$1"/>
+   <atom label="Process$2"/>
+   <atom label="Process$3"/>
+   <atom label="Process$4"/>
+</sig>
+
+<field label="rightNeighbor" ID="5" parentID="4">
+   <tuple> <atom label="Process$0"/> <atom label="Process$2"/> </tuple>
+   <tuple> <atom label="Process$1"/> <atom label="Process$3"/> </tuple>
+   <tuple> <atom label="Process$2"/> <atom label="Process$1"/> </tuple>
+   <tuple> <atom label="Process$3"/> <atom label="Process$4"/> </tuple>
+   <tuple> <atom label="Process$4"/> <atom label="Process$0"/> </tuple>
+   <types> <type ID="4"/> <type ID="4"/> </types>
+</field>
+
+<field label="AP1" ID="6" parentID="4">
+   <tuple> <atom label="Process$0"/> <atom label="Process$2"/> </tuple>
+   <tuple> <atom label="Process$1"/> <atom label="Process$3"/> </tuple>
+   <tuple> <atom label="Process$2"/> <atom label="Process$0"/> </tuple>
+   <tuple> <atom label="Process$3"/> <atom label="Process$1"/> </tuple>
+   <tuple> <atom label="Process$4"/> <atom label="Process$3"/> </tuple>
+   <types> <type ID="4"/> <type ID="4"/> </types>
+</field>
+
+<field label="AP2" ID="7" parentID="4">
+   <tuple> <atom label="Process$0"/> <atom label="Process$4"/> </tuple>
+   <tuple> <atom label="Process$1"/> <atom label="Process$2"/> </tuple>
+   <tuple> <atom label="Process$2"/> <atom label="Process$1"/> </tuple>
+   <tuple> <atom label="Process$3"/> <atom label="Process$4"/> </tuple>
+   <tuple> <atom label="Process$4"/> <atom label="Process$0"/> </tuple>
+   <types> <type ID="4"/> <type ID="4"/> </types>
+</field>
+
+<sig label="this/Tick" ID="8" parentID="2">
+   <atom label="Tick$0"/>
+   <atom label="Tick$1"/>
+</sig>
+
+<field label="runs" ID="9" parentID="8">
+   <tuple> <atom label="Tick$0"/> <atom label="Process$0"/> </tuple>
+   <tuple> <atom label="Tick$0"/> <atom label="Process$1"/> </tuple>
+   <tuple> <atom label="Tick$0"/> <atom label="Process$2"/> </tuple>
+   <tuple> <atom label="Tick$0"/> <atom label="Process$4"/> </tuple>
+   <types> <type ID="8"/> <type ID="4"/> </types>
+</field>
+
+<field label="dir" ID="10" parentID="8">
+   <tuple> <atom label="Tick$0"/> <atom label="Process$0"/> <atom label="bool/False$0"/> </tuple>
+   <tuple> <atom label="Tick$0"/> <atom label="Process$1"/> <atom label="bool/False$0"/> </tuple>
+   <tuple> <atom label="Tick$0"/> <atom label="Process$2"/> <atom label="bool/False$0"/> </tuple>
+   <tuple> <atom label="Tick$0"/> <atom label="Process$3"/> <atom label="bool/True$0"/> </tuple>
+   <tuple> <atom label="Tick$0"/> <atom label="Process$4"/> <atom label="bool/True$0"/> </tuple>
+   <tuple> <atom label="Tick$1"/> <atom label="Process$0"/> <atom label="bool/False$0"/> </tuple>
+   <tuple> <atom label="Tick$1"/> <atom label="Process$1"/> <atom label="bool/False$0"/> </tuple>
+   <tuple> <atom label="Tick$1"/> <atom label="Process$2"/> <atom label="bool/True$0"/> </tuple>
+   <tuple> <atom label="Tick$1"/> <atom label="Process$3"/> <atom label="bool/True$0"/> </tuple>
+   <tuple> <atom label="Tick$1"/> <atom label="Process$4"/> <atom label="bool/True$0"/> </tuple>
+   <types> <type ID="8"/> <type ID="4"/> <type ID="11"/> </types>
+</field>
+
+<field label="S" ID="12" parentID="8">
+   <tuple> <atom label="Tick$0"/> <atom label="Process$0"/> <atom label="bool/True$0"/> </tuple>
+   <tuple> <atom label="Tick$0"/> <atom label="Process$1"/> <atom label="bool/False$0"/> </tuple>
+   <tuple> <atom label="Tick$0"/> <atom label="Process$2"/> <atom label="bool/True$0"/> </tuple>
+   <tuple> <atom label="Tick$0"/> <atom label="Process$3"/> <atom label="bool/True$0"/> </tuple>
+   <tuple> <atom label="Tick$0"/> <atom label="Process$4"/> <atom label="bool/True$0"/> </tuple>
+   <tuple> <atom label="Tick$1"/> <atom label="Process$0"/> <atom label="bool/False$0"/> </tuple>
+   <tuple> <atom label="Tick$1"/> <atom label="Process$1"/> <atom label="bool/False$0"/> </tuple>
+   <tuple> <atom label="Tick$1"/> <atom label="Process$2"/> <atom label="bool/False$0"/> </tuple>
+   <tuple> <atom label="Tick$1"/> <atom label="Process$3"/> <atom label="bool/True$0"/> </tuple>
+   <tuple> <atom label="Tick$1"/> <atom label="Process$4"/> <atom label="bool/False$0"/> </tuple>
+   <types> <type ID="8"/> <type ID="4"/> <type ID="11"/> </types>
+</field>
+
+<field label="T" ID="13" parentID="8">
+   <tuple> <atom label="Tick$0"/> <atom label="Process$0"/> <atom label="bool/False$0"/> </tuple>
+   <tuple> <atom label="Tick$0"/> <atom label="Process$1"/> <atom label="bool/True$0"/> </tuple>
+   <tuple> <atom label="Tick$0"/> <atom label="Process$2"/> <atom label="bool/True$0"/> </tuple>
+   <tuple> <atom label="Tick$0"/> <atom label="Process$3"/> <atom label="bool/False$0"/> </tuple>
+   <tuple> <atom label="Tick$0"/> <atom label="Process$4"/> <atom label="bool/True$0"/> </tuple>
+   <tuple> <atom label="Tick$1"/> <atom label="Process$0"/> <atom label="bool/True$0"/> </tuple>
+   <tuple> <atom label="Tick$1"/> <atom label="Process$1"/> <atom label="bool/True$0"/> </tuple>
+   <tuple> <atom label="Tick$1"/> <atom label="Process$2"/> <atom label="bool/False$0"/> </tuple>
+   <tuple> <atom label="Tick$1"/> <atom label="Process$3"/> <atom label="bool/False$0"/> </tuple>
+   <tuple> <atom label="Tick$1"/> <atom label="Process$4"/> <atom label="bool/True$0"/> </tuple>
+   <types> <type ID="8"/> <type ID="4"/> <type ID="11"/> </types>
+</field>
+
+<field label="ring_" ID="14" parentID="8">
+   <tuple> <atom label="Tick$0"/> <atom label="Process$0"/> <atom label="Process$4"/> </tuple>
+   <tuple> <atom label="Tick$0"/> <atom label="Process$1"/> <atom label="Process$2"/> </tuple>
+   <tuple> <atom label="Tick$0"/> <atom label="Process$2"/> <atom label="Process$1"/> </tuple>
+   <tuple> <atom label="Tick$0"/> <atom label="Process$3"/> <atom label="Process$1"/> </tuple>
+   <tuple> <atom label="Tick$0"/> <atom label="Process$4"/> <atom label="Process$3"/> </tuple>
+   <tuple> <atom label="Tick$1"/> <atom label="Process$0"/> <atom label="Process$4"/> </tuple>
+   <tuple> <atom label="Tick$1"/> <atom label="Process$1"/> <atom label="Process$2"/> </tuple>
+   <tuple> <atom label="Tick$1"/> <atom label="Process$2"/> <atom label="Process$0"/> </tuple>
+   <tuple> <atom label="Tick$1"/> <atom label="Process$3"/> <atom label="Process$1"/> </tuple>
+   <tuple> <atom label="Tick$1"/> <atom label="Process$4"/> <atom label="Process$3"/> </tuple>
+   <types> <type ID="8"/> <type ID="4"/> <type ID="4"/> </types>
+</field>
+
+<sig label="bool/True" ID="15" parentID="11" one="yes">
+   <atom label="bool/True$0"/>
+</sig>
+
+<sig label="bool/False" ID="16" parentID="11" one="yes">
+   <atom label="bool/False$0"/>
+</sig>
+
+<sig label="bool/Bool" ID="11" parentID="2" abstract="yes">
+</sig>
+
+<sig label="ord/Ord" ID="17" parentID="2" one="yes" private="yes">
+   <atom label="ord/Ord$0"/>
+</sig>
+
+<field label="First" ID="18" parentID="17" private="yes">
+   <tuple> <atom label="ord/Ord$0"/> <atom label="Tick$0"/> </tuple>
+   <types> <type ID="17"/> <type ID="8"/> </types>
+</field>
+
+<field label="Next" ID="19" parentID="17" private="yes">
+   <tuple> <atom label="ord/Ord$0"/> <atom label="Tick$0"/> <atom label="Tick$1"/> </tuple>
+   <types> <type ID="17"/> <type ID="8"/> <type ID="8"/> </types>
+</field>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<skolem label="$ring_n" ID="20">
+   <tuple> <atom label="Process$3"/> </tuple>
+   <types> <type ID="4"/> </types>
+</skolem>
+
+<skolem label="$SomeState_t" ID="21">
+   <tuple> <atom label="Tick$1"/> </tuple>
+   <types> <type ID="8"/> </types>
+</skolem>
+
+</instance>
+
+</alloy>

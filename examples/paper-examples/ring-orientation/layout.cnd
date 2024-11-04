@@ -1,0 +1,7 @@
+constraints:
+    - cyclic : {field : rightNeighbor, direction: counterclockwise}
+    - orientation : {field: left, directions: [left, above]}
+directives:
+    - flag: hideDisconnected
+    - projection : {sig: this/Table}
+    - attribute : {field: dir}
