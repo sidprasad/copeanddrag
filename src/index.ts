@@ -157,7 +157,11 @@ app.get('/example/:name', (req, res) => {
     let exampleName = req.params.name;
 
     // Define the path to the /examples directory
-    const examplesDir = path.join(path.join(__dirname, '..', 'examples'), exampleName);
+    const examplesDir = path.join(
+                            path.join(
+                                path.join(__dirname, '..', 'examples'), 
+                                    'paper-examples'),    
+                        exampleName);
 
     // Check if the directory exists
     if (!fs.existsSync(examplesDir)) {

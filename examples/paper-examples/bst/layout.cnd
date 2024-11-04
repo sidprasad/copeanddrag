@@ -1,0 +1,7 @@
+constraints:
+  - orientation: { field: left, directions: [below, left] }
+  - orientation: { field: right, directions: [below, right] }
+directives:
+  - attribute: { field: key }
+  - flag: hideDisconnected
+  - flag: hideDisconnectedBuiltIns
