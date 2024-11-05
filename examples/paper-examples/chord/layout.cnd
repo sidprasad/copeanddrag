@@ -1,0 +1,8 @@
+constraints:
+    - cyclic: {field : next}
+    - orientation { field: data, directions: [directlyLeft]}
+directives:
+    - projection: {sig: this/State}
+    - flag: hideDisconnected
+    - attribute: {field: find_predecessor}
+    - attribute: {field: find_successor}

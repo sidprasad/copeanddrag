@@ -1,0 +1,104 @@
+<alloy builddate="2021-11-19T05:45:51.188Z">
+
+<instance bitwidth="4" maxseq="3" mintrace="-1" maxtrace="-1" command="Run ShowMe1 for 3 expect 1" filename="c:\Users\nivsi\Desktop\papers\forge\copeanddrag\alloy\alloy-examples\chord\chord.als" tracelength="1" backloop="0">
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="String" ID="3" parentID="2" builtin="yes">
+</sig>
+
+<sig label="this/Id" ID="4" parentID="2">
+   <atom label="Id$0"/>
+   <atom label="Id$1"/>
+</sig>
+
+<field label="next" ID="5" parentID="4">
+   <tuple> <atom label="Id$0"/> <atom label="Id$1"/> </tuple>
+   <tuple> <atom label="Id$1"/> <atom label="Id$0"/> </tuple>
+   <types> <type ID="4"/> <type ID="4"/> </types>
+</field>
+
+<sig label="this/Node" ID="6" parentID="2">
+   <atom label="Node$0"/>
+   <atom label="Node$1"/>
+</sig>
+
+<field label="id" ID="7" parentID="6">
+   <tuple> <atom label="Node$0"/> <atom label="Id$0"/> </tuple>
+   <tuple> <atom label="Node$1"/> <atom label="Id$1"/> </tuple>
+   <types> <type ID="6"/> <type ID="4"/> </types>
+</field>
+
+<sig label="this/NodeData" ID="8" parentID="2">
+   <atom label="NodeData$0"/>
+   <atom label="NodeData$1"/>
+</sig>
+
+<field label="prev" ID="9" parentID="8">
+   <tuple> <atom label="NodeData$0"/> <atom label="Node$1"/> </tuple>
+   <tuple> <atom label="NodeData$1"/> <atom label="Node$0"/> </tuple>
+   <types> <type ID="8"/> <type ID="6"/> </types>
+</field>
+
+<field label="next" ID="10" parentID="8">
+   <tuple> <atom label="NodeData$0"/> <atom label="Node$1"/> </tuple>
+   <tuple> <atom label="NodeData$1"/> <atom label="Node$0"/> </tuple>
+   <types> <type ID="8"/> <type ID="6"/> </types>
+</field>
+
+<field label="finger" ID="11" parentID="8">
+   <tuple> <atom label="NodeData$0"/> <atom label="Id$1"/> <atom label="Node$1"/> </tuple>
+   <tuple> <atom label="NodeData$1"/> <atom label="Id$0"/> <atom label="Node$0"/> </tuple>
+   <types> <type ID="8"/> <type ID="4"/> <type ID="6"/> </types>
+</field>
+
+<field label="closest_preceding_finger" ID="12" parentID="8">
+   <tuple> <atom label="NodeData$0"/> <atom label="Id$0"/> <atom label="Node$1"/> </tuple>
+   <tuple> <atom label="NodeData$0"/> <atom label="Id$1"/> <atom label="Node$1"/> </tuple>
+   <tuple> <atom label="NodeData$1"/> <atom label="Id$0"/> <atom label="Node$1"/> </tuple>
+   <tuple> <atom label="NodeData$1"/> <atom label="Id$1"/> <atom label="Node$1"/> </tuple>
+   <types> <type ID="8"/> <type ID="4"/> <type ID="6"/> </types>
+</field>
+
+<field label="find_predecessor" ID="13" parentID="8">
+   <tuple> <atom label="NodeData$0"/> <atom label="Id$0"/> <atom label="Node$1"/> </tuple>
+   <tuple> <atom label="NodeData$0"/> <atom label="Id$1"/> <atom label="Node$1"/> </tuple>
+   <tuple> <atom label="NodeData$1"/> <atom label="Id$0"/> <atom label="Node$1"/> </tuple>
+   <tuple> <atom label="NodeData$1"/> <atom label="Id$1"/> <atom label="Node$1"/> </tuple>
+   <types> <type ID="8"/> <type ID="4"/> <type ID="6"/> </types>
+</field>
+
+<field label="find_successor" ID="14" parentID="8">
+   <tuple> <atom label="NodeData$0"/> <atom label="Id$0"/> <atom label="Node$1"/> </tuple>
+   <tuple> <atom label="NodeData$0"/> <atom label="Id$1"/> <atom label="Node$1"/> </tuple>
+   <tuple> <atom label="NodeData$1"/> <atom label="Id$0"/> <atom label="Node$1"/> </tuple>
+   <tuple> <atom label="NodeData$1"/> <atom label="Id$1"/> <atom label="Node$1"/> </tuple>
+   <types> <type ID="8"/> <type ID="4"/> <type ID="6"/> </types>
+</field>
+
+<sig label="this/State" ID="15" parentID="2">
+   <atom label="State$0"/>
+</sig>
+
+<field label="active" ID="16" parentID="15">
+   <tuple> <atom label="State$0"/> <atom label="Node$0"/> </tuple>
+   <tuple> <atom label="State$0"/> <atom label="Node$1"/> </tuple>
+   <types> <type ID="15"/> <type ID="6"/> </types>
+</field>
+
+<field label="data" ID="17" parentID="15">
+   <tuple> <atom label="State$0"/> <atom label="Node$0"/> <atom label="NodeData$0"/> </tuple>
+   <tuple> <atom label="State$0"/> <atom label="Node$1"/> <atom label="NodeData$1"/> </tuple>
+   <types> <type ID="15"/> <type ID="6"/> <type ID="8"/> </types>
+</field>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+</instance>
+
+</alloy>

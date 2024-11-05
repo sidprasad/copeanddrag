@@ -136,3 +136,9 @@ By default, we assign every `sig` a random color, that is respected by all atoms
 
 - Heirarchy
   - Need some weak webcola heirarchy constraints along some relations (if directional, then add heirarchy?)
+
+
+### Bugs
+
+- Have an issue with showing the label and having it different from the relName with n-ary tuples.
+- Arrows FROM groups don't quite layout well when groups are nested (see CHORD example). Source for the link is a little too long, and doesn't anchor to the outer bound (I think it links to the inner padding bound).
