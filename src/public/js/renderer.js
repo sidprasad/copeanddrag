@@ -610,17 +610,42 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 let source = d.source;
                 let target = d.target;
 
+                const sourceIndex = getNodeIndex(source);
+                const targetIndex = getNodeIndex(target);
+
                 let n = d.id;
                 if (n.startsWith("_g_")) {
-                    // This actually deals with subsumed groups, since only
-                    // the innermost group will include the element in its leaves.
+                    // This actually deals with subsumed groups, since only the innermost group will include the element in its leaves.
                     let targetGroup = groups.find(group => {
                         let leaves = group.leaves.map(leaf => leaf.id);
                         return leaves.includes(target.id);
 
                     });
-                    target = targetGroup;
-                    target.innerBounds = target.bounds.inflate(-1);
+
+    
+                    let sourceGroup = groups.find(group => {
+                        let leaves = group.leaves.map(leaf => leaf.id);
+                        return leaves.includes(source.id);
+    
+                    });
+    
+                    const groupIsTarget = targetGroup && targetGroup.keyNode === sourceIndex;
+                    const groupIsSource = sourceGroup && sourceGroup.keyNode === targetIndex;
+
+                    if (groupIsSource) {
+                        source = sourceGroup;
+                        console.log(sourceGroup);
+                        source.innerBounds = source.bounds.inflate(-1);
+                    }
+                    else if (groupIsTarget) {
+                        target = targetGroup;
+                        target.innerBounds = target.bounds.inflate(-1);
+                    }
+                    else {
+                        console.log("This is a group edge, but neither source nor target is a group.", d);
+                    }
+
+
 
                 }
 
