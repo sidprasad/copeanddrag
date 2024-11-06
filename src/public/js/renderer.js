@@ -446,7 +446,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
     linkGroups.append("text")
         .attr("class", "linklabel")
-        .text(d => d.relName);
+        .text(d => d.label);
 
 
     function isHiddenNode(node) {
