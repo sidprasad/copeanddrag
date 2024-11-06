@@ -1,8 +1,9 @@
 constraints:
-    - cyclic: {field : next}
-    - orientation { field: data, directions: [directlyLeft]}
+    - cyclic: {field : next, direction: counterclockwise}
+    - orientation: { field: id, directions: [directlyBelow]}
+    - group: {field: active, target: domain}
+    - group : {field: find_predecessor}
+    - group : {field: find_successor}
 directives:
-    - projection: {sig: this/State}
+    - projection: {sig: this/NodeData}
     - flag: hideDisconnected
-    - attribute: {field: find_predecessor}
-    - attribute: {field: find_successor}
