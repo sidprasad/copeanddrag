@@ -40,6 +40,31 @@ function getRandomOffsetAlongPath() {
 }
 
 
+// let targetGroup = groups.find(group => {
+//     let leaves = group.leaves.map(leaf => leaf.id);
+//     return leaves.includes(target.id);
+
+// });
+
+// Goes through the groups and finds ALL groups that contain the node
+
+function getContainingGroups(groups, node) {
+    const containingGroups = [];
+
+    function findContainingGroups(currentNode, groups, parents) {
+        for (const group of groups) {
+            let leaves = group.leaves.map(leaf => leaf.id);
+            if (leaves.includes(currentNode.id)) {
+                containingGroups.push(...parents, group);
+                findContainingGroups(group, groups, [...parents, group]);
+            }
+        }
+    }
+
+    findContainingGroups(node, groups, []);
+    return containingGroups;
+}
+
 
 
 function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
@@ -150,24 +175,32 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 // Depends on the source group and the target group.
 
 
-                // This actually deals with subsumed groups, since only
-                // the innermost group will include the element in its leaves.
-                let targetGroup = groups.find(group => {
-                    let leaves = group.leaves.map(leaf => leaf.id);
-                    return leaves.includes(target.id);
+                // // This actually deals with subsumed groups, since only
+                // // the innermost group will include the element in its leaves.
+                // let targetGroup = groups.find(group => {
+                //     let leaves = group.leaves.map(leaf => leaf.id);
+                //     return leaves.includes(target.id);
 
-                });
+                // });
 
-                let sourceGroup = groups.find(group => {
-                    let leaves = group.leaves.map(leaf => leaf.id);
-                    return leaves.includes(source.id);
+                // let sourceGroup = groups.find(group => {
+                //     let leaves = group.leaves.map(leaf => leaf.id);
+                //     return leaves.includes(source.id);
 
-                });
+                // });
 
-                const groupIsTarget = targetGroup && targetGroup.keyNode === sourceIndex;
-                const groupIsSource = sourceGroup && sourceGroup.keyNode === targetIndex;
+                // const groupIsTarget = targetGroup && targetGroup.keyNode === sourceIndex;
+                // const groupIsSource = sourceGroup && sourceGroup.keyNode === targetIndex;
 
-                if (groupIsSource && groupIsTarget) {
+
+                let potentialTargetGroups = getContainingGroups(groups, target);
+                let potentialSourceGroups = getContainingGroups(groups, source);
+
+
+                let targetGroup = potentialTargetGroups.find(group => group.keyNode === sourceIndex);
+                let sourceGroup = potentialSourceGroups.find(group => group.keyNode === targetIndex);
+
+                if (targetGroup && sourceGroup) {
                     alert('Something is very wrong!');
                 }
 
@@ -196,7 +229,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
 
 
-                if (groupIsTarget) {
+                if (targetGroup) {
                     let newTargetCoords = closestPointOnRect(targetGroup.bounds, route[0]);
                     let currentTarget = route[route.length - 1];
                     currentTarget.x = newTargetCoords.x;
@@ -204,7 +237,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
 
                 }
-                else if (groupIsSource) {
+                else if (sourceGroup) {
                     let newSourceCoords = closestPointOnRect(sourceGroup.bounds, route[route.length - 1]);
                     let currentSource = route[0];
                     currentSource.x = newSourceCoords.x;
@@ -213,6 +246,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 }
                 else {
                     console.log("This is a group edge, but neither source nor target is a group.", d);
+                    console.log(potentialSourceGroups);
+                    console.log(potentialTargetGroups);
                 }
 
                 // Not ideal but we dont want odd curves.
@@ -615,38 +650,47 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
                 let n = d.id;
                 if (n.startsWith("_g_")) {
+
                     // This actually deals with subsumed groups, since only the innermost group will include the element in its leaves.
-                    let targetGroup = groups.find(group => {
-                        let leaves = group.leaves.map(leaf => leaf.id);
-                        return leaves.includes(target.id);
-
-                    });
+                    // let targetGroup = groups.find(group => {
+                    //     let leaves = group.leaves.map(leaf => leaf.id);
+                    //     return leaves.includes(target.id);
+                    // });
 
     
-                    let sourceGroup = groups.find(group => {
-                        let leaves = group.leaves.map(leaf => leaf.id);
-                        return leaves.includes(source.id);
+                    // let sourceGroup = groups.find(group => {
+                    //     let leaves = group.leaves.map(leaf => leaf.id);
+                    //     return leaves.includes(source.id);
+                    // });
     
-                    });
-    
-                    const groupIsTarget = targetGroup && targetGroup.keyNode === sourceIndex;
-                    const groupIsSource = sourceGroup && sourceGroup.keyNode === targetIndex;
 
-                    if (groupIsSource) {
+                    let potentialTargetGroups = getContainingGroups(groups, target);
+                    let potentialSourceGroups = getContainingGroups(groups, source);
+
+
+                    let targetGroup = potentialTargetGroups.find(group => group.keyNode === sourceIndex);
+                    let sourceGroup = potentialSourceGroups.find(group => group.keyNode === targetIndex);
+
+                    // AHH, this is the problem. Nested groups are not handled correctly.
+                    // This only is true if the inner group exists (aka the innermost group is the leaf).
+                    // const groupIsTarget = targetGroup && targetGroup.keyNode === sourceIndex;
+                    // const groupIsSource = sourceGroup && sourceGroup.keyNode === targetIndex;
+
+                    if (sourceGroup) {
                         source = sourceGroup;
                         console.log(sourceGroup);
                         source.innerBounds = source.bounds.inflate(-1);
                     }
-                    else if (groupIsTarget) {
+                    else if (targetGroup) {
                         target = targetGroup;
                         target.innerBounds = target.bounds.inflate(-1);
                     }
                     else {
-                        console.log("This is a group edge, but neither source nor target is a group.", d);
+                        console.log("This is a group edge (_on tick_), but neither source nor target is a group.", d);
+                        console.log(potentialSourceGroups);
+                        console.log(potentialTargetGroups);
+                        console.log(sourceIndex, targetIndex);
                     }
-
-
-
                 }
 
 
