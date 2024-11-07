@@ -40,6 +40,68 @@ function getRandomOffsetAlongPath() {
 }
 
 
+function calculateOverlapArea(bbox1, bbox2) {
+    const x_overlap = Math.max(0, Math.min(bbox1.x + bbox1.width, bbox2.x + bbox2.width) - Math.max(bbox1.x, bbox2.x));
+    const y_overlap = Math.max(0, Math.min(bbox1.y + bbox1.height, bbox2.y + bbox2.height) - Math.max(bbox1.y, bbox2.y));
+    return x_overlap * y_overlap;
+}
+
+function minimizeOverlap(currentLabel, overlapsWith) {
+    const originalBBox = currentLabel.getBBox();
+    let minOverlapArea = Infinity;
+    let bestPosition = { dx: 0, dy: 0, textAnchor: 'middle' };
+
+    const positions = [
+        { dx: 0, dy: 0, textAnchor: 'middle' },
+        { dx: 2, dy: 0, textAnchor: 'start' },
+        { dx: -2, dy: 0, textAnchor: 'end' },
+        { dx: 0, dy: '1em', textAnchor: 'middle' }
+    ];
+
+    positions.forEach(position => {
+        let totalOverlapArea = 0;
+        d3.select(currentLabel)
+            .attr('dx', position.dx)
+            .attr('dy', position.dy)
+            .attr('text-anchor', position.textAnchor);
+
+        const newBBox = currentLabel.getBBox();
+        overlapsWith.forEach(overlapLabel => {
+            const overlapBBox = overlapLabel.getBBox();
+            totalOverlapArea += calculateOverlapArea(newBBox, overlapBBox);
+        });
+
+        if (totalOverlapArea < minOverlapArea) {
+            minOverlapArea = totalOverlapArea;
+            bestPosition = position;
+        }
+    });
+
+    d3.select(currentLabel)
+        .attr('dx', bestPosition.dx)
+        .attr('dy', bestPosition.dy)
+        .attr('text-anchor', bestPosition.textAnchor);
+}
+
+// Goes through the groups and finds ALL groups that contain the node
+
+function getContainingGroups(groups, node) {
+    const containingGroups = [];
+
+    function findContainingGroups(currentNode, groups, parents) {
+        for (const group of groups) {
+            let leaves = group.leaves.map(leaf => leaf.id);
+            if (leaves.includes(currentNode.id)) {
+                containingGroups.push(...parents, group);
+                findContainingGroups(group, groups, [...parents, group]);
+            }
+        }
+    }
+
+    findContainingGroups(node, groups, []);
+    return containingGroups;
+}
+
 
 
 function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
@@ -54,7 +116,10 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         d3.select(".zoomable").attr("transform", d3.event.transform);
     }
 
-    function getNodeIndex(nodeId) {
+    function getNodeIndex(n) {
+
+        // Check if n is of type string
+        const nodeId = typeof n === 'string' ? n : n.id;
         return nodes.findIndex(node => node.id === nodeId);
     }
 
@@ -147,27 +212,14 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 let sourceIndex = getNodeIndex(source.id);
                 let targetIndex = getNodeIndex(target.id);
 
-                // Depends on the source group and the target group.
+                let potentialTargetGroups = getContainingGroups(groups, target);
+                let potentialSourceGroups = getContainingGroups(groups, source);
 
 
-                // This actually deals with subsumed groups, since only
-                // the innermost group will include the element in its leaves.
-                let targetGroup = groups.find(group => {
-                    let leaves = group.leaves.map(leaf => leaf.id);
-                    return leaves.includes(target.id);
+                let targetGroup = potentialTargetGroups.find(group => group.keyNode === sourceIndex);
+                let sourceGroup = potentialSourceGroups.find(group => group.keyNode === targetIndex);
 
-                });
-
-                let sourceGroup = groups.find(group => {
-                    let leaves = group.leaves.map(leaf => leaf.id);
-                    return leaves.includes(source.id);
-
-                });
-
-                const groupIsTarget = targetGroup && targetGroup.keyNode === sourceIndex;
-                const groupIsSource = sourceGroup && sourceGroup.keyNode === targetIndex;
-
-                if (groupIsSource && groupIsTarget) {
+                if (targetGroup && sourceGroup) {
                     alert('Something is very wrong!');
                 }
 
@@ -180,6 +232,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     // Destructure the rectangle bounds
                     const { x, y, X, Y } = bounds;
 
+
+
                     // Calculate the rectangle's edges
                     const left = x;
                     const right = X;
@@ -190,37 +244,52 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     const closestX = Math.max(left, Math.min(point.x, right));
                     const closestY = Math.max(top, Math.min(point.y, bottom));
 
+                    if (closestX != left && closestX != right
+                        && closestY != top && closestY != bottom) {
+
+                        console.log("Point is inside the rectangle", bounds, closestX, closestY);
+                    }
+
                     return { x: closestX, y: closestY };
                 }
 
 
 
 
-                if (groupIsTarget) {
+                if (targetGroup) {
+
+
+
                     let newTargetCoords = closestPointOnRect(targetGroup.bounds, route[0]);
                     let currentTarget = route[route.length - 1];
                     currentTarget.x = newTargetCoords.x;
                     currentTarget.y = newTargetCoords.y;
+                    route[route.length - 1] = currentTarget;
 
 
                 }
-                else if (groupIsSource) {
-                    let newSourceCoords = closestPointOnRect(sourceGroup.bounds, route[route.length - 1]);
+                else if (sourceGroup) {
+
+                    console.log(`From group ${sourceGroup.id} to the group ${target.id}`);
+
+                    let newSourceCoords = closestPointOnRect(sourceGroup.bounds.inflate(-1), route[route.length - 1]);
                     let currentSource = route[0];
                     currentSource.x = newSourceCoords.x;
                     currentSource.y = newSourceCoords.y;
+                    route[0] = currentSource;
 
                 }
                 else {
                     console.log("This is a group edge, but neither source nor target is a group.", d);
+                    console.log(potentialSourceGroups);
+                    console.log(potentialTargetGroups);
                 }
 
                 // Not ideal but we dont want odd curves.
-                if (route.length > 2) {
-                    route.splice(1, route.length - 2);
-                }
-
-
+                // if (route.length > 2) {
+                //     //route.splice(1, route.length - 2);
+                // }
+                return lineFunction(route);
             }
 
 
@@ -356,16 +425,16 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             .attr("text-anchor", "end")
             .each(function(d, i, nodes) {
                 const currentLabel = this;
-                let overlap = false;
+                const overlapsWith = [];
+        
                 d3.selectAll("text.linklabel").each(function() {
                     if (this !== currentLabel && isOverlapping(currentLabel, this)) {
-                        overlap = true;
+                        overlapsWith.push(this);
                     }
                 });
-                if (overlap) {
-                    d3.select(this)
-                        .attr("text-anchor", "start")
-                        .attr("dx", 2); // Adjust the position to avoid overlap
+        
+                if (overlapsWith.length > 0) {
+                    minimizeOverlap(currentLabel, overlapsWith);
                 }
             })
             .raise();
@@ -610,18 +679,36 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 let source = d.source;
                 let target = d.target;
 
+                const sourceIndex = getNodeIndex(source);
+                const targetIndex = getNodeIndex(target);
+
                 let n = d.id;
                 if (n.startsWith("_g_")) {
-                    // This actually deals with subsumed groups, since only
-                    // the innermost group will include the element in its leaves.
-                    let targetGroup = groups.find(group => {
-                        let leaves = group.leaves.map(leaf => leaf.id);
-                        return leaves.includes(target.id);
 
-                    });
-                    target = targetGroup;
-                    target.innerBounds = target.bounds.inflate(-1);
+                    let potentialTargetGroups = getContainingGroups(groups, target);
+                    let potentialSourceGroups = getContainingGroups(groups, source);
 
+
+                    let targetGroup = potentialTargetGroups.find(group => group.keyNode === sourceIndex);
+                    let sourceGroup = potentialSourceGroups.find(group => group.keyNode === targetIndex);
+
+                    /*
+
+                        group has bounds, inner bounds AND padding.
+
+                    */
+
+                    if (sourceGroup) {
+                        source = sourceGroup;
+                        source.innerBounds = sourceGroup.bounds.inflate(-1 * sourceGroup.padding);
+                    }
+                    else if (targetGroup) {
+                        target = targetGroup;
+                        target.innerBounds = targetGroup.bounds.inflate(-1 * targetGroup.padding);
+                    }
+                    else {
+                        console.log("This is a group edge (_on tick_), but neither source nor target is a group.", d);
+                    }
                 }
 
 
