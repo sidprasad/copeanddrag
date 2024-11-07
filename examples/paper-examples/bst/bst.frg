@@ -29,4 +29,4 @@ pred binary_tree {
 
 
 
-run {binary_tree} for exactly 10 Node
+run {binary_tree} for exactly 5 Node

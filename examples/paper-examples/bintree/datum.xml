@@ -1,5 +1,5 @@
 <alloy builddate="Thursday, November 7th, 2024">
-<instance bitwidth="4" maxseq="-1" command="temporary-name_bst_1" filename="/no-name.rkt" version="3.5"  >
+<instance bitwidth="4" maxseq="-1" command="temporary-name_binarytree_1" filename="/no-name.rkt" version="3.5"  >
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>
@@ -19,25 +19,15 @@
 </sig>
 
 <field label="right" ID="5" parentID="4">
-<tuple><atom label="Node3"/><atom label="Node0"/></tuple>
+<tuple><atom label="Node2"/><atom label="Node1"/></tuple>
+<tuple><atom label="Node3"/><atom label="Node2"/></tuple>
+<tuple><atom label="Node4"/><atom label="Node0"/></tuple>
 <types><type ID="4"/><type ID="4"/></types>
 
 </field>
 
-<field label="key" ID="6" parentID="4">
-<tuple><atom label="Node0"/><atom label="7"/></tuple>
-<tuple><atom label="Node1"/><atom label="7"/></tuple>
-<tuple><atom label="Node2"/><atom label="6"/></tuple>
-<tuple><atom label="Node3"/><atom label="6"/></tuple>
-<tuple><atom label="Node4"/><atom label="5"/></tuple>
-<types><type ID="4"/><type ID="1"/></types>
-
-</field>
-
-<field label="left" ID="7" parentID="4">
-<tuple><atom label="Node1"/><atom label="Node4"/></tuple>
-<tuple><atom label="Node3"/><atom label="Node1"/></tuple>
-<tuple><atom label="Node4"/><atom label="Node2"/></tuple>
+<field label="left" ID="6" parentID="4">
+<tuple><atom label="Node4"/><atom label="Node3"/></tuple>
 <types><type ID="4"/><type ID="4"/></types>
 
 </field>
