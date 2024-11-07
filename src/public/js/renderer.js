@@ -233,6 +233,9 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
 
                 if (targetGroup) {
+
+                    console.log(`From source ${source.id} to the group ${targetGroup.id}`);
+
                     let newTargetCoords = closestPointOnRect(targetGroup.bounds, route[0]);
                     let currentTarget = route[route.length - 1];
                     currentTarget.x = newTargetCoords.x;
@@ -257,8 +260,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 if (route.length > 2) {
                     route.splice(1, route.length - 2);
                 }
-
-
             }
 
 
@@ -681,7 +682,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
                     if (sourceGroup) {
                         source = sourceGroup;
-                        console.log(sourceGroup);
                         source.innerBounds = source.bounds.inflate(-1);
                     }
                     else if (targetGroup) {
