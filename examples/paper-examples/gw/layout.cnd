@@ -1,0 +1,3 @@
+constraints:
+    - group: {field: animals, target: domain}
+

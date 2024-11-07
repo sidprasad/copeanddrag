@@ -286,9 +286,9 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 }
 
                 // Not ideal but we dont want odd curves.
-                // if (route.length > 2) {
-                //     //route.splice(1, route.length - 2);
-                // }
+                if (route.length > 2) {
+                    route.splice(1, route.length - 2);
+                }
                 return lineFunction(route);
             }
 
