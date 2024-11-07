@@ -1,6 +1,7 @@
 import { SimplexSolver, Variable, Expression, Strength, Inequality, LEQ, GEQ, LE } from 'cassowary';
 import { NodeWithMetadata } from './graphtowebcola';
 import { intersection } from 'lodash';
+import { relative } from 'path';
 
 class ConstraintValidator {
 
@@ -9,6 +10,9 @@ class ConstraintValidator {
     private colaNodes: NodeWithMetadata[];
 
     private variables: { [key: string]: { x: Variable, y: Variable } };
+
+
+    private added_constraints: any[];
 
     private groups: any[];
 
@@ -22,7 +26,7 @@ class ConstraintValidator {
         this.colaNodes = nodes;
         this.variables = {};
         this.groups = groups;
-
+        this.added_constraints = [];
         this.error = null;
     }
 
@@ -94,6 +98,30 @@ class ConstraintValidator {
 
 
 
+    private colaOrientationConstraintToString(constraint) {
+
+        let axis = constraint.axis;
+        let equality = constraint?.equality || false;
+
+        let left_idx = constraint.left;
+        let right_idx = constraint.right;
+
+        let left = this.colaNodes[left_idx].id;
+        let right = this.colaNodes[right_idx].id;
+
+
+        let relativePosition = axis === 'x' ? 'to the left of ' : 'above ';
+        if (axis === 'x' && equality) {
+            relativePosition += 'and horizontally aligned with ';
+        }
+        else if (axis === 'y' && equality) {
+            relativePosition += 'and vertically aligned with ';
+        }
+        return `ENSURE: ${left} is ${relativePosition} ${right}`;
+
+
+    }
+
 
     private webColaToCassowary(constraint) {
         let axis = constraint.axis;
@@ -117,25 +145,19 @@ class ConstraintValidator {
 
         try {
             this.solver.addConstraint(new Inequality(lhs, LEQ, rhs, strength));
+
             if(equality) {
                 this.solver.addConstraint(new Inequality(lhs, GEQ, rhs, strength));
             }
+            this.added_constraints.push(constraint);
         }
         catch (e) {
 
 
-            let leftNodeName = this.colaNodes[left].id;
-            let rightNodeName = this.colaNodes[right].id
+            let previousConstraintString = "<br><br>" + this.added_constraints.map((c) => this.colaOrientationConstraintToString(c)).join('<br>');
 
-            if (axis === 'x') {
-                this.error = `Layout not satisfiable! Could not place ${leftNodeName} to the left ${rightNodeName} and satisfy other constraints.`;
-            }
-            else if (axis === 'y') {
-                this.error = `Layout not satisfiable! Could not place ${leftNodeName} above ${rightNodeName} and satisfy other constraints.`;
-            }
-            else {
-                this.error = `Layout not satisfiable! Could not place ${leftNodeName} in relation to ${rightNodeName} and satisfy other constraints.`;
-            }
+            let currentConstraintString = this.colaOrientationConstraintToString(constraint);
+            this.error = `Layout not satisfiable! Constraint : ${currentConstraintString} and conflicts with the following constraints:` + previousConstraintString;
             console.log(e);
             return;
         }
