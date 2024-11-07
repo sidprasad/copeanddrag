@@ -3,7 +3,7 @@ constraints:
     - orientation: { field: id, directions: [directlyBelow]}
     - group: {field: active, target: domain}
     - group : {field: find_predecessor}
-    - group : {field: find_successor}
+
 directives:
     - projection: {sig: this/NodeData}
     - flag: hideDisconnected
