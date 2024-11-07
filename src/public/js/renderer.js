@@ -79,7 +79,10 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         d3.select(".zoomable").attr("transform", d3.event.transform);
     }
 
-    function getNodeIndex(nodeId) {
+    function getNodeIndex(n) {
+
+        // Check if n is of type string
+        const nodeId = typeof n === 'string' ? n : n.id;
         return nodes.findIndex(node => node.id === nodeId);
     }
 
