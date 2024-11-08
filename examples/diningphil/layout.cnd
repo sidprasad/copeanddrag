@@ -1,0 +1,3 @@
+constraints:
+    - cyclic : {field: left, direction: clockwise}
+    - cyclic : {field: lFork}

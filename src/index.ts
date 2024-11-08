@@ -102,7 +102,20 @@ app.post('/', (req, res) => {
         loopBack = 0;
     }
 
-    let {layout, projectionData }  = li.generateLayout(instances[instanceNumber], projections);
+    let {layout, projectionData, error }  = li.generateLayout(instances[instanceNumber], projections);
+
+    if (error) {
+
+        // TODO: THe reporting here should be more meaningful at some point.
+        // TODO: Change the output.
+
+        let internally_inconsistent = "Internally inconsistent constraints: " + error;
+
+        console.error(internally_inconsistent);
+        // This is "I am a teapot" error code, which is a joke error code.
+        res.status(418).send(internally_inconsistent);
+        return;
+    }
 
 
     let cl = new WebColaLayout(layout);
@@ -114,14 +127,15 @@ app.post('/', (req, res) => {
 
 
     const constraintValidator = new ConstraintValidator(colaConstraints, colaNodes, colaGroups);
-    const error = constraintValidator.validateConstraints();
-    if (error) {
+    const inconsistent_error = constraintValidator.validateConstraints();
+    if (inconsistent_error) {
 
         // TODO: THe reporting here should be more meaningful at some point.
+        // TODO: Change the output.
 
         console.error("Error validating constraints:", error);
         // This is "I am a teapot" error code, which is a joke error code.
-        res.status(418).send(error);
+        res.status(418).send(inconsistent_error);
         return;
     }
 

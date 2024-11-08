@@ -1,19 +1,7 @@
 constraints:
     - cyclic : {field : next}
-    - cyclic : {field: left, direction: counterclockwise}
-    - cyclic : {field: right, direction: counterclockwise}
 directives:
+    - attribute : {field: left}
+    - attribute : {field: right}
     - flag: hideDisconnected
     - projection : {sig: this/Table}
-    - icon:
-        sig: this/Fork
-        icon:
-            path: fork.png
-            height: 50
-            width: 50
-    - icon:
-        sig: this/P
-        icon:
-            path:  phil.png
-            height: 70
-            width: 70

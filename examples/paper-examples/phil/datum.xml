@@ -1,6 +1,6 @@
 <alloy builddate="2021-11-19T05:45:51.188Z">
 
-<instance bitwidth="4" maxseq="4" mintrace="-1" maxtrace="-1" command="Run run$1 for 4" filename="c:\Users\nivsi\Desktop\papers\forge\copeanddrag\alloy\alloy-examples\philosophers\philosophers.als" tracelength="1" backloop="0">
+<instance bitwidth="4" maxseq="7" mintrace="-1" maxtrace="-1" command="Run run$1 for 15 but exactly 8 P" filename="c:\Users\nivsi\Desktop\AlloyStuff\models\models\logic\philosophers.als" tracelength="1" backloop="0">
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>
@@ -16,14 +16,67 @@
    <atom label="Table$1"/>
    <atom label="Table$2"/>
    <atom label="Table$3"/>
+   <atom label="Table$4"/>
+   <atom label="Table$5"/>
+   <atom label="Table$6"/>
+   <atom label="Table$7"/>
+   <atom label="Table$8"/>
+   <atom label="Table$9"/>
+   <atom label="Table$10"/>
+   <atom label="Table$11"/>
+   <atom label="Table$12"/>
+   <atom label="Table$13"/>
+   <atom label="Table$14"/>
 </sig>
 
 <field label="setting" ID="5" parentID="4">
-   <tuple> <atom label="Table$1"/> <atom label="P$3"/> <atom label="Fork$0"/> </tuple>
-   <tuple> <atom label="Table$2"/> <atom label="P$3"/> <atom label="Fork$0"/> </tuple>
-   <tuple> <atom label="Table$2"/> <atom label="P$3"/> <atom label="Fork$2"/> </tuple>
-   <tuple> <atom label="Table$3"/> <atom label="P$3"/> <atom label="Fork$0"/> </tuple>
-   <tuple> <atom label="Table$3"/> <atom label="P$3"/> <atom label="Fork$2"/> </tuple>
+   <tuple> <atom label="Table$1"/> <atom label="P$7"/> <atom label="Fork$4"/> </tuple>
+   <tuple> <atom label="Table$2"/> <atom label="P$7"/> <atom label="Fork$0"/> </tuple>
+   <tuple> <atom label="Table$2"/> <atom label="P$7"/> <atom label="Fork$4"/> </tuple>
+   <tuple> <atom label="Table$3"/> <atom label="P$6"/> <atom label="Fork$1"/> </tuple>
+   <tuple> <atom label="Table$3"/> <atom label="P$7"/> <atom label="Fork$0"/> </tuple>
+   <tuple> <atom label="Table$3"/> <atom label="P$7"/> <atom label="Fork$4"/> </tuple>
+   <tuple> <atom label="Table$4"/> <atom label="P$5"/> <atom label="Fork$2"/> </tuple>
+   <tuple> <atom label="Table$4"/> <atom label="P$6"/> <atom label="Fork$1"/> </tuple>
+   <tuple> <atom label="Table$4"/> <atom label="P$7"/> <atom label="Fork$0"/> </tuple>
+   <tuple> <atom label="Table$4"/> <atom label="P$7"/> <atom label="Fork$4"/> </tuple>
+   <tuple> <atom label="Table$5"/> <atom label="P$5"/> <atom label="Fork$2"/> </tuple>
+   <tuple> <atom label="Table$5"/> <atom label="P$6"/> <atom label="Fork$1"/> </tuple>
+   <tuple> <atom label="Table$6"/> <atom label="P$5"/> <atom label="Fork$2"/> </tuple>
+   <tuple> <atom label="Table$6"/> <atom label="P$6"/> <atom label="Fork$1"/> </tuple>
+   <tuple> <atom label="Table$6"/> <atom label="P$7"/> <atom label="Fork$0"/> </tuple>
+   <tuple> <atom label="Table$7"/> <atom label="P$5"/> <atom label="Fork$2"/> </tuple>
+   <tuple> <atom label="Table$7"/> <atom label="P$6"/> <atom label="Fork$1"/> </tuple>
+   <tuple> <atom label="Table$7"/> <atom label="P$6"/> <atom label="Fork$5"/> </tuple>
+   <tuple> <atom label="Table$7"/> <atom label="P$7"/> <atom label="Fork$0"/> </tuple>
+   <tuple> <atom label="Table$8"/> <atom label="P$5"/> <atom label="Fork$2"/> </tuple>
+   <tuple> <atom label="Table$8"/> <atom label="P$7"/> <atom label="Fork$0"/> </tuple>
+   <tuple> <atom label="Table$9"/> <atom label="P$5"/> <atom label="Fork$2"/> </tuple>
+   <tuple> <atom label="Table$9"/> <atom label="P$7"/> <atom label="Fork$0"/> </tuple>
+   <tuple> <atom label="Table$9"/> <atom label="P$7"/> <atom label="Fork$4"/> </tuple>
+   <tuple> <atom label="Table$10"/> <atom label="P$4"/> <atom label="Fork$3"/> </tuple>
+   <tuple> <atom label="Table$10"/> <atom label="P$5"/> <atom label="Fork$2"/> </tuple>
+   <tuple> <atom label="Table$10"/> <atom label="P$7"/> <atom label="Fork$0"/> </tuple>
+   <tuple> <atom label="Table$10"/> <atom label="P$7"/> <atom label="Fork$4"/> </tuple>
+   <tuple> <atom label="Table$11"/> <atom label="P$3"/> <atom label="Fork$7"/> </tuple>
+   <tuple> <atom label="Table$11"/> <atom label="P$4"/> <atom label="Fork$3"/> </tuple>
+   <tuple> <atom label="Table$11"/> <atom label="P$5"/> <atom label="Fork$2"/> </tuple>
+   <tuple> <atom label="Table$11"/> <atom label="P$7"/> <atom label="Fork$0"/> </tuple>
+   <tuple> <atom label="Table$11"/> <atom label="P$7"/> <atom label="Fork$4"/> </tuple>
+   <tuple> <atom label="Table$12"/> <atom label="P$3"/> <atom label="Fork$7"/> </tuple>
+   <tuple> <atom label="Table$12"/> <atom label="P$4"/> <atom label="Fork$3"/> </tuple>
+   <tuple> <atom label="Table$12"/> <atom label="P$5"/> <atom label="Fork$2"/> </tuple>
+   <tuple> <atom label="Table$12"/> <atom label="P$6"/> <atom label="Fork$5"/> </tuple>
+   <tuple> <atom label="Table$12"/> <atom label="P$7"/> <atom label="Fork$0"/> </tuple>
+   <tuple> <atom label="Table$12"/> <atom label="P$7"/> <atom label="Fork$4"/> </tuple>
+   <tuple> <atom label="Table$13"/> <atom label="P$3"/> <atom label="Fork$7"/> </tuple>
+   <tuple> <atom label="Table$13"/> <atom label="P$4"/> <atom label="Fork$3"/> </tuple>
+   <tuple> <atom label="Table$13"/> <atom label="P$5"/> <atom label="Fork$2"/> </tuple>
+   <tuple> <atom label="Table$13"/> <atom label="P$6"/> <atom label="Fork$5"/> </tuple>
+   <tuple> <atom label="Table$14"/> <atom label="P$3"/> <atom label="Fork$7"/> </tuple>
+   <tuple> <atom label="Table$14"/> <atom label="P$4"/> <atom label="Fork$3"/> </tuple>
+   <tuple> <atom label="Table$14"/> <atom label="P$5"/> <atom label="Fork$2"/> </tuple>
+   <tuple> <atom label="Table$14"/> <atom label="P$6"/> <atom label="Fork$5"/> </tuple>
    <types> <type ID="4"/> <type ID="6"/> <type ID="7"/> </types>
 </field>
 
@@ -32,6 +85,10 @@
    <atom label="Fork$1"/>
    <atom label="Fork$2"/>
    <atom label="Fork$3"/>
+   <atom label="Fork$4"/>
+   <atom label="Fork$5"/>
+   <atom label="Fork$6"/>
+   <atom label="Fork$7"/>
 </sig>
 
 <sig label="this/P" ID="6" parentID="2">
@@ -39,29 +96,45 @@
    <atom label="P$1"/>
    <atom label="P$2"/>
    <atom label="P$3"/>
+   <atom label="P$4"/>
+   <atom label="P$5"/>
+   <atom label="P$6"/>
+   <atom label="P$7"/>
 </sig>
 
 <field label="next" ID="8" parentID="6">
-   <tuple> <atom label="P$0"/> <atom label="P$2"/> </tuple>
-   <tuple> <atom label="P$1"/> <atom label="P$0"/> </tuple>
-   <tuple> <atom label="P$2"/> <atom label="P$3"/> </tuple>
-   <tuple> <atom label="P$3"/> <atom label="P$1"/> </tuple>
+   <tuple> <atom label="P$0"/> <atom label="P$6"/> </tuple>
+   <tuple> <atom label="P$1"/> <atom label="P$4"/> </tuple>
+   <tuple> <atom label="P$2"/> <atom label="P$1"/> </tuple>
+   <tuple> <atom label="P$3"/> <atom label="P$0"/> </tuple>
+   <tuple> <atom label="P$4"/> <atom label="P$5"/> </tuple>
+   <tuple> <atom label="P$5"/> <atom label="P$7"/> </tuple>
+   <tuple> <atom label="P$6"/> <atom label="P$2"/> </tuple>
+   <tuple> <atom label="P$7"/> <atom label="P$3"/> </tuple>
    <types> <type ID="6"/> <type ID="6"/> </types>
 </field>
 
 <field label="left" ID="9" parentID="6">
-   <tuple> <atom label="P$0"/> <atom label="Fork$3"/> </tuple>
-   <tuple> <atom label="P$1"/> <atom label="Fork$2"/> </tuple>
-   <tuple> <atom label="P$2"/> <atom label="Fork$1"/> </tuple>
-   <tuple> <atom label="P$3"/> <atom label="Fork$0"/> </tuple>
+   <tuple> <atom label="P$0"/> <atom label="Fork$7"/> </tuple>
+   <tuple> <atom label="P$1"/> <atom label="Fork$6"/> </tuple>
+   <tuple> <atom label="P$2"/> <atom label="Fork$5"/> </tuple>
+   <tuple> <atom label="P$3"/> <atom label="Fork$4"/> </tuple>
+   <tuple> <atom label="P$4"/> <atom label="Fork$3"/> </tuple>
+   <tuple> <atom label="P$5"/> <atom label="Fork$2"/> </tuple>
+   <tuple> <atom label="P$6"/> <atom label="Fork$1"/> </tuple>
+   <tuple> <atom label="P$7"/> <atom label="Fork$0"/> </tuple>
    <types> <type ID="6"/> <type ID="7"/> </types>
 </field>
 
 <field label="right" ID="10" parentID="6">
    <tuple> <atom label="P$0"/> <atom label="Fork$1"/> </tuple>
    <tuple> <atom label="P$1"/> <atom label="Fork$3"/> </tuple>
-   <tuple> <atom label="P$2"/> <atom label="Fork$0"/> </tuple>
-   <tuple> <atom label="P$3"/> <atom label="Fork$2"/> </tuple>
+   <tuple> <atom label="P$2"/> <atom label="Fork$6"/> </tuple>
+   <tuple> <atom label="P$3"/> <atom label="Fork$7"/> </tuple>
+   <tuple> <atom label="P$4"/> <atom label="Fork$2"/> </tuple>
+   <tuple> <atom label="P$5"/> <atom label="Fork$0"/> </tuple>
+   <tuple> <atom label="P$6"/> <atom label="Fork$5"/> </tuple>
+   <tuple> <atom label="P$7"/> <atom label="Fork$4"/> </tuple>
    <types> <type ID="6"/> <type ID="7"/> </types>
 </field>
 
@@ -78,6 +151,17 @@
    <tuple> <atom label="ordering/Ord$0"/> <atom label="Table$0"/> <atom label="Table$1"/> </tuple>
    <tuple> <atom label="ordering/Ord$0"/> <atom label="Table$1"/> <atom label="Table$2"/> </tuple>
    <tuple> <atom label="ordering/Ord$0"/> <atom label="Table$2"/> <atom label="Table$3"/> </tuple>
+   <tuple> <atom label="ordering/Ord$0"/> <atom label="Table$3"/> <atom label="Table$4"/> </tuple>
+   <tuple> <atom label="ordering/Ord$0"/> <atom label="Table$4"/> <atom label="Table$5"/> </tuple>
+   <tuple> <atom label="ordering/Ord$0"/> <atom label="Table$5"/> <atom label="Table$6"/> </tuple>
+   <tuple> <atom label="ordering/Ord$0"/> <atom label="Table$6"/> <atom label="Table$7"/> </tuple>
+   <tuple> <atom label="ordering/Ord$0"/> <atom label="Table$7"/> <atom label="Table$8"/> </tuple>
+   <tuple> <atom label="ordering/Ord$0"/> <atom label="Table$8"/> <atom label="Table$9"/> </tuple>
+   <tuple> <atom label="ordering/Ord$0"/> <atom label="Table$9"/> <atom label="Table$10"/> </tuple>
+   <tuple> <atom label="ordering/Ord$0"/> <atom label="Table$10"/> <atom label="Table$11"/> </tuple>
+   <tuple> <atom label="ordering/Ord$0"/> <atom label="Table$11"/> <atom label="Table$12"/> </tuple>
+   <tuple> <atom label="ordering/Ord$0"/> <atom label="Table$12"/> <atom label="Table$13"/> </tuple>
+   <tuple> <atom label="ordering/Ord$0"/> <atom label="Table$13"/> <atom label="Table$14"/> </tuple>
    <types> <type ID="11"/> <type ID="4"/> <type ID="4"/> </types>
 </field>
 
@@ -85,9 +169,20 @@
 </sig>
 
 <skolem label="$p" ID="14">
-   <tuple> <atom label="Table$0"/> <atom label="P$3"/> </tuple>
-   <tuple> <atom label="Table$1"/> <atom label="P$3"/> </tuple>
-   <tuple> <atom label="Table$2"/> <atom label="P$2"/> </tuple>
+   <tuple> <atom label="Table$0"/> <atom label="P$7"/> </tuple>
+   <tuple> <atom label="Table$1"/> <atom label="P$7"/> </tuple>
+   <tuple> <atom label="Table$2"/> <atom label="P$6"/> </tuple>
+   <tuple> <atom label="Table$3"/> <atom label="P$5"/> </tuple>
+   <tuple> <atom label="Table$4"/> <atom label="P$7"/> </tuple>
+   <tuple> <atom label="Table$5"/> <atom label="P$7"/> </tuple>
+   <tuple> <atom label="Table$6"/> <atom label="P$6"/> </tuple>
+   <tuple> <atom label="Table$7"/> <atom label="P$6"/> </tuple>
+   <tuple> <atom label="Table$8"/> <atom label="P$7"/> </tuple>
+   <tuple> <atom label="Table$9"/> <atom label="P$4"/> </tuple>
+   <tuple> <atom label="Table$10"/> <atom label="P$3"/> </tuple>
+   <tuple> <atom label="Table$11"/> <atom label="P$6"/> </tuple>
+   <tuple> <atom label="Table$12"/> <atom label="P$7"/> </tuple>
+   <tuple> <atom label="Table$13"/> <atom label="P$7"/> </tuple>
    <types> <type ID="4"/> <type ID="6"/> </types>
 </skolem>
 

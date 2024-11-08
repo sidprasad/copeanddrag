@@ -1,9 +1,8 @@
 #lang forge/temporal
 
 sig P {
-    var lFork : lone Fork,
-    var rFork : lone Fork,
-    leftP : one P
+    left : one P,
+    forks : set Fork,
 }
 
 
