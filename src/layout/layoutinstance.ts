@@ -514,7 +514,7 @@ export class LayoutInstance {
         const groups = this.generateGroups(g);
         const colors = this.colorNodesByType(g, a);
 
-        this.ensureNoExtraNodes(g, a);
+        //this.ensureNoExtraNodes(g, a);
 
 
 
