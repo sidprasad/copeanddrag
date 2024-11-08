@@ -144,14 +144,19 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     const default_node_width = 70;
     
 
+
+    // TODO: Figure out WHEN to use flowLayout and when not to use it.
+    // I think having directly above/ below makes it impossible to have flow layout 'y' *unless we have heirarchy*
+
     colaLayout
         .nodes(nodes)
         .links(edges)
         .constraints(constraints)
         .groups(groups)
         .groupCompactness(1e-3)
-        .flowLayout("y", 100) // This is in line with the DAGRE estimate
+        //.flowLayout("y", 100) // Adding this in causes an issue in terms of layout. This is in line with the DAGRE estimate
         .symmetricDiffLinkLengths(min_sep + default_node_width, 0.1);
+        //.jaccardLinkLengths(LINK_DISTANCE, 2);
         //.linkDistance(50); // I *think* this is minimum link distance
 
     var lineFunction = d3.line()
