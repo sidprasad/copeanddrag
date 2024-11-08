@@ -1,0 +1,36 @@
+constraints:
+  - group:
+      field: fruit
+      target: domain
+directives:
+  - flag: hideDisconnectedBuiltIns
+  - color:
+      sig: Banana
+      value: '#FDDA0D'
+  - color:
+      sig: Apple
+      value: red
+  - color:
+      sig: Pear
+      value: green
+  - color:
+      sig: Basket
+      value: grey
+  - icon:
+      sig: Banana
+      icon:
+        path: 'https://sidprasad.github.io/diagrams/img/banana.png'
+        height: 70
+        width: 70
+  - icon:
+      sig: Apple
+      icon:
+        path: 'https://sidprasad.github.io/diagrams/img/apple.png'
+        height: 70
+        width: 70
+  - icon:
+      sig: Pear
+      icon:
+        path: 'https://sidprasad.github.io/diagrams/img/pear.png'
+        height: 70
+        width: 70

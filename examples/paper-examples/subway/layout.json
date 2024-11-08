@@ -1,0 +1,20 @@
+{
+    "fieldDirections": [
+        {
+            "fieldName": "north",
+            "directions": [
+                "directlyAbove"
+            ]
+        },
+        {
+            "fieldName": "east",
+            "directions": [
+                "directlyRight"
+            ]
+        }
+    ],
+    "groupBy": [   ],
+    "attributeFields": [    ],
+    "hideDisconnected": false,
+    "hideDisconnectedBuiltIns": true
+}

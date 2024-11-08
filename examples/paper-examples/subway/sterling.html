@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Zoomable Image</title>
+    <style>
+        #svg-container {
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #zoomable-image {
+            width: 100%;
+            height: auto;
+        }
+
+        .svg-border {
+            border: 2px solid black;
+        }
+    </style>
+    <!-- Include D3.js library -->
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+</head>
+
+<body>
+
+    <div class="container">
+
+
+        <div class="container-fluid" id="svg-container">
+            <svg id="diagram" width="800" height="800" class="svg-border">
+                <g class="zoomable">
+                        <g transform="matrix(1,0,0,1,0,0)">
+                            <g id="">
+                                <defs>
+                                    <marker id="arrow-10-[#333]" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="10"
+                                        markerHeight="10" markerUnits="userSpaceOnUse" orient="auto" fill="#333">
+                                        <path d="M 0 0 L 10 5 L 0 10 z"></path>
+                                    </marker>
+                                </defs>
+                                <g class="nodes">
+                                    <g id="Station0" transform="translate(-37.5 -400)">
+                                        <rect x="-50" y="-30" width="100" height="60"
+                                            style="stroke: rgb(51, 51, 51); stroke-width: 1; fill: rgb(255, 255, 255);">
+                                        </rect><text x="0" y="0" dy="0.33em"
+                                            style="font-family: monospace; font-size: 14px; text-anchor: middle; user-select: none; fill: rgb(51, 51, 51);">Station0</text>
+                                    </g>
+                                    <g id="Station1" transform="translate(27.5 -240)">
+                                        <rect x="-50" y="-30" width="100" height="60"
+                                            style="stroke: rgb(51, 51, 51); stroke-width: 1; fill: rgb(255, 255, 255);">
+                                        </rect><text x="0" y="0" dy="0.33em"
+                                            style="font-family: monospace; font-size: 14px; text-anchor: middle; user-select: none; fill: rgb(51, 51, 51);">Station1</text>
+                                    </g>
+                                    <g id="Station2" transform="translate(37.5 -80)">
+                                        <rect x="-50" y="-30" width="100" height="60"
+                                            style="stroke: rgb(51, 51, 51); stroke-width: 1; fill: rgb(255, 255, 255);">
+                                        </rect><text x="0" y="0" dy="0.33em"
+                                            style="font-family: monospace; font-size: 14px; text-anchor: middle; user-select: none; fill: rgb(51, 51, 51);">Station2</text>
+                                    </g>
+                                    <g id="Station3" transform="translate(-27.5 400)">
+                                        <rect x="-50" y="-30" width="100" height="60"
+                                            style="stroke: rgb(51, 51, 51); stroke-width: 1; fill: rgb(255, 255, 255);">
+                                        </rect><text x="0" y="0" dy="0.33em"
+                                            style="font-family: monospace; font-size: 14px; text-anchor: middle; user-select: none; fill: rgb(51, 51, 51);">Station3</text>
+                                    </g>
+                                    <g id="Station4" transform="translate(37.5 80)">
+                                        <rect x="-50" y="-30" width="100" height="60"
+                                            style="stroke: rgb(51, 51, 51); stroke-width: 1; fill: rgb(255, 255, 255);">
+                                        </rect><text x="0" y="0" dy="0.33em"
+                                            style="font-family: monospace; font-size: 14px; text-anchor: middle; user-select: none; fill: rgb(51, 51, 51);">Station4</text>
+                                    </g>
+                                    <g id="Station5" transform="translate(-27.5 240)">
+                                        <rect x="-50" y="-30" width="100" height="60"
+                                            style="stroke: rgb(51, 51, 51); stroke-width: 1; fill: rgb(255, 255, 255);">
+                                        </rect><text x="0" y="0" dy="0.33em"
+                                            style="font-family: monospace; font-size: 14px; text-anchor: middle; user-select: none; fill: rgb(51, 51, 51);">Station5</text>
+                                    </g>
+                                </g>
+                                <g class="edges">
+                                    <g id="Station<:east:Station4->Station5">
+                                        <path marker-end="url(#arrow-10-[#333])"
+                                            style="stroke: rgb(51, 51, 51); stroke-width: 1; fill: none;"
+                                            d="M37.5,110L37.5,118.33333333333333C37.5,126.66666666666667,37.5,143.33333333333334,31.780154863993328,158.70647684733072C26.060309727986652,174.07962036132812,14.620619455973307,188.15924072265625,8.900774319966635,195.1990509033203L3.180929183959961,202.23886108398438">
+                                        </path>
+                                        <path
+                                            d="M37.5,110L37.5,118.33333333333333C37.5,126.66666666666667,37.5,143.33333333333334,30.729166666666668,160C23.95833333333333,176.66666666666666,10.416666666666657,193.33333333333334,3.6458333333333215,201.66666666666666L-3.125000000000014,210"
+                                            stroke="transparent" stroke-width="11" fill="none"></path><text
+                                            x="28.755239486694336" y="164.47470092773438" dy="0.33em"
+                                            style="font-family: monospace; font-size: 12px; text-anchor: middle; user-select: none;">east</text>
+                                    </g>
+                                    <g id="Station<:east:Station5->Station3">
+                                        <path marker-end="url(#arrow-10-[#333])"
+                                            style="stroke: rgb(51, 51, 51); stroke-width: 1; fill: none;"
+                                            d="M-27.5,270L-27.5,360"></path>
+                                        <path d="M-27.5,270L-27.500000000000014,370" stroke="transparent"
+                                            stroke-width="11" fill="none"></path><text x="-27.499998092651367" y="320"
+                                            dy="0.33em"
+                                            style="font-family: monospace; font-size: 12px; text-anchor: middle; user-select: none;">east</text>
+                                    </g>
+                                    <g id="Station<:next:Station0->Station5">
+                                        <path marker-end="url(#arrow-10-[#333])"
+                                            style="stroke: rgb(51, 51, 51); stroke-width: 1; fill: none;"
+                                            d="M-58.125,-370L-63.854166666666664,-361.6666666666667C-69.58333333333333,-353.3333333333333,-81.04166666666667,-336.6666666666667,-86.77083333333333,-315C-92.5,-293.3333333333333,-92.5,-266.6666666666667,-92.5,-240C-92.5,-213.33333333333334,-92.5,-186.66666666666666,-92.5,-160C-92.5,-133.33333333333334,-92.5,-106.66666666666667,-92.5,-80C-92.5,-53.333333333333336,-92.5,-26.666666666666668,-92.5,0C-92.5,26.666666666666668,-92.5,53.333333333333336,-92.5,80C-92.5,106.66666666666667,-92.5,133.33333333333334,-86.78015454610188,153.70647684733072C-81.06030909220378,174.07962036132812,-69.62061818440755,188.15924072265625,-63.90077273050944,195.1990509033203L-58.18092727661133,202.23886108398438">
+                                        </path>
+                                        <path
+                                            d="M-58.125,-370L-63.854166666666664,-361.6666666666667C-69.58333333333333,-353.3333333333333,-81.04166666666667,-336.6666666666667,-86.77083333333333,-315C-92.5,-293.3333333333333,-92.5,-266.6666666666667,-92.5,-240C-92.5,-213.33333333333334,-92.5,-186.66666666666666,-92.5,-160C-92.5,-133.33333333333334,-92.5,-106.66666666666667,-92.5,-80C-92.5,-53.333333333333336,-92.5,-26.666666666666668,-92.5,0C-92.5,26.666666666666668,-92.5,53.333333333333336,-92.5,80C-92.5,106.66666666666667,-92.5,133.33333333333334,-85.72916666666667,155C-78.95833333333333,176.66666666666666,-65.41666666666667,193.33333333333334,-58.64583333333334,201.66666666666666L-51.875000000000014,210"
+                                            stroke="transparent" stroke-width="11" fill="none"></path><text x="-92.5"
+                                            y="-78.58660888671875" dy="0.33em"
+                                            style="font-family: monospace; font-size: 12px; text-anchor: middle; user-select: none;">next</text>
+                                    </g>
+                                    <g id="Station<:next:Station1->Station5">
+                                        <path marker-end="url(#arrow-10-[#333])"
+                                            style="stroke: rgb(51, 51, 51); stroke-width: 1; fill: none;"
+                                            d="M-9.999999999999986,-210L-20.416666666666654,-201.66666666666666C-30.833333333333325,-193.33333333333334,-51.666666666666664,-176.66666666666666,-62.083333333333336,-155C-72.5,-133.33333333333334,-72.5,-106.66666666666667,-72.5,-80C-72.5,-53.333333333333336,-72.5,-26.666666666666668,-72.5,0C-72.5,26.666666666666668,-72.5,53.333333333333336,-72.5,80C-72.5,106.66666666666667,-72.5,133.33333333333334,-68.62958908081055,153.5473658243815C-64.7591781616211,173.7613983154297,-57.01835632324219,187.52279663085938,-53.147945404052734,194.40349578857422L-49.27753448486328,201.28419494628906">
+                                        </path>
+                                        <path
+                                            d="M-9.999999999999986,-210L-20.416666666666654,-201.66666666666666C-30.833333333333325,-193.33333333333334,-51.666666666666664,-176.66666666666666,-62.083333333333336,-155C-72.5,-133.33333333333334,-72.5,-106.66666666666667,-72.5,-80C-72.5,-53.333333333333336,-72.5,-26.666666666666668,-72.5,0C-72.5,26.666666666666668,-72.5,53.333333333333336,-72.5,80C-72.5,106.66666666666667,-72.5,133.33333333333334,-67.8125,155C-63.125,176.66666666666666,-53.75000000000001,193.33333333333334,-49.06250000000001,201.66666666666666L-44.375000000000014,210"
+                                            stroke="transparent" stroke-width="11" fill="none"></path><text x="-72.5"
+                                            y="-8.7332763671875" dy="0.33em"
+                                            style="font-family: monospace; font-size: 12px; text-anchor: middle; user-select: none;">next</text>
+                                    </g>
+                                    <g id="Station<:next:Station2->Station1">
+                                        <path marker-end="url(#arrow-10-[#333])"
+                                            style="stroke: rgb(51, 51, 51); stroke-width: 1; fill: none;"
+                                            d="M41.25,-110L42.291666666666664,-118.33333333333333C43.333333333333336,-126.66666666666667,45.416666666666664,-143.33333333333334,44.77912712097168,-158.38307189941406C44.141587575276695,-173.43281046549478,40.78317515055338,-186.8656209309896,39.103968938191734,-193.58202616373697L37.42476272583008,-200.29843139648438">
+                                        </path>
+                                        <path
+                                            d="M41.25,-110L42.291666666666664,-118.33333333333333C43.333333333333336,-126.66666666666667,45.416666666666664,-143.33333333333334,44.375,-160C43.333333333333336,-176.66666666666666,39.16666666666667,-193.33333333333334,37.083333333333336,-201.66666666666666L35.00000000000001,-210"
+                                            stroke="transparent" stroke-width="11" fill="none"></path><text
+                                            x="44.35041046142578" y="-160.38441467285156" dy="0.33em"
+                                            style="font-family: monospace; font-size: 12px; text-anchor: middle; user-select: none;">next</text>
+                                    </g>
+                                    <g id="Station<:next:Station4->Station2">
+                                        <path marker-end="url(#arrow-10-[#333])"
+                                            style="stroke: rgb(51, 51, 51); stroke-width: 1; fill: none;"
+                                            d="M41.25,50L42.291666666666664,41.666666666666664C43.333333333333336,33.333333333333336,45.416666666666664,16.666666666666668,45.623311360677086,1.6538060506184895C45.8299560546875,-13.359054565429688,44.159912109375,-26.718109130859375,43.32489013671875,-33.39763641357422L42.4898681640625,-40.07716369628906">
+                                        </path>
+                                        <path
+                                            d="M41.25,50L42.291666666666664,41.666666666666664C43.333333333333336,33.333333333333336,45.416666666666664,16.666666666666668,45.416666666666664,0C45.416666666666664,-16.666666666666668,43.333333333333336,-33.333333333333336,42.29166666666667,-41.666666666666664L41.25000000000001,-50"
+                                            stroke="transparent" stroke-width="11" fill="none"></path><text
+                                            x="45.41666793823242" y="0" dy="0.33em"
+                                            style="font-family: monospace; font-size: 12px; text-anchor: middle; user-select: none;">next</text>
+                                    </g>
+                                    <g id="Station<:next:Station5->Station3">
+                                        <path marker-end="url(#arrow-10-[#333])"
+                                            style="stroke: rgb(51, 51, 51); stroke-width: 1; fill: none;"
+                                            d="M-27.5,270L-27.5,278.3333333333333C-27.5,286.6666666666667,-27.5,303.3333333333333,-27.5,318.3333333333333C-27.5,333.3333333333333,-27.5,346.6666666666667,-27.5,353.3333333333333L-27.5,360">
+                                        </path>
+                                        <path
+                                            d="M-27.5,270L-27.5,278.3333333333333C-27.5,286.6666666666667,-27.5,303.3333333333333,-27.5,320C-27.500000000000004,336.6666666666667,-27.50000000000001,353.3333333333333,-27.50000000000001,361.6666666666667L-27.500000000000014,370"
+                                            stroke="transparent" stroke-width="11" fill="none"></path><text x="-27.5"
+                                            y="320" dy="0.33em"
+                                            style="font-family: monospace; font-size: 12px; text-anchor: middle; user-select: none;">next</text>
+                                    </g>
+                                    <g id="Station<:north:Station0->Station1">
+                                        <path marker-end="url(#arrow-10-[#333])"
+                                            style="stroke: rgb(51, 51, 51); stroke-width: 1; fill: none;"
+                                            d="M-13.125,-370L-6.354166666666667,-361.6666666666667C0.4166666666666667,-353.3333333333333,13.958333333333334,-336.6666666666667,20.72888469696045,-321.6666666666667C27.499436060587566,-306.6666666666667,27.49887212117513,-293.3333333333333,27.498590151468914,-286.6666666666667L27.498308181762695,-280">
+                                        </path>
+                                        <path
+                                            d="M-13.125,-370L-6.354166666666667,-361.6666666666667C0.4166666666666667,-353.3333333333333,13.958333333333334,-336.6666666666667,20.729166666666664,-320C27.499999999999996,-303.3333333333333,27.49999999999999,-286.6666666666667,27.49999999999999,-278.3333333333333L27.499999999999986,-270"
+                                            stroke="transparent" stroke-width="11" fill="none"></path><text
+                                            x="18.75522232055664" y="-324.47467041015625" dy="0.33em"
+                                            style="font-family: monospace; font-size: 12px; text-anchor: middle; user-select: none;">north</text>
+                                    </g>
+                                    <g id="Station<:north:Station1->Station2">
+                                        <path marker-end="url(#arrow-10-[#333])"
+                                            style="stroke: rgb(51, 51, 51); stroke-width: 1; fill: none;"
+                                            d="M27.5,-210L27.5,-201.66666666666666C27.5,-193.33333333333334,27.5,-176.66666666666666,28.33498191833496,-161.65380223592123C29.169963836669922,-146.64093780517578,30.839927673339844,-133.28187561035156,31.674909591674805,-126.60234451293945L32.509891510009766,-119.92281341552734">
+                                        </path>
+                                        <path
+                                            d="M27.5,-210L27.5,-201.66666666666666C27.5,-193.33333333333334,27.5,-176.66666666666666,28.541666666666668,-160C29.58333333333333,-143.33333333333334,31.666666666666657,-126.66666666666667,32.70833333333332,-118.33333333333333L33.749999999999986,-110"
+                                            stroke="transparent" stroke-width="11" fill="none"></path><text
+                                            x="28.54988670349121" y="-159.8704833984375" dy="0.33em"
+                                            style="font-family: monospace; font-size: 12px; text-anchor: middle; user-select: none;">north</text>
+                                    </g>
+                                    <g id="Station<:north:Station2->Station4">
+                                        <path marker-end="url(#arrow-10-[#333])"
+                                            style="stroke: rgb(51, 51, 51); stroke-width: 1; fill: none;"
+                                            d="M20.625,-50L15.9375,-41.666666666666664C11.25,-33.333333333333336,1.875,-16.666666666666668,1.0579148928324382,-1.4526360829671223C0.2408297856648763,13.761394500732422,7.981659571329753,27.522789001464844,11.852074464162191,34.403486251831055L15.722489356994629,41.284183502197266">
+                                        </path>
+                                        <path
+                                            d="M20.625,-50L15.9375,-41.666666666666664C11.25,-33.333333333333336,1.875,-16.666666666666668,1.874999999999999,0C1.8749999999999976,16.666666666666668,11.249999999999995,33.333333333333336,15.937499999999995,41.666666666666664L20.624999999999993,50"
+                                            stroke="transparent" stroke-width="11" fill="none"></path><text x="1.875"
+                                            y="-0.0000038146949918882456" dy="0.33em"
+                                            style="font-family: monospace; font-size: 12px; text-anchor: middle; user-select: none;">north</text>
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+
+
+                </g>
+            </svg>
+        </div>
+    </div>
+    <script>
+        // Add zoom behavior
+        const zoom = d3.zoom()
+            .scaleExtent([0.1, 10]) // Set the zoom scale extent
+            .on('zoom', zoomed);
+
+        function zoomed(event) {
+            d3.select('.zoomable').attr('transform', event.transform);
+        }
+        const diagram = d3.select('#diagram');
+        diagram.call(zoom);
+
+
+        // Select all nodes and make them draggable
+        const nodes = d3.selectAll('.nodes g');
+
+        function getNodePositions() {
+            const positions = {};
+            nodes.each(function () {
+                const node = d3.select(this);
+                const transform = node.attr('transform');
+                const translate = transform.match(/translate\(([^, ]+)[, ]+([^)]+)\)/);
+                if (translate) {
+                    const x = parseFloat(translate[1]);
+                    const y = parseFloat(translate[2]);
+                    positions[node.attr('id')] = { x, y };
+                }
+            });
+            console.log(positions);
+            return positions;
+        }
+
+        // Store the initial positions of the nodes
+        const nodePositions = getNodePositions();
+
+        function getEdgeSourceAndTarget(edgeId) {
+            // First find the id of the last : character and get the substring after it
+            const byParts = edgeId.split(':');
+            let rel = byParts[byParts.length - 1];
+
+            const [sourceId, targetId] = rel.split('->');
+            return { sourceId, targetId };
+        }
+
+        function updatePath(path, startX, startY, endX, endY) {
+            const controlPoint1 = `${(startX + endX) / 2},${startY}`;
+            const controlPoint2 = `${(startX + endX) / 2},${endY}`;
+            const newD = `M${startX},${startY} C${controlPoint1},${controlPoint2},${endX},${endY}`;
+            path.attr('d', newD);
+        }
+
+        function getIntersectionPoint(node, targetNode) {
+            const dx = targetNode.x - node.x;
+            const dy = targetNode.y - node.y;
+            const absDx = Math.abs(dx);
+            const absDy = Math.abs(dy);
+
+            let x = node.x;
+            let y = node.y;
+
+            const halfWidth = 50;
+            const halfHeight = 30;
+
+            if (absDx > absDy) {
+                x += dx > 0 ? halfWidth : -halfWidth;
+                y += dy * (halfWidth / absDx);
+            } else {
+                x += dx * (halfHeight / absDy);
+                y += dy > 0 ? halfHeight : -halfHeight;
+            }
+
+            return { x, y };
+        }
+
+        function updateEdges(nodeId) {
+            const node = nodePositions[nodeId];
+            // Update edges where the node is the source
+            d3.selectAll(`g[id*=":${nodeId}->"]`).each(function () {
+                const edge = d3.select(this);
+                const edgeId = edge.attr('id');
+
+                const { sourceId, targetId } = getEdgeSourceAndTarget(edgeId);
+                //assert (sourceId === nodeId);
+
+                const targetNode = nodePositions[targetId];
+                const sourceIntersection = getIntersectionPoint(node, targetNode);
+                const targetIntersection = getIntersectionPoint(targetNode, node);
+                edge.select('path').each(function () {
+                    updatePath(d3.select(this), sourceIntersection.x, sourceIntersection.y, targetIntersection.x, targetIntersection.y);
+                });
+
+                // Update the position of the label
+                edge.select('text').attr('x', (sourceIntersection.x + targetIntersection.x) / 2)
+                    .attr('y', (sourceIntersection.y + targetIntersection.y) / 2);
+            });
+
+            // Update edges where the node is the target
+            d3.selectAll(`g[id*="->${nodeId}"]`).each(function () {
+                const edge = d3.select(this);
+                const edgeId = edge.attr('id');
+
+                const { sourceId, targetId } = getEdgeSourceAndTarget(edgeId);
+                //assert (targetId === nodeId);
+
+                const sourceNode = nodePositions[sourceId];
+                const sourceIntersection = getIntersectionPoint(sourceNode, node);
+                const targetIntersection = getIntersectionPoint(node, sourceNode);
+                edge.select('path').each(function () {
+                    updatePath(d3.select(this), sourceIntersection.x, sourceIntersection.y, targetIntersection.x, targetIntersection.y);
+                });
+
+                // Update the position of the label
+                edge.select('text').attr('x', (sourceIntersection.x + targetIntersection.x) / 2)
+                    .attr('y', (sourceIntersection.y + targetIntersection.y) / 2);
+            });
+        }
+
+        nodes
+            .call(d3.drag()
+                .on('start', dragStarted)
+                .on('drag', dragged)
+                .on('end', dragEnded));
+
+        function dragStarted(event, d) {
+            d3.select(this).raise().attr('stroke', 'black');
+        }
+
+        function dragged(event, d) {
+            const nodeId = d3.select(this).attr('id');
+            nodePositions[nodeId].x = event.x;
+            nodePositions[nodeId].y = event.y;
+            d3.select(this).attr('transform', `translate(${event.x}, ${event.y})`);
+            updateEdges(nodeId); // Update the edges during the drag event
+        }
+
+        function dragEnded(event, d) {
+            d3.select(this).attr('stroke', null);
+        }
+
+
+
+        /**** This bit ensures we zoom to fit ***/
+        const bbox = d3.select('.zoomable').node().getBBox();
+        const padding = 10; // Padding in pixels
+
+        const viewBox = [
+            bbox.x - padding,
+            bbox.y - padding,
+            bbox.width + 2 * padding,
+            bbox.height + 2 * padding
+        ].join(' ');
+
+
+        const topSvg = d3.select("#diagram");
+        topSvg.attr('viewBox', viewBox);
+        /*************************************/
+
+    </script>
+</body>
+
+</html>

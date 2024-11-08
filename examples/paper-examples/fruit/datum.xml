@@ -1,0 +1,89 @@
+<alloy builddate="Thursday, September 12th, 2024">
+<instance bitwidth="4" maxseq="-1" command="temporary-name_fruit_1" filename="/no-name.rkt" version="3.5"  >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Fruit" ID="4" parentID="2">
+
+</sig>
+
+<sig label="Pear" ID="5" parentID="4">
+<atom label="Pear0"/><atom label="Pear1"/><atom label="Pear2"/>
+</sig>
+
+<sig label="Status" ID="6" parentID="2">
+
+</sig>
+
+<sig label="Fresh" ID="7" parentID="6">
+<atom label="Fresh0"/>
+</sig>
+
+<sig label="Apple" ID="8" parentID="4">
+<atom label="Apple0"/><atom label="Apple1"/><atom label="Apple2"/><atom label="Apple3"/><atom label="Apple4"/>
+</sig>
+
+<sig label="Rotten" ID="9" parentID="6">
+<atom label="Rotten0"/>
+</sig>
+
+<sig label="Basket" ID="10" parentID="2">
+<atom label="Basket0"/><atom label="Basket1"/><atom label="Basket2"/>
+</sig>
+
+<sig label="Banana" ID="11" parentID="4">
+<atom label="Banana0"/><atom label="Banana1"/><atom label="Banana2"/><atom label="Banana3"/><atom label="Banana4"/>
+</sig>
+
+<field label="fruit" ID="12" parentID="10">
+<tuple><atom label="Basket0"/><atom label="Apple4"/></tuple>
+<tuple><atom label="Basket0"/><atom label="Pear2"/></tuple>
+<tuple><atom label="Basket1"/><atom label="Apple1"/></tuple>
+<tuple><atom label="Basket1"/><atom label="Apple2"/></tuple>
+<tuple><atom label="Basket1"/><atom label="Apple3"/></tuple>
+<tuple><atom label="Basket1"/><atom label="Banana4"/></tuple>
+<tuple><atom label="Basket2"/><atom label="Apple0"/></tuple>
+<tuple><atom label="Basket2"/><atom label="Banana0"/></tuple>
+<tuple><atom label="Basket2"/><atom label="Banana1"/></tuple>
+<tuple><atom label="Basket2"/><atom label="Banana2"/></tuple>
+<tuple><atom label="Basket2"/><atom label="Banana3"/></tuple>
+<tuple><atom label="Basket2"/><atom label="Pear0"/></tuple>
+<tuple><atom label="Basket2"/><atom label="Pear1"/></tuple>
+<types><type ID="10"/><type ID="4"/></types>
+
+</field>
+
+<field label="status" ID="13" parentID="4">
+<tuple><atom label="Apple0"/><atom label="Fresh0"/></tuple>
+<tuple><atom label="Apple1"/><atom label="Rotten0"/></tuple>
+<tuple><atom label="Apple2"/><atom label="Rotten0"/></tuple>
+<tuple><atom label="Apple3"/><atom label="Rotten0"/></tuple>
+<tuple><atom label="Apple4"/><atom label="Fresh0"/></tuple>
+<tuple><atom label="Banana0"/><atom label="Rotten0"/></tuple>
+<tuple><atom label="Banana1"/><atom label="Rotten0"/></tuple>
+<tuple><atom label="Banana2"/><atom label="Rotten0"/></tuple>
+<tuple><atom label="Banana3"/><atom label="Fresh0"/></tuple>
+<tuple><atom label="Banana4"/><atom label="Rotten0"/></tuple>
+<tuple><atom label="Pear0"/><atom label="Rotten0"/></tuple>
+<tuple><atom label="Pear1"/><atom label="Rotten0"/></tuple>
+<tuple><atom label="Pear2"/><atom label="Fresh0"/></tuple>
+<types><type ID="4"/><type ID="6"/></types>
+
+</field>
+
+
+</instance>
+
+<source filename="/no-name.rkt" content="// Couldn't open source file (/no-name.rkt) (info: (2 . posix)). Is the file saved?"></source>
+</alloy>

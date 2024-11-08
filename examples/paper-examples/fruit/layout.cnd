@@ -1,0 +1,16 @@
+constraints:
+    - group: {field: fruit, target : domain}
+directives:
+    - flag: hideDisconnectedBuiltIns
+    - color:
+        sig: Banana
+        value: "#FDDA0D"
+    - color:
+        sig: Apple
+        value: "red"
+    - color:
+        sig: Pear
+        value: "green"
+    - color:
+        sig: Basket
+        value: "grey"

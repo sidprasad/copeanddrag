@@ -1,0 +1,4 @@
+constraints:
+    - cyclic:
+        field : left
+        direction: clockwise

@@ -154,10 +154,10 @@ class ConstraintValidator {
         catch (e) {
 
 
-            let previousConstraintString = "<br><br>" + this.added_constraints.map((c) => this.colaOrientationConstraintToString(c)).join('<br>');
+            let previousConstraintString = "<br><br>" + this.added_constraints.map((c) => "<code>" + this.colaOrientationConstraintToString(c) + "</code>").join('<br>');
 
             let currentConstraintString = this.colaOrientationConstraintToString(constraint);
-            this.error = `Layout not satisfiable! Constraint : ${currentConstraintString} and conflicts with the following constraints:` + previousConstraintString;
+            this.error = `Constraint:<br> <code>${currentConstraintString}</code><br> conflicts with the following constraints:` + previousConstraintString;
             console.log(e);
             return;
         }

@@ -62,6 +62,109 @@ export class LayoutInstance {
     }
 
 
+    public checkConstraintConsistency() : { consistent: boolean, error : string} {
+        let sigDirections = this._layoutSpec.sigDirections || [];
+        let fieldDirections = this._layoutSpec.fieldDirections || [];
+        
+        // We will have to get to this at some point. Hopefully the parser 
+
+
+
+        function areDirectionsConsistent(directions : string[]) : boolean {
+
+            // If "above" and  "below" are present, return false
+            if (directions.includes("above") && directions.includes("below")) {
+                return false;
+            }
+
+            // If "left" and "right" are present, return false
+            if (directions.includes("left") && directions.includes("right")) {
+                return false;
+            }
+
+            // If directlyLeft is present, the only other possible value should be left
+            if (directions.includes("directlyLeft")) {
+                // Ensure that all other values in the array are "left"
+                if (!directions.every((direction) => direction === "left" || direction === "directlyLeft")) {
+                    return false;
+                }
+            }
+
+            // If directlyRight is present, the only other possible value should be right
+            if (directions.includes("directlyRight")) {
+                // Ensure that all other values in the array are "right"
+                if (!directions.every((direction) => direction === "right" || direction === "directlyRight")) {
+                    return false;
+                }
+            }
+
+            // If directlyAbove is present, the only other possible value should be above
+            if (directions.includes("directlyAbove")) {
+                // Ensure that all other values in the array are "above"
+                if (!directions.every((direction) => direction === "above" || direction === "directlyAbove")) {
+                    return false;
+                }
+            }
+
+            // If directlyBelow is present, the only other possible value should be below
+            if (directions.includes("directlyBelow")) {
+                // Ensure that all other values in the array are "below"
+                if (!directions.every((direction) => direction === "below" || direction === "directlyBelow")) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+
+
+        // First check that all sigDirections are consistent
+        for (let i = 0; i < sigDirections.length; i++) {
+            let sigDirection = sigDirections[i];
+            let sourceSig = sigDirection.sigName;
+            let targetSig = sigDirection.target.sigName;
+            let directions = sigDirection.directions || [];
+
+            if (!areDirectionsConsistent(directions)) {
+                let directionsString = directions.join(", ");
+                return { consistent: false, error: `Inconsistent orientation constraint: Sigs <code>${sourceSig}</code> and <code>${targetSig}</code> cannot have relative directions: <code>${directionsString}</code>.` };
+            }
+        }
+
+        // Then check that all fieldDirections are consistent
+        for (let i = 0; i < fieldDirections.length; i++) {
+            let fieldDirection = fieldDirections[i];
+            let fieldName = fieldDirection.fieldName;
+            let directions = fieldDirection.directions || [];
+
+            if (!areDirectionsConsistent(directions)) {
+                let directionsString = directions.join(", ");
+                return { consistent: false, error: `Inconsistent orientation constraint:  Field <code>${fieldName}</code> cannot be laid out with directions: <code>${directionsString}</code>.` };
+            }
+        }
+
+
+        let closures = this._layoutSpec.closures || [];
+
+        // Build a map of field names to flow, using closures
+        let fieldToFlow = {};
+        for (let i = 0; i < closures.length; i++) {
+            let closure = closures[i];
+            let fieldName = closure.fieldName;
+            let direction = closure.direction;
+
+            if (fieldToFlow[fieldName] && fieldToFlow[fieldName] !== direction) {
+                return { consistent: false, error: `Inconsistent cyclic constraints: Field ${fieldName} cannot be laid out ${direction} and ${fieldToFlow[direction]}.` };
+            }
+            fieldToFlow[fieldName] = direction;
+        }
+        
+
+
+        return { consistent: true, error: ""};
+    }
+
+
     get projectedSigs(): string[] {
         if (!this._layoutSpec.projections) {
             return [];

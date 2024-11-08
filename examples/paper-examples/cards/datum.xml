@@ -1,0 +1,69 @@
+<alloy builddate="Monday, September 23rd, 2024">
+<instance bitwidth="4" maxseq="-1" command="temporary-name_cards_1" filename="/no-name.rkt" version="3.5"  >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Card" ID="4" parentID="2">
+<atom label="Card0"/><atom label="Card1"/><atom label="Card2"/><atom label="Card3"/><atom label="Card4"/>
+</sig>
+
+<sig label="Player" ID="5" parentID="2">
+<atom label="Player0"/><atom label="Player1"/><atom label="Player2"/><atom label="Player3"/><atom label="Player4"/>
+</sig>
+
+<sig label="Dealer" ID="6" parentID="2">
+<atom label="Dealer0"/>
+</sig>
+
+<field label="left" ID="7" parentID="5">
+<tuple><atom label="Player0"/><atom label="Player1"/></tuple>
+<tuple><atom label="Player1"/><atom label="Player2"/></tuple>
+<tuple><atom label="Player2"/><atom label="Player3"/></tuple>
+<tuple><atom label="Player3"/><atom label="Player4"/></tuple>
+<tuple><atom label="Player4"/><atom label="Player0"/></tuple>
+<types><type ID="5"/><type ID="5"/></types>
+
+</field>
+
+<field label="right" ID="8" parentID="5">
+<tuple><atom label="Player0"/><atom label="Player4"/></tuple>
+<tuple><atom label="Player1"/><atom label="Player0"/></tuple>
+<tuple><atom label="Player2"/><atom label="Player1"/></tuple>
+<tuple><atom label="Player3"/><atom label="Player2"/></tuple>
+<tuple><atom label="Player4"/><atom label="Player3"/></tuple>
+<types><type ID="5"/><type ID="5"/></types>
+
+</field>
+
+<field label="hand" ID="9" parentID="5">
+<tuple><atom label="Player0"/><atom label="Card4"/></tuple>
+<tuple><atom label="Player1"/><atom label="Card3"/></tuple>
+<tuple><atom label="Player2"/><atom label="Card2"/></tuple>
+<tuple><atom label="Player3"/><atom label="Card1"/></tuple>
+<tuple><atom label="Player4"/><atom label="Card0"/></tuple>
+<types><type ID="5"/><type ID="4"/></types>
+
+</field>
+
+<field label="holding" ID="10" parentID="5">
+<tuple><atom label="Player4"/><atom label="Dealer0"/></tuple>
+<types><type ID="5"/><type ID="6"/></types>
+
+</field>
+
+
+</instance>
+
+<source filename="/no-name.rkt" content="// Couldn't open source file (/no-name.rkt) (info: (2 . posix)). Is the file saved?"></source>
+</alloy>
