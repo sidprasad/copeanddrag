@@ -102,20 +102,20 @@ app.post('/', (req, res) => {
         loopBack = 0;
     }
 
-    let {layout, projectionData, error }  = li.generateLayout(instances[instanceNumber], projections);
+    let {layout, projectionData }  = li.generateLayout(instances[instanceNumber], projections);
 
-    if (error) {
+    // if (error) {
 
-        // TODO: THe reporting here should be more meaningful at some point.
-        // TODO: Change the output.
+    //     // TODO: THe reporting here should be more meaningful at some point.
+    //     // TODO: Change the output.
 
-        let internally_inconsistent = "Internally inconsistent constraints: " + error;
+    //     let internally_inconsistent = "Internally inconsistent constraints: " + error;
 
-        console.error(internally_inconsistent);
-        // This is "I am a teapot" error code, which is a joke error code.
-        res.status(418).send(internally_inconsistent);
-        return;
-    }
+    //     console.error(internally_inconsistent);
+    //     // This is "I am a teapot" error code, which is a joke error code.
+    //     res.status(418).send(internally_inconsistent);
+    //     return;
+    // }
 
 
     let cl = new WebColaLayout(layout);

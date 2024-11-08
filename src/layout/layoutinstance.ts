@@ -62,10 +62,6 @@ export class LayoutInstance {
     }
 
 
-
-    
-
-
     get projectedSigs(): string[] {
         if (!this._layoutSpec.projections) {
             return [];
@@ -402,13 +398,7 @@ export class LayoutInstance {
 
 
 
-    public generateLayout(a: AlloyInstance, projections: Record<string, string>): { layout: InstanceLayout, projectionData: { type: string, projectedAtom: string, atoms: string[] }[], error?: string } {
-
-
-        // projections = Record<Projected type, projected atoms>
-
-
-        let error : string = undefined;
+    public generateLayout(a: AlloyInstance, projections: Record<string, string>): { layout: InstanceLayout, projectionData: { type: string, projectedAtom: string, atoms: string[] }[] } {
 
         let projectionResult = this.applyLayoutProjections(a, projections);
 
@@ -518,7 +508,7 @@ export class LayoutInstance {
 
 
         let layout = { nodes: layoutNodes, edges: layoutEdges, constraints: constraints, groups: groups };
-        return { layout, projectionData, error };
+        return { layout, projectionData };
     }
 
 
