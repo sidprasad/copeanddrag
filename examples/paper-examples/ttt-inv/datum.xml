@@ -1,0 +1,70 @@
+<alloy builddate="Sunday, October 27th, 2024">
+<instance bitwidth="4" maxseq="-1" command="temporary-name_ttt_1" filename="/no-name.rkt" version="3.5"  >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Cell" ID="4" parentID="2">
+<atom label="Cell0"/><atom label="Cell1"/><atom label="Cell2"/><atom label="Cell3"/><atom label="Cell4"/><atom label="Cell5"/><atom label="Cell6"/><atom label="Cell7"/><atom label="Cell8"/>
+</sig>
+
+<sig label="Mark" ID="5" parentID="2">
+
+</sig>
+
+<sig label="X" ID="6" parentID="5">
+<atom label="X"/>
+</sig>
+
+<sig label="O" ID="7" parentID="5">
+<atom label="O"/>
+</sig>
+
+<field label="mark" ID="8" parentID="4">
+<tuple><atom label="Cell0"/><atom label="O"/></tuple>
+<tuple><atom label="Cell1"/><atom label="X"/></tuple>
+<tuple><atom label="Cell2"/><atom label="O"/></tuple>
+<tuple><atom label="Cell3"/><atom label="X"/></tuple>
+<tuple><atom label="Cell4"/><atom label="O"/></tuple>
+<tuple><atom label="Cell5"/><atom label="X"/></tuple>
+<tuple><atom label="Cell7"/><atom label="X"/></tuple>
+<tuple><atom label="Cell8"/><atom label="O"/></tuple>
+<types><type ID="4"/><type ID="5"/></types>
+
+</field>
+
+<field label="right" ID="9" parentID="4">
+<tuple><atom label="Cell2"/><atom label="Cell0"/></tuple>
+<tuple><atom label="Cell4"/><atom label="Cell3"/></tuple>
+<tuple><atom label="Cell5"/><atom label="Cell6"/></tuple>
+<tuple><atom label="Cell7"/><atom label="Cell8"/></tuple>
+<types><type ID="4"/><type ID="4"/></types>
+
+</field>
+
+<field label="down" ID="10" parentID="4">
+<tuple><atom label="Cell3"/><atom label="Cell8"/></tuple>
+<tuple><atom label="Cell4"/><atom label="Cell7"/></tuple>
+<tuple><atom label="Cell5"/><atom label="Cell4"/></tuple>
+<tuple><atom label="Cell6"/><atom label="Cell3"/></tuple>
+<tuple><atom label="Cell7"/><atom label="Cell2"/></tuple>
+<tuple><atom label="Cell8"/><atom label="Cell1"/></tuple>
+<types><type ID="4"/><type ID="4"/></types>
+
+</field>
+
+
+</instance>
+
+<source filename="/no-name.rkt" content="// Couldn't open source file (/no-name.rkt) (info: (2 . posix)). Is the file saved?"></source>
+</alloy>

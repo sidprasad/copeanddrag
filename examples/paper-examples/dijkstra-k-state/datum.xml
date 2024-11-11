@@ -1,0 +1,144 @@
+<alloy builddate="2021-11-19T05:45:51.188Z">
+
+<instance bitwidth="4" maxseq="5" mintrace="-1" maxtrace="-1" command="Run TwoPrivileged for 5 but 3 Process, 4 Val expect 1" filename="c:\Users\nivsi\Desktop\AlloyStuff\models\algorithms\mutex\dijkstra-K-state.als" tracelength="1" backloop="0">
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="String" ID="3" parentID="2" builtin="yes">
+</sig>
+
+<sig label="this/FirstProc" ID="4" parentID="5" one="yes">
+   <atom label="FirstProc$0"/>
+</sig>
+
+<sig label="this/Process" ID="5" parentID="2">
+   <atom label="Process$0"/>
+   <atom label="Process$1"/>
+</sig>
+
+<field label="rightNeighbor" ID="6" parentID="5">
+   <tuple> <atom label="FirstProc$0"/> <atom label="Process$1"/> </tuple>
+   <tuple> <atom label="Process$0"/> <atom label="FirstProc$0"/> </tuple>
+   <tuple> <atom label="Process$1"/> <atom label="Process$0"/> </tuple>
+   <types> <type ID="5"/> <type ID="5"/> </types>
+</field>
+
+<sig label="this/Val" ID="7" parentID="2">
+   <atom label="Val$0"/>
+   <atom label="Val$1"/>
+   <atom label="Val$2"/>
+   <atom label="Val$3"/>
+</sig>
+
+<field label="nextVal" ID="8" parentID="7">
+   <tuple> <atom label="Val$0"/> <atom label="Val$1"/> </tuple>
+   <tuple> <atom label="Val$1"/> <atom label="Val$3"/> </tuple>
+   <tuple> <atom label="Val$2"/> <atom label="Val$0"/> </tuple>
+   <tuple> <atom label="Val$3"/> <atom label="Val$2"/> </tuple>
+   <types> <type ID="7"/> <type ID="7"/> </types>
+</field>
+
+<sig label="this/Tick" ID="9" parentID="2">
+   <atom label="Tick$0"/>
+   <atom label="Tick$1"/>
+   <atom label="Tick$2"/>
+   <atom label="Tick$3"/>
+   <atom label="Tick$4"/>
+</sig>
+
+<field label="val" ID="10" parentID="9">
+   <tuple> <atom label="Tick$0"/> <atom label="FirstProc$0"/> <atom label="Val$2"/> </tuple>
+   <tuple> <atom label="Tick$0"/> <atom label="Process$0"/> <atom label="Val$1"/> </tuple>
+   <tuple> <atom label="Tick$0"/> <atom label="Process$1"/> <atom label="Val$3"/> </tuple>
+   <tuple> <atom label="Tick$1"/> <atom label="FirstProc$0"/> <atom label="Val$2"/> </tuple>
+   <tuple> <atom label="Tick$1"/> <atom label="Process$0"/> <atom label="Val$2"/> </tuple>
+   <tuple> <atom label="Tick$1"/> <atom label="Process$1"/> <atom label="Val$3"/> </tuple>
+   <tuple> <atom label="Tick$2"/> <atom label="FirstProc$0"/> <atom label="Val$2"/> </tuple>
+   <tuple> <atom label="Tick$2"/> <atom label="Process$0"/> <atom label="Val$2"/> </tuple>
+   <tuple> <atom label="Tick$2"/> <atom label="Process$1"/> <atom label="Val$2"/> </tuple>
+   <tuple> <atom label="Tick$3"/> <atom label="FirstProc$0"/> <atom label="Val$0"/> </tuple>
+   <tuple> <atom label="Tick$3"/> <atom label="Process$0"/> <atom label="Val$2"/> </tuple>
+   <tuple> <atom label="Tick$3"/> <atom label="Process$1"/> <atom label="Val$2"/> </tuple>
+   <tuple> <atom label="Tick$4"/> <atom label="FirstProc$0"/> <atom label="Val$0"/> </tuple>
+   <tuple> <atom label="Tick$4"/> <atom label="Process$0"/> <atom label="Val$0"/> </tuple>
+   <tuple> <atom label="Tick$4"/> <atom label="Process$1"/> <atom label="Val$2"/> </tuple>
+   <types> <type ID="9"/> <type ID="5"/> <type ID="7"/> </types>
+</field>
+
+<field label="runs" ID="11" parentID="9">
+   <tuple> <atom label="Tick$0"/> <atom label="FirstProc$0"/> </tuple>
+   <tuple> <atom label="Tick$0"/> <atom label="Process$0"/> </tuple>
+   <tuple> <atom label="Tick$1"/> <atom label="FirstProc$0"/> </tuple>
+   <tuple> <atom label="Tick$1"/> <atom label="Process$1"/> </tuple>
+   <tuple> <atom label="Tick$2"/> <atom label="FirstProc$0"/> </tuple>
+   <tuple> <atom label="Tick$3"/> <atom label="Process$0"/> </tuple>
+   <types> <type ID="9"/> <type ID="5"/> </types>
+</field>
+
+<field label="priv" ID="12" parentID="9">
+   <tuple> <atom label="Tick$0"/> <atom label="Process$0"/> </tuple>
+   <tuple> <atom label="Tick$0"/> <atom label="Process$1"/> </tuple>
+   <tuple> <atom label="Tick$1"/> <atom label="Process$1"/> </tuple>
+   <tuple> <atom label="Tick$2"/> <atom label="FirstProc$0"/> </tuple>
+   <tuple> <atom label="Tick$3"/> <atom label="Process$0"/> </tuple>
+   <tuple> <atom label="Tick$4"/> <atom label="Process$1"/> </tuple>
+   <types> <type ID="9"/> <type ID="5"/> </types>
+</field>
+
+<sig label="to/Ord" ID="13" parentID="2" one="yes" private="yes">
+   <atom label="to/Ord$0"/>
+</sig>
+
+<field label="First" ID="14" parentID="13" private="yes">
+   <tuple> <atom label="to/Ord$0"/> <atom label="Tick$0"/> </tuple>
+   <types> <type ID="13"/> <type ID="9"/> </types>
+</field>
+
+<field label="Next" ID="15" parentID="13" private="yes">
+   <tuple> <atom label="to/Ord$0"/> <atom label="Tick$0"/> <atom label="Tick$1"/> </tuple>
+   <tuple> <atom label="to/Ord$0"/> <atom label="Tick$1"/> <atom label="Tick$2"/> </tuple>
+   <tuple> <atom label="to/Ord$0"/> <atom label="Tick$2"/> <atom label="Tick$3"/> </tuple>
+   <tuple> <atom label="to/Ord$0"/> <atom label="Tick$3"/> <atom label="Tick$4"/> </tuple>
+   <types> <type ID="13"/> <type ID="9"/> <type ID="9"/> </types>
+</field>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<skolem label="$BadTick_p1" ID="16">
+   <tuple> <atom label="Process$0"/> </tuple>
+   <types> <type ID="5"/> </types>
+</skolem>
+
+<skolem label="$BadTick_p2" ID="17">
+   <tuple> <atom label="Process$1"/> </tuple>
+   <types> <type ID="5"/> </types>
+</skolem>
+
+<skolem label="$TwoPrivileged_p1" ID="18">
+   <tuple> <atom label="Process$1"/> </tuple>
+   <types> <type ID="5"/> </types>
+</skolem>
+
+<skolem label="$TwoPrivileged_p2" ID="19">
+   <tuple> <atom label="FirstProc$0"/> </tuple>
+   <types> <type ID="5"/> </types>
+</skolem>
+
+<skolem label="$TwoPrivileged_t1" ID="20">
+   <tuple> <atom label="Tick$4"/> </tuple>
+   <types> <type ID="9"/> </types>
+</skolem>
+
+<skolem label="$TwoPrivileged_t2" ID="21">
+   <tuple> <atom label="Tick$2"/> </tuple>
+   <types> <type ID="9"/> </types>
+</skolem>
+
+</instance>
+
+</alloy>
