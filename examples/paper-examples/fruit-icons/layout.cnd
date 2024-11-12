@@ -19,18 +19,18 @@ directives:
   - icon:
       sig: Banana
       icon:
-        path: 'https://sidprasad.github.io/diagrams/img/banana.png'
+        path: 'http://localhost:3000/img/banana.png'
         height: 70
         width: 70
   - icon:
       sig: Apple
       icon:
-        path: 'https://sidprasad.github.io/diagrams/img/apple.png'
+        path: 'http://localhost:3000/img/apple.png'
         height: 70
         width: 70
   - icon:
       sig: Pear
       icon:
-        path: 'https://sidprasad.github.io/diagrams/img/pear.png'
+        path: 'http://localhost:3000/img/pear.png'
         height: 70
         width: 70

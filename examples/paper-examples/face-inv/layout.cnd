@@ -1,0 +1,6 @@
+constraints:
+    - orientation: { field: below, directions: [below] }
+    - orientation : {field: aligned, directions : [directlyRight]}
+    - group : {field: parts, target: domain}
+
+

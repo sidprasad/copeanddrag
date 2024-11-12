@@ -1,0 +1,86 @@
+<alloy builddate="Friday, November 1st, 2024">
+<instance bitwidth="4" maxseq="-1" command="temporary-name_face_1" filename="/no-name.rkt" version="3.5"  >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="FacePart" ID="4" parentID="2">
+
+</sig>
+
+<sig label="Mouth" ID="5" parentID="4">
+<atom label="Mouth"/>
+</sig>
+
+<sig label="Nose" ID="6" parentID="4">
+<atom label="Nose"/>
+</sig>
+
+<sig label="Chin" ID="7" parentID="4">
+<atom label="Chin"/>
+</sig>
+
+<sig label="Face" ID="8" parentID="2">
+<atom label="Face"/>
+</sig>
+
+<sig label="EyeBrow" ID="9" parentID="4">
+<atom label="EyeBrowA"/><atom label="EyeBrowB"/>
+</sig>
+
+<sig label="Eye" ID="10" parentID="4">
+<atom label="Eye2"/><atom label="Eye1"/>
+</sig>
+
+<sig label="Hair" ID="11" parentID="4">
+<atom label="Hair"/>
+</sig>
+
+<field label="parts" ID="12" parentID="8">
+<tuple><atom label="Face"/><atom label="EyeBrowA"/></tuple>
+<tuple><atom label="Face"/><atom label="Eye2"/></tuple>
+<tuple><atom label="Face"/><atom label="Nose"/></tuple>
+<tuple><atom label="Face"/><atom label="Mouth"/></tuple>
+<tuple><atom label="Face"/><atom label="Hair"/></tuple>
+<tuple><atom label="Face"/><atom label="EyeBrowB"/></tuple>
+<tuple><atom label="Face"/><atom label="Chin"/></tuple>
+<tuple><atom label="Face"/><atom label="Eye1"/></tuple>
+<types><type ID="8"/><type ID="4"/></types>
+
+</field>
+
+<field label="below" ID="13" parentID="4">
+<tuple><atom label="EyeBrowA"/><atom label="Eye1"/></tuple>
+<tuple><atom label="Eye2"/><atom label="Nose"/></tuple>
+<tuple><atom label="Nose"/><atom label="Mouth"/></tuple>
+<tuple><atom label="Mouth"/><atom label="Chin"/></tuple>
+<tuple><atom label="Hair"/><atom label="EyeBrowA"/></tuple>
+<tuple><atom label="Hair"/><atom label="EyeBrowB"/></tuple>
+<tuple><atom label="EyeBrowB"/><atom label="Eye2"/></tuple>
+<tuple><atom label="Eye1"/><atom label="Nose"/></tuple>
+<types><type ID="4"/><type ID="4"/></types>
+
+</field>
+
+<field label="aligned" ID="14" parentID="4">
+<tuple><atom label="EyeBrowA"/><atom label="EyeBrowB"/></tuple>
+<tuple><atom label="Eye1"/><atom label="Eye2"/></tuple>
+<types><type ID="4"/><type ID="4"/></types>
+
+</field>
+
+
+</instance>
+
+<source filename="/no-name.rkt" content="// Couldn't open source file (/no-name.rkt) (info: (2 . posix)). Is the file saved?"></source>
+</alloy>
