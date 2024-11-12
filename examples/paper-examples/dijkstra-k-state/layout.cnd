@@ -1,8 +1,0 @@
-constraints:
-    - cyclic: {field: rightNeighbor, direction: clockwise}
-    - cyclic: {field: nextVal}
-    - group : {field: val, target: range}
-directives:
-    - projection : {sig: to/Ord}
-    - projection : { sig: this/Tick}
-    - flag: hideDisconnected

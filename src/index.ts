@@ -153,7 +153,17 @@ app.post('/', (req, res) => {
 });
 
 
+app.get('/example', (req, res) => {
 
+    const examplesDir = path.join(path.join(__dirname, '..', 'examples'), 'paper-examples');
+
+    // Get the names of all the directories in examplesDir
+    let exampleNames = fs.readdirSync(examplesDir, { withFileTypes: true })
+        .filter(dirent => dirent.isDirectory())
+        .map(dirent => dirent.name);
+
+    res.render('examplehome', { exampleNames });
+}); 
 
 
 // Need to do this better, but for now, 

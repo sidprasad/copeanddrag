@@ -1,4 +1,0 @@
-constraints:
-  - cyclic:
-      field: next
-
