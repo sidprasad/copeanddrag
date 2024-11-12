@@ -1,0 +1,120 @@
+<alloy builddate="2021-11-19T05:45:51.188Z">
+
+<instance bitwidth="4" maxseq="4" mintrace="-1" maxtrace="-1" command="Run run$3 for exactly 5 Dir, 10 Name, exactly 5 File, 10 DirEntry" filename="c:\Users\nivsi\Desktop\papers\forge\copeanddrag\images\filesystem\file_system.als" tracelength="1" backloop="0">
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="String" ID="3" parentID="2" builtin="yes">
+</sig>
+
+<sig label="this/File" ID="4" parentID="5">
+   <atom label="File$0"/>
+   <atom label="File$1"/>
+   <atom label="File$2"/>
+   <atom label="File$3"/>
+   <atom label="File$4"/>
+</sig>
+
+<sig label="this/Root" ID="6" parentID="7" one="yes">
+   <atom label="Root$0"/>
+</sig>
+
+<sig label="this/Cur" ID="8" parentID="7" lone="yes">
+</sig>
+
+<sig label="this/Dir" ID="7" parentID="5">
+   <atom label="Dir$0"/>
+   <atom label="Dir$1"/>
+   <atom label="Dir$2"/>
+   <atom label="Dir$3"/>
+</sig>
+
+<field label="entries" ID="9" parentID="7">
+   <tuple> <atom label="Root$0"/> <atom label="DirEntry$7"/> </tuple>
+   <tuple> <atom label="Root$0"/> <atom label="DirEntry$8"/> </tuple>
+   <tuple> <atom label="Dir$2"/> <atom label="DirEntry$4"/> </tuple>
+   <tuple> <atom label="Dir$2"/> <atom label="DirEntry$5"/> </tuple>
+   <tuple> <atom label="Dir$2"/> <atom label="DirEntry$6"/> </tuple>
+   <tuple> <atom label="Dir$3"/> <atom label="DirEntry$0"/> </tuple>
+   <tuple> <atom label="Dir$3"/> <atom label="DirEntry$1"/> </tuple>
+   <tuple> <atom label="Dir$3"/> <atom label="DirEntry$2"/> </tuple>
+   <tuple> <atom label="Dir$3"/> <atom label="DirEntry$3"/> </tuple>
+   <types> <type ID="7"/> <type ID="10"/> </types>
+</field>
+
+<field label="parent" ID="11" parentID="7">
+   <tuple> <atom label="Dir$0"/> <atom label="Dir$2"/> </tuple>
+   <tuple> <atom label="Dir$1"/> <atom label="Dir$2"/> </tuple>
+   <tuple> <atom label="Dir$2"/> <atom label="Dir$3"/> </tuple>
+   <tuple> <atom label="Dir$3"/> <atom label="Root$0"/> </tuple>
+   <types> <type ID="7"/> <type ID="7"/> </types>
+</field>
+
+<sig label="this/Object" ID="5" parentID="2" abstract="yes">
+</sig>
+
+<sig label="this/Name" ID="12" parentID="2">
+   <atom label="Name$0"/>
+   <atom label="Name$1"/>
+   <atom label="Name$2"/>
+   <atom label="Name$3"/>
+   <atom label="Name$4"/>
+</sig>
+
+<sig label="this/DirEntry" ID="10" parentID="2">
+   <atom label="DirEntry$0"/>
+   <atom label="DirEntry$1"/>
+   <atom label="DirEntry$2"/>
+   <atom label="DirEntry$3"/>
+   <atom label="DirEntry$4"/>
+   <atom label="DirEntry$5"/>
+   <atom label="DirEntry$6"/>
+   <atom label="DirEntry$7"/>
+   <atom label="DirEntry$8"/>
+</sig>
+
+<field label="name" ID="13" parentID="10">
+   <tuple> <atom label="DirEntry$0"/> <atom label="Name$4"/> </tuple>
+   <tuple> <atom label="DirEntry$1"/> <atom label="Name$3"/> </tuple>
+   <tuple> <atom label="DirEntry$2"/> <atom label="Name$2"/> </tuple>
+   <tuple> <atom label="DirEntry$3"/> <atom label="Name$1"/> </tuple>
+   <tuple> <atom label="DirEntry$4"/> <atom label="Name$0"/> </tuple>
+   <tuple> <atom label="DirEntry$5"/> <atom label="Name$3"/> </tuple>
+   <tuple> <atom label="DirEntry$6"/> <atom label="Name$4"/> </tuple>
+   <tuple> <atom label="DirEntry$7"/> <atom label="Name$0"/> </tuple>
+   <tuple> <atom label="DirEntry$8"/> <atom label="Name$4"/> </tuple>
+   <types> <type ID="10"/> <type ID="12"/> </types>
+</field>
+
+<field label="contents" ID="14" parentID="10">
+   <tuple> <atom label="DirEntry$0"/> <atom label="Dir$2"/> </tuple>
+   <tuple> <atom label="DirEntry$1"/> <atom label="File$2"/> </tuple>
+   <tuple> <atom label="DirEntry$2"/> <atom label="File$1"/> </tuple>
+   <tuple> <atom label="DirEntry$3"/> <atom label="File$0"/> </tuple>
+   <tuple> <atom label="DirEntry$4"/> <atom label="Dir$1"/> </tuple>
+   <tuple> <atom label="DirEntry$5"/> <atom label="Dir$0"/> </tuple>
+   <tuple> <atom label="DirEntry$6"/> <atom label="File$3"/> </tuple>
+   <tuple> <atom label="DirEntry$7"/> <atom label="Dir$3"/> </tuple>
+   <tuple> <atom label="DirEntry$8"/> <atom label="File$4"/> </tuple>
+   <types> <type ID="10"/> <type ID="5"/> </types>
+</field>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<skolem label="$d" ID="15">
+   <tuple> <atom label="File$0"/> <atom label="Dir$3"/> </tuple>
+   <tuple> <atom label="File$1"/> <atom label="Dir$3"/> </tuple>
+   <tuple> <atom label="File$2"/> <atom label="Dir$3"/> </tuple>
+   <tuple> <atom label="File$3"/> <atom label="Dir$2"/> </tuple>
+   <tuple> <atom label="File$4"/> <atom label="Root$0"/> </tuple>
+   <types> <type ID="4"/> <type ID="7"/> </types>
+</skolem>
+
+</instance>
+
+</alloy>

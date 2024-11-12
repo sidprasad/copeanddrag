@@ -1,0 +1,16 @@
+constraints:
+  - orientation:
+      field: parent
+      directions: [above]
+  - group:
+      field: entries
+      target: domain
+  - orientation:
+      field: entries
+      directions: [directlyRight]
+directives:
+  - attribute:
+      field: name
+  - attribute:
+      field: contents
+  - flag: hideDisconnected

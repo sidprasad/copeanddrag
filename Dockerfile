@@ -11,7 +11,10 @@ COPY package*.json ./
 RUN npm install
 
 # Copy the rest of the application code
-COPY . .
+COPY src ./src
+COPY views ./views
+COPY examples/paper-examples ./examples/paper-examples
+COPY tsconfig.json ./
 
 # Install nodemon and ts-node globally
 RUN npm install -g nodemon ts-node
