@@ -191,12 +191,29 @@ app.get('/example/:name', (req, res) => {
 
    // Ignore for now
    let displayConfig = path.join(examplesDir, 'displayConfig.yml');
+   let sourceAlloy = path.join(examplesDir, 'source.als');
+   let sourceFrg = path.join(examplesDir, 'source.frg');
 
     // Ensure the files exist
     if (!fs.existsSync(datumFile) || !fs.existsSync(cndFile)) {
         res.status(404).send('Example not found');
         return;
     }
+
+    var source_content = "";
+    var sourceFileName = "";
+
+    if (fs.existsSync(sourceAlloy))
+        source_content = fs.readFileSync(sourceAlloy, 'utf8');
+        sourceFileName = `${exampleName}.als`;
+    }
+    
+    
+    if (fs.existsSync(sourceFrg)) {
+        source_content = fs.readFileSync(sourceFrg, 'utf8');
+        sourceFileName = `${exampleName}.frg`;
+    }
+
 
     // Read the files
     const alloyDatum = fs.readFileSync(datumFile, 'utf8');
