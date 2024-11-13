@@ -157,3 +157,8 @@ Then to rehydrate:
 docker load -i cnd.tar
 docker run --rm -it -p 3000:3000 cnd:latest
 ```
+
+- TODO: RedBlack tree in artifact
+- TODO: Forge or Alloy model in artifact (on examples page probably)
+- TODO: Spellcheck
+- TODO: `phil` example is not ideal.
