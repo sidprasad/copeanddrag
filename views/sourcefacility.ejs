@@ -1,0 +1,39 @@
+<div class="container">
+    <% if (source_content && sourceFileName) { %>
+        <h4> Alloy or Forge Source </h4>
+        <button id="downloadButton" class="btn btn-primary">Download Source Specification</button>
+        <button id="openButton" class="btn btn-secondary">Open Source Specification in New Tab</button>
+    <% } %> else { %>
+        <h4>No Source Specification. Diagram generated purely from the Alloy datum.</h4>
+    <% } %>
+    
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var downloadButton = document.getElementById('downloadButton');
+            var openButton = document.getElementById('openButton');
+            var sourceContent = '<%= source_content %>';
+            var sourceFileName = '<%= sourceFileName %>';
+            var blob = new Blob([sourceContent], { type: 'text/plain' });
+            var url = URL.createObjectURL(blob);
+
+            if (downloadButton) {
+                downloadButton.addEventListener('click', function() {
+                    var a = document.createElement('a');
+                    a.href = url;
+                    a.download = sourceFileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                });
+            }
+
+            if (openButton) {
+                openButton.addEventListener('click', function() {
+                    window.open(url, '_blank');
+                });
+            }
+        });
+    </script>
+</div>

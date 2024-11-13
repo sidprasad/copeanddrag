@@ -191,8 +191,8 @@ app.get('/example/:name', (req, res) => {
 
    // Ignore for now
    let displayConfig = path.join(examplesDir, 'displayConfig.yml');
-   let sourceAlloy = path.join(examplesDir, 'source.als');
-   let sourceFrg = path.join(examplesDir, 'source.frg');
+
+
 
     // Ensure the files exist
     if (!fs.existsSync(datumFile) || !fs.existsSync(cndFile)) {
@@ -203,17 +203,24 @@ app.get('/example/:name', (req, res) => {
     var source_content = "";
     var sourceFileName = "";
 
-    // if (fs.existsSync(sourceAlloy))
-    //     source_content = fs.readFileSync(sourceAlloy, 'utf8');
-    //     sourceFileName = `${exampleName}.als`;
-    // }
-    
-    
-    // if (fs.existsSync(sourceFrg)) {
-    //     source_content = fs.readFileSync(sourceFrg, 'utf8');
-    //     sourceFileName = `${exampleName}.frg`;
-    // }
 
+
+   let sourceAlloyPath = path.join(examplesDir, 'source.als');
+   let sourceFrgPath = path.join(examplesDir, 'source.frg');
+
+
+    let srcAlloy = fs.existsSync(sourceAlloyPath) ? fs.readFileSync(sourceAlloyPath, 'utf8') : "";
+    let srcFrg = fs.existsSync(sourceFrgPath) ? fs.readFileSync(sourceFrgPath, 'utf8') : "";
+
+
+    if (srcAlloy.length > 0) {
+        source_content = srcAlloy;
+        sourceFileName = `${exampleName}.als`;
+    }
+    else if (srcFrg.length > 0) {
+        source_content = srcFrg;
+        sourceFileName = `${exampleName}.frg`;
+    }
 
     // Read the files
     const alloyDatum = fs.readFileSync(datumFile, 'utf8');
@@ -271,7 +278,9 @@ app.get('/example/:name', (req, res) => {
         alloyDatum,
         loopBack,
         cope,
-        projectionData
+        projectionData,
+        source_content,
+        sourceFileName
     });
 
 
