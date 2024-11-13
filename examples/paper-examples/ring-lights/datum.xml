@@ -1,0 +1,298 @@
+<alloy builddate="Wednesday, November 13th, 2024">
+<instance bitwidth="4" maxseq="-1" command="temporary-name_source_1" filename="/no-name.rkt" version="3.5" prefixLength="6" loop="5" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Light" ID="4" parentID="2">
+
+</sig>
+
+<sig label="Unlit" ID="5" parentID="4">
+<atom label="Light0"/><atom label="Light1"/><atom label="Light2"/><atom label="Light3"/><atom label="Light4"/>
+</sig>
+
+<sig label="Lit" ID="6" parentID="4">
+
+</sig>
+
+<field label="left" ID="7" parentID="4">
+<tuple><atom label="Light0"/><atom label="Light4"/></tuple>
+<tuple><atom label="Light1"/><atom label="Light3"/></tuple>
+<tuple><atom label="Light2"/><atom label="Light1"/></tuple>
+<tuple><atom label="Light3"/><atom label="Light0"/></tuple>
+<tuple><atom label="Light4"/><atom label="Light2"/></tuple>
+<types><type ID="4"/><type ID="4"/></types>
+
+</field>
+
+<field label="right" ID="8" parentID="4">
+<tuple><atom label="Light0"/><atom label="Light3"/></tuple>
+<tuple><atom label="Light1"/><atom label="Light2"/></tuple>
+<tuple><atom label="Light2"/><atom label="Light4"/></tuple>
+<tuple><atom label="Light3"/><atom label="Light1"/></tuple>
+<tuple><atom label="Light4"/><atom label="Light0"/></tuple>
+<types><type ID="4"/><type ID="4"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_source_1" filename="/no-name.rkt" version="3.5" prefixLength="6" loop="5" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Light" ID="4" parentID="2">
+
+</sig>
+
+<sig label="Unlit" ID="5" parentID="4">
+<atom label="Light2"/><atom label="Light4"/>
+</sig>
+
+<sig label="Lit" ID="6" parentID="4">
+<atom label="Light0"/><atom label="Light1"/><atom label="Light3"/>
+</sig>
+
+<field label="left" ID="7" parentID="4">
+<tuple><atom label="Light0"/><atom label="Light4"/></tuple>
+<tuple><atom label="Light1"/><atom label="Light3"/></tuple>
+<tuple><atom label="Light2"/><atom label="Light1"/></tuple>
+<tuple><atom label="Light3"/><atom label="Light0"/></tuple>
+<tuple><atom label="Light4"/><atom label="Light2"/></tuple>
+<types><type ID="4"/><type ID="4"/></types>
+
+</field>
+
+<field label="right" ID="8" parentID="4">
+<tuple><atom label="Light0"/><atom label="Light3"/></tuple>
+<tuple><atom label="Light1"/><atom label="Light2"/></tuple>
+<tuple><atom label="Light2"/><atom label="Light4"/></tuple>
+<tuple><atom label="Light3"/><atom label="Light1"/></tuple>
+<tuple><atom label="Light4"/><atom label="Light0"/></tuple>
+<types><type ID="4"/><type ID="4"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_source_1" filename="/no-name.rkt" version="3.5" prefixLength="6" loop="5" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Light" ID="4" parentID="2">
+
+</sig>
+
+<sig label="Unlit" ID="5" parentID="4">
+<atom label="Light0"/>
+</sig>
+
+<sig label="Lit" ID="6" parentID="4">
+<atom label="Light1"/><atom label="Light2"/><atom label="Light3"/><atom label="Light4"/>
+</sig>
+
+<field label="left" ID="7" parentID="4">
+<tuple><atom label="Light0"/><atom label="Light4"/></tuple>
+<tuple><atom label="Light1"/><atom label="Light3"/></tuple>
+<tuple><atom label="Light2"/><atom label="Light1"/></tuple>
+<tuple><atom label="Light3"/><atom label="Light0"/></tuple>
+<tuple><atom label="Light4"/><atom label="Light2"/></tuple>
+<types><type ID="4"/><type ID="4"/></types>
+
+</field>
+
+<field label="right" ID="8" parentID="4">
+<tuple><atom label="Light0"/><atom label="Light3"/></tuple>
+<tuple><atom label="Light1"/><atom label="Light2"/></tuple>
+<tuple><atom label="Light2"/><atom label="Light4"/></tuple>
+<tuple><atom label="Light3"/><atom label="Light1"/></tuple>
+<tuple><atom label="Light4"/><atom label="Light0"/></tuple>
+<types><type ID="4"/><type ID="4"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_source_1" filename="/no-name.rkt" version="3.5" prefixLength="6" loop="5" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Light" ID="4" parentID="2">
+
+</sig>
+
+<sig label="Unlit" ID="5" parentID="4">
+<atom label="Light0"/><atom label="Light1"/><atom label="Light2"/><atom label="Light4"/>
+</sig>
+
+<sig label="Lit" ID="6" parentID="4">
+<atom label="Light3"/>
+</sig>
+
+<field label="left" ID="7" parentID="4">
+<tuple><atom label="Light0"/><atom label="Light4"/></tuple>
+<tuple><atom label="Light1"/><atom label="Light3"/></tuple>
+<tuple><atom label="Light2"/><atom label="Light1"/></tuple>
+<tuple><atom label="Light3"/><atom label="Light0"/></tuple>
+<tuple><atom label="Light4"/><atom label="Light2"/></tuple>
+<types><type ID="4"/><type ID="4"/></types>
+
+</field>
+
+<field label="right" ID="8" parentID="4">
+<tuple><atom label="Light0"/><atom label="Light3"/></tuple>
+<tuple><atom label="Light1"/><atom label="Light2"/></tuple>
+<tuple><atom label="Light2"/><atom label="Light4"/></tuple>
+<tuple><atom label="Light3"/><atom label="Light1"/></tuple>
+<tuple><atom label="Light4"/><atom label="Light0"/></tuple>
+<types><type ID="4"/><type ID="4"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_source_1" filename="/no-name.rkt" version="3.5" prefixLength="6" loop="5" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Light" ID="4" parentID="2">
+
+</sig>
+
+<sig label="Unlit" ID="5" parentID="4">
+<atom label="Light0"/><atom label="Light3"/><atom label="Light4"/>
+</sig>
+
+<sig label="Lit" ID="6" parentID="4">
+<atom label="Light1"/><atom label="Light2"/>
+</sig>
+
+<field label="left" ID="7" parentID="4">
+<tuple><atom label="Light0"/><atom label="Light4"/></tuple>
+<tuple><atom label="Light1"/><atom label="Light3"/></tuple>
+<tuple><atom label="Light2"/><atom label="Light1"/></tuple>
+<tuple><atom label="Light3"/><atom label="Light0"/></tuple>
+<tuple><atom label="Light4"/><atom label="Light2"/></tuple>
+<types><type ID="4"/><type ID="4"/></types>
+
+</field>
+
+<field label="right" ID="8" parentID="4">
+<tuple><atom label="Light0"/><atom label="Light3"/></tuple>
+<tuple><atom label="Light1"/><atom label="Light2"/></tuple>
+<tuple><atom label="Light2"/><atom label="Light4"/></tuple>
+<tuple><atom label="Light3"/><atom label="Light1"/></tuple>
+<tuple><atom label="Light4"/><atom label="Light0"/></tuple>
+<types><type ID="4"/><type ID="4"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_source_1" filename="/no-name.rkt" version="3.5" prefixLength="6" loop="5" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Light" ID="4" parentID="2">
+
+</sig>
+
+<sig label="Unlit" ID="5" parentID="4">
+
+</sig>
+
+<sig label="Lit" ID="6" parentID="4">
+<atom label="Light0"/><atom label="Light1"/><atom label="Light2"/><atom label="Light3"/><atom label="Light4"/>
+</sig>
+
+<field label="left" ID="7" parentID="4">
+<tuple><atom label="Light0"/><atom label="Light4"/></tuple>
+<tuple><atom label="Light1"/><atom label="Light3"/></tuple>
+<tuple><atom label="Light2"/><atom label="Light1"/></tuple>
+<tuple><atom label="Light3"/><atom label="Light0"/></tuple>
+<tuple><atom label="Light4"/><atom label="Light2"/></tuple>
+<types><type ID="4"/><type ID="4"/></types>
+
+</field>
+
+<field label="right" ID="8" parentID="4">
+<tuple><atom label="Light0"/><atom label="Light3"/></tuple>
+<tuple><atom label="Light1"/><atom label="Light2"/></tuple>
+<tuple><atom label="Light2"/><atom label="Light4"/></tuple>
+<tuple><atom label="Light3"/><atom label="Light1"/></tuple>
+<tuple><atom label="Light4"/><atom label="Light0"/></tuple>
+<types><type ID="4"/><type ID="4"/></types>
+
+</field>
+
+
+</instance>
+
+<source filename="/no-name.rkt" content="// Couldn't open source file (/no-name.rkt) (info: (2 . posix)). Is the file saved?"></source>
+</alloy>
