@@ -1,11 +1,51 @@
 <!-- TODO: Add to each list -->
 <div id="reltable-container" class="col">
+    <div class="row">
     <div id="reldescr">
         <h3>Diagram Fields</h3>
         <p>Hover over a field name to highlight it in the diagram.</p>
     </div>
     <ul id="relationList">
     </ul>
+    </div>
+    <div class="row">
 
+
+
+        <% if (source_content && sourceFileName) { %>
+            <h4> Alloy or Forge Source </h4>
+            <button id="downloadButton" class="btn btn-primary">Download</button>
+            <br>
+            <button id="openButton" class="btn btn-secondary">Open in browser</button>
+        <% } %> 
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var downloadButton = document.getElementById('downloadButton');
+                var openButton = document.getElementById('openButton');
+                var sourceContent = <%- JSON.stringify(source_content) %>;
+                var sourceFileName = "<%= sourceFileName %>";
+                var blob = new Blob([sourceContent], { type: 'text/plain' });
+                var url = URL.createObjectURL(blob);
+    
+                if (downloadButton) {
+                    downloadButton.addEventListener('click', function() {
+                        var a = document.createElement('a');
+                        a.href = url;
+                        a.download = sourceFileName;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    });
+                }
+    
+                if (openButton) {
+                    openButton.addEventListener('click', function() {
+                        window.open(url, '_blank');
+                    });
+                }
+            });
+        </script>
+    </div>
 
 </div>
