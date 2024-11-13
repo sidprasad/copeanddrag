@@ -148,7 +148,9 @@ app.post('/', (req, res) => {
         alloyDatum,
         loopBack,
         cope,
-        projectionData
+        projectionData,
+        source_content: "", //HACK
+        sourceFileName : ""
     });
 });
 
