@@ -203,16 +203,16 @@ app.get('/example/:name', (req, res) => {
     var source_content = "";
     var sourceFileName = "";
 
-    if (fs.existsSync(sourceAlloy))
-        source_content = fs.readFileSync(sourceAlloy, 'utf8');
-        sourceFileName = `${exampleName}.als`;
-    }
+    // if (fs.existsSync(sourceAlloy))
+    //     source_content = fs.readFileSync(sourceAlloy, 'utf8');
+    //     sourceFileName = `${exampleName}.als`;
+    // }
     
     
-    if (fs.existsSync(sourceFrg)) {
-        source_content = fs.readFileSync(sourceFrg, 'utf8');
-        sourceFileName = `${exampleName}.frg`;
-    }
+    // if (fs.existsSync(sourceFrg)) {
+    //     source_content = fs.readFileSync(sourceFrg, 'utf8');
+    //     sourceFileName = `${exampleName}.frg`;
+    // }
 
 
     // Read the files

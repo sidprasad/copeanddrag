@@ -736,7 +736,16 @@ export class LayoutInstance {
 
         sigDirections.forEach((sigDirection) => {
             let sourceType = nodeTypes.find((type) => type.id === sigDirection.sigName);
-            let targetType = nodeTypes.find((type) => type.id === sigDirection.target.sigName);
+
+            // This is a hack, something is wrong with the types.
+            let targetType = nodeTypes.find((type) => {
+                
+                // First check if sigDirection.target is a string
+                if (typeof sigDirection.target === "string") {
+                    return type.id === sigDirection.target;
+                }
+                return type.id === sigDirection.target.sigName;
+            });
 
             if (sourceType && targetType) {
                 let sourceNodes = layoutNodes.filter((node) => getAtomType(ai, node.id).id === sourceType.id);
