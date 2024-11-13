@@ -1,0 +1,29 @@
+<alloy builddate="Wednesday, November 13th, 2024">
+<instance bitwidth="4" maxseq="-1" command="temporary-name_source_1" filename="/no-name.rkt" version="3.5"  >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="A" ID="4" parentID="2">
+<atom label="A"/>
+</sig>
+
+<sig label="B" ID="5" parentID="2">
+<atom label="B"/>
+</sig>
+
+
+</instance>
+
+<source filename="/no-name.rkt" content="// Couldn't open source file (/no-name.rkt) (info: (2 . posix)). Is the file saved?"></source>
+</alloy>
