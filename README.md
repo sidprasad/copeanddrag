@@ -142,3 +142,18 @@ By default, we assign every `sig` a random color, that is respected by all atoms
 
 - Have an issue with showing the label and having it different from the relName with n-ary tuples.
 - Arrows FROM groups don't quite layout well when groups are nested (see CHORD example). Source for the link is a little too long, and doesn't anchor to the outer bound (I think it links to the inner padding bound).
+`````````````
+
+
+Dockerfile:
+```
+docker build . -t cnd   
+docker save -o cnd.tar cnd:latest
+```
+
+Then to rehydrate:
+
+```
+docker load -i cnd.tar
+docker run --rm -it -p 3000:3000 cnd:latest
+```
