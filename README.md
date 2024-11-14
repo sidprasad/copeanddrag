@@ -1,4 +1,4 @@
-## Penrose Visualizations for Forge
+## Lightweight Visualizations for Lightweight Formal Methods
 
 1. Run `npm install`
 2. Run in dev mode using `nodemon --exec ts-node src/index.ts`
@@ -112,37 +112,9 @@ By default, we assign every `sig` a random color, that is respected by all atoms
 
 ## Current Issues
 
-
-- [] Currently only show a visualizations for a single alloy instance in the datum
-- [] Fragment shapes should not overlap
-  - Effectively, fragment centroids should be at least the radius of the fragment to the left 
-- **Grids**
-
-- Relation colors?
-
-- Prevent Label overlap:
-  - [] Better Label Layout: https://medium.com/@adarshlilha/removing-label-overlapping-from-pretty-charts-8dd2e3581b71
-
 - [] Attributes for n-ary relations are broken (we lost the in-betweens in the attribute names)
-
-
-### WebCola
-
-
 - [] Struggles with groups that intersect but are not subgroups of one another
-- [] WebCola struggles with variable link length. 
-    - Minimum link length does not always serve us, since it really tries to enforce that min length.
-    - Perhaps we need to force super large links and also force all nodes within the frame?
 
-- Heirarchy
-  - Need some weak webcola heirarchy constraints along some relations (if directional, then add heirarchy?)
-
-
-### Bugs
-
-- Have an issue with showing the label and having it different from the relName with n-ary tuples.
-- Arrows FROM groups don't quite layout well when groups are nested (see CHORD example). Source for the link is a little too long, and doesn't anchor to the outer bound (I think it links to the inner padding bound).
-`````````````
 
 
 Dockerfile:
@@ -158,7 +130,3 @@ docker load -i cnd.tar
 docker run --rm -it -p 3000:3000 cnd:latest
 ```
 
-- TODO: RedBlack tree in artifact
-- TODO: Forge or Alloy model in artifact (on examples page probably)
-- TODO: Spellcheck
-- TODO: `phil` example is not ideal.
