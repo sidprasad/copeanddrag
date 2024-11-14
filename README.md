@@ -113,6 +113,7 @@ By default, we assign every `sig` a random color, that is respected by all atoms
 ## Current Issues
 
 - [] Attributes for n-ary relations are broken (we lost the in-betweens in the attribute names)
+  - What can we do here? You could extend grouping by adding more than just range and domain
 - [] Struggles with groups that intersect but are not subgroups of one another
 
 
