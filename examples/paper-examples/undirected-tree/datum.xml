@@ -1,0 +1,40 @@
+<alloy builddate="Friday, November 15th, 2024">
+<instance bitwidth="4" maxseq="-1" command="temporary-name_undirectedtree_1" filename="/no-name.rkt" version="3.5"  >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Node" ID="4" parentID="2">
+<atom label="Node0"/><atom label="Node1"/><atom label="Node2"/><atom label="Node3"/><atom label="Node4"/><atom label="Node5"/>
+</sig>
+
+<field label="edges" ID="5" parentID="4">
+<tuple><atom label="Node0"/><atom label="Node5"/></tuple>
+<tuple><atom label="Node1"/><atom label="Node5"/></tuple>
+<tuple><atom label="Node2"/><atom label="Node4"/></tuple>
+<tuple><atom label="Node3"/><atom label="Node4"/></tuple>
+<tuple><atom label="Node4"/><atom label="Node2"/></tuple>
+<tuple><atom label="Node4"/><atom label="Node3"/></tuple>
+<tuple><atom label="Node4"/><atom label="Node5"/></tuple>
+<tuple><atom label="Node5"/><atom label="Node0"/></tuple>
+<tuple><atom label="Node5"/><atom label="Node1"/></tuple>
+<tuple><atom label="Node5"/><atom label="Node4"/></tuple>
+<types><type ID="4"/><type ID="4"/></types>
+
+</field>
+
+
+</instance>
+
+<source filename="/no-name.rkt" content="// Couldn't open source file (/no-name.rkt) (info: (2 . posix)). Is the file saved?"></source>
+</alloy>

@@ -78,7 +78,9 @@ app.get('/', (req, res) => {
         layoutAnnotation: "",
         alloyDatum: "",
         cope: "",
-        projectionData : []
+        projectionData : [],
+        source_content: "", //HACK
+        sourceFileName : ""
     });
 
 

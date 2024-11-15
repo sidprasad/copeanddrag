@@ -131,3 +131,26 @@ docker load -i cnd.tar
 docker run --rm -it -p 3000:3000 cnd:latest
 ```
 
+
+
+### Alloy Thread
+
+https://alloytools.discourse.group/t/visualization-for-alloy-what-do-you-want/111/7
+
+From Daniel jackson on thread:
+
+– Is there a theme-like facility for saving customizations? I believe that’s critical, because it amortizes the cost of editing the customization across sessions. It would be even better to be able to save styles that can apply to different models.
+– The diagrams (and especially the textual labels) look slightly blurry in my browser.
+– Is it possible to change the font? That would be a priority for me.
+– I wish labels didn’t collide.
+– When you select a node or edge, it would be nice to select the appropriate field in the form to edit it; I know this is hard (and not always even unambiguous)
+– In the Alloy viz, we switch the text color from dark to light when the fill is switched from light to dark
+– When you adjust the layout, the graph sometimes moves off screen
+– I expected the table layouts to adjust alignment within tables, not of tables themselves within window: wouldn’t you always want them centered in the window, eg?
+– Undo is a feature missing from the Alloy viz that would be really nice
+
+
+
+## Motivation for Grouping
+
+https://alloytools.discourse.group/t/is-it-possible-to-group-container-nodes-in-the-visualizer/277/4
