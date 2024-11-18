@@ -1,0 +1,200 @@
+<alloy builddate="2021-11-19T05:45:51.188Z">
+
+<instance bitwidth="4" maxseq="6" mintrace="-1" maxtrace="-1" command="Run run$2 for 6 but 8 State, 3 ViewType, 5 Object" filename="c:\Users\nivsi\Desktop\AlloyStuff\models\algorithms\mapping\view-backing.als" tracelength="1" backloop="0">
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="String" ID="3" parentID="2" builtin="yes">
+</sig>
+
+<sig label="this/MapRef" ID="4" parentID="5">
+</sig>
+
+<sig label="this/IteratorRef" ID="6" parentID="5">
+   <atom label="IteratorRef$0"/>
+   <atom label="IteratorRef$1"/>
+   <atom label="IteratorRef$2"/>
+</sig>
+
+<sig label="this/SetRef" ID="7" parentID="5">
+   <atom label="SetRef$0"/>
+</sig>
+
+<sig label="this/Ref" ID="5" parentID="2">
+   <atom label="Ref$0"/>
+</sig>
+
+<sig label="this/Map" ID="8" parentID="9">
+   <atom label="Map$0"/>
+   <atom label="Map$1"/>
+</sig>
+
+<field label="keys" ID="10" parentID="8">
+   <tuple> <atom label="Map$0"/> <atom label="Ref$0"/> </tuple>
+   <tuple> <atom label="Map$0"/> <atom label="IteratorRef$1"/> </tuple>
+   <tuple> <atom label="Map$1"/> <atom label="Ref$0"/> </tuple>
+   <tuple> <atom label="Map$1"/> <atom label="IteratorRef$1"/> </tuple>
+   <types> <type ID="8"/> <type ID="5"/> </types>
+</field>
+
+<field label="map" ID="11" parentID="8">
+   <tuple> <atom label="Map$0"/> <atom label="Ref$0"/> <atom label="Ref$0"/> </tuple>
+   <tuple> <atom label="Map$0"/> <atom label="IteratorRef$1"/> <atom label="IteratorRef$1"/> </tuple>
+   <tuple> <atom label="Map$1"/> <atom label="Ref$0"/> <atom label="Ref$0"/> </tuple>
+   <tuple> <atom label="Map$1"/> <atom label="IteratorRef$1"/> <atom label="IteratorRef$1"/> </tuple>
+   <types> <type ID="8"/> <type ID="5"/> <type ID="5"/> </types>
+</field>
+
+<sig label="this/Iterator" ID="12" parentID="9">
+   <atom label="Iterator$0"/>
+</sig>
+
+<field label="left" ID="13" parentID="12">
+   <tuple> <atom label="Iterator$0"/> <atom label="Ref$0"/> </tuple>
+   <tuple> <atom label="Iterator$0"/> <atom label="IteratorRef$0"/> </tuple>
+   <tuple> <atom label="Iterator$0"/> <atom label="IteratorRef$1"/> </tuple>
+   <types> <type ID="12"/> <type ID="5"/> </types>
+</field>
+
+<field label="done" ID="14" parentID="12">
+   <tuple> <atom label="Iterator$0"/> <atom label="Ref$0"/> </tuple>
+   <tuple> <atom label="Iterator$0"/> <atom label="IteratorRef$1"/> </tuple>
+   <types> <type ID="12"/> <type ID="5"/> </types>
+</field>
+
+<field label="lastRef" ID="15" parentID="12">
+   <tuple> <atom label="Iterator$0"/> <atom label="Ref$0"/> </tuple>
+   <types> <type ID="12"/> <type ID="5"/> </types>
+</field>
+
+<sig label="this/Set" ID="16" parentID="9">
+   <atom label="Set$0"/>
+</sig>
+
+<field label="elts" ID="17" parentID="16">
+   <types> <type ID="16"/> <type ID="5"/> </types>
+</field>
+
+<sig label="this/Object" ID="9" parentID="2">
+</sig>
+
+<sig label="this/State" ID="18" parentID="2">
+   <atom label="State$0"/>
+   <atom label="State$1"/>
+   <atom label="State$2"/>
+   <atom label="State$3"/>
+   <atom label="State$4"/>
+   <atom label="State$5"/>
+   <atom label="State$6"/>
+   <atom label="State$7"/>
+</sig>
+
+<field label="refs" ID="19" parentID="18">
+   <tuple> <atom label="State$0"/> <atom label="Ref$0"/> </tuple>
+   <tuple> <atom label="State$0"/> <atom label="IteratorRef$0"/> </tuple>
+   <tuple> <atom label="State$0"/> <atom label="IteratorRef$1"/> </tuple>
+   <tuple> <atom label="State$1"/> <atom label="Ref$0"/> </tuple>
+   <tuple> <atom label="State$1"/> <atom label="IteratorRef$0"/> </tuple>
+   <tuple> <atom label="State$1"/> <atom label="IteratorRef$1"/> </tuple>
+   <tuple> <atom label="State$2"/> <atom label="Ref$0"/> </tuple>
+   <tuple> <atom label="State$2"/> <atom label="IteratorRef$0"/> </tuple>
+   <tuple> <atom label="State$2"/> <atom label="IteratorRef$1"/> </tuple>
+   <tuple> <atom label="State$3"/> <atom label="Ref$0"/> </tuple>
+   <tuple> <atom label="State$3"/> <atom label="IteratorRef$0"/> </tuple>
+   <tuple> <atom label="State$3"/> <atom label="IteratorRef$1"/> </tuple>
+   <tuple> <atom label="State$4"/> <atom label="Ref$0"/> </tuple>
+   <tuple> <atom label="State$4"/> <atom label="IteratorRef$0"/> </tuple>
+   <tuple> <atom label="State$4"/> <atom label="IteratorRef$1"/> </tuple>
+   <tuple> <atom label="State$5"/> <atom label="Ref$0"/> </tuple>
+   <tuple> <atom label="State$5"/> <atom label="IteratorRef$0"/> </tuple>
+   <tuple> <atom label="State$5"/> <atom label="IteratorRef$1"/> </tuple>
+   <tuple> <atom label="State$6"/> <atom label="Ref$0"/> </tuple>
+   <tuple> <atom label="State$6"/> <atom label="IteratorRef$0"/> </tuple>
+   <tuple> <atom label="State$6"/> <atom label="IteratorRef$1"/> </tuple>
+   <tuple> <atom label="State$7"/> <atom label="Ref$0"/> </tuple>
+   <tuple> <atom label="State$7"/> <atom label="IteratorRef$0"/> </tuple>
+   <tuple> <atom label="State$7"/> <atom label="IteratorRef$1"/> </tuple>
+   <types> <type ID="18"/> <type ID="5"/> </types>
+</field>
+
+<field label="obj" ID="20" parentID="18">
+   <tuple> <atom label="State$0"/> <atom label="Ref$0"/> <atom label="Set$0"/> </tuple>
+   <tuple> <atom label="State$0"/> <atom label="IteratorRef$0"/> <atom label="Iterator$0"/> </tuple>
+   <tuple> <atom label="State$0"/> <atom label="IteratorRef$1"/> <atom label="Iterator$0"/> </tuple>
+   <tuple> <atom label="State$1"/> <atom label="Ref$0"/> <atom label="Set$0"/> </tuple>
+   <tuple> <atom label="State$1"/> <atom label="IteratorRef$0"/> <atom label="Iterator$0"/> </tuple>
+   <tuple> <atom label="State$1"/> <atom label="IteratorRef$1"/> <atom label="Iterator$0"/> </tuple>
+   <tuple> <atom label="State$2"/> <atom label="Ref$0"/> <atom label="Set$0"/> </tuple>
+   <tuple> <atom label="State$2"/> <atom label="IteratorRef$0"/> <atom label="Iterator$0"/> </tuple>
+   <tuple> <atom label="State$2"/> <atom label="IteratorRef$1"/> <atom label="Iterator$0"/> </tuple>
+   <tuple> <atom label="State$3"/> <atom label="Ref$0"/> <atom label="Set$0"/> </tuple>
+   <tuple> <atom label="State$3"/> <atom label="IteratorRef$0"/> <atom label="Iterator$0"/> </tuple>
+   <tuple> <atom label="State$3"/> <atom label="IteratorRef$1"/> <atom label="Iterator$0"/> </tuple>
+   <tuple> <atom label="State$4"/> <atom label="Ref$0"/> <atom label="Set$0"/> </tuple>
+   <tuple> <atom label="State$4"/> <atom label="IteratorRef$0"/> <atom label="Iterator$0"/> </tuple>
+   <tuple> <atom label="State$4"/> <atom label="IteratorRef$1"/> <atom label="Iterator$0"/> </tuple>
+   <tuple> <atom label="State$5"/> <atom label="Ref$0"/> <atom label="Set$0"/> </tuple>
+   <tuple> <atom label="State$5"/> <atom label="IteratorRef$0"/> <atom label="Iterator$0"/> </tuple>
+   <tuple> <atom label="State$5"/> <atom label="IteratorRef$1"/> <atom label="Iterator$0"/> </tuple>
+   <tuple> <atom label="State$6"/> <atom label="Ref$0"/> <atom label="Set$0"/> </tuple>
+   <tuple> <atom label="State$6"/> <atom label="IteratorRef$0"/> <atom label="Iterator$0"/> </tuple>
+   <tuple> <atom label="State$6"/> <atom label="IteratorRef$1"/> <atom label="Iterator$0"/> </tuple>
+   <tuple> <atom label="State$7"/> <atom label="Ref$0"/> <atom label="Set$0"/> </tuple>
+   <tuple> <atom label="State$7"/> <atom label="IteratorRef$0"/> <atom label="Iterator$0"/> </tuple>
+   <tuple> <atom label="State$7"/> <atom label="IteratorRef$1"/> <atom label="Iterator$0"/> </tuple>
+   <types> <type ID="18"/> <type ID="5"/> <type ID="9"/> </types>
+</field>
+
+<field label="views" ID="21" parentID="18">
+   <types> <type ID="18"/> <type ID="22"/> <type ID="5"/> <type ID="5"/> </types>
+</field>
+
+<field label="dirty" ID="23" parentID="18">
+   <types> <type ID="18"/> <type ID="5"/> </types>
+</field>
+
+<sig label="this/KeySetView" ID="24" parentID="22" one="yes">
+   <atom label="KeySetView$0"/>
+</sig>
+
+<sig label="this/KeySetView&quot;" ID="25" parentID="22" one="yes">
+   <atom label="KeySetView&quot;$0"/>
+</sig>
+
+<sig label="this/IteratorView" ID="26" parentID="22" one="yes">
+   <atom label="IteratorView$0"/>
+</sig>
+
+<sig label="this/ViewType" ID="22" parentID="2" abstract="yes">
+</sig>
+
+<sig label="so/Ord" ID="27" parentID="2" one="yes" private="yes">
+   <atom label="so/Ord$0"/>
+</sig>
+
+<field label="First" ID="28" parentID="27" private="yes">
+   <tuple> <atom label="so/Ord$0"/> <atom label="State$0"/> </tuple>
+   <types> <type ID="27"/> <type ID="18"/> </types>
+</field>
+
+<field label="Next" ID="29" parentID="27" private="yes">
+   <tuple> <atom label="so/Ord$0"/> <atom label="State$0"/> <atom label="State$1"/> </tuple>
+   <tuple> <atom label="so/Ord$0"/> <atom label="State$1"/> <atom label="State$2"/> </tuple>
+   <tuple> <atom label="so/Ord$0"/> <atom label="State$2"/> <atom label="State$3"/> </tuple>
+   <tuple> <atom label="so/Ord$0"/> <atom label="State$3"/> <atom label="State$4"/> </tuple>
+   <tuple> <atom label="so/Ord$0"/> <atom label="State$4"/> <atom label="State$5"/> </tuple>
+   <tuple> <atom label="so/Ord$0"/> <atom label="State$5"/> <atom label="State$6"/> </tuple>
+   <tuple> <atom label="so/Ord$0"/> <atom label="State$6"/> <atom label="State$7"/> </tuple>
+   <types> <type ID="27"/> <type ID="18"/> <type ID="18"/> </types>
+</field>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+</instance>
+
+</alloy>
