@@ -1,0 +1,6 @@
+constraints:
+    - orientation: {field: value, directions: [directlyRight] }
+    - orientation: {field: next, directions : [directlyBelow]}
+directives:
+    - flag: hideDisconnected
+    - projection : {sig : Matrix}

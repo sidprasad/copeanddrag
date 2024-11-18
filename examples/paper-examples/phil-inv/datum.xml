@@ -1,0 +1,135 @@
+<alloy builddate="2021-11-19T05:45:51.188Z">
+
+<instance bitwidth="4" maxseq="4" mintrace="-1" maxtrace="-1" command="Run dinnerParty for 5 Philosopher, exactly 6 Fork, exactly 7 State" filename="c:\Users\nivsi\Desktop\AlloyStuff\models\models\logic\phil.als" tracelength="1" backloop="0">
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="String" ID="3" parentID="2" builtin="yes">
+</sig>
+
+<sig label="this/Philosopher" ID="4" parentID="2">
+   <atom label="Philosopher$0"/>
+   <atom label="Philosopher$1"/>
+   <atom label="Philosopher$2"/>
+   <atom label="Philosopher$3"/>
+   <atom label="Philosopher$4"/>
+</sig>
+
+<field label="leftFork" ID="5" parentID="4">
+   <tuple> <atom label="Philosopher$0"/> <atom label="Fork$5"/> </tuple>
+   <tuple> <atom label="Philosopher$1"/> <atom label="Fork$4"/> </tuple>
+   <tuple> <atom label="Philosopher$2"/> <atom label="Fork$3"/> </tuple>
+   <tuple> <atom label="Philosopher$3"/> <atom label="Fork$2"/> </tuple>
+   <tuple> <atom label="Philosopher$4"/> <atom label="Fork$1"/> </tuple>
+   <types> <type ID="4"/> <type ID="6"/> </types>
+</field>
+
+<field label="rightFork" ID="7" parentID="4">
+   <tuple> <atom label="Philosopher$0"/> <atom label="Fork$4"/> </tuple>
+   <tuple> <atom label="Philosopher$1"/> <atom label="Fork$3"/> </tuple>
+   <tuple> <atom label="Philosopher$2"/> <atom label="Fork$2"/> </tuple>
+   <tuple> <atom label="Philosopher$3"/> <atom label="Fork$1"/> </tuple>
+   <tuple> <atom label="Philosopher$4"/> <atom label="Fork$5"/> </tuple>
+   <types> <type ID="4"/> <type ID="6"/> </types>
+</field>
+
+<field label="leftPhil" ID="8" parentID="4">
+   <tuple> <atom label="Philosopher$0"/> <atom label="Philosopher$4"/> </tuple>
+   <tuple> <atom label="Philosopher$1"/> <atom label="Philosopher$0"/> </tuple>
+   <tuple> <atom label="Philosopher$2"/> <atom label="Philosopher$1"/> </tuple>
+   <tuple> <atom label="Philosopher$3"/> <atom label="Philosopher$2"/> </tuple>
+   <tuple> <atom label="Philosopher$4"/> <atom label="Philosopher$3"/> </tuple>
+   <types> <type ID="4"/> <type ID="4"/> </types>
+</field>
+
+<field label="rightPhil" ID="9" parentID="4">
+   <tuple> <atom label="Philosopher$0"/> <atom label="Philosopher$1"/> </tuple>
+   <tuple> <atom label="Philosopher$1"/> <atom label="Philosopher$2"/> </tuple>
+   <tuple> <atom label="Philosopher$2"/> <atom label="Philosopher$3"/> </tuple>
+   <tuple> <atom label="Philosopher$3"/> <atom label="Philosopher$4"/> </tuple>
+   <tuple> <atom label="Philosopher$4"/> <atom label="Philosopher$0"/> </tuple>
+   <types> <type ID="4"/> <type ID="4"/> </types>
+</field>
+
+<sig label="this/Fork" ID="6" parentID="2">
+   <atom label="Fork$0"/>
+   <atom label="Fork$1"/>
+   <atom label="Fork$2"/>
+   <atom label="Fork$3"/>
+   <atom label="Fork$4"/>
+   <atom label="Fork$5"/>
+</sig>
+
+<sig label="this/State" ID="10" parentID="2">
+   <atom label="State$0"/>
+   <atom label="State$1"/>
+   <atom label="State$2"/>
+   <atom label="State$3"/>
+   <atom label="State$4"/>
+   <atom label="State$5"/>
+   <atom label="State$6"/>
+</sig>
+
+<field label="using" ID="11" parentID="10">
+   <tuple> <atom label="State$1"/> <atom label="Fork$5"/> <atom label="Philosopher$4"/> </tuple>
+   <tuple> <atom label="State$2"/> <atom label="Fork$5"/> <atom label="Philosopher$4"/> </tuple>
+   <tuple> <atom label="State$3"/> <atom label="Fork$1"/> <atom label="Philosopher$4"/> </tuple>
+   <tuple> <atom label="State$3"/> <atom label="Fork$2"/> <atom label="Philosopher$3"/> </tuple>
+   <tuple> <atom label="State$3"/> <atom label="Fork$5"/> <atom label="Philosopher$4"/> </tuple>
+   <tuple> <atom label="State$4"/> <atom label="Fork$2"/> <atom label="Philosopher$3"/> </tuple>
+   <tuple> <atom label="State$5"/> <atom label="Fork$1"/> <atom label="Philosopher$4"/> </tuple>
+   <tuple> <atom label="State$5"/> <atom label="Fork$2"/> <atom label="Philosopher$3"/> </tuple>
+   <tuple> <atom label="State$5"/> <atom label="Fork$5"/> <atom label="Philosopher$0"/> </tuple>
+   <tuple> <atom label="State$6"/> <atom label="Fork$1"/> <atom label="Philosopher$4"/> </tuple>
+   <tuple> <atom label="State$6"/> <atom label="Fork$2"/> <atom label="Philosopher$3"/> </tuple>
+   <tuple> <atom label="State$6"/> <atom label="Fork$3"/> <atom label="Philosopher$2"/> </tuple>
+   <tuple> <atom label="State$6"/> <atom label="Fork$5"/> <atom label="Philosopher$0"/> </tuple>
+   <types> <type ID="10"/> <type ID="6"/> <type ID="4"/> </types>
+</field>
+
+<sig label="so/Ord" ID="12" parentID="2" one="yes" private="yes">
+   <atom label="so/Ord$0"/>
+</sig>
+
+<field label="First" ID="13" parentID="12" private="yes">
+   <tuple> <atom label="so/Ord$0"/> <atom label="State$0"/> </tuple>
+   <types> <type ID="12"/> <type ID="10"/> </types>
+</field>
+
+<field label="Next" ID="14" parentID="12" private="yes">
+   <tuple> <atom label="so/Ord$0"/> <atom label="State$0"/> <atom label="State$1"/> </tuple>
+   <tuple> <atom label="so/Ord$0"/> <atom label="State$1"/> <atom label="State$2"/> </tuple>
+   <tuple> <atom label="so/Ord$0"/> <atom label="State$2"/> <atom label="State$3"/> </tuple>
+   <tuple> <atom label="so/Ord$0"/> <atom label="State$3"/> <atom label="State$4"/> </tuple>
+   <tuple> <atom label="so/Ord$0"/> <atom label="State$4"/> <atom label="State$5"/> </tuple>
+   <tuple> <atom label="so/Ord$0"/> <atom label="State$5"/> <atom label="State$6"/> </tuple>
+   <types> <type ID="12"/> <type ID="10"/> <type ID="10"/> </types>
+</field>
+
+<sig label="po/Ord" ID="15" parentID="2" one="yes" private="yes">
+   <atom label="po/Ord$0"/>
+</sig>
+
+<field label="First" ID="16" parentID="15" private="yes">
+   <tuple> <atom label="po/Ord$0"/> <atom label="Philosopher$0"/> </tuple>
+   <types> <type ID="15"/> <type ID="4"/> </types>
+</field>
+
+<field label="Next" ID="17" parentID="15" private="yes">
+   <tuple> <atom label="po/Ord$0"/> <atom label="Philosopher$0"/> <atom label="Philosopher$1"/> </tuple>
+   <tuple> <atom label="po/Ord$0"/> <atom label="Philosopher$1"/> <atom label="Philosopher$2"/> </tuple>
+   <tuple> <atom label="po/Ord$0"/> <atom label="Philosopher$2"/> <atom label="Philosopher$3"/> </tuple>
+   <tuple> <atom label="po/Ord$0"/> <atom label="Philosopher$3"/> <atom label="Philosopher$4"/> </tuple>
+   <types> <type ID="15"/> <type ID="4"/> <type ID="4"/> </types>
+</field>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+</instance>
+
+</alloy>
