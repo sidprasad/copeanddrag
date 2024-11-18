@@ -1,7 +1,9 @@
 constraints:
     - orientation: {field: Next, directions: [directlyRight]}
+    - orientation: {field: left, directions : [left]}
     - group : {field: refs}
     - group : {field: obj}
+    - orientation: {field: refs, directions: [below]}
 directives:
-    - flag: hideDisconnectedBuiltIns
+    - flag: hideDisconnected
     - projection: {sig: so/Ord}
