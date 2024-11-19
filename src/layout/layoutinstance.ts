@@ -393,6 +393,10 @@ export class LayoutInstance {
 
     private colorNodesByType(g: Graph, a: AlloyInstance): Record<string, string> {
 
+        // TODO: This needs to be more
+        // sophisticated.
+
+
         let nodes = [...g.nodes()];
         let types = getInstanceTypes(a);
         let numTypes = types.length;
@@ -406,6 +410,7 @@ export class LayoutInstance {
 
         let colorsByType: Record<string, string> = {};
 
+        let types_with_user_colors = Object.keys(this._sigColors);
 
         // For each type, assign a unique, random color
         types.forEach((type, index) => {
@@ -424,7 +429,13 @@ export class LayoutInstance {
         nodes.forEach((node) => {
             // Get the type of the node
             let type = getAtomType(a, node);
-            let color = colorsByType[type.id];
+            let allTypes = type.types;
+
+
+            // Get the first element of allTypes that 
+            // is also an element of types_with_user_colors
+            let type_id = allTypes.find((type) => types_with_user_colors.includes(type)) || type.id;
+            let color = colorsByType[type_id];
             colorsByNode[node] = color;
         });
         return colorsByNode;

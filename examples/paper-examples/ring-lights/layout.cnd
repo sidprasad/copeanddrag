@@ -2,3 +2,11 @@ constraints:
   - cyclic:
       field: left
       direction: clockwise
+directives:
+  - flag: hideDisconnected
+  - color:
+      sig: Lit
+      value: "red"
+  - color:
+      sig: Unlit
+      value: "grey"

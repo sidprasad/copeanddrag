@@ -42,7 +42,7 @@ option min_tracelength 5
 // We need more than 5 states to find a solution
 option max_tracelength 10 
 
-option verbose 5
+// option verbose 5
 run {
     -- well-formedness constraints
     ring
@@ -69,4 +69,4 @@ run {
     --next_state { always { some Lit }}    
     
 } 
-for exactly 5 Light
+for exactly 5 Light, 5 Lit, 5 Unlit
