@@ -4,6 +4,9 @@ constraints:
     - group : {field: refs}
     - group : {field: obj}
     - orientation: {field: refs, directions: [below]}
+    - group : {field: done, target: domain}
+
 directives:
     - flag: hideDisconnected
     - projection: {sig: so/Ord}
+    - attribute : {field: keys}
