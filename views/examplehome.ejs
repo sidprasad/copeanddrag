@@ -14,9 +14,15 @@
         <h3>Cope and Drag Examples</h3>
         <p>Click any of the following buttons to see the related example.</p>
         <div>
-            <% exampleNames.forEach(function(name) { %>
-                <a href="/example/<%= name %>"> <span class="badge badge-pill badge-primary"><%= name %></span> </a>
-            <% }); %>
+            <ul class="list-group">
+
+                <% exampleNames.forEach(function(name) { %>
+                    <li class="list-group-item">
+                    <a href="/example/<%= name %>"> <span class="badge badge-pill badge-primary"><%= name %></span> </a>
+                </li>
+                <% }); %>
+
+            </ul>
         </div>
     </div>
 </body>
