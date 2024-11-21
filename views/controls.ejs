@@ -1,11 +1,30 @@
 <div id="controls" class="col">
 
+    <style>
+        .CodeMirror {
+            height: auto;
+            width: calc(30ch + 2px);
+            overflow: auto;
+        }
+        .CodeMirror.is-valid {
+            border: 1px solid #28a745;
+        }
+        .CodeMirror.is-invalid {
+            border: 2px solid #dc3545;
+        }
 
-    <form id="controlsForm" method="post" action="/">
-        <button type="submit" id='cola' class="btn btn-primary">Load Diagram</button>
+        .cope {
+            height: auto;
+            width: 100%;
+            overflow: auto;
+        }
+    </style>
+    <form id="controlsForm" method="post" action="/" style="padding-top: 5px;">
+        <button type="submit" id='cola' class="btn btn-primary btn-lg btn-block">Load Diagram</button>
+        <br>
         <div class="form-group">
-            <label for="alloydatum">Alloy Instance</label>
-            <textarea class="form-control" id="alloydatum" rows="5"
+            <label for="alloydatum" class="lead">Alloy Instance</label>
+            <textarea class="form-control" id="alloydatum" rows="3"
                 name="alloydatum"><%= alloyDatum ? alloyDatum : '' %></textarea>
         </div>
         <!-- <div class="form-group">
@@ -13,8 +32,8 @@
                 <textarea class="form-control" id="layoutannotation" rows="5" name="layoutannotation"><%= layoutAnnotation ? layoutAnnotation : '' %></textarea>
             </div> -->
         <div class="form-group">
-            <label for="layoutannotation">Cope and Drag Spec</label>
-            <textarea class="form-control" id="cope" rows="5" name="cope"><%= cope ? cope : '' %></textarea>
+            <label for="layoutannotation" class="lead">Cope and Drag</label> <button id="prettify" class="btn btn-outline-dark btn-sm">Lint</button>
+            <textarea class="form-control" id="cope" rows="10" name="cope"><%= cope ? cope : '' %></textarea>
         </div>
         <div class="form-group d-none">
             <label for="instancenumber">Temporal Instance Number</label>
@@ -49,5 +68,58 @@
         <% } %>
 
     </form>
+    
 
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+<!-- Include CodeMirror CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+<!-- Include CodeMirror JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+<!-- Include CodeMirror YAML mode -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/yaml/yaml.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var copeTextarea = document.getElementById('cope');
+        var editor = CodeMirror.fromTextArea(copeTextarea, {
+            mode: 'yaml',
+            lineNumbers: true,
+            theme: 'default',
+            lineWrapping: false, // Disable line wrapping
+        });
+
+
+
+        // Event listener for the Prettify button
+        document.getElementById('prettify').addEventListener('click', function() {
+            try {
+                var yamlContent = editor.getValue();
+                var parsedYaml = jsyaml.load(yamlContent);
+                var formattedYaml = jsyaml.dump(parsedYaml);
+                editor.setValue(formattedYaml);
+                editor.getWrapperElement().classList.remove('is-invalid');
+                editor.getWrapperElement().classList.add('is-valid');
+            } catch (e) {
+                editor.getWrapperElement().classList.remove('is-valid');
+                editor.getWrapperElement().classList.add('is-invalid');
+                alert('Invalid YAML format: ' + e.message);
+            }
+        });
+
+
+
+        editor.on('blur', function() {
+            try {
+                var yamlContent = editor.getValue();
+                var parsedYaml = jsyaml.load(yamlContent);
+                editor.getWrapperElement().classList.remove('is-invalid');
+                editor.getWrapperElement().classList.add('is-valid');
+            } catch (e) {
+                editor.getWrapperElement().classList.remove('is-valid');
+                editor.getWrapperElement().classList.add('is-invalid');
+                // alert('Invalid YAML format: ' + e.message);
+            }
+        });
+    });
+</script>

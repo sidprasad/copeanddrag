@@ -481,6 +481,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             .data(Array.from(relNames))
             .enter()
             .append("li")
+            .attr("class", "list-group-item")
             .text(d => d)
             .on("mouseover", function (d) {
                 highlightRelation(d);
