@@ -1,0 +1,44 @@
+<alloy builddate="Wednesday, November 6th, 2024">
+<instance bitwidth="4" maxseq="-1" command="temporary-name_bst-broken_1" filename="/no-name.rkt" version="3.5"  >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Node" ID="4" parentID="2">
+<atom label="Node2"/><atom label="Node3"/>
+</sig>
+
+<field label="right" ID="5" parentID="4">
+<tuple><atom label="Node2"/><atom label="Node3"/></tuple>
+<types><type ID="4"/><type ID="4"/></types>
+
+</field>
+
+<field label="key" ID="6" parentID="4">
+<tuple><atom label="Node2"/><atom label="-1"/></tuple>
+<tuple><atom label="Node3"/><atom label="-2"/></tuple>
+<types><type ID="4"/><type ID="1"/></types>
+
+</field>
+
+<field label="left" ID="7" parentID="4">
+<tuple><atom label="Node2"/><atom label="Node3"/></tuple>
+<types><type ID="4"/><type ID="4"/></types>
+
+</field>
+
+
+</instance>
+
+<source filename="/no-name.rkt" content="// Couldn't open source file (/no-name.rkt) (info: (2 . posix)). Is the file saved?"></source>
+<visualizer script="/*&#xA;  Script for bst.frg. Expectations:&#xA;    - sig Node { left: lone Node, right: lone Node }&#xA;    - binary_tree pred is satisfied (e.g., unique root exists)&#xA;    - no empty trees &#xA;*/&#xA;&#xA;const RADIUS = 16;&#xA;const LEAF_RADIUS = 2;&#xA;&#xA;function makeLeaf() {&#xA;    return {&#xA;        visualObject: new Circle({radius:LEAF_RADIUS, color: 'black', borderColor: 'black'}), &#xA;        children: [] }&#xA;}&#xA;&#xA;function firstAtomOf(expr) {&#xA;  if(!expr.empty())&#xA;    return expr.tuples()[0].atoms()[0].id()&#xA;  return 'none'&#xA;}&#xA;&#xA;// Construct a nested JS object that describes the tree structure.&#xA;function buildNested(root) {&#xA;  let obj = new Circle({radius: RADIUS, color: 'white', borderColor: 'black', &#xA;                        label: firstAtomOf(root.key)});&#xA;  let dataTree = { visualObject: obj, children: []}&#xA;  dataTree.children[0] = root.left.empty() ? &#xA;    makeLeaf() : buildNested(root.left)&#xA;  dataTree.children[1] = root.right.empty() ? &#xA;    makeLeaf() : buildNested(root.right)&#xA;  return dataTree&#xA;}&#xA;&#xA;// Which node is the root of the tree?&#xA;function findRoot() {&#xA;  const noParents = Node.atoms().filter(a =&amp;gt; left.join(a).empty() &amp;&amp;&#xA;                                             right.join(a).empty())&#xA;  if(noParents.length != 1) &#xA;    throw Error('Instance had more than one root node: '+noParents)&#xA;  return noParents[0]&#xA;}&#xA;&#xA;// A Tree takes a nested JS object that describes the tree structure.&#xA;const tree = new Tree({&#xA;    root: buildNested(findRoot()), &#xA;    height: 500, &#xA;    width: 500, &#xA;    coords: { x: 20, y: 50 }&#xA;    });&#xA;&#xA;const stage = new Stage() &#xA;stage.add(tree)&#xA;stage.render(svg)" /></alloy>
