@@ -466,10 +466,6 @@ export class LayoutInstance {
     private applyLayoutProjections(ai: AlloyInstance, projections: Record<string, string>): { projectedInstance: AlloyInstance, finalProjectionChoices: { type: string, projectedAtom: string, atoms: string[] }[] } {
 
         let projectedSigs: string[] = this.projectedSigs;
-
-
-
-
         let projectedTypes: AlloyType[] = projectedSigs.map((sig) => ai.types[sig]);
 
 
