@@ -466,6 +466,10 @@ export class LayoutInstance {
     private applyLayoutProjections(ai: AlloyInstance, projections: Record<string, string>): { projectedInstance: AlloyInstance, finalProjectionChoices: { type: string, projectedAtom: string, atoms: string[] }[] } {
 
         let projectedSigs: string[] = this.projectedSigs;
+
+
+
+
         let projectedTypes: AlloyType[] = projectedSigs.map((sig) => ai.types[sig]);
 
 
@@ -501,7 +505,11 @@ export class LayoutInstance {
         });
 
         // finalProjectionChoices : { type : string, projectedAtom : string, atoms : string[]} 
-        let finalProjectionChoices = Object.entries(projections).map(([typeId, atomId]) => {
+        let finalProjectionChoices = Object.entries(projections)
+        
+        .filter(([typeId, atomId]) => projectedSigs.includes(typeId)) // This is crucial for scenarios where the projection is changed.
+        
+        .map(([typeId, atomId]) => {
             let atoms = atomsPerProjectedType[typeId];
             return { type: typeId, projectedAtom: atomId, atoms: atoms };
         });
