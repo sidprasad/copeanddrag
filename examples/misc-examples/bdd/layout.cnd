@@ -1,0 +1,28 @@
+constraints:
+  - orientation:
+      field: t
+      directions:
+        - below
+        - left
+  - orientation:
+      field: f
+      directions:
+        - below
+        - right
+  - group:
+      field: v
+  - orientation: { sigs: [Leaf, Variable], directions: [above]}
+directives:
+  - flag: hideDisconnected
+  - color:
+        sig: Node
+        value: "#008ae6"
+  - color:
+      sig: Variable
+      value: "grey"
+  - color:
+      sig: 'True'
+      value: 'green'
+  - color:
+      sig: 'False'
+      value: 'red'

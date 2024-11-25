@@ -83,7 +83,8 @@ pred bdd {
 }
 
 
+run {
+  bdd
 
-
-run bdd for exactly 4 Variable, 10 Node, exactly 2 Leaf
+ } for exactly 3 Variable, exactly 7 Node, exactly 2 Leaf
 
