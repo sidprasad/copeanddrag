@@ -541,7 +541,9 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .attr("height", function (d) { return d.height; }) // Use node's height
         .attr("x", function (d) { return -d.width / 2; }) // Center the rectangle on the node's x
         .attr("y", function (d) { return -d.height / 2; }) // Center the rectangle on the node's y
-        .attr("stroke", function (d) { return d.color; }) // Outline color of the node
+         .attr("stroke", function (d) { return d.color; }) // Outline color of the node
+        .attr("rx", 3) // Set the x-axis radius for rounded corners
+        .attr("ry", 3) // Set the y-axis radius for rounded corners
         .attr("stroke-width", 1.5) // Adjust the stroke width as needed
         .attr("fill", function (d) {
             let f = isHiddenNode(d) || (d.icon != null) ? "transparent" : "white";
