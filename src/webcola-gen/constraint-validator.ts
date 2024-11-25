@@ -45,9 +45,14 @@ class ConstraintValidator {
             };
         });
 
-        this.webcolaConstraints.forEach(constraint => {
+        for (let i = 0; i < this.webcolaConstraints.length; i++) {
+            let constraint = this.webcolaConstraints[i];
             this.webColaToCassowary(constraint);
-        });
+            if (this.error) {
+                return this.error;
+            }
+        }
+
 
         this.solver.solve();
         return this.error;
@@ -108,15 +113,16 @@ class ConstraintValidator {
 
         let left = this.colaNodes[left_idx].id;
         let right = this.colaNodes[right_idx].id;
-
-
         let relativePosition = axis === 'x' ? 'to the left of ' : 'above ';
-        if (axis === 'x' && equality) {
-            relativePosition += 'and horizontally aligned with ';
+        if (equality) {
+            if (axis === 'y') {
+                relativePosition = 'horizontally aligned with ';
+            }
+            else if (axis === 'x') {
+                relativePosition = 'vertically aligned with ';
+            }
         }
-        else if (axis === 'y' && equality) {
-            relativePosition += 'and vertically aligned with ';
-        }
+
         return `ENSURE: ${left} is ${relativePosition} ${right}`;
 
 

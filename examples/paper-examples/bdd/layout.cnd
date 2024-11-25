@@ -1,0 +1,15 @@
+constraints:
+  - orientation:
+      field: t
+      directions:
+        - below
+        - left
+  - orientation:
+      field: f
+      directions:
+        - below
+        - right
+  - group:
+      field: v
+  - orientation: { field: v, directions: [directlyLeft]}
+  - orientation: { sigs: [Leaf, Variable], directions: [above]}
