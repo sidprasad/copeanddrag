@@ -553,10 +553,14 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     node.filter(d => d.icon) // Filter nodes that have an icon
         .append("image")
         .attr("xlink:href", d => d.icon)
-        .attr("width", function (d) { return d.width * 0.8; }) // Scale down the icon to fit inside the rectangle
-        .attr("height", function (d) { return d.height * 0.8; }) // Scale down the icon to fit inside the rectangle
-        .attr("x", function (d) { return -d.width * 0.4; }) // Center the icon horizontally
-        .attr("y", function (d) { return -d.height * 0.4; }); // Center the icon vertically
+        .attr("width", function (d) { return d.width; }) // Scale down the icon to fit inside the rectangle
+        .attr("height", function (d) { return d.height; }) // Scale down the icon to fit inside the rectangle
+        .attr("x", function (d) { return -d.width * 0.5; }) // Center the icon horizontally
+        .attr("y", function (d) { return -d.height * 0.5; }) // Center the icon vertically
+        // I want to show some text on hover
+        .append("title")
+        .text(function (d) { return d.name; });
+        
 
 
 
@@ -571,12 +575,16 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 return;
             }
 
+            let displayLabel = d.icon? "" : d.name;
+
             // Append tspan for d.name
             d3.select(this).append("tspan")
                 .attr("x", 0) // Align with the parent text element
                 .attr("dy", "0em") // Start at the same vertical position
                 .style("font-weight", "bold")
-                .text(d.name);
+                .text( displayLabel );
+                    
+                
 
             var y = 1; // Start from the next line for attributes
 
@@ -596,7 +604,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     function calculateNewPosition(previousPosition, pathElement, axis) {
         const pathLength = pathElement.getTotalLength();
         const midpointLength = pathLength / 2;
-        const offset = getRandomOffsetAlongPath();
+        const offset = 0; //getRandomOffsetAlongPath(); // commenting out to remove jitter
 
         let targetLength = midpointLength + offset;
 
