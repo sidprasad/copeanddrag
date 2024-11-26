@@ -631,7 +631,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             var targetNode = nodes[d.keyNode];
             return targetNode.color;
         })
-        .attr("fill-opacity", 0.3)
+        .attr("fill-opacity", 0.25)
         .call(colaLayout.drag);
 
     // TODO: Uncomment to reenable group labels
