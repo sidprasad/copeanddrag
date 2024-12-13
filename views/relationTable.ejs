@@ -15,6 +15,34 @@
             </div>
         </div>
     </div>
+
+
+    <% if (instAsString) { %>
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <button id="instButton" class="btn btn-outline-dark">View As Forge Instance</button>
+                </div>
+            </div>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var openInstBtn = document.getElementById('instButton');
+                var sourceContent = <%- JSON.stringify(instAsString) %>;
+                var sourceFileName = "<%= sourceFileName %>";
+                var blob = new Blob([sourceContent], { type: 'text/plain' });
+                var url = URL.createObjectURL(blob);
+
+                if (openInstBtn) {
+                    openInstBtn.addEventListener('click', function () {
+                        window.open(url, '_blank');
+                    });
+                }
+            });
+        </script>
+    <% } %>
+
+
     <% if (source_content && sourceFileName) { %>
     </hr>
     <div class="row" id="downloadSource" style="padding: 20px; position: absolute; bottom: 0">

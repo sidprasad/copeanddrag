@@ -129,3 +129,6 @@ export function instanceFromElement(element: Element): AlloyInstance {
     skolems: keyBy(skolems, (s) => s.id)
   };
 }
+
+
+

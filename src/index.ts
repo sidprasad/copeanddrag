@@ -9,6 +9,7 @@ import { ConstraintValidator } from './webcola-gen/constraint-validator';
 import { InstanceLayout } from './layout/interfaces';
 import {copeToLayoutSpec} from './cope-lang/cope-parser';
 import { parseLayoutSpec } from './layout/layoutspec';
+import { instanceToInst } from './forge-util/instanceToInst';
 
 const express = require('express');
 const path = require('path');
@@ -111,6 +112,10 @@ app.post('/', (req, res) => {
         return;
     }
 
+
+    const instAsString = instanceToInst(instances[instanceNumber]);
+
+
     let {layout, projectionData }  = li.generateLayout(instances[instanceNumber], projections);
 
     let cl = new WebColaLayout(layout);
@@ -152,7 +157,8 @@ app.post('/', (req, res) => {
         cope,
         projectionData,
         source_content: "", //HACK
-        sourceFileName : ""
+        sourceFileName : "",
+        instAsString
     });
 });
 
@@ -247,7 +253,7 @@ app.get('/example/:name', (req, res) => {
 
     let {layout, projectionData }  = li.generateLayout(instances[instanceNumber], projections);
 
-
+    const instAsString = instanceToInst(instances[instanceNumber]);
     let cl = new WebColaLayout(layout);
     let colaConstraints = cl.colaConstraints;
     let colaNodes = cl.colaNodes;
@@ -284,7 +290,8 @@ app.get('/example/:name', (req, res) => {
         cope,
         projectionData,
         source_content,
-        sourceFileName
+        sourceFileName,
+        instAsString
     });
 
 

@@ -154,3 +154,9 @@ From Daniel jackson on thread:
 ## Motivation for Grouping
 
 https://alloytools.discourse.group/t/is-it-possible-to-group-container-nodes-in-the-visualizer/277/4
+
+
+
+### Could we save an INstance to an Example?
+
+### Could we save a CnD diagram to constraints? (A no-code solution?)
