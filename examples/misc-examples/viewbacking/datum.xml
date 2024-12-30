@@ -1,6 +1,6 @@
 <alloy builddate="2021-11-19T05:45:51.188Z">
 
-<instance bitwidth="4" maxseq="6" mintrace="-1" maxtrace="-1" command="Run run$2 for 6 but 8 State, 3 ViewType, 5 Object" filename="c:\Users\nivsi\Desktop\AlloyStuff\models\algorithms\mapping\view-backing.als" tracelength="1" backloop="0">
+<instance bitwidth="4" maxseq="6" mintrace="-1" maxtrace="-1" command="Run run$2 for 6 but 8 State, 3 ViewType, 5 Object" filename="models\algorithms\mapping\view-backing.als" tracelength="1" backloop="0">
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>

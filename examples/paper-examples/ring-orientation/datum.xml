@@ -1,6 +1,6 @@
 <alloy builddate="2021-11-19T05:45:51.188Z">
 
-<instance bitwidth="4" maxseq="1" mintrace="-1" maxtrace="-1" command="Run SomeState for 1 but 2 Tick, 2 Bool, exactly 5 Process expect 1" filename="c:\Users\nivsi\Desktop\papers\forge\copeanddrag\alloy\alloy-examples\ring-orientation\stable-orient-ring.als" tracelength="1" backloop="0">
+<instance bitwidth="4" maxseq="1" mintrace="-1" maxtrace="-1" command="Run SomeState for 1 but 2 Tick, 2 Bool, exactly 5 Process expect 1" filename="copeanddrag\alloy\alloy-examples\ring-orientation\stable-orient-ring.als" tracelength="1" backloop="0">
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>

@@ -1,6 +1,6 @@
 <alloy builddate="2021-11-19T05:45:51.188Z">
 
-<instance bitwidth="4" maxseq="4" mintrace="-1" maxtrace="-1" command="Run dinnerParty for 5 Philosopher, exactly 6 Fork, exactly 7 State" filename="c:\Users\nivsi\Desktop\AlloyStuff\models\models\logic\phil.als" tracelength="1" backloop="0">
+<instance bitwidth="4" maxseq="4" mintrace="-1" maxtrace="-1" command="Run dinnerParty for 5 Philosopher, exactly 6 Fork, exactly 7 State" filename="models\models\logic\phil.als" tracelength="1" backloop="0">
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>

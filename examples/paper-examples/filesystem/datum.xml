@@ -1,6 +1,6 @@
 <alloy builddate="2021-11-19T05:45:51.188Z">
 
-<instance bitwidth="4" maxseq="4" mintrace="-1" maxtrace="-1" command="Run run$3 for exactly 5 Dir, 10 Name, exactly 5 File, 10 DirEntry" filename="c:\Users\nivsi\Desktop\papers\forge\copeanddrag\images\filesystem\file_system.als" tracelength="1" backloop="0">
+<instance bitwidth="4" maxseq="4" mintrace="-1" maxtrace="-1" command="Run run$3 for exactly 5 Dir, 10 Name, exactly 5 File, 10 DirEntry" filename="copeanddrag\images\filesystem\file_system.als" tracelength="1" backloop="0">
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>

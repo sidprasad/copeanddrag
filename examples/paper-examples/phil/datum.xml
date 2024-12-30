@@ -1,6 +1,6 @@
 <alloy builddate="2021-11-19T05:45:51.188Z">
 
-<instance bitwidth="4" maxseq="7" mintrace="-1" maxtrace="-1" command="Run run$1 for 15 but exactly 8 P" filename="c:\Users\nivsi\Desktop\AlloyStuff\models\models\logic\philosophers.als" tracelength="1" backloop="0">
+<instance bitwidth="4" maxseq="7" mintrace="-1" maxtrace="-1" command="Run run$1 for 15 but exactly 8 P" filename="models\models\logic\philosophers.als" tracelength="1" backloop="0">
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>
