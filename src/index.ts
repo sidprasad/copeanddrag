@@ -81,7 +81,8 @@ app.get('/', (req, res) => {
         cope: "",
         projectionData : [],
         source_content: "", //HACK
-        sourceFileName : ""
+        sourceFileName : "",
+        instAsString : ""
     });
 
 
