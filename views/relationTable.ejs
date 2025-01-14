@@ -1,13 +1,12 @@
 <!-- TODO: Add to each list -->
-<div id="reltable-container" class="col">
+<div id="reltable-container" class="col-sm-2">
     <div class="row">
 
 
-        <div class="card">
+        <div class="card" id="relationcard" style="display: none;">
             <div class="card-body">
                 <div id="reldescr">
-                    <h4 class="card-title">Diagram Fields</h4>
-                    <p class="text-muted">Hover over a field name to highlight it in the diagram.</p>
+                    <p class="text-muted">Hover over a field name <br> to highlight it in the diagram.</p>
                 </div>
                 <ul class="list-group list-group-flush" id="relationList">
 
@@ -15,6 +14,26 @@
             </div>
         </div>
     </div>
+    <script>
+                // Function to check the length of relationList and show/hide relationcard
+                function updateRelationCardVisibility() {
+                    var relationList = document.getElementById('relationList');
+                    var relationCard = document.getElementById('relationcard');
+                    if (relationList.children.length > 0) {
+                        relationCard.style.display = 'block';
+                    } else {
+                        relationCard.style.display = 'none';
+                    }
+                }
+
+                // Initial check
+                updateRelationCardVisibility();
+
+                // MutationObserver to watch for changes in relationList
+                var observer = new MutationObserver(updateRelationCardVisibility);
+                observer.observe(document.getElementById('relationList'), { childList: true });
+
+    </script>
 
 
     <% if (instAsString) { %>

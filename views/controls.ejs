@@ -20,20 +20,16 @@
         }
     </style>
     <form id="controlsForm" method="post" action="/" style="padding-top: 5px;">
-        <button type="submit" id='cola' class="btn btn-primary btn-lg btn-block">Load Diagram</button>
+        <button type="submit" id='cola' class="btn btn-primary btn-lg btn-block">Apply Layout</button>
         <br>
         <div class="form-group">
-            <label for="alloydatum" class="lead">Alloy Instance</label>
-            <textarea class="form-control" id="alloydatum" rows="3"
-                name="alloydatum"><%= alloyDatum ? alloyDatum : '' %></textarea>
-        </div>
-        <!-- <div class="form-group">
-                <label for="layoutannotation">Layout Annotation</label>
-                <textarea class="form-control" id="layoutannotation" rows="5" name="layoutannotation"><%= layoutAnnotation ? layoutAnnotation : '' %></textarea>
-            </div> -->
-        <div class="form-group">
-            <label for="layoutannotation" class="lead">Cope and Drag</label> <button id="prettify" class="btn btn-outline-dark btn-sm">Lint</button>
+            <label for="layoutannotation" class="lead">Layout</label> <button id="prettify" class="btn btn-outline-dark btn-sm">Lint</button>
             <textarea class="form-control" id="cope" rows="10" name="cope"><%= cope ? cope : '' %></textarea>
+        </div>
+        <br>
+        <div class="form-group">
+                <label for="alloydatum" class="btn btn-outline-dark btn-sm" id="alloyinstancelabel" style="cursor: pointer;">Edit Forge/Alloy Datum</label>
+                <textarea class="form-control" id="alloydatum" rows="5" name="alloydatum" style="display: none;"><%= alloyDatum ? alloyDatum : '' %></textarea>
         </div>
         <div class="form-group d-none">
             <label for="instancenumber">Temporal Instance Number</label>
@@ -68,6 +64,7 @@
         <% } %>
 
     </form>
+
     
 
 </div>
@@ -89,6 +86,16 @@
             lineWrapping: false, // Disable line wrapping
         });
 
+        var alloyInstanceLabel = document.getElementById('alloyinstancelabel');
+        var alloyDatumTextarea = document.getElementById('alloydatum');
+
+        alloyInstanceLabel.addEventListener('click', function() {
+            if (alloyDatumTextarea.style.display === 'none') {
+                alloyDatumTextarea.style.display = 'block';
+            } else {
+                alloyDatumTextarea.style.display = 'none';
+            }
+        });
 
 
         // Event listener for the Prettify button
