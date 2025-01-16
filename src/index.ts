@@ -19,6 +19,10 @@ import * as fs from 'fs';
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Set the views directory
+app.set('views', path.join(__dirname, 'views'));
+
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
