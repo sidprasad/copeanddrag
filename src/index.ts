@@ -51,7 +51,7 @@ function getFormContents(req: any) {
         }
     }
 
-    const instanceNumber = parseInt(req.body.instancenumber);
+    const instanceNumber = parseInt(req.body.instancenumber) || 0;
 
     let ad: AlloyDatum = parseAlloyXML(alloyDatum);
     let instances = ad.instances;
