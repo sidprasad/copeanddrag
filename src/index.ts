@@ -30,40 +30,47 @@ app.set('view engine', 'ejs');
 
 
 function getFormContents(req: any) {
+    let error = "";
+    let projections : Record<string, string>= {};
     const alloyDatum = req.body.alloydatum;
-    const layoutAnnotation = req.body.layoutannotation;
     const cope = req.body.cope;
 
+    try {
 
-    /*
 
-        Get ALL form elements ending with _projection
-    */
-    let projections : Record<string, string>= {};
-    let keys = Object.keys(req.body);
-    for (let key of keys) {
-        if (key.endsWith("_projection")) {
+        /*
+            Get ALL form elements ending with _projection
+        */
 
-            //First get the key up to '_projection'
-            let projectedType = key.substring(0, key.length - "_projection".length);
-            let projectedAtom = req.body[key];
-            projections[projectedType] = projectedAtom;
+        let keys = Object.keys(req.body);
+        for (let key of keys) {
+            if (key.endsWith("_projection")) {
+
+                //First get the key up to '_projection'
+                let projectedType = key.substring(0, key.length - "_projection".length);
+                let projectedAtom = req.body[key];
+                projections[projectedType] = projectedAtom;
+            }
         }
+
+        const instanceNumber = parseInt(req.body.instancenumber) || 0;
+
+        let ad: AlloyDatum = parseAlloyXML(alloyDatum);
+        let instances = ad.instances;
+        let loopBack = ad.loopBack || -1;
+
+        let coopeNonEmpty = cope && cope.length > 0;
+
+        let layoutSpec = coopeNonEmpty ? copeToLayoutSpec(cope) : parseLayoutSpec("");
+        let li = new LayoutInstance(layoutSpec);
+        return { instances, li, instanceNumber, loopBack, projections, error };
+    }
+    catch (e) {
+        error = e.message;
+        return {error}
     }
 
-    const instanceNumber = parseInt(req.body.instancenumber) || 0;
 
-    let ad: AlloyDatum = parseAlloyXML(alloyDatum);
-    let instances = ad.instances;
-    let loopBack = ad.loopBack || -1;
-
-    let coopeNonEmpty = cope && cope.length > 0;
-
-    let layoutSpec = coopeNonEmpty ? copeToLayoutSpec(cope) : parseLayoutSpec(layoutAnnotation);
-
-    let li = new LayoutInstance(layoutSpec);
-
-    return { instances, li, instanceNumber, loopBack, projections };
 }
 
 
@@ -80,47 +87,54 @@ app.get('/', (req, res) => {
         'colaGroups': [],
         instanceNumber: 0,
         num_instances: 0,
-        layoutAnnotation: "",
         alloyDatum: "",
         cope: "",
         projectionData : [],
         source_content: "", //HACK
         sourceFileName : "",
-        instAsString : ""
+        instAsString : "",
+        errors : ""
     });
 
 
 });
 
 app.post('/', (req, res) => {
-
-
     const alloyDatum = req.body.alloydatum;
-    const layoutAnnotation = req.body.layoutannotation;
     const cope = req.body.cope;
+
+
+    // TODO: More errors about the layout.
+
+
+    // TODO: We need to be able to get errors here no?
+    // Empty spec error.
+    let fc = getFormContents(req);
+    let error = fc.error;
+
+    if(error != "") {
+        // This is an issue! TODO: Return here!
+        // BUT WE SHOULD DO BETTER. REALLY I WISH I HAD SOME KIND OF WRAPPER THAT
+        // RETURNED MOST THINGS IF ERROR WAS DEFINED.
+        return error;
+    }
 
     let { instances, li, instanceNumber, loopBack, projections} = getFormContents(req);
 
     let num_instances = instances.length;
 
     if (instanceNumber >= num_instances) {
-        res.status(418).send("Instance number out of range");
-        return;
+        error = `Temporal instance ${instanceNumber} number out of range. The temporal trace has only ${num_instances} states.`;
     } else if (loopBack != 0 && !loopBack) {
         loopBack = 0;
     }
 
-
     let internal_inconsistency = li.checkConstraintConsistency();
     if (!internal_inconsistency.consistent) {
-        res.status(418).send(internal_inconsistency.error);
-        return;
+        error = error || internal_inconsistency.error;
     }
 
-
     const instAsString = instanceToInst(instances[instanceNumber]);
-
-
     let {layout, projectionData }  = li.generateLayout(instances[instanceNumber], projections);
 
     let cl = new WebColaLayout(layout);
@@ -128,24 +142,20 @@ app.post('/', (req, res) => {
     let colaNodes = cl.colaNodes;
     let colaEdges = cl.colaEdges;
     let colaGroups = cl.groupDefinitions;
-
+    let height = cl.FIG_HEIGHT ;
+    let width = cl.FIG_WIDTH ;
 
 
     const constraintValidator = new ConstraintValidator(colaConstraints, colaNodes, colaGroups);
     const inconsistent_error = constraintValidator.validateConstraints();
     if (inconsistent_error) {
         // Conflict between constraints and instance
-        let error_string = "Error: The instance being visualized is inconsistent with layout constraints.<br><br> " + inconsistent_error;
-
-        console.error(error_string);
-        // This is "I am a teapot" error code, which is a joke error code.
-        res.status(418).send(error_string);
-        return;
+        error = error || "The instance being visualized is inconsistent with layout constraints.<br><br> " + inconsistent_error;
     }
 
+    // BUT ALSO, the moment there is an error we should not do the
+    // rest. E.g., get cola nodes, colka edges, etc.
 
-    let height = cl.FIG_HEIGHT ;
-    let width = cl.FIG_WIDTH ;
 
     res.render('diagram', {
         'height': height,
@@ -156,14 +166,14 @@ app.post('/', (req, res) => {
         'colaGroups': colaGroups,
         instanceNumber,
         num_instances,
-        layoutAnnotation,
         alloyDatum,
         loopBack,
         cope,
         projectionData,
         source_content: "", //HACK
         sourceFileName : "",
-        instAsString
+        instAsString,
+        errors: error
     });
 });
 
@@ -304,7 +314,7 @@ app.get('/example/:name', (req, res) => {
 
 const server = http.createServer(app);
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3001; // TODO: Revert!
 server.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}/`);
 });
