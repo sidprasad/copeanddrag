@@ -65,8 +65,16 @@
         <a href="https://github.com/sidprasad/copeanddrag/wiki"><button>Read the docs</button></a>
        
     </nav>
+    <% if (errors && errors.trim().length > 0) { %>
+        <div id="error_messages" class="alert alert-danger">
+            <%- errors %>
+        </div>
+    <% } %>
 
     <div class="container-fluid">
+
+
+
         <%- include('temporalminimap') %>
 
         <div class="row">
@@ -76,7 +84,7 @@
             <%- include('controls') %>
         </div>
         <div class="row">
-            
+
         </div>
     </div>
 

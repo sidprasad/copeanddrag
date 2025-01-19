@@ -7,7 +7,7 @@ import { LayoutInstance } from './layout/layoutinstance';
 import { WebColaLayout } from './webcola-gen/graphtowebcola';
 import { ConstraintValidator } from './webcola-gen/constraint-validator';
 import { InstanceLayout } from './layout/interfaces';
-import {copeToLayoutSpec} from './cope-lang/cope-parser';
+import { copeToLayoutSpec } from './cope-lang/cope-parser';
 import { parseLayoutSpec } from './layout/layoutspec';
 import { instanceToInst } from './forge-util/instanceToInst';
 
@@ -30,16 +30,20 @@ app.set('view engine', 'ejs');
 
 
 function getFormContents(req: any) {
+
+    let projections: Record<string, string> = {};
     const alloyDatum = req.body.alloydatum;
-    const layoutAnnotation = req.body.layoutannotation;
+
+    if (!alloyDatum || alloyDatum.length == 0) {
+        throw new Error("No instance to visualize provided.");
+    }
+
     const cope = req.body.cope;
 
 
     /*
-
         Get ALL form elements ending with _projection
     */
-    let projections : Record<string, string>= {};
     let keys = Object.keys(req.body);
     for (let key of keys) {
         if (key.endsWith("_projection")) {
@@ -53,17 +57,24 @@ function getFormContents(req: any) {
 
     const instanceNumber = parseInt(req.body.instancenumber) || 0;
 
-    let ad: AlloyDatum = parseAlloyXML(alloyDatum);
+
+
+    try {
+        var ad: AlloyDatum = parseAlloyXML(alloyDatum);
+    }
+    catch (e) {
+        throw new Error("Error parsing Forge instance. May be malformed." + e.message);
+    }
     let instances = ad.instances;
     let loopBack = ad.loopBack || -1;
 
     let coopeNonEmpty = cope && cope.length > 0;
 
-    let layoutSpec = coopeNonEmpty ? copeToLayoutSpec(cope) : parseLayoutSpec(layoutAnnotation);
-
+    let layoutSpec = coopeNonEmpty ? copeToLayoutSpec(cope) : parseLayoutSpec("");
     let li = new LayoutInstance(layoutSpec);
-
     return { instances, li, instanceNumber, loopBack, projections };
+
+
 }
 
 
@@ -80,90 +91,88 @@ app.get('/', (req, res) => {
         'colaGroups': [],
         instanceNumber: 0,
         num_instances: 0,
-        layoutAnnotation: "",
         alloyDatum: "",
         cope: "",
-        projectionData : [],
+        projectionData: [],
         source_content: "", //HACK
-        sourceFileName : "",
-        instAsString : ""
+        sourceFileName: "",
+        instAsString: "",
+        errors: ""
     });
 
 
 });
 
 app.post('/', (req, res) => {
-
-
     const alloyDatum = req.body.alloydatum;
-    const layoutAnnotation = req.body.layoutannotation;
     const cope = req.body.cope;
+    let error = "";
 
-    let { instances, li, instanceNumber, loopBack, projections} = getFormContents(req);
+    try {
 
-    let num_instances = instances.length;
+        var { instances, li, instanceNumber, loopBack, projections } = getFormContents(req);
+        var num_instances = instances.length;
 
-    if (instanceNumber >= num_instances) {
-        res.status(418).send("Instance number out of range");
-        return;
-    } else if (loopBack != 0 && !loopBack) {
-        loopBack = 0;
+        if (instanceNumber >= num_instances) {
+            throw new Error(`Temporal instance ${instanceNumber} number out of range. The temporal trace has only ${num_instances} states.`);
+        } else if (loopBack != 0 && !loopBack) {
+            loopBack = 0;
+        }
+
+        var internal_inconsistency = li.checkConstraintConsistency();
+        if (!internal_inconsistency.consistent) {
+            throw new Error(internal_inconsistency.error);
+        }
+
+        var instAsString = instanceToInst(instances[instanceNumber]);
+        var { layout, projectionData } = li.generateLayout(instances[instanceNumber], projections);
+
+        let cl = new WebColaLayout(layout);
+        var colaConstraints = cl.colaConstraints;
+        var colaNodes = cl.colaNodes;
+        var colaEdges = cl.colaEdges;
+        var colaGroups = cl.groupDefinitions;
+        var height = cl.FIG_HEIGHT;
+        var width = cl.FIG_WIDTH;
+
+
+        const constraintValidator = new ConstraintValidator(colaConstraints, colaNodes, colaGroups);
+        const inconsistent_error = constraintValidator.validateConstraints();
+        if (inconsistent_error) {
+            // Conflict between constraints and instance
+            throw new Error("The instance being visualized is inconsistent with layout constraints.<br><br> " + inconsistent_error);
+        }
+
+        // BUT ALSO, the moment there is an error we should not do the
+        // rest. E.g., get cola nodes, colka edges, etc.
     }
-
-
-    let internal_inconsistency = li.checkConstraintConsistency();
-    if (!internal_inconsistency.consistent) {
-        res.status(418).send(internal_inconsistency.error);
-        return;
+    catch (e) {
+        error = e.message;
+        // If there is an error, we should not show the diagram.
+        height = 0;
+        width = 0;
+        colaNodes = [];
+        colaEdges = [];
+        colaConstraints = [];
     }
-
-
-    const instAsString = instanceToInst(instances[instanceNumber]);
-
-
-    let {layout, projectionData }  = li.generateLayout(instances[instanceNumber], projections);
-
-    let cl = new WebColaLayout(layout);
-    let colaConstraints = cl.colaConstraints;
-    let colaNodes = cl.colaNodes;
-    let colaEdges = cl.colaEdges;
-    let colaGroups = cl.groupDefinitions;
-
-
-
-    const constraintValidator = new ConstraintValidator(colaConstraints, colaNodes, colaGroups);
-    const inconsistent_error = constraintValidator.validateConstraints();
-    if (inconsistent_error) {
-        // Conflict between constraints and instance
-        let error_string = "Error: The instance being visualized is inconsistent with layout constraints.<br><br> " + inconsistent_error;
-
-        console.error(error_string);
-        // This is "I am a teapot" error code, which is a joke error code.
-        res.status(418).send(error_string);
-        return;
-    }
-
-
-    let height = cl.FIG_HEIGHT ;
-    let width = cl.FIG_WIDTH ;
 
     res.render('diagram', {
-        'height': height,
-        'width': width,
+        'height': height !== undefined ? height : 0,
+        'width': width !== undefined ? width : 0,
         'colaNodes': colaNodes,
         'colaEdges': colaEdges,
         'colaConstraints': colaConstraints,
         'colaGroups': colaGroups,
         instanceNumber,
         num_instances,
-        layoutAnnotation,
         alloyDatum,
         loopBack,
         cope,
         projectionData,
         source_content: "", //HACK
-        sourceFileName : "",
-        instAsString
+        sourceFileName: "",
+        instAsString,
+        errors: error
     });
 });
 
@@ -178,7 +187,7 @@ app.get('/example', (req, res) => {
         .map(dirent => dirent.name);
 
     res.render('examplehome', { exampleNames });
-}); 
+});
 
 
 // Need to do this better, but for now, 
@@ -189,10 +198,10 @@ app.get('/example/:name', (req, res) => {
 
     // Define the path to the /examples directory
     const examplesDir = path.join(
-                            path.join(
-                                path.join(__dirname, '..', 'examples'), 
-                                    'paper-examples'),    
-                        exampleName);
+        path.join(
+            path.join(__dirname, '..', 'examples'),
+            'paper-examples'),
+        exampleName);
 
     // Check if the directory exists
     if (!fs.existsSync(examplesDir)) {
@@ -201,13 +210,8 @@ app.get('/example/:name', (req, res) => {
     }
 
 
-   const datumFile = path.join(examplesDir, 'datum.xml');
-   const cndFile = path.join(examplesDir, 'layout.cnd');
-
-   // Ignore for now
-   let displayConfig = path.join(examplesDir, 'displayConfig.yml');
-
-
+    const datumFile = path.join(examplesDir, 'datum.xml');
+    const cndFile = path.join(examplesDir, 'layout.cnd');
 
     // Ensure the files exist
     if (!fs.existsSync(datumFile) || !fs.existsSync(cndFile)) {
@@ -220,8 +224,8 @@ app.get('/example/:name', (req, res) => {
 
 
 
-   let sourceAlloyPath = path.join(examplesDir, 'source.als');
-   let sourceFrgPath = path.join(examplesDir, 'source.frg');
+    let sourceAlloyPath = path.join(examplesDir, 'source.als');
+    let sourceFrgPath = path.join(examplesDir, 'source.frg');
 
 
     let srcAlloy = fs.existsSync(sourceAlloyPath) ? fs.readFileSync(sourceAlloyPath, 'utf8') : "";
@@ -240,10 +244,10 @@ app.get('/example/:name', (req, res) => {
     // Read the files
     const alloyDatum = fs.readFileSync(datumFile, 'utf8');
     const cope = fs.readFileSync(cndFile, 'utf8');
-    
+
     // Eventually, read these from the displayConfig file
     const instanceNumber = 0;
-    const projections : Record<string, string>= {};
+    const projections: Record<string, string> = {};
 
     let ad: AlloyDatum = parseAlloyXML(alloyDatum);
     let instances = ad.instances;
@@ -252,13 +256,13 @@ app.get('/example/:name', (req, res) => {
     let layoutSpec = copeToLayoutSpec(cope);
     let li = new LayoutInstance(layoutSpec);
 
-    
+
 
     //// It is not good hygiene to repeat code like this.
 
-    let {layout, projectionData }  = li.generateLayout(instances[instanceNumber], projections);
+    var { layout, projectionData } = li.generateLayout(instances[instanceNumber], projections);
 
-    const instAsString = instanceToInst(instances[instanceNumber]);
+    var instAsString = instanceToInst(instances[instanceNumber]);
     let cl = new WebColaLayout(layout);
     let colaConstraints = cl.colaConstraints;
     let colaNodes = cl.colaNodes;
@@ -277,8 +281,8 @@ app.get('/example/:name', (req, res) => {
     }
 
 
-    let height = cl.FIG_HEIGHT ;
-    let width = cl.FIG_WIDTH ;
+    let height = cl.FIG_HEIGHT;
+    let width = cl.FIG_WIDTH;
 
     res.render('diagram', {
         'height': height,
@@ -289,14 +293,15 @@ app.get('/example/:name', (req, res) => {
         'colaGroups': colaGroups,
         instanceNumber,
         num_instances,
-        layoutAnnotation : "",
+        layoutAnnotation: "",
         alloyDatum,
         loopBack,
         cope,
         projectionData,
         source_content,
         sourceFileName,
-        instAsString
+        instAsString,
+        errors: ""
     });
 
 
@@ -304,7 +309,7 @@ app.get('/example/:name', (req, res) => {
 
 const server = http.createServer(app);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001; // TODO: Revert!
 server.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}/`);
 });

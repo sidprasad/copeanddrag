@@ -1,48 +1,6 @@
 ## Lightweight Visualizations for Lightweight Formal Methods
 
-1. Run `npm install`
-2. Run in dev mode using `nodemon --exec ts-node src/index.ts`
-3. Application should be available at `localhost:3000`. It expects an Alloy datum and visualization constraints (see the `/examples` folder)
 
-
-###Layout Settings
-
-
-We currently support:
-4 types of layout settings that act upon relations (also called fields)
-
-
-### Directional Relationships (`fieldDirections`)
-
-These specify that a field must be laid out in a particular direction (any combination of "left", "right", "above", "below")
-
-```
-{
-  "fieldName": "afield",
-  "directions": ["below", "left"]
-}
-```
-
-*Limitations*: Currently, we do not deal well with conflicting directions (say `["left", "right"]). The rendering engine may fail to settle on a layout here.
-
-### Grouping by field (`groupBy`)
-
-These specify that the atoms related by a field should be grouped together. This can be configured for the grouping key to be the range (default) or domain of a relation. The node associated with the grouping key (and its related edges) are removed from the graph.
-
-```
-"groupBy": [
-  {
-    "fieldName" : "pos"
-    "groupOn" : "range"
-  },
-  {
-    "fieldName" : "bank"
-    "groupOn" : "domain"
-  }
-]
-```
-
-*Limitations* : WebCola layouts currently struggle to lay out groups that intersect but are not subsumed by one another. This is a webcola limitation that needs to be addressed, either by us or them.
 
 
 ### Relation to attribute (`attributeFields`)
@@ -112,51 +70,10 @@ By default, we assign every `sig` a random color, that is respected by all atoms
 
 ## Current Issues
 
+- [] Error reporting: We want better error messages on start.
+- [] We should show unsatisfiable layout / the dynamic equivalent ON SCREEN rather than as JUST text feedback. This will allow iteration.
+
 - [] Attributes for n-ary relations are broken (we lost the in-betweens in the attribute names)
   - What can we do here? You could extend grouping by adding more than just range and domain
 - [] Struggles with groups that intersect but are not subgroups of one another
 
-
-
-Dockerfile:
-```
-docker build . -t cnd   
-docker save -o cnd.tar cnd:latest
-```
-
-Then to rehydrate:
-
-```
-docker load -i cnd.tar
-docker run --rm -it -p 3000:3000 cnd:latest
-```
-
-
-
-### Alloy Thread
-
-https://alloytools.discourse.group/t/visualization-for-alloy-what-do-you-want/111/7
-
-From Daniel jackson on thread:
-
-– Is there a theme-like facility for saving customizations? I believe that’s critical, because it amortizes the cost of editing the customization across sessions. It would be even better to be able to save styles that can apply to different models.
-– The diagrams (and especially the textual labels) look slightly blurry in my browser.
-– Is it possible to change the font? That would be a priority for me.
-– I wish labels didn’t collide.
-– When you select a node or edge, it would be nice to select the appropriate field in the form to edit it; I know this is hard (and not always even unambiguous)
-– In the Alloy viz, we switch the text color from dark to light when the fill is switched from light to dark
-– When you adjust the layout, the graph sometimes moves off screen
-– I expected the table layouts to adjust alignment within tables, not of tables themselves within window: wouldn’t you always want them centered in the window, eg?
-– Undo is a feature missing from the Alloy viz that would be really nice
-
-
-
-## Motivation for Grouping
-
-https://alloytools.discourse.group/t/is-it-possible-to-group-container-nodes-in-the-visualizer/277/4
-
-
-
-### Could we save an INstance to an Example?
-
-### Could we save a CnD diagram to constraints? (A no-code solution?)

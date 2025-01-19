@@ -23,7 +23,7 @@
         <button type="submit" id='cola' class="btn btn-primary btn-lg btn-block">Apply Layout</button>
         <br>
         <div class="form-group">
-            <label for="layoutannotation" class="lead">Layout</label> <button id="prettify" class="btn btn-outline-dark btn-sm">Lint</button>
+            <label for="layoutannotation" class="lead">Layout</label> <button id="prettify" class="btn btn-outline-dark btn-sm">Check Syntax</button>
             <textarea class="form-control" id="cope" rows="10" name="cope"><%= cope ? cope : '' %></textarea>
         </div>
         <br>
@@ -43,7 +43,7 @@
             -->
 
         
-        <% if (projectionData.length> 0) { %>
+        <% if (projectionData && projectionData.length> 0) { %>
             <h4>Projections</h4>
             <p> For each projected type, choose the atom to project over.</p>
             <% projectionData.forEach(function(projection) { %>
@@ -99,7 +99,9 @@
 
 
         // Event listener for the Prettify button
-        document.getElementById('prettify').addEventListener('click', function() {
+        document.getElementById('prettify').addEventListener('click', function(event) {
+            
+            event.preventDefault();
             try {
                 var yamlContent = editor.getValue();
                 var parsedYaml = jsyaml.load(yamlContent);
