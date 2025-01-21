@@ -53,6 +53,11 @@ directives:
 
 export function copeToLayoutSpec(s : string) : LayoutSpec {
 
+
+    if (!s) {
+        return DEFAULT_LAYOUT;
+    }
+
     // s is a string in YAML format (as above)
     // I want to convert it to a LayoutSpec object, piece by piece.
 
