@@ -10,7 +10,7 @@ import { LayoutNode, LayoutEdge, LayoutConstraint, InstanceLayout, LeftConstrain
 
 import { generateGraph } from '../alloy-graph';
 
-import { chroma, scale } from 'chroma-js';
+import { ColorPicker } from './colorpicker';
 
 
 
@@ -379,48 +379,31 @@ export class LayoutInstance {
         });
     }
 
-    // TODO: Replace this with that d3 function that generates a color based on an index
-    private getRandomColor(index: number): string {
-
-        const letters = '0123456789ABCDEF';
-        let color = '#';
-        for (let i = 0; i < 6; i++) {
-            color += letters[Math.floor(Math.random() * 16)];
-        }
-        return color;
-    }
 
 
     private colorNodesByType(g: Graph, a: AlloyInstance): Record<string, string> {
 
-        // TODO: This needs to be more
-        // sophisticated.
-
 
         let nodes = [...g.nodes()];
         let types = getInstanceTypes(a);
-        let numTypes = types.length;
+        let colorPicker = new ColorPicker(types.length);
 
-        // Do this so that we can have more colors than types
-        let colorScale = scale('Set1').mode('lch').colors(numTypes * 2);
 
         // Ensure that we have colors that are NOT in the sigColors
         let usedColors = Object.values(this._sigColors);
-        colorScale = colorScale.filter((color) => !usedColors.includes(color));
-
+        
         let colorsByType: Record<string, string> = {};
-
         let types_with_user_colors = Object.keys(this._sigColors);
 
-        // For each type, assign a unique, random color
+  
         types.forEach((type, index) => {
-
             // If the type has a color specified, use that
             if (this._sigColors[type.id]) {
                 colorsByType[type.id] = this._sigColors[type.id];
             }
             else {
-                colorsByType[type.id] = colorScale[index];
+                // But we want to make sure that the phylo color is not already in use.
+                colorsByType[type.id] = colorPicker.getNextColor();
             }
         });
 
