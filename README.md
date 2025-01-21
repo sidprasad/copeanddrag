@@ -3,6 +3,8 @@
 
 ### How to Run Cope and Drag
 
+Cope and Drag is built to be easily deployed as an ExpressJs web application.
+
 #### Prerequisites
 
 - Node.js 
