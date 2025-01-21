@@ -313,3 +313,20 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}/`);
 });
+
+const shutdown = () => {
+    console.log('Received termination signal, shutting down gracefully...');
+    server.close(() => {
+        console.log('Closed out remaining connections.');
+        process.exit(0);
+    });
+
+    // Forcefully shut down after 10 seconds
+    setTimeout(() => {
+        console.error('Could not close connections in time, forcefully shutting down');
+        process.exit(1);
+    }, 10000);
+};
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);

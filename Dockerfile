@@ -1,5 +1,5 @@
-# Use an official Node.js runtime as a parent image
-FROM node:16-slim
+# Stage 1: Build
+FROM node:16-slim AS build
 
 # Set the working directory
 WORKDIR /app
@@ -10,17 +10,33 @@ COPY package*.json ./
 # Install dependencies
 RUN npm install
 
-# Copy the rest of the application code
-COPY src ./src
-COPY views ./views
-COPY examples/paper-examples ./examples/paper-examples
-COPY tsconfig.json ./
+## Need to have ncc installed globally
+RUN npm install -g @vercel/ncc
 
-# Install nodemon and ts-node globally
-RUN npm install -g nodemon ts-node
+# Copy the rest of the application code
+COPY . .
+
+# Build the application
+RUN npm run build
+
+# Stage 2: Run
+FROM node:16-slim
+
+# Set the working directory
+WORKDIR /app
+
+# Copy only the necessary files from the build stage
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/package*.json ./
+
+# Install only production dependencies
+#RUN npm install --only=production
+
+
+
 
 # Expose the port the app runs on
 EXPOSE 3000
 
-# Command to run the application with nodemon and ts-node
-CMD ["nodemon", "--exec", "ts-node", "src/index.ts"]
+# Command to run the application
+CMD ["node", "dist/index.js"]
