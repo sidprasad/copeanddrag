@@ -148,16 +148,34 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     // TODO: Figure out WHEN to use flowLayout and when not to use it.
     // I think having directly above/ below makes it impossible to have flow layout 'y' *unless we have heirarchy*
 
+    // TODO: Need to think about this
+
+
     colaLayout
-        .nodes(nodes)
-        .links(edges)
-        .constraints(constraints)
-        .groups(groups)
-        .groupCompactness(1e-3)
-        //.flowLayout("y", 100) // Adding this in causes an issue in terms of layout. This is in line with the DAGRE estimate
-        .symmetricDiffLinkLengths(min_sep + default_node_width, 0.1);
-        //.jaccardLinkLengths(LINK_DISTANCE, 2);
-        //.linkDistance(50); // I *think* this is minimum link distance
+    .nodes(nodes)
+    .links(edges)
+    .constraints(constraints)
+    .groups(groups)
+    .groupCompactness(1e-3)
+    .symmetricDiffLinkLengths(min_sep + default_node_width);
+
+    // const anyCnD = (constraints.length > 0) || (groups.length > 0);
+
+    // if (!anyCnD) {
+    //     colaLayout
+    //         .flowLayout("y", 100);
+    // }
+
+    // colaLayout
+    //     .nodes(nodes)
+    //     .links(edges)
+    //     .constraints(constraints)
+    //     .groups(groups)
+    //     .groupCompactness(1e-3)
+    //     //.flowLayout("y", 100) // Adding this in causes an issue in terms of layout. This is in line with the DAGRE estimate
+    //     //.symmetricDiffLinkLengths(min_sep + default_node_width, 0.1);
+    //     //.jaccardLinkLengths(LINK_DISTANCE, 2);
+    //      // I *think* this is minimum link distance
 
     var lineFunction = d3.line()
         .x(function (d) { return d.x; })
@@ -262,9 +280,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
 
                 if (targetGroup) {
-
-
-
                     let newTargetCoords = closestPointOnRect(targetGroup.bounds, route[0]);
                     let currentTarget = route[route.length - 1];
                     currentTarget.x = newTargetCoords.x;
@@ -495,17 +510,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 // Also make the text normal
                 d3.select(this).style("font-weight", "normal");
             });
-
-
-
-        // linkGroups.on("mouseover", function (d) {
-        //     const relName = d.relName;
-        //     highlightRelation(relName);
-        //     })
-        //     .on("mouseout", function(event, d) {
-        //         d3.selectAll(".link")
-        //             .classed("highlighted", false);
-        //     });
     };
 
 
@@ -561,10 +565,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .append("title")
         .text(function (d) { return d.name; });
         
-
-
-
-
     var label = svg.selectAll(".label")
         .data(nodes)
         .enter().append("text")
@@ -584,8 +584,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 .style("font-weight", "bold")
                 .text( displayLabel );
                     
-                
-
             var y = 1; // Start from the next line for attributes
 
             // Append tspans for each attribute
@@ -761,8 +759,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
         // Can we get all end-arrow markers and raise them?
         svg.selectAll("marker").raise();
-
-
         linkGroups.select("text.linklabel").raise(); // Ensure link labels are raised
 
     });
