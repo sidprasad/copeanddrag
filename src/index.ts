@@ -309,7 +309,7 @@ app.get('/example/:name', (req, res) => {
 
 const server = http.createServer(app);
 
-const PORT = process.env.PORT || 3000; // TODO: Revert!
+const PORT = process.env.PORT || 3000; 
 server.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}/`);
 });
