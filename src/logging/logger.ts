@@ -30,6 +30,8 @@ export class Logger {
 
     app; db; log_target; version;
 
+    // But what if logging is turned on and then off.
+    // I don't want to manage that state.
     constructor(private user: string, private enabled: boolean, private cnd_version: string)
     {
         if(this.enabled)
