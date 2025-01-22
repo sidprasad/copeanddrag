@@ -3,7 +3,6 @@ import { getFirestore, collection, doc, setDoc } from 'firebase/firestore/lite';
 const execSync = require('child_process').execSync;
 
 
-
 // Enum for log levels
 export enum LogLevel {
     INFO = "info",
@@ -29,24 +28,16 @@ import config from "./logging_config.json";
 
 export class Logger {
 
-    user; app; db; log_target; version;
+    app; db; log_target; version;
 
-    constructor(userid: string)
+    constructor(private user: string, private enabled: boolean, private cnd_version: string)
     {
-        let v = null;
-        try
+        if(this.enabled)
         {
-            v = execSync('raco pkg show --full-checksum forge');
+            this.app = initializeApp(config);
+            this.db = getFirestore(this.app)
+            this.log_target = collection(this.db, config.collectionName);
         }
-        catch {}
-
-        this.version = (v != null && v.length > 0) ? 
-                            new TextDecoder().decode(v) : "unknown";
-
-        this.user = userid;
-        this.app = initializeApp(config);
-        this.db = getFirestore(this.app)
-        this.log_target = collection(this.db, config.collectionName);
     }
  
     payload(payload: any, loglevel: LogLevel, event: Event)
@@ -60,13 +51,13 @@ export class Logger {
         }
     }
 
-
     async log_payload(payload: any, loglevel: LogLevel, event: Event) {
         let p = this.payload(payload, loglevel, event);
         let log = doc(this.log_target);
+
+        let do_not_log = !this.enabled || process.env.NODE_ENV === 'development' || process.env.npm_lifecycle_event === 'dev';
         try {
-            const isDevMode = process.env.NODE_ENV === 'development' || process.env.npm_lifecycle_event === 'dev';
-            if (isDevMode) {
+            if (do_not_log) {
                 console.log(p);
             } else {
                 await setDoc(log, p);

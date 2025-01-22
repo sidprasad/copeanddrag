@@ -14,7 +14,7 @@ import { Event, Logger, LogLevel } from './logging/logger';
 import * as os from 'os';
 import * as crypto from 'crypto'; 
 
-
+const minimist = require('minimist');
 const express = require('express');
 const path = require('path');
 import * as fs from 'fs';
@@ -22,15 +22,15 @@ import * as fs from 'fs';
 
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
-
-// Set the views directory
 app.set('views', path.join(__dirname, 'views'));
-
-
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
 app.set('view engine', 'ejs');
+
+
+// Parse command-line arguments
+const args = minimist(process.argv.slice(2));
+const enableLogging = !args['no-logging'];
 
 
 const secretKey = "cope-and-drag-logging-key";
@@ -49,10 +49,11 @@ function getPersistentUserId(): string {
     }
 }
 
+// This is a hack. I'm not sure
+// how to encode the version number.
+const version = "1.0.1";
 const userId = getPersistentUserId();
-const logger = new Logger(userId);
-
-
+const logger = new Logger(userId, enableLogging, version);
 
 function getFormContents(req: any) {
 
@@ -132,11 +133,6 @@ app.post('/', (req, res) => {
     const alloyDatum = req.body.alloydatum;
     const cope = req.body.cope;
     let error = "";
-
-
-
-
-
 
     try {
 
