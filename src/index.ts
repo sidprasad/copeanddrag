@@ -12,6 +12,7 @@ import { parseLayoutSpec } from './layout/layoutspec';
 import { instanceToInst } from './forge-util/instanceToInst';
 import { Event, Logger, LogLevel } from './logging/logger';
 import * as os from 'os';
+import * as crc from 'crc';
 
 
 const express = require('express');
@@ -34,13 +35,15 @@ app.set('view engine', 'ejs');
 
 
 // TODO: Needs work.
-function getPersistentUserId() {
-
-    let userId = os.hostname();
-
-    // Can we anonynmize this further?
-    return userId;
-
+function getPersistentUserId(): string {
+    const hostname = os.hostname();
+    if (!hostname) {
+        return "unknown" + Math.random().toString(4);
+    } else {
+        // Generate a 32-bit hash of the hostname
+        const userId = crc.crc32(hostname).toString();
+        return userId;
+    }
 }
 
 const userId = getPersistentUserId();
