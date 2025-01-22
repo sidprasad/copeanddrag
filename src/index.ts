@@ -12,7 +12,7 @@ import { parseLayoutSpec } from './layout/layoutspec';
 import { instanceToInst } from './forge-util/instanceToInst';
 import { Event, Logger, LogLevel } from './logging/logger';
 import * as os from 'os';
-import * as crc from 'crc';
+import * as crypto from 'crypto'; 
 
 
 const express = require('express');
@@ -33,15 +33,18 @@ app.use(express.json());
 app.set('view engine', 'ejs');
 
 
+const secretKey = "cnd-logging-key";
 
-// TODO: Needs work.
+// Function to get or generate a persistent user ID using HMAC
 function getPersistentUserId(): string {
     const hostname = os.hostname();
     if (!hostname) {
         return "unknown" + Math.random().toString(4);
     } else {
-        // Generate a 32-bit hash of the hostname
-        const userId = crc.crc32(hostname).toString();
+        // Generate an HMAC of the hostname using the secret key
+        const hmac = crypto.createHmac('sha256', secretKey);
+        hmac.update(hostname);
+        const userId = hmac.digest('hex');
         return userId;
     }
 }
