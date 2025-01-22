@@ -33,7 +33,7 @@ app.use(express.json());
 app.set('view engine', 'ejs');
 
 
-const secretKey = "cnd-logging-key";
+const secretKey = "cope-and-drag-logging-key";
 
 // Function to get or generate a persistent user ID using HMAC
 function getPersistentUserId(): string {
