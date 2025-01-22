@@ -10,6 +10,9 @@ import { InstanceLayout } from './layout/interfaces';
 import { copeToLayoutSpec } from './cope-lang/cope-parser';
 import { parseLayoutSpec } from './layout/layoutspec';
 import { instanceToInst } from './forge-util/instanceToInst';
+import { Event, Logger, LogLevel } from './logging/logger';
+import * as os from 'os';
+
 
 const express = require('express');
 const path = require('path');
@@ -27,6 +30,22 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.set('view engine', 'ejs');
+
+
+
+// TODO: Needs work.
+function getPersistentUserId() {
+
+    let userId = os.hostname();
+
+    // Can we anonynmize this further?
+    return userId;
+
+}
+
+const userId = getPersistentUserId();
+const logger = new Logger(userId);
+
 
 
 function getFormContents(req: any) {
@@ -108,6 +127,11 @@ app.post('/', (req, res) => {
     const cope = req.body.cope;
     let error = "";
 
+
+
+
+
+
     try {
 
         var { instances, li, instanceNumber, loopBack, projections } = getFormContents(req);
@@ -154,6 +178,14 @@ app.post('/', (req, res) => {
         colaNodes = [];
         colaEdges = [];
         colaConstraints = [];
+    }
+    finally {
+        let payload = {
+            "alloyDatum": alloyDatum,
+            "cope": cope,
+            "error": error
+        }
+        logger.log_payload(payload, LogLevel.INFO, Event.CND_RUN);
     }
 
     res.render('diagram', {
