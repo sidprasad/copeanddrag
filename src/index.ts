@@ -130,7 +130,7 @@ app.post('/', (req, res) => {
     let error = "";
 
     // Should this move elsewhere?
-    var loggingEnabled = (req.body.loggingEnabled == undefined) ? true : (req.body.loggingEnabled === 'Enabled');
+    var loggingEnabled = (req.body.loggingEnabled == undefined) ? true : (req.body.loggingEnabled.toLowerCase() === 'enabled');
 
     try {
 
