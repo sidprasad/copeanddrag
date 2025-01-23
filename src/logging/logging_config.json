@@ -1,0 +1,7 @@
+{
+    "authDomain": "pyret-examples.firebaseapp.com",
+    "databaseURL": "https://pyret-examples.firebaseio.com",
+    "projectId": "pyret-examples",
+    "storageBucket": "pyret-examples.appspot.com",
+    "collectionName": "forge_cnd"
+}

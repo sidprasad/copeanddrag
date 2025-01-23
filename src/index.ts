@@ -10,6 +10,9 @@ import { InstanceLayout } from './layout/interfaces';
 import { copeToLayoutSpec } from './cope-lang/cope-parser';
 import { parseLayoutSpec } from './layout/layoutspec';
 import { instanceToInst } from './forge-util/instanceToInst';
+import { Event, Logger, LogLevel } from './logging/logger';
+import * as os from 'os';
+import * as crypto from 'crypto'; 
 
 const express = require('express');
 const path = require('path');
@@ -18,15 +21,34 @@ import * as fs from 'fs';
 
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
-
-// Set the views directory
 app.set('views', path.join(__dirname, 'views'));
-
-
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
 app.set('view engine', 'ejs');
+
+
+
+const secretKey = "cope-and-drag-logging-key";
+
+// Function to get or generate a persistent user ID using HMAC
+function getPersistentUserId(): string {
+    const hostname = os.hostname();
+    if (!hostname) {
+        return "unknown" + Math.random().toString(4);
+    } else {
+        // Generate an HMAC of the hostname using the secret key
+        const hmac = crypto.createHmac('sha256', secretKey);
+        hmac.update(hostname);
+        const userId = hmac.digest('hex');
+        return userId;
+    }
+}
+
+// This is a hack. I'm not sure
+// how to encode the version number.
+const version = "1.1.0";
+const userId = getPersistentUserId();
+const logger = new Logger(userId, version);
 
 
 function getFormContents(req: any) {
@@ -34,13 +56,12 @@ function getFormContents(req: any) {
     let projections: Record<string, string> = {};
     const alloyDatum = req.body.alloydatum;
 
+
     if (!alloyDatum || alloyDatum.length == 0) {
         throw new Error("No instance to visualize provided.");
     }
 
     const cope = req.body.cope;
-
-
     /*
         Get ALL form elements ending with _projection
     */
@@ -108,6 +129,9 @@ app.post('/', (req, res) => {
     const cope = req.body.cope;
     let error = "";
 
+    // Should this move elsewhere?
+    var loggingEnabled = (req.body.loggingEnabled == undefined) ? true : (req.body.loggingEnabled.toLowerCase() === 'enabled');
+
     try {
 
         var { instances, li, instanceNumber, loopBack, projections } = getFormContents(req);
@@ -155,6 +179,17 @@ app.post('/', (req, res) => {
         colaEdges = [];
         colaConstraints = [];
     }
+    finally {
+        let payload = {
+            "alloyDatum": alloyDatum,
+            "cope": cope,
+            "error": error
+        }
+
+        if (loggingEnabled) {
+            logger.log_payload(payload, LogLevel.INFO, Event.CND_RUN);
+        }
+    }
 
     res.render('diagram', {
         'height': height !== undefined ? height : 0,
@@ -172,7 +207,8 @@ app.post('/', (req, res) => {
         source_content: "", //HACK
         sourceFileName: "",
         instAsString,
-        errors: error
+        errors: error,
+        loggingEnabled
     });
 });
 
@@ -301,7 +337,8 @@ app.get('/example/:name', (req, res) => {
         source_content,
         sourceFileName,
         instAsString,
-        errors: ""
+        errors: "",
+        loggingEnabled: true
     });
 
 
