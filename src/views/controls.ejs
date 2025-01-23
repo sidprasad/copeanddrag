@@ -33,11 +33,11 @@
         </div>
         <div class="form-group">
             <div class="form-check">
-                
+
                 <label for="loggingEnabled" class="form-check-label">Logging</label>
-                <input type="checkbox" id="loggingEnabled" name="loggingEnabled" <%= loggingEnabled ? 'checked' : '' %>>
-                <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#loggingInfoModal">?</button>
+                <input type="checkbox" id="loggingEnabled" name="loggingEnabled" <%= typeof loggingEnabled === 'undefined' || loggingEnabled ? 'checked' : '' %>>
             </div>
+            <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#loggingInfoModal" id="loggingmoreinfo">?</button>
         </div>
         <div class="form-group d-none">
             <label for="instancenumber">Temporal Instance Number</label>
@@ -126,6 +126,11 @@
             }
         });
 
+
+        document.getElementById('loggingmoreinfo').addEventListener('click', function(event) {
+            
+            event.preventDefault();
+        });
 
         // Event listener for the Prettify button
         document.getElementById('prettify').addEventListener('click', function(event) {
