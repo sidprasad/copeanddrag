@@ -35,7 +35,7 @@
             <div class="form-check">
                 
                 <label for="loggingEnabled" class="form-check-label">Logging</label>
-                <input type="checkbox" id="loggingEnabled" name="loggingEnabled" checked>
+                <input type="checkbox" id="loggingEnabled" name="loggingEnabled" <%= loggingEnabled ? 'checked' : '' %>>
                 <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#loggingInfoModal">?</button>
             </div>
         </div>

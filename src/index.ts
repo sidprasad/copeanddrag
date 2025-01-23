@@ -334,7 +334,8 @@ app.get('/example/:name', (req, res) => {
         source_content,
         sourceFileName,
         instAsString,
-        errors: ""
+        errors: "",
+        loggingEnabled: false
     });
 
 
