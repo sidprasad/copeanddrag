@@ -1,4 +1,4 @@
-<div id="controls" class="""col"></div>
+<div id="controls" class="col">
 
     <style>
         .CodeMirror {
@@ -19,7 +19,7 @@
             overflow: auto;
         }
     </style>
-    <form id="controlsForm" method="post" action="""/" style="padding-top: 5px;"></form>
+    <form id="controlsForm" method="post" action="/" style="padding-top: 5px;"></form>
         <button type="submit" id='cola' class="btn btn-primary btn-lg btn-block">Apply Layout</button>
         <br>
         <div class="form-group">
@@ -33,9 +33,11 @@
         </div>
         <br>
         <div class="form-group">
-            <label for="loggingEnabled" class="form-check-label">Logging</label>
-            <input type="checkbox" id="loggingEnabled" name="loggingEnabled" <%= typeof loggingEnabled === 'undefined' || loggingEnabled ? 'checked' : '' %>>
-            <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#loggingInfoModal" id="loggingmoreinfo">?</button>
+            <div class="d-flex justify-content-between align-items-center">
+                <label for="loggingEnabled" class="form-check-label">Logging</label>
+                <input type="checkbox" id="loggingEnabled" name="loggingEnabled" <%= typeof loggingEnabled === 'undefined' || loggingEnabled ? 'checked' : '' %>>
+                <button type="button" class="btn btn-sm btn-outline-info float-right" data-toggle="modal" data-target="#loggingInfoModal" id="loggingmoreinfo">?</button>
+            </div>
         </div>
         <div class="form-group d-none">
             <label for="instancenumber">Temporal Instance Number</label>
@@ -85,6 +87,7 @@
                     By enabling logging, you allow us to examine your <b>anonymized</b> 
                     specifications and diagrams in order
                     to improve Cope and Drag, and understand its effectiveness.
+                    <br><br>
                     Have questions? <a href="https://docs.google.com/forms/d/e/1FAIpQLSdQcAlnW86OLlpmFovEiviToq5WMU10N4U_pz01N-9LUJ4qzQ/viewform?usp=dialog" target="_blank">Fill out this form</a>.
                 </div>
                 <div class="modal-footer">
@@ -125,10 +128,10 @@
         });
 
 
-        document.getElementById('loggingmoreinfo').addEventListener('click', function(event) {
+        // document.getElementById('loggingmoreinfo').addEventListener('click', function(event) {
             
-            event.preventDefault();
-        });
+        //    // event.preventDefault();
+        // });
 
         // Event listener for the Prettify button
         document.getElementById('prettify').addEventListener('click', function(event) {
