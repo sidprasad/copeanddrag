@@ -1,4 +1,4 @@
-<div id="controls" class="col">
+<div id="controls" class="""col"></div>
 
     <style>
         .CodeMirror {
@@ -19,7 +19,7 @@
             overflow: auto;
         }
     </style>
-    <form id="controlsForm" method="post" action="/" style="padding-top: 5px;">
+    <form id="controlsForm" method="post" action="""/" style="padding-top: 5px;"></form>
         <button type="submit" id='cola' class="btn btn-primary btn-lg btn-block">Apply Layout</button>
         <br>
         <div class="form-group">
@@ -30,6 +30,14 @@
         <div class="form-group">
                 <label for="alloydatum" class="btn btn-outline-dark btn-sm" id="alloyinstancelabel" style="cursor: pointer;">Edit Forge/Alloy Datum</label>
                 <textarea class="form-control" id="alloydatum" rows="5" name="alloydatum" style="display: none;"><%= alloyDatum ? alloyDatum : '' %></textarea>
+        </div>
+        <div class="form-group">
+            <div class="form-check">
+                
+                <label for="loggingEnabled" class="form-check-label">Logging</label>
+                <input type="checkbox" id="loggingEnabled" name="loggingEnabled" checked>
+                <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#loggingInfoModal">?</button>
+            </div>
         </div>
         <div class="form-group d-none">
             <label for="instancenumber">Temporal Instance Number</label>
@@ -65,7 +73,28 @@
 
     </form>
 
-    
+    <!-- Modal -->
+    <div class="modal fade" id="loggingInfoModal" tabindex="-1" role="dialog" aria-labelledby="loggingInfoModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loggingInfoModalLabel">Logging Information</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    By enabling logging, you allow us to examine your <b>anonymized</b> 
+                    specifications and diagrams in order
+                    to improve Cope and Drag, and understand its effectiveness.
+                    Have questions? <a href="https://docs.google.com/forms/d/e/1FAIpQLSdQcAlnW86OLlpmFovEiviToq5WMU10N4U_pz01N-9LUJ4qzQ/viewform?usp=dialog" target="_blank">Fill out this form</a>.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
 

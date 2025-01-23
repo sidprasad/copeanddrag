@@ -14,7 +14,6 @@ import { Event, Logger, LogLevel } from './logging/logger';
 import * as os from 'os';
 import * as crypto from 'crypto'; 
 
-const minimist = require('minimist');
 const express = require('express');
 const path = require('path');
 import * as fs from 'fs';
@@ -27,10 +26,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.set('view engine', 'ejs');
 
-
-// Parse command-line arguments
-const args = minimist(process.argv.slice(2));
-const enableLogging = !args['no-logging'];
 
 
 const secretKey = "cope-and-drag-logging-key";
@@ -53,12 +48,13 @@ function getPersistentUserId(): string {
 // how to encode the version number.
 const version = "1.0.1";
 const userId = getPersistentUserId();
-const logger = new Logger(userId, enableLogging, version);
+const logger = new Logger(userId, version);
 
 function getFormContents(req: any) {
 
     let projections: Record<string, string> = {};
     const alloyDatum = req.body.alloydatum;
+    const loggingEnabled = req.body.loggingEnabled || true;
 
     if (!alloyDatum || alloyDatum.length == 0) {
         throw new Error("No instance to visualize provided.");
@@ -98,7 +94,7 @@ function getFormContents(req: any) {
 
     let layoutSpec = coopeNonEmpty ? copeToLayoutSpec(cope) : parseLayoutSpec("");
     let li = new LayoutInstance(layoutSpec);
-    return { instances, li, instanceNumber, loopBack, projections };
+    return { instances, li, instanceNumber, loopBack, projections, loggingEnabled };
 
 
 }
@@ -136,7 +132,7 @@ app.post('/', (req, res) => {
 
     try {
 
-        var { instances, li, instanceNumber, loopBack, projections } = getFormContents(req);
+        var { instances, li, instanceNumber, loopBack, projections, loggingEnabled } = getFormContents(req);
         var num_instances = instances.length;
 
         if (instanceNumber >= num_instances) {
@@ -187,7 +183,10 @@ app.post('/', (req, res) => {
             "cope": cope,
             "error": error
         }
-        logger.log_payload(payload, LogLevel.INFO, Event.CND_RUN);
+
+        if (loggingEnabled) {
+            logger.log_payload(payload, LogLevel.INFO, Event.CND_RUN);
+        }
     }
 
     res.render('diagram', {

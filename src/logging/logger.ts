@@ -32,14 +32,13 @@ export class Logger {
 
     // But what if logging is turned on and then off.
     // I don't want to manage that state.
-    constructor(private user: string, private enabled: boolean, private cnd_version: string)
+    constructor(private user: string, private cnd_version: string)
     {
-        if(this.enabled)
-        {
-            this.app = initializeApp(config);
-            this.db = getFirestore(this.app)
-            this.log_target = collection(this.db, config.collectionName);
-        }
+
+        this.app = initializeApp(config);
+        this.db = getFirestore(this.app)
+        this.log_target = collection(this.db, config.collectionName);
+
     }
  
     payload(payload: any, loglevel: LogLevel, event: Event)
@@ -57,7 +56,7 @@ export class Logger {
         let p = this.payload(payload, loglevel, event);
         let log = doc(this.log_target);
 
-        let do_not_log = !this.enabled || process.env.NODE_ENV === 'development' || process.env.npm_lifecycle_event === 'dev';
+        let do_not_log =  process.env.NODE_ENV === 'development' || process.env.npm_lifecycle_event === 'dev';
         try {
             if (do_not_log) {
                 console.log(p);
