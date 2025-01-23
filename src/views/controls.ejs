@@ -31,12 +31,10 @@
                 <label for="alloydatum" class="btn btn-outline-dark btn-sm" id="alloyinstancelabel" style="cursor: pointer;">Edit Forge/Alloy Datum</label>
                 <textarea class="form-control" id="alloydatum" rows="5" name="alloydatum" style="display: none;"><%= alloyDatum ? alloyDatum : '' %></textarea>
         </div>
+        <br>
         <div class="form-group">
-            <div class="form-check">
-
-                <label for="loggingEnabled" class="form-check-label">Logging</label>
-                <input type="checkbox" id="loggingEnabled" name="loggingEnabled" <%= typeof loggingEnabled === 'undefined' || loggingEnabled ? 'checked' : '' %>>
-            </div>
+            <label for="loggingEnabled" class="form-check-label">Logging</label>
+            <input type="checkbox" id="loggingEnabled" name="loggingEnabled" <%= typeof loggingEnabled === 'undefined' || loggingEnabled ? 'checked' : '' %>>
             <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#loggingInfoModal" id="loggingmoreinfo">?</button>
         </div>
         <div class="form-group d-none">
