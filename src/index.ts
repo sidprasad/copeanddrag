@@ -46,23 +46,22 @@ function getPersistentUserId(): string {
 
 // This is a hack. I'm not sure
 // how to encode the version number.
-const version = "1.0.1";
+const version = "1.1.0";
 const userId = getPersistentUserId();
 const logger = new Logger(userId, version);
+
 
 function getFormContents(req: any) {
 
     let projections: Record<string, string> = {};
     const alloyDatum = req.body.alloydatum;
-    const loggingEnabled = req.body.loggingEnabled || true;
+
 
     if (!alloyDatum || alloyDatum.length == 0) {
         throw new Error("No instance to visualize provided.");
     }
 
     const cope = req.body.cope;
-
-
     /*
         Get ALL form elements ending with _projection
     */
@@ -94,7 +93,7 @@ function getFormContents(req: any) {
 
     let layoutSpec = coopeNonEmpty ? copeToLayoutSpec(cope) : parseLayoutSpec("");
     let li = new LayoutInstance(layoutSpec);
-    return { instances, li, instanceNumber, loopBack, projections, loggingEnabled };
+    return { instances, li, instanceNumber, loopBack, projections };
 
 
 }
@@ -130,9 +129,12 @@ app.post('/', (req, res) => {
     const cope = req.body.cope;
     let error = "";
 
+    // Should this move elsewhere?
+    var loggingEnabled = (req.body.loggingEnabled == undefined) ? true : (req.body.loggingEnabled === 'Enabled');
+
     try {
 
-        var { instances, li, instanceNumber, loopBack, projections, loggingEnabled } = getFormContents(req);
+        var { instances, li, instanceNumber, loopBack, projections } = getFormContents(req);
         var num_instances = instances.length;
 
         if (instanceNumber >= num_instances) {
@@ -205,7 +207,8 @@ app.post('/', (req, res) => {
         source_content: "", //HACK
         sourceFileName: "",
         instAsString,
-        errors: error
+        errors: error,
+        loggingEnabled
     });
 });
 
@@ -335,7 +338,7 @@ app.get('/example/:name', (req, res) => {
         sourceFileName,
         instAsString,
         errors: "",
-        loggingEnabled: false
+        loggingEnabled: true
     });
 
 
