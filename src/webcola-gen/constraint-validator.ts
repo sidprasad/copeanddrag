@@ -159,11 +159,15 @@ class ConstraintValidator {
         }
         catch (e) {
 
+            
+            let previousConstraintList = this.added_constraints.map((c) => this.colaOrientationConstraintToString(c));
+            let previousConstraintSet = new Set(previousConstraintList);
+            previousConstraintList = [...previousConstraintSet];
 
-            let previousConstraintString = "<br><br>" + this.added_constraints.map((c) => "<code>" + this.colaOrientationConstraintToString(c) + "</code>").join('<br>');
+            let previousConstraintString = "<br><br>" + previousConstraintList.map((c) => "<code>" + c + "</code>").join('<br>');
 
             let currentConstraintString = this.colaOrientationConstraintToString(constraint);
-            this.error = `Constraint:<br> <code>${currentConstraintString}</code><br> conflicts with the following constraints:` + previousConstraintString;
+            this.error = `Constraint:<br> <code>${currentConstraintString}</code><br> conflicts with one (or some) the following constraints:` + previousConstraintString;
             console.log(e);
             return;
         }
