@@ -46,7 +46,7 @@ function getPersistentUserId(): string {
 
 // This is a hack. I'm not sure
 // how to encode the version number.
-const version = "1.1.0";
+const version = "1.1.1";
 const userId = getPersistentUserId();
 const logger = new Logger(userId, version);
 
