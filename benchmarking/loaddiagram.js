@@ -1,4 +1,12 @@
-const puppeteer = require('puppeteer');
+//const puppeteer = require('puppeteer');
+
+import puppeteer from 'puppeteer';
+
+function delay(time) {
+    return new Promise(function(resolve) { 
+        setTimeout(resolve, time);
+    });
+}
 
 async function loadDiagram(copespec, alloydatum, numloads = 1) {
     const browser = await puppeteer.launch({ headless: false }); // Set headless: true to run in headless mode
@@ -48,19 +56,31 @@ async function loadExample(exampleName, numloads = 1) {
     const page = await browser.newPage();
 
     // Define the URL and form data
-    const url = `http://localhost:3000/example/${examplename}`; 
+    const url = `http://localhost:3000/example/${exampleName}`; 
     await page.goto(url);
 
 
     // Wait for navigation to complete
-    await page.waitForNavigation();
+    //await page.waitForNavigation();
 
     for (let i = 0; i < numloads; i++) {
-        // Click the button
-        await page.click('#cola');
-        // Wait for navigation to complete
-        await page.waitForNavigation();
+
+        await delay(1000);
+
+        const buttonExists = await page.$('#cola') !== null;
+        
+        if (!buttonExists) {
+            console.error('Button not found');
+            break;
+        }
+
+        await Promise.all([
+            page.waitForNavigation(),
+            // What if the button is not there?
+            page.click('#cola')
+        ]);
         console.log(`Clicked the button ${i + 1} times`);
+
     }
 
     await browser.close();
@@ -68,7 +88,7 @@ async function loadExample(exampleName, numloads = 1) {
 
 
 
-const TIMES = 1;
+const TIMES = 100;
 const copespec = `constraints:
     - orientation: {sigs : [B, A], directions: [left]}`;
 const alloydatum = `<alloy builddate="Wednesday, November 13th, 2024">
@@ -101,4 +121,4 @@ const alloydatum = `<alloy builddate="Wednesday, November 13th, 2024">
 <source filename="/no-name.rkt" content="// Couldn't open source file (/no-name.rkt) (info: (2 . posix)). Is the file saved?"></source>
 </alloy>`;
 //loadDiagram(copespec, alloydatum, TIMES).catch(console.error);
-await loadExample("ab", TIMES).catch(console.error);
+await loadExample("filesystem", TIMES).catch(console.error);
