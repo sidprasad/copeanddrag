@@ -88,7 +88,7 @@ async function loadExample(exampleName, numloads = 1) {
 
 
 
-const TIMES = 100;
+const TIMES = 50;
 const copespec = `constraints:
     - orientation: {sigs : [B, A], directions: [left]}`;
 const alloydatum = `<alloy builddate="Wednesday, November 13th, 2024">
@@ -121,4 +121,4 @@ const alloydatum = `<alloy builddate="Wednesday, November 13th, 2024">
 <source filename="/no-name.rkt" content="// Couldn't open source file (/no-name.rkt) (info: (2 . posix)). Is the file saved?"></source>
 </alloy>`;
 //loadDiagram(copespec, alloydatum, TIMES).catch(console.error);
-await loadExample("filesystem", TIMES).catch(console.error);
+await loadExample("chord", TIMES).catch(console.error);

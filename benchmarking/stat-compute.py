@@ -6,7 +6,7 @@ import os
 import chardet
 
 
-LOG = "ab.txt"
+LOG = "chord.txt"
 logfile = os.path.join(os.path.dirname(__file__), LOG)
 
 # Read log data from the specified file
