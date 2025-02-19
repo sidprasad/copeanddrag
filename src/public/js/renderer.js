@@ -9,6 +9,9 @@ const dy_for_linespacing = 5; // Adjust for spacing between lines
 //////////
 
 
+
+
+
 function adjustPointToRectanglePerimeter(point, rect) {
     const { x, y, width, height } = rect;
     const padding = 3; // Padding in pixels
@@ -105,6 +108,10 @@ function getContainingGroups(groups, node) {
 
 
 function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
+
+    // Start measuring client-side execution time
+    const clientStartTime = performance.now();
+
 
 
     // Create a zoom behavior
@@ -510,6 +517,20 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 // Also make the text normal
                 d3.select(this).style("font-weight", "normal");
             });
+
+
+        // Stop measuring client-side execution time
+        const clientEndTime = performance.now();
+        const clientTime = clientEndTime - clientStartTime;
+        fetch('/benchmark', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                clientTime: clientTime
+            })
+        });
     };
 
 

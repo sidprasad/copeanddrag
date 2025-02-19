@@ -18,6 +18,9 @@ const express = require('express');
 const path = require('path');
 import * as fs from 'fs';
 
+// import axios
+const axios = require('axios');
+
 
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
@@ -46,7 +49,7 @@ function getPersistentUserId(): string {
 
 // This is a hack. I'm not sure
 // how to encode the version number.
-const version = "1.1.1";
+const version = "1.1.2";
 const userId = getPersistentUserId();
 const logger = new Logger(userId, version);
 
@@ -123,6 +126,8 @@ app.get('/', (req, res) => {
 
 
 });
+
+
 
 app.post('/', (req, res) => {
     const alloyDatum = req.body.alloydatum;
@@ -364,6 +369,47 @@ const shutdown = () => {
         process.exit(1);
     }, 10000);
 };
+
+
+app.get('/benchmark', async (req, res) => {
+    const alloyDatum = req.query.alloydatum;
+    const cope = req.query.cope;
+    let error = "";
+
+    if (!alloyDatum || !cope) {
+        res.status(400).send('Missing alloydatum or cope in query parameters');
+        return;
+    }
+
+    let totalClientTime = 0;
+    let totalServerTime = 0;
+
+    for (let i = 0; i < 100; i++) {
+        try {
+            const response = await axios.post('http://localhost:3000/', {
+                alloydatum: alloyDatum,
+                cope: cope,
+                instancenumber: 0,
+                loggingEnabled: 'disabled'
+            });
+
+            const clientTime = response.data.clientTime;
+            const serverTime = response.data.serverTime;
+
+            totalClientTime += clientTime;
+            totalServerTime += serverTime;
+        } catch (e) {
+            error = e.message;
+        }
+    }
+
+    res.json({
+        averageClientTime: totalClientTime / 100,
+        averageServerTime: totalServerTime / 100
+    });
+});
+
+
 
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);

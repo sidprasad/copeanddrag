@@ -1,6 +1,6 @@
 {
   "name": "cope-and-drag",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "A web application for lightweight diagramming for Alloy/Forge.",
   "main": "dist/index.js",
   "keywords": [],
@@ -28,6 +28,7 @@
     "@types/d3": "^7.4.3",
     "@types/graphlib": "^2.1.12",
     "@types/webcola": "^3.2.0",
+    "axios": "^1.7.9",
     "cassowary": "^0.0.2",
     "chroma-js": "^3.1.1",
     "cytoscape": "^3.30.1",
