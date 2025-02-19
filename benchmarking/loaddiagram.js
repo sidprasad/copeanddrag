@@ -13,20 +13,22 @@ async function loadDiagram(copespec, alloydatum, numloads = 1) {
         instancenumber: 0 // Replace with your actual instance number
     };
 
+    // Load the page and submit the form
+    await page.goto(url);
+    await page.evaluate((formData) => {
+        document.getElementById('cope').value = formData.cope;
+        document.getElementById('alloydatum').value = formData.alloydatum;
+        document.getElementById('loggingEnabled').value = formData.loggingEnabled;
+        document.getElementById('instancenumber').value = formData.instancenumber;
+        document.getElementById('controlsForm').submit();
+    }, formData);
+
+    // Wait for navigation to complete
+    await page.waitForNavigation();
+
+    console.log('Page loaded for the first time. Clicking the button...');
+
     for (let i = 0; i < numloads; i++) {
-        // Load the page and submit the form
-        await page.goto(url);
-        await page.evaluate((formData) => {
-            document.getElementById('cope').value = formData.cope;
-            document.getElementById('alloydatum').value = formData.alloydatum;
-            document.getElementById('loggingEnabled').value = formData.loggingEnabled;
-            document.getElementById('instancenumber').value = formData.instancenumber;
-            document.getElementById('controlsForm').submit();
-        }, formData);
-
-        // Wait for navigation to complete
-        await page.waitForNavigation();
-
         // Click the button
         await page.click('#cola');
 
@@ -38,6 +40,33 @@ async function loadDiagram(copespec, alloydatum, numloads = 1) {
 
     await browser.close();
 }
+
+
+async function loadExample(exampleName, numloads = 1) {
+
+    const browser = await puppeteer.launch({ headless: false }); // Set headless: true to run in headless mode
+    const page = await browser.newPage();
+
+    // Define the URL and form data
+    const url = `http://localhost:3000/example/${examplename}`; 
+    await page.goto(url);
+
+
+    // Wait for navigation to complete
+    await page.waitForNavigation();
+
+    for (let i = 0; i < numloads; i++) {
+        // Click the button
+        await page.click('#cola');
+        // Wait for navigation to complete
+        await page.waitForNavigation();
+        console.log(`Clicked the button ${i + 1} times`);
+    }
+
+    await browser.close();
+}
+
+
 
 const TIMES = 1;
 const copespec = `constraints:
@@ -71,4 +100,5 @@ const alloydatum = `<alloy builddate="Wednesday, November 13th, 2024">
 
 <source filename="/no-name.rkt" content="// Couldn't open source file (/no-name.rkt) (info: (2 . posix)). Is the file saved?"></source>
 </alloy>`;
-loadDiagram(copespec, alloydatum, TIMES).catch(console.error);
+//loadDiagram(copespec, alloydatum, TIMES).catch(console.error);
+await loadExample("ab", TIMES).catch(console.error);
