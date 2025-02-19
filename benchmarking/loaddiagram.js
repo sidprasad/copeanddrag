@@ -52,7 +52,7 @@ async function loadDiagram(copespec, alloydatum, numloads = 1) {
 
 async function loadExample(exampleName, numloads = 1) {
 
-    const browser = await puppeteer.launch({ headless: false }); // Set headless: true to run in headless mode
+    const browser = await puppeteer.launch({ headless: true }); // Set headless: true to run in headless mode
     const page = await browser.newPage();
 
     // Define the URL and form data
@@ -65,7 +65,7 @@ async function loadExample(exampleName, numloads = 1) {
 
     for (let i = 0; i < numloads; i++) {
 
-        await delay(3000);
+        await delay(1000);
 
         const buttonExists = await page.$('#cola') !== null;
         
@@ -82,7 +82,7 @@ async function loadExample(exampleName, numloads = 1) {
         console.log(`Clicked the button ${i + 1} times`);
 
     }
-
+    await delay(3000);
     await browser.close();
 }
 
