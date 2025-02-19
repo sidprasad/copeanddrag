@@ -372,12 +372,23 @@ const shutdown = () => {
 
 
 app.get('/benchmark', async (req, res) => {
-    const alloyDatum = req.query.alloydatum;
-    const cope = req.query.cope;
+    res.render('benchmark', {
+        averageClientTime: 0,
+        averageServerTime: 0
+    });
+});
+
+
+let clientTimes: number[] = [];
+app.post('/benchmark', async (req, res) => {
+    const alloyDatum = req.body.alloydatum;
+    const cope = req.body.cope;
     let error = "";
 
     if (!alloyDatum || !cope) {
-        res.status(400).send('Missing alloydatum or cope in query parameters');
+        res.json({
+            error: "No instance or layout provided."
+        });
         return;
     }
 
@@ -386,6 +397,8 @@ app.get('/benchmark', async (req, res) => {
 
     for (let i = 0; i < 100; i++) {
         try {
+            const startTime = performance.now(); // Start server-side timing
+
             const response = await axios.post('http://localhost:3000/', {
                 alloydatum: alloyDatum,
                 cope: cope,
@@ -393,11 +406,21 @@ app.get('/benchmark', async (req, res) => {
                 loggingEnabled: 'disabled'
             });
 
-            const clientTime = response.data.clientTime;
-            const serverTime = response.data.serverTime;
+            console.log(`Run ${i + 1}: ${response.data.error || 'Success'}`);
+
+            const endTime = performance.now(); // End server-side timing
+            const serverTime = endTime - startTime;
+
+            // Wait until client time is received
+            await waitForClientTime();
+
+            // Retrieve the client time from the array
+            const clientTime = clientTimes.shift();
 
             totalClientTime += clientTime;
             totalServerTime += serverTime;
+
+            console.log(`Run ${i + 1}: Client Time = ${clientTime} ms, Server Time = ${serverTime} ms`);
         } catch (e) {
             error = e.message;
         }
@@ -409,7 +432,27 @@ app.get('/benchmark', async (req, res) => {
     });
 });
 
+// Function to wait until client time is received
+function waitForClientTime(): Promise<void> {
+    return new Promise<void>(resolve => {
+        const interval = setInterval(() => {
+            if (clientTimes.length > 0) {
+                clearInterval(interval);
+                resolve();
+            }
+        }, 10); // Check every 10 milliseconds
+    });
+}
+app.post('/timing', (req, res) => {
+    const clientTime = req.body.clientTime;
 
+    console.log(`Received client time: ${clientTime} ms`);
+
+    // Store the client time in the array
+    clientTimes.push(clientTime);
+
+    res.json({ message: 'Client time received successfully' });
+});
 
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);

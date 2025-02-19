@@ -522,7 +522,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         // Stop measuring client-side execution time
         const clientEndTime = performance.now();
         const clientTime = clientEndTime - clientStartTime;
-        fetch('/benchmark', {
+        fetch('/timing', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
