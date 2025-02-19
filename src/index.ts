@@ -137,6 +137,9 @@ app.post('/', (req, res) => {
     // Should this move elsewhere?
     var loggingEnabled = (req.body.loggingEnabled == undefined) ? true : (req.body.loggingEnabled.toLowerCase() === 'enabled');
 
+
+    const startTime = performance.now();
+
     try {
 
         var { instances, li, instanceNumber, loopBack, projections } = getFormContents(req);
@@ -190,6 +193,10 @@ app.post('/', (req, res) => {
             "cope": cope,
             "error": error
         }
+
+        let endTime = performance.now();
+        var serverTime = endTime - startTime;
+        console.log(`Server time: ${serverTime} ms`);
 
         if (loggingEnabled) {
             logger.log_payload(payload, LogLevel.INFO, Event.CND_RUN);
@@ -371,85 +378,17 @@ const shutdown = () => {
 };
 
 
-app.get('/benchmark', async (req, res) => {
-    res.render('benchmark', {
-        averageClientTime: 0,
-        averageServerTime: 0
-    });
-});
 
 
-let clientTimes: number[] = [];
-app.post('/benchmark', async (req, res) => {
-    const alloyDatum = req.body.alloydatum;
-    const cope = req.body.cope;
-    let error = "";
 
-    if (!alloyDatum || !cope) {
-        res.json({
-            error: "No instance or layout provided."
-        });
-        return;
-    }
 
-    let totalClientTime = 0;
-    let totalServerTime = 0;
 
-    for (let i = 0; i < 100; i++) {
-        try {
-            const startTime = performance.now(); // Start server-side timing
-
-            const response = await axios.post('http://localhost:3000/', {
-                alloydatum: alloyDatum,
-                cope: cope,
-                instancenumber: 0,
-                loggingEnabled: 'disabled'
-            });
-
-            console.log(`Run ${i + 1}: ${response.data.error || 'Success'}`);
-
-            const endTime = performance.now(); // End server-side timing
-            const serverTime = endTime - startTime;
-
-            // Wait until client time is received
-            await waitForClientTime();
-
-            // Retrieve the client time from the array
-            const clientTime = clientTimes.shift();
-
-            totalClientTime += clientTime;
-            totalServerTime += serverTime;
-
-            console.log(`Run ${i + 1}: Client Time = ${clientTime} ms, Server Time = ${serverTime} ms`);
-        } catch (e) {
-            error = e.message;
-        }
-    }
-
-    res.json({
-        averageClientTime: totalClientTime / 100,
-        averageServerTime: totalServerTime / 100
-    });
-});
-
-// Function to wait until client time is received
-function waitForClientTime(): Promise<void> {
-    return new Promise<void>(resolve => {
-        const interval = setInterval(() => {
-            if (clientTimes.length > 0) {
-                clearInterval(interval);
-                resolve();
-            }
-        }, 10); // Check every 10 milliseconds
-    });
-}
 app.post('/timing', (req, res) => {
     const clientTime = req.body.clientTime;
 
-    console.log(`Received client time: ${clientTime} ms`);
+    console.log(`Client time: ${clientTime} ms`);
 
-    // Store the client time in the array
-    clientTimes.push(clientTime);
+
 
     res.json({ message: 'Client time received successfully' });
 });
