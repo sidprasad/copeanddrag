@@ -109,6 +109,9 @@ function getContainingGroups(groups, node) {
 
 function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
+
+    let edgeRouteIdx = 0;
+
     // Start measuring client-side execution time
     const clientStartTime = performance.now();
 
@@ -149,7 +152,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
     const min_sep = 50;
     const default_node_width = 70;
-    
+
 
 
     // TODO: Figure out WHEN to use flowLayout and when not to use it.
@@ -159,12 +162,12 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
 
     colaLayout
-    .nodes(nodes)
-    .links(edges)
-    .constraints(constraints)
-    .groups(groups)
-    .groupCompactness(1e-3)
-    .symmetricDiffLinkLengths(min_sep + default_node_width);
+        .nodes(nodes)
+        .links(edges)
+        .constraints(constraints)
+        .groups(groups)
+        .groupCompactness(1e-3)
+        .symmetricDiffLinkLengths(min_sep + default_node_width);
 
     // const anyCnD = (constraints.length > 0) || (groups.length > 0);
 
@@ -189,348 +192,349 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .y(function (d) { return d.y; })
         .curve(d3.curveBasis);
 
-
     var routeEdges = function () {
-        colaLayout.prepareEdgeRouting(margin / 3);
-        console.log("Routing edges");
+        
+        try {
+            colaLayout.prepareEdgeRouting(margin / 3);
+            console.log("Routing edges for the nth time", ++edgeRouteIdx);
 
+            // What I want to do is change the angle based on the number of edges between the same nodes
+            // Function to calculate curvature based on number of edges and index
+            function calculateCurvature(edges, fromNode, toNode, edgeid) {
+                const sourceIndex = getNodeIndex(fromNode);
+                const targetIndex = getNodeIndex(toNode);
 
+                // Get all edges between the two nodes, regardless of direction
+                const allEdges = edges.filter(edge => {
+                    return (edge.source.id == fromNode && edge.target.id == toNode) ||
+                        (edge.source.id == toNode && edge.target.id == fromNode);
+                });
 
-        // What I want to do is change the angle based on the number of edges between the same nodes
-        // Function to calculate curvature based on number of edges and index
-        function calculateCurvature(edges, fromNode, toNode, edgeid) {
-            const sourceIndex = getNodeIndex(fromNode);
-            const targetIndex = getNodeIndex(toNode);
+                const edgeCount = allEdges.length;
+                let index = allEdges.findIndex(edge => edge.id == edgeid);
 
-            // Get all edges between the two nodes, regardless of direction
-            const allEdges = edges.filter(edge => {
-                return (edge.source.id == fromNode && edge.target.id == toNode) ||
-                    (edge.source.id == toNode && edge.target.id == fromNode);
-            });
-
-            const edgeCount = allEdges.length;
-            let index = allEdges.findIndex(edge => edge.id == edgeid);
-
-            // Calculate curvature
-            let curvature = 0;
-            if (edgeCount > 1) {
-                curvature = (index % 2 === 0 ? 1 : -1) * (Math.floor(index / 2) + 1) * 0.15 * edgeCount;
-            }
-            return curvature;
-        }
-
-
-        link.attr("d", function (d, i) {
-
-            var route = colaLayout.routeEdge(d);
-
-
-            // Get all edges between the two nodes, regardless of direction
-            const allEdgesBetweenSourceAndTarget = edges.filter(edge => {
-                return (edge.source.id == d.source.id && edge.target.id == d.target.id) ||
-                    (edge.source.id == d.target.id && edge.target.id == d.source.id);
-            });
-
-
-
-            let n = d.id;
-            // This is a special case for group edges
-            if (n.startsWith("_g_")) {
-                let source = d.source;
-                let target = d.target;
-
-                let sourceIndex = getNodeIndex(source.id);
-                let targetIndex = getNodeIndex(target.id);
-
-                let potentialTargetGroups = getContainingGroups(groups, target);
-                let potentialSourceGroups = getContainingGroups(groups, source);
-
-
-                let targetGroup = potentialTargetGroups.find(group => group.keyNode === sourceIndex);
-                let sourceGroup = potentialSourceGroups.find(group => group.keyNode === targetIndex);
-
-                if (targetGroup && sourceGroup) {
-                    alert('Something is very wrong!');
+                // Calculate curvature
+                let curvature = 0;
+                if (edgeCount > 1) {
+                    curvature = (index % 2 === 0 ? 1 : -1) * (Math.floor(index / 2) + 1) * 0.15 * edgeCount;
                 }
+                return curvature;
+            }
 
 
-                // Only one of source group and target group can be a group.
+            link.attr("d", function (d, i) {
 
-                // Within source group, see if the target is the key
-
-                function closestPointOnRect(bounds, point) {
-                    // Destructure the rectangle bounds
-                    const { x, y, X, Y } = bounds;
+                var route = colaLayout.routeEdge(d);
 
 
+                // Get all edges between the two nodes, regardless of direction
+                const allEdgesBetweenSourceAndTarget = edges.filter(edge => {
+                    return (edge.source.id == d.source.id && edge.target.id == d.target.id) ||
+                        (edge.source.id == d.target.id && edge.target.id == d.source.id);
+                });
 
-                    // Calculate the rectangle's edges
-                    const left = x;
-                    const right = X;
-                    const top = y;
-                    const bottom = Y;
 
-                    // Clamp the point's coordinates to the rectangle's bounds
-                    const closestX = Math.max(left, Math.min(point.x, right));
-                    const closestY = Math.max(top, Math.min(point.y, bottom));
 
-                    if (closestX != left && closestX != right
-                        && closestY != top && closestY != bottom) {
+                let n = d.id;
+                // This is a special case for group edges
+                if (n.startsWith("_g_")) {
+                    let source = d.source;
+                    let target = d.target;
 
-                        console.log("Point is inside the rectangle", bounds, closestX, closestY);
+                    let sourceIndex = getNodeIndex(source.id);
+                    let targetIndex = getNodeIndex(target.id);
+
+                    let potentialTargetGroups = getContainingGroups(groups, target);
+                    let potentialSourceGroups = getContainingGroups(groups, source);
+
+
+                    let targetGroup = potentialTargetGroups.find(group => group.keyNode === sourceIndex);
+                    let sourceGroup = potentialSourceGroups.find(group => group.keyNode === targetIndex);
+
+                    if (targetGroup && sourceGroup) {
+                        alert('Something is very wrong!');
                     }
 
-                    return { x: closestX, y: closestY };
-                }
+
+                    // Only one of source group and target group can be a group.
+
+                    // Within source group, see if the target is the key
+
+                    function closestPointOnRect(bounds, point) {
+                        // Destructure the rectangle bounds
+                        const { x, y, X, Y } = bounds;
 
 
 
+                        // Calculate the rectangle's edges
+                        const left = x;
+                        const right = X;
+                        const top = y;
+                        const bottom = Y;
 
-                if (targetGroup) {
-                    let newTargetCoords = closestPointOnRect(targetGroup.bounds, route[0]);
-                    let currentTarget = route[route.length - 1];
-                    currentTarget.x = newTargetCoords.x;
-                    currentTarget.y = newTargetCoords.y;
-                    route[route.length - 1] = currentTarget;
+                        // Clamp the point's coordinates to the rectangle's bounds
+                        const closestX = Math.max(left, Math.min(point.x, right));
+                        const closestY = Math.max(top, Math.min(point.y, bottom));
 
+                        if (closestX != left && closestX != right
+                            && closestY != top && closestY != bottom) {
 
-                }
-                else if (sourceGroup) {
-
-                    console.log(`From group ${sourceGroup.id} to the group ${target.id}`);
-
-                    let newSourceCoords = closestPointOnRect(sourceGroup.bounds.inflate(-1), route[route.length - 1]);
-                    let currentSource = route[0];
-                    currentSource.x = newSourceCoords.x;
-                    currentSource.y = newSourceCoords.y;
-                    route[0] = currentSource;
-
-                }
-                else {
-                    console.log("This is a group edge, but neither source nor target is a group.", d);
-                    console.log(potentialSourceGroups);
-                    console.log(potentialTargetGroups);
-                }
-
-                // Not ideal but we dont want odd curves.
-                if (route.length > 2) {
-                    route.splice(1, route.length - 2);
-                }
-                return lineFunction(route);
-            }
-
-
-
-
-            // If there are only two points in the route, get the midpoint of the route and add it to the route
-            if (route.length === 2) {
-                const midpoint = {
-                    x: (route[0].x + route[1].x) / 2,
-                    y: (route[0].y + route[1].y) / 2
-                };
-                route.splice(1, 0, midpoint);
-            }
-
-
-
-
-            // Determine the direction of the edge
-            var dx = route[1].x - route[0].x;
-            var dy = route[1].y - route[0].y;
-            var angle = Math.atan2(dy, dx);
-            var distance = Math.sqrt(dx * dx + dy * dy);
-
-
-
-            /** Here, we do some point of incidence adjustment IF the number of edges between the same nodes is greater than 1 */
-            if (allEdgesBetweenSourceAndTarget.length > 1) {
-                const minDistance = 10; // Minimum distance between edges (divided by 2)
-                const edgeIndex = allEdgesBetweenSourceAndTarget.findIndex(edge => edge.id === d.id);
-
-                // Start with a small offset and grow it based on the edge index. But start with min offset of 5
-                const offset = (edgeIndex % 2 === 0 ? 1 : -1) * (Math.floor(edgeIndex / 2) + 1) * minDistance;
-
-                // Now we should apply the offset to the start and end points of the route, depending on the angle.
-
-                if (route.length > 1) {
-                    const startIndex = 0;
-                    const endIndex = route.length - 1;
-
-                    /*
-                    
-                    Angle 0: The edge is horizontal and points to the right.
-                    Angle π/2 (90 degrees): The edge is vertical and points upwards.
-                    Angle π (180 degrees): The edge is horizontal and points to the left.
-                    Angle -π/2 (-90 degrees): The edge is vertical and points downwards.
-                    */
-                    function getDominantDirection(angle) {
-                        // Normalize angle between -π and π
-                        angle = ((angle + Math.PI) % (2 * Math.PI)) - Math.PI;
-
-                        if (angle >= -Math.PI / 4 && angle <= Math.PI / 4) {
-                            return 'right'; // Dominant direction is right
-                        } else if (angle > Math.PI / 4 && angle < 3 * Math.PI / 4) {
-                            return 'up'; // Dominant direction is up
-                        } else if (angle >= 3 * Math.PI / 4 || angle <= -3 * Math.PI / 4) {
-                            return 'left'; // Dominant direction is left
-                        } else if (angle > -3 * Math.PI / 4 && angle < -Math.PI / 4) {
-                            return 'down'; // Dominant direction is down
+                            console.log("Point is inside the rectangle", bounds, closestX, closestY);
                         }
-                        return null; // Default to null if something unexpected happens
-                    }
-                    let direction = getDominantDirection(angle);
 
-
-                    // As a result, offset along the y axis.
-                    if (direction === 'right' || direction === 'left') {
-                        route[startIndex].y += offset;
-                        route[endIndex].y += offset;
-                    }
-                    // else if direction is up or down, offset along the x axis
-                    else if (direction === 'up' || direction === 'down') {
-                        route[startIndex].x += offset;
-                        route[endIndex].x += offset;
+                        return { x: closestX, y: closestY };
                     }
 
-                    // Ignore the other directions, if they do crop up.
 
-                    // And ensure it stays on the rectangle perimeter
-                    console.log("Adjusting points to rectangle perimeter");
-                    route[startIndex] = adjustPointToRectanglePerimeter(route[startIndex], d.source.innerBounds);
-                    route[endIndex] = adjustPointToRectanglePerimeter(route[endIndex], d.target.innerBounds);
+
+
+                    if (targetGroup) {
+                        let newTargetCoords = closestPointOnRect(targetGroup.bounds, route[0]);
+                        let currentTarget = route[route.length - 1];
+                        currentTarget.x = newTargetCoords.x;
+                        currentTarget.y = newTargetCoords.y;
+                        route[route.length - 1] = currentTarget;
+
+
+                    }
+                    else if (sourceGroup) {
+
+                        console.log(`From group ${sourceGroup.id} to the group ${target.id}`);
+
+                        let newSourceCoords = closestPointOnRect(sourceGroup.bounds.inflate(-1), route[route.length - 1]);
+                        let currentSource = route[0];
+                        currentSource.x = newSourceCoords.x;
+                        currentSource.y = newSourceCoords.y;
+                        route[0] = currentSource;
+
+                    }
+                    else {
+                        console.log("This is a group edge, but neither source nor target is a group.", d);
+                        console.log(potentialSourceGroups);
+                        console.log(potentialTargetGroups);
+                    }
+
+                    // Not ideal but we dont want odd curves.
+                    if (route.length > 2) {
+                        route.splice(1, route.length - 2);
+                    }
+                    return lineFunction(route);
                 }
 
-            }
 
 
-            // Calculate the curvature for the current edge
-            var curvature = calculateCurvature(edges, d.source.id, d.target.id, d.id);
-            //Apply curvature to the control points (but this does not help with the direction)
-            route.forEach(function (point, index) {
 
-
-                if (index > 0 && index < route.length - 1 && curvature !== 0) {
-
-                    // Adjust the control points based on the direction
-                    var offsetX = curvature * Math.abs(Math.sin(angle)) * distance;
-                    var offsetY = curvature * Math.abs(Math.cos(angle)) * distance;
-
-                    point.x += offsetX;
-                    point.y += offsetY;
+                // If there are only two points in the route, get the midpoint of the route and add it to the route
+                if (route.length === 2) {
+                    const midpoint = {
+                        x: (route[0].x + route[1].x) / 2,
+                        y: (route[0].y + route[1].y) / 2
+                    };
+                    route.splice(1, 0, midpoint);
                 }
+
+
+
+
+                // Determine the direction of the edge
+                var dx = route[1].x - route[0].x;
+                var dy = route[1].y - route[0].y;
+                var angle = Math.atan2(dy, dx);
+                var distance = Math.sqrt(dx * dx + dy * dy);
+
+
+
+                /** Here, we do some point of incidence adjustment IF the number of edges between the same nodes is greater than 1 */
+                if (allEdgesBetweenSourceAndTarget.length > 1) {
+                    const minDistance = 10; // Minimum distance between edges (divided by 2)
+                    const edgeIndex = allEdgesBetweenSourceAndTarget.findIndex(edge => edge.id === d.id);
+
+                    // Start with a small offset and grow it based on the edge index. But start with min offset of 5
+                    const offset = (edgeIndex % 2 === 0 ? 1 : -1) * (Math.floor(edgeIndex / 2) + 1) * minDistance;
+
+                    // Now we should apply the offset to the start and end points of the route, depending on the angle.
+
+                    if (route.length > 1) {
+                        const startIndex = 0;
+                        const endIndex = route.length - 1;
+
+                        /*
+                        
+                        Angle 0: The edge is horizontal and points to the right.
+                        Angle π/2 (90 degrees): The edge is vertical and points upwards.
+                        Angle π (180 degrees): The edge is horizontal and points to the left.
+                        Angle -π/2 (-90 degrees): The edge is vertical and points downwards.
+                        */
+                        function getDominantDirection(angle) {
+                            // Normalize angle between -π and π
+                            angle = ((angle + Math.PI) % (2 * Math.PI)) - Math.PI;
+
+                            if (angle >= -Math.PI / 4 && angle <= Math.PI / 4) {
+                                return 'right'; // Dominant direction is right
+                            } else if (angle > Math.PI / 4 && angle < 3 * Math.PI / 4) {
+                                return 'up'; // Dominant direction is up
+                            } else if (angle >= 3 * Math.PI / 4 || angle <= -3 * Math.PI / 4) {
+                                return 'left'; // Dominant direction is left
+                            } else if (angle > -3 * Math.PI / 4 && angle < -Math.PI / 4) {
+                                return 'down'; // Dominant direction is down
+                            }
+                            return null; // Default to null if something unexpected happens
+                        }
+                        let direction = getDominantDirection(angle);
+
+
+                        // As a result, offset along the y axis.
+                        if (direction === 'right' || direction === 'left') {
+                            route[startIndex].y += offset;
+                            route[endIndex].y += offset;
+                        }
+                        // else if direction is up or down, offset along the x axis
+                        else if (direction === 'up' || direction === 'down') {
+                            route[startIndex].x += offset;
+                            route[endIndex].x += offset;
+                        }
+
+                        // Ignore the other directions, if they do crop up.
+
+                        // And ensure it stays on the rectangle perimeter
+                        console.log("Adjusting points to rectangle perimeter");
+                        route[startIndex] = adjustPointToRectanglePerimeter(route[startIndex], d.source.innerBounds);
+                        route[endIndex] = adjustPointToRectanglePerimeter(route[endIndex], d.target.innerBounds);
+                    }
+
+                }
+
+
+                // Calculate the curvature for the current edge
+                var curvature = calculateCurvature(edges, d.source.id, d.target.id, d.id);
+                //Apply curvature to the control points (but this does not help with the direction)
+                route.forEach(function (point, index) {
+
+
+                    if (index > 0 && index < route.length - 1 && curvature !== 0) {
+
+                        // Adjust the control points based on the direction
+                        var offsetX = curvature * Math.abs(Math.sin(angle)) * distance;
+                        var offsetY = curvature * Math.abs(Math.cos(angle)) * distance;
+
+                        point.x += offsetX;
+                        point.y += offsetY;
+                    }
+                });
+
+                return lineFunction(route);
             });
 
-            return lineFunction(route);
-        });
-
-
-        // Function to check for overlap
-        function isOverlapping(label1, label2) {
-            const bbox1 = label1.getBBox();
-            const bbox2 = label2.getBBox();
-            return !(bbox2.x > bbox1.x + bbox1.width ||
+            // Function to check for overlap
+            function isOverlapping(label1, label2) {
+                const bbox1 = label1.getBBox();
+                const bbox2 = label2.getBBox();
+                return !(bbox2.x > bbox1.x + bbox1.width ||
                     bbox2.x + bbox2.width < bbox1.x ||
                     bbox2.y > bbox1.y + bbox1.height ||
                     bbox2.y + bbox2.height < bbox1.y);
-        }
+            }
 
 
-        // Update label positions after routing edges
-        linkGroups.select("text.linklabel")
-            .attr("x", function (d) {
-                const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
-                const pathLength = pathElement.getTotalLength();
-                const midpoint = pathElement.getPointAtLength(pathLength / 2);
-                return midpoint.x;
-            })
-            .attr("y", function (d) {
-                const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
-                const pathLength = pathElement.getTotalLength();
-                const midpoint = pathElement.getPointAtLength(pathLength / 2);
-                return midpoint.y;
-            })
-            .attr("text-anchor", "end")
-            .each(function(d, i, nodes) {
-                const currentLabel = this;
-                const overlapsWith = [];
-        
-                d3.selectAll("text.linklabel").each(function() {
-                    if (this !== currentLabel && isOverlapping(currentLabel, this)) {
-                        overlapsWith.push(this);
+            // Update label positions after routing edges
+            linkGroups.select("text.linklabel")
+                .attr("x", function (d) {
+                    const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
+                    const pathLength = pathElement.getTotalLength();
+                    const midpoint = pathElement.getPointAtLength(pathLength / 2);
+                    return midpoint.x;
+                })
+                .attr("y", function (d) {
+                    const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
+                    const pathLength = pathElement.getTotalLength();
+                    const midpoint = pathElement.getPointAtLength(pathLength / 2);
+                    return midpoint.y;
+                })
+                .attr("text-anchor", "end")
+                .each(function (d, i, nodes) {
+                    const currentLabel = this;
+                    const overlapsWith = [];
+
+                    d3.selectAll("text.linklabel").each(function () {
+                        if (this !== currentLabel && isOverlapping(currentLabel, this)) {
+                            overlapsWith.push(this);
+                        }
+                    });
+
+                    if (overlapsWith.length > 0) {
+                        minimizeOverlap(currentLabel, overlapsWith);
                     }
-                });
-        
-                if (overlapsWith.length > 0) {
-                    minimizeOverlap(currentLabel, overlapsWith);
-                }
-            })
-            .raise();
+                })
+                .raise();
 
-        /**** This bit ensures we zoom to fit ***/
-        const bbox = svg.node().getBBox();
-        const padding = 10; // Padding in pixels
+            /**** This bit ensures we zoom to fit ***/
+            const bbox = svg.node().getBBox();
+            const padding = 10; // Padding in pixels
 
-        const viewBox = [
-            bbox.x - padding,
-            bbox.y - padding,
-            bbox.width + 2 * padding,
-            bbox.height + 2 * padding
-        ].join(' ');
+            const viewBox = [
+                bbox.x - padding,
+                bbox.y - padding,
+                bbox.width + 2 * padding,
+                bbox.height + 2 * padding
+            ].join(' ');
 
 
-        const topSvg = d3.select("#svg");
-        topSvg.attr('viewBox', viewBox);
-        /*************************************/
+            const topSvg = d3.select("#svg");
+            topSvg.attr('viewBox', viewBox);
+            /*************************************/
 
-
-
-        function highlightRelation(relName) {
-            d3.selectAll(".link")
-                .filter(link => link.relName === relName)
-                .classed("highlighted", true);
-        }
-
-        // Get a set of all relNames
-        const relNames = new Set(edges.map(edge => edge.relName));
-        // For each relName, add a LI element to the ul with id "relationList", with the relName as text and hover event to highlight the relation,
-        // also a mouseout event to remove the highlight
-
-
-        // Maybe these should be checkboxes instead of just text?
-        // I wory about the removal of the highlight on uncheck
-        const relationList = d3.select("#relationList");
-        relationList.selectAll("li")
-            .data(Array.from(relNames))
-            .enter()
-            .append("li")
-            .attr("class", "list-group-item")
-            .text(d => d)
-            .on("mouseover", function (d) {
-                highlightRelation(d);
-                // Also make the text bold
-                d3.select(this).style("font-weight", "bold");
-
-            })
-            .on("mouseout", function (event, d) {
+            function highlightRelation(relName) {
                 d3.selectAll(".link")
-                    .classed("highlighted", false);
-                // Also make the text normal
-                d3.select(this).style("font-weight", "normal");
-            });
+                    .filter(link => link.relName === relName)
+                    .classed("highlighted", true);
+            }
+
+            // Get a set of all relNames
+            const relNames = new Set(edges.map(edge => edge.relName));
+            // For each relName, add a LI element to the ul with id "relationList", with the relName as text and hover event to highlight the relation,
+            // also a mouseout event to remove the highlight
 
 
-        // Stop measuring client-side execution time
-        const clientEndTime = performance.now();
-        const clientTime = clientEndTime - clientStartTime;
-        fetch('/timing', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                clientTime: clientTime
-            })
-        });
+            // Maybe these should be checkboxes instead of just text?
+            // I wory about the removal of the highlight on uncheck
+            const relationList = d3.select("#relationList");
+            relationList.selectAll("li")
+                .data(Array.from(relNames))
+                .enter()
+                .append("li")
+                .attr("class", "list-group-item")
+                .text(d => d)
+                .on("mouseover", function (d) {
+                    highlightRelation(d);
+                    // Also make the text bold
+                    d3.select(this).style("font-weight", "bold");
+                })
+                .on("mouseout", function (event, d) {
+                    d3.selectAll(".link")
+                        .classed("highlighted", false);
+                    // Also make the text normal
+                    d3.select(this).style("font-weight", "normal");
+                });
+        }
+        finally {
+
+
+            // Only record timing data for the first edge route
+            if (edgeRouteIdx === 1) {
+                // Stop measuring client-side execution time
+                const clientEndTime = performance.now();
+                const clientTime = clientEndTime - clientStartTime;
+                fetch('/timing', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        clientTime: clientTime
+                    })
+                });
+            }
+        }
     };
 
 
@@ -566,7 +570,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .attr("height", function (d) { return d.height; }) // Use node's height
         .attr("x", function (d) { return -d.width / 2; }) // Center the rectangle on the node's x
         .attr("y", function (d) { return -d.height / 2; }) // Center the rectangle on the node's y
-         .attr("stroke", function (d) { return d.color; }) // Outline color of the node
+        .attr("stroke", function (d) { return d.color; }) // Outline color of the node
         .attr("rx", 3) // Set the x-axis radius for rounded corners
         .attr("ry", 3) // Set the y-axis radius for rounded corners
         .attr("stroke-width", 1.5) // Adjust the stroke width as needed
@@ -585,7 +589,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         // I want to show some text on hover
         .append("title")
         .text(function (d) { return d.name; });
-        
+
     var label = svg.selectAll(".label")
         .data(nodes)
         .enter().append("text")
@@ -596,15 +600,15 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 return;
             }
 
-            let displayLabel = d.icon? "" : d.name;
+            let displayLabel = d.icon ? "" : d.name;
 
             // Append tspan for d.name
             d3.select(this).append("tspan")
                 .attr("x", 0) // Align with the parent text element
                 .attr("dy", "0em") // Start at the same vertical position
                 .style("font-weight", "bold")
-                .text( displayLabel );
-                    
+                .text(displayLabel);
+
             var y = 1; // Start from the next line for attributes
 
             // Append tspans for each attribute

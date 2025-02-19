@@ -65,7 +65,7 @@ async function loadExample(exampleName, numloads = 1) {
 
     for (let i = 0; i < numloads; i++) {
 
-        await delay(1000);
+        await delay(3000);
 
         const buttonExists = await page.$('#cola') !== null;
         
