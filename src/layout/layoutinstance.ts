@@ -618,7 +618,8 @@ export class LayoutInstance {
         const closures = this.getClosures();
 
         let constraints = closures.map((closure) => {
-            return this.applyClosureConstraint(g, layoutNodes, closure.fieldName, closure.direction, groups);
+            //return this.applyClosureConstraint(g, layoutNodes, closure.fieldName, closure.direction, groups);
+            return this.applyClosureConstraintWithoutACentroid(g, layoutNodes, closure.fieldName, closure.direction, groups);
         });
 
         return constraints.flat();
@@ -655,7 +656,7 @@ export class LayoutInstance {
                 id: `_${relName}_${fragment_num++}`,
                 attributes: {},
                 groups: [],
-                color: "transparent",
+                color: "black", // "transparent" (change back)
                 width: 10,
                 height: 10,
             };
@@ -697,6 +698,36 @@ export class LayoutInstance {
 
             let index = 0;
 
+            // There is actually more to do here. if they are laid out, the nodes must
+            // ALSO not be to the left or right one another.
+            // What this means is an alternative impl, where it has to do with 'x', 'y'.
+
+
+            // So in order:
+            /*
+
+
+                we have 5 nodes we need to arrange in a regular shape (with min distance 100)
+
+                - First lay them all out in reference to a centroid.
+
+
+                - Then in order, determine which nodes are to the left/right of one another.
+
+                // For instance, if we start from the left. The first node should be to the left of the second node, and NOT above it.
+
+                // But, this changes every 90 degrees. So the angle matters.
+
+                // If the angle is between 0 and 90: each node should be to the left and below the next node.
+                // If the angle is between 90 and 180: each node should be to the left of and above the next node.
+                // If the angle is between 180 and 270: each node should be to the right of and above the next node.
+                // If the angle is between 270 and 360: each node should be to the right of and below the next node.
+
+                // However, there are phase transitions right? Rather, we might want to maintain this for things like say, a square.
+
+            */
+
+
             relatedNodes.forEach(nodeId => {
 
                 const angle = index * angleStep;
@@ -718,6 +749,116 @@ export class LayoutInstance {
                 }
                 index++;
             });
+
+        });
+
+        return constraints;
+    }
+
+
+    applyClosureConstraintWithoutACentroid(g: Graph, layoutNodes: LayoutNode[], relName: string, direction: string, groups: LayoutGroup[]): LayoutConstraint[] {
+        let direction_mult: number = 0;
+        if (direction === "clockwise") {
+            direction_mult = 1;
+        }
+        else if (direction === "counterclockwise") {
+            direction_mult = -1; // IS THIS RIGHT OR THE OTHER WAY?
+        }
+
+        let relationEdges = g.edges().filter(edge => {
+            return this.getRelationName(g, edge) === relName;
+        });
+
+        if (relationEdges.length === 0) { return []; }
+
+        let relatedNodeFragments = this.orderNodesByEdges(relationEdges);
+        var fragment_num = 0;
+
+
+
+     
+
+        let constraints: LayoutConstraint[] = [];
+        relatedNodeFragments.forEach((relatedNodes) => {
+            const minRadius = 100; // Example fixed distance. This needs to change.
+
+            // One thing we dont have here is PREVENTING FRAGMENTS FROM OVERLAPPING
+
+
+            const angleStep = (direction_mult * 2 * Math.PI) / relatedNodes.length;
+            //let index = 0;
+
+
+
+
+            // There is actually more to do here. if they are laid out, the nodes must
+            // ALSO not be to the left or right one another.
+            // What this means is an alternative impl, where it has to do with 'x', 'y'.
+
+
+            // So in order:
+            /*
+
+
+                we have 5 nodes we need to arrange in a regular shape (with min distance 100)
+
+                - First lay them all out in reference to a centroid.
+
+
+                - Then in order, determine which nodes are to the left/right of one another.
+
+                // For instance, if we start from the left. The first node should be to the left of the second node, and NOT above it.
+
+                // But, this changes every 90 degrees. So the angle matters.
+
+                // If the angle is between 0 and 90: each node should be to the left and below the next node.
+                // If the angle is between 90 and 180: each node should be to the left of and above the next node.
+                // If the angle is between 180 and 270: each node should be to the right of and above the next node.
+                // If the angle is between 270 and 360: each node should be to the right of and below the next node.
+
+                // However, there are phase transitions right? Rather, we might want to maintain this for things like say, a square.
+
+            */
+
+            for (var i = 0; i < relatedNodes.length; i++) {
+
+                let next_node_idx = (i + 1) % relatedNodes.length;
+                let node = relatedNodes[i];
+                let next_node = relatedNodes[next_node_idx];
+
+
+                // Get the angle between the two nodes
+                let current_node_theta = i * angleStep;
+                let next_node_theta = next_node_idx * angleStep;
+
+                // This is a notional computation, where 
+                // we assume a circle of radius minRadius
+                let current_node_x = minRadius * Math.cos(current_node_theta);
+                let current_node_y = minRadius * Math.sin(current_node_theta);
+
+                let next_node_x = minRadius * Math.cos(next_node_theta);
+                let next_node_y = minRadius * Math.sin(next_node_theta);
+
+                // Now we need to determine the direction of the nodes
+                // relative to one another.
+                if(current_node_x > next_node_x) {
+                    constraints.push(this.leftConstraint(next_node, node, this.minSepWidth, layoutNodes));
+                }
+                // HMM. Should this be <= or just an else?
+                else {
+                    constraints.push(this.leftConstraint(node, next_node, this.minSepWidth, layoutNodes));
+                }
+
+                if(current_node_y > next_node_y) {
+                    constraints.push(this.topConstraint(node, next_node, this.minSepHeight, layoutNodes));
+                }
+                else {
+                    constraints.push(this.topConstraint(next_node, node, this.minSepHeight, layoutNodes));
+                }
+            }
+
+
+
 
         });
 
