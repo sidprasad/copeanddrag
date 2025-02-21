@@ -618,7 +618,6 @@ export class LayoutInstance {
         const closures = this.getClosures();
 
         let constraints = closures.map((closure) => {
-            //return this.applyClosureConstraint(g, layoutNodes, closure.fieldName, closure.direction, groups);
             return this.applyClosureConstraintWithoutACentroid(g, layoutNodes, closure.fieldName, closure.direction, groups);
         });
 
