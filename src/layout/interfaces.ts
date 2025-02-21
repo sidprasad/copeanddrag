@@ -21,6 +21,7 @@ interface LayoutNode {
     icon? : string;
     width : number;
     height : number;
+    mostSpecificType : string;
 }
 
 

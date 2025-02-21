@@ -590,6 +590,14 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .append("title")
         .text(function (d) { return d.name; });
 
+
+    // Add most specific type label
+    var mostSpecificTypeLabel = node.append("text")
+        .attr("class", "mostSpecificTypeLabel")
+        .style("fill", function (d) { return d.color; }) // Set the font color to d.color
+        .text(function (d) { return d.mostSpecificType; });
+
+
     var label = svg.selectAll(".label")
         .data(nodes)
         .enter().append("text")
@@ -601,6 +609,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             }
 
             let displayLabel = d.icon ? "" : d.name;
+
 
             // Append tspan for d.name
             d3.select(this).append("tspan")
@@ -694,6 +703,10 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             .attr("x", function (d) { return d.bounds.x; })
             .attr("y", function (d) { return d.bounds.y; });
 
+        mostSpecificTypeLabel
+            .attr("x", function (d) { return d.x - d.width/2 + 5; })
+            .attr("y", function (d) { return d.y - (d.height/2) + 10 ; })
+            .raise();
 
 
 

@@ -48,6 +48,13 @@
     cursor: move;
 }
 
+.mostSpecificTypeLabel {
+    font-family: system-ui;
+    font-size: 10px;
+    text-anchor: start;
+    cursor: move;
+}
+
 .icon {
     fill: transparent;
 }
