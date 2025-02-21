@@ -618,14 +618,14 @@ export class LayoutInstance {
         const closures = this.getClosures();
 
         let constraints = closures.map((closure) => {
-            return this.applyClosureConstraint(g, layoutNodes, closure.fieldName, closure.direction, groups);
+            return this.applyClosureConstraintWithoutACentroid(g, layoutNodes, closure.fieldName, closure.direction, groups);
         });
 
         return constraints.flat();
 
     }
 
-    applyClosureConstraint(g: Graph, layoutNodes: LayoutNode[], relName: string, direction: string, groups: LayoutGroup[]): LayoutConstraint[] {
+    applyClosureConstraintWithoutACentroid(g: Graph, layoutNodes: LayoutNode[], relName: string, direction: string, groups: LayoutGroup[]): LayoutConstraint[] {
         let direction_mult: number = 0;
         if (direction === "clockwise") {
             direction_mult = 1;
@@ -645,79 +645,89 @@ export class LayoutInstance {
 
 
 
-        let centroids: LayoutNode[] = [];
+     
 
         let constraints: LayoutConstraint[] = [];
         relatedNodeFragments.forEach((relatedNodes) => {
             const minRadius = 100; // Example fixed distance. This needs to change.
 
-            const fragmentCentroid: LayoutNode = {
-                id: `_${relName}_${fragment_num++}`,
-                attributes: {},
-                groups: [],
-                color: "transparent",
-                width: 10,
-                height: 10,
-            };
-            layoutNodes.push(fragmentCentroid);
-
-
-
-            /*
-                For each centroid, make sure it is 'n' to the right of the previous centroid.
-                Or 'n' distance from the previous centroid.
-            */
-            if (centroids.length > 0) {
-                var prevCentroid = centroids[centroids.length - 1];
-                const nodeHeightEstimate = 100;
-                const centroidDist = minRadius + nodeHeightEstimate;
-
-                // Push left and top constraints (down and right layout)
-                constraints.push(this.leftConstraint(prevCentroid.id, fragmentCentroid.id, centroidDist, layoutNodes));
-
-                constraints.push(this.topConstraint(prevCentroid.id, fragmentCentroid.id, centroidDist, layoutNodes));
-            }
-
-
-            // Then add it to the list.
-            centroids.push(fragmentCentroid);
-
-
-            // Check if the relatedNodes are all in a single group. If so, we should place the centroid in that group.
-            let group: LayoutGroup = groups.find((group) => relatedNodes.every((node) => group.nodeIds.includes(node)));
-            if (group) {
-                group.nodeIds.push(fragmentCentroid.id);
-            }
-
-
-            // Now keep the related nodes a fixed distance from the centroid
+            // One thing we dont have here is PREVENTING FRAGMENTS FROM OVERLAPPING
 
 
             const angleStep = (direction_mult * 2 * Math.PI) / relatedNodes.length;
+            //let index = 0;
 
-            let index = 0;
 
-            relatedNodes.forEach(nodeId => {
 
-                const angle = index * angleStep;
-                const x_gap = minRadius * Math.cos(angle);
-                const y_gap = minRadius * Math.sin(angle);
 
-                if (x_gap > 0) {
-                    constraints.push(this.leftConstraint(fragmentCentroid.id, nodeId, x_gap, layoutNodes));
+            // There is actually more to do here. if they are laid out, the nodes must
+            // ALSO not be to the left or right one another.
+            // What this means is an alternative impl, where it has to do with 'x', 'y'.
+
+
+            // So in order:
+            /*
+
+
+                we have 5 nodes we need to arrange in a regular shape (with min distance 100)
+
+                - First lay them all out in reference to a centroid.
+
+
+                - Then in order, determine which nodes are to the left/right of one another.
+
+                // For instance, if we start from the left. The first node should be to the left of the second node, and NOT above it.
+
+                // But, this changes every 90 degrees. So the angle matters.
+
+                // If the angle is between 0 and 90: each node should be to the left and below the next node.
+                // If the angle is between 90 and 180: each node should be to the left of and above the next node.
+                // If the angle is between 180 and 270: each node should be to the right of and above the next node.
+                // If the angle is between 270 and 360: each node should be to the right of and below the next node.
+
+                // However, there are phase transitions right? Rather, we might want to maintain this for things like say, a square.
+
+            */
+
+            for (var i = 0; i < relatedNodes.length; i++) {
+
+                let next_node_idx = (i + 1) % relatedNodes.length;
+                let node = relatedNodes[i];
+                let next_node = relatedNodes[next_node_idx];
+
+
+                // Get the angle between the two nodes
+                let current_node_theta = i * angleStep;
+                let next_node_theta = next_node_idx * angleStep;
+
+                // This is a notional computation, where 
+                // we assume a circle of radius minRadius
+                let current_node_x = minRadius * Math.cos(current_node_theta);
+                let current_node_y = minRadius * Math.sin(current_node_theta);
+
+                let next_node_x = minRadius * Math.cos(next_node_theta);
+                let next_node_y = minRadius * Math.sin(next_node_theta);
+
+                // Now we need to determine the direction of the nodes
+                // relative to one another.
+                if(current_node_x > next_node_x) {
+                    constraints.push(this.leftConstraint(next_node, node, this.minSepWidth, layoutNodes));
+                }
+                // HMM. Should this be <= or just an else?
+                else {
+                    constraints.push(this.leftConstraint(node, next_node, this.minSepWidth, layoutNodes));
+                }
+
+                if(current_node_y > next_node_y) {
+                    constraints.push(this.topConstraint(node, next_node, this.minSepHeight, layoutNodes));
                 }
                 else {
-                    constraints.push(this.leftConstraint(nodeId, fragmentCentroid.id, -x_gap, layoutNodes));
+                    constraints.push(this.topConstraint(next_node, node, this.minSepHeight, layoutNodes));
                 }
+            }
 
-                if (y_gap > 0) {
-                    constraints.push(this.topConstraint(fragmentCentroid.id, nodeId, y_gap, layoutNodes));
-                }
-                else {
-                    constraints.push(this.topConstraint(nodeId, fragmentCentroid.id, -y_gap, layoutNodes));
-                }
-                index++;
-            });
+
+
 
         });
 

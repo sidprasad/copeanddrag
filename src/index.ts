@@ -18,6 +18,9 @@ const express = require('express');
 const path = require('path');
 import * as fs from 'fs';
 
+// import axios
+const axios = require('axios');
+
 
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
@@ -46,7 +49,7 @@ function getPersistentUserId(): string {
 
 // This is a hack. I'm not sure
 // how to encode the version number.
-const version = "1.1.1";
+const version = "1.1.2";
 const userId = getPersistentUserId();
 const logger = new Logger(userId, version);
 
@@ -124,6 +127,8 @@ app.get('/', (req, res) => {
 
 });
 
+
+
 app.post('/', (req, res) => {
     const alloyDatum = req.body.alloydatum;
     const cope = req.body.cope;
@@ -131,6 +136,9 @@ app.post('/', (req, res) => {
 
     // Should this move elsewhere?
     var loggingEnabled = (req.body.loggingEnabled == undefined) ? true : (req.body.loggingEnabled.toLowerCase() === 'enabled');
+
+
+    const startTime = performance.now();
 
     try {
 
@@ -185,6 +193,10 @@ app.post('/', (req, res) => {
             "cope": cope,
             "error": error
         }
+
+        let endTime = performance.now();
+        var serverTime = endTime - startTime;
+        console.log(`Server time: ${serverTime} ms`);
 
         if (loggingEnabled) {
             logger.log_payload(payload, LogLevel.INFO, Event.CND_RUN);
@@ -364,6 +376,22 @@ const shutdown = () => {
         process.exit(1);
     }, 10000);
 };
+
+
+
+
+
+
+
+app.post('/timing', (req, res) => {
+    const clientTime = req.body.clientTime;
+
+    console.log(`Client time: ${clientTime} ms`);
+
+
+
+    res.json({ message: 'Client time received successfully' });
+});
 
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);

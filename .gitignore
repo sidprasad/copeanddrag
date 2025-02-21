@@ -37,3 +37,6 @@ coverage/
 .env.test
 .env.test.local
 
+# Ignore the __pycache__ directory in benchmarking
+__pycache__/
+bm-logs/
