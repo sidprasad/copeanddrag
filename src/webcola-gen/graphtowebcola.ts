@@ -9,7 +9,8 @@ type NodeWithMetadata = Node &
   { id: string, 
     attributes: Record<string, string[]>, 
     color: string 
-    icon: string
+    icon: string,
+    mostSpecificType: string
   };
 
 
@@ -157,7 +158,8 @@ export class WebColaLayout {
       x: x,
       y: y,
       icon: node.icon,
-      fixed: fixed
+      fixed: fixed,
+      mostSpecificType: node.mostSpecificType
     }
   }
 

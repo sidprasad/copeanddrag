@@ -380,6 +380,14 @@ export class LayoutInstance {
     }
 
 
+    private getMostSpecificType(node: string, a: AlloyInstance): string {
+
+        let type = getAtomType(a, node);
+        let allTypes = type.types;
+        let mostSpecificType = allTypes[0];
+        return mostSpecificType;
+    }
+
 
     private colorNodesByType(g: Graph, a: AlloyInstance): Record<string, string> {
 
@@ -523,6 +531,8 @@ export class LayoutInstance {
             const nodeHeight = this._sigIcons[type.id] ? this._sigIcons[type.id].height : this.DEFAULT_NODE_HEIGHT;
             const nodeWidth = this._sigIcons[type.id] ? this._sigIcons[type.id].width : this.DEFAULT_NODE_WIDTH;
 
+
+            const mostSpecificType = this.getMostSpecificType(nodeId, a);
             // TODO: ensure that iconPath exists
 
 
@@ -539,7 +549,8 @@ export class LayoutInstance {
                 attributes: nodeAttributes,
                 icon: iconPath,
                 height: nodeHeight,
-                width: nodeWidth
+                width: nodeWidth,
+                mostSpecificType: mostSpecificType
             };
         });
 
