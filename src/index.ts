@@ -65,6 +65,9 @@ function getFormContents(req: any) {
     }
 
     const cope = req.body.cope;
+
+
+    
     /*
         Get ALL form elements ending with _projection
     */
