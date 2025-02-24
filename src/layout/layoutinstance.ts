@@ -535,7 +535,7 @@ export class LayoutInstance {
             const mostSpecificType = this.getMostSpecificType(nodeId, a);
             // TODO: ensure that iconPath exists
 
-
+            // Should we fallback to a default icon?
 
             let color = colors[nodeId];
             let nodeGroups = groups

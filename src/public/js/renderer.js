@@ -588,7 +588,11 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .attr("y", function (d) { return -d.height * 0.5; }) // Center the icon vertically
         // I want to show some text on hover
         .append("title")
-        .text(function (d) { return d.name; });
+        .text(function (d) { return d.name; })
+        .on("error", function (d) {
+            d3.select(this).attr("xlink:href", "img/default.png"); // Replace with a default icon
+            console.error(`Failed to load icon for node ${d.id}: ${d.icon}`);
+        });
 
 
     // Add most specific type label
