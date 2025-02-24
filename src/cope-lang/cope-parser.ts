@@ -1,4 +1,4 @@
-import {DEFAULT_LAYOUT, LayoutSpec, DirectionalRelation, SigDirection, ClusterRelation, AttributeDefinition, SigColor, ProjectionDefinition, ClosureDefinition, IconDefinition} from '../layout/layoutspec'; 
+import { DEFAULT_LAYOUT, LayoutSpec, DirectionalRelation, SigDirection, ClusterRelation, AttributeDefinition, SigColor, ProjectionDefinition, ClosureDefinition, IconDefinition } from '../layout/layoutspec';
 
 // Import js-yaml
 import * as yaml from 'js-yaml';
@@ -51,15 +51,12 @@ directives:
 
 */
 
-export function copeToLayoutSpec(s : string) : LayoutSpec {
-
+export function copeToLayoutSpec(s: string): LayoutSpec {
 
     if (!s) {
         return DEFAULT_LAYOUT;
     }
 
-    // s is a string in YAML format (as above)
-    // I want to convert it to a LayoutSpec object, piece by piece.
 
     // First, parse the YAML
     let parsed = yaml.load(s);
@@ -80,13 +77,16 @@ export function copeToLayoutSpec(s : string) : LayoutSpec {
 }
     */
 
+
+
+
     // Now extract the constraints and directives
     let constraints = parsed.constraints;
     let directives = parsed.directives;
 
 
 
-    let layoutSpec : LayoutSpec = {
+    let layoutSpec: LayoutSpec = {
         fieldDirections: [],
         sigDirections: [],
         groupBy: [],
@@ -99,66 +99,77 @@ export function copeToLayoutSpec(s : string) : LayoutSpec {
     };
 
     if (constraints) {
-        let {closures, clusterRelations, fieldDirectionConstraints, sigOrientationConstraints} = extractConstraints(constraints);
-        layoutSpec.closures = closures;
-        layoutSpec.groupBy = clusterRelations;
-        layoutSpec.fieldDirections = fieldDirectionConstraints;
-        layoutSpec.sigDirections = sigOrientationConstraints;
+        try {
+            let { closures, clusterRelations, fieldDirectionConstraints, sigOrientationConstraints } = extractConstraints(constraints);
+            layoutSpec.closures = closures;
+            layoutSpec.groupBy = clusterRelations;
+            layoutSpec.fieldDirections = fieldDirectionConstraints;
+            layoutSpec.sigDirections = sigOrientationConstraints;
+        }
+        catch (e) {
+            throw new Error("Error parsing Cope and Drag constraints block." + e);
+        }
     }
-    
-    if (directives) {
 
-        let {sigIcons, sigColors, attributeFields, sigProjections, hideDisconnected, hideDisconnectedBuiltIns} = extractDirectives(directives);
-        layoutSpec.sigIcons = sigIcons;
-        layoutSpec.sigColors = sigColors;
-        layoutSpec.attributeFields = attributeFields;
-        layoutSpec.projections = sigProjections;
-        layoutSpec.hideDisconnected = hideDisconnected;
-        layoutSpec.hideDisconnectedBuiltIns = hideDisconnectedBuiltIns;
+    if (directives) {
+        try {
+            let { sigIcons, sigColors, attributeFields, sigProjections, hideDisconnected, hideDisconnectedBuiltIns } = extractDirectives(directives);
+            layoutSpec.sigIcons = sigIcons;
+            layoutSpec.sigColors = sigColors;
+            layoutSpec.attributeFields = attributeFields;
+            layoutSpec.projections = sigProjections;
+            layoutSpec.hideDisconnected = hideDisconnected;
+            layoutSpec.hideDisconnectedBuiltIns = hideDisconnectedBuiltIns;
+        }
+
+        catch (e) {
+            throw new Error("Error parsing Cope and Drag directives block." + e);
+        }
     }
     return layoutSpec;
 }
 
 
-function extractConstraints(constraints : any[]) : any {
+function extractConstraints(constraints: any[]): any {
 
 
-    let closures : ClosureDefinition[] = constraints.filter(c => c.cyclic)
-                                    .map(c => {
-                                        return {
-                                            fieldName: c.cyclic.field,
-                                            direction: c.cyclic.direction || "clockwise"
-                                        }
-                                    });
+    let closures: ClosureDefinition[] = constraints.filter(c => c.cyclic)
+        .map(c => {
+            return {
+                fieldName: c.cyclic.field,
+                direction: c.cyclic.direction || "clockwise"
+            }
+        });
 
-    let clusterRelations : ClusterRelation[] = constraints.filter(c => c.group)
+    let clusterRelations: ClusterRelation[] = constraints.filter(c => c.group)
         .map(c => {
             return {
                 fieldName: c.group.field,
                 groupOn: c.group.target
             }
-        });                     
+        });
 
-    let orientationConstraints = constraints.filter(c => c.orientation).map( c => c.orientation);
-    let fieldDirectionConstraints : DirectionalRelation[] = orientationConstraints.filter(c => c.field)
-                                    .map(c => {
-                                        return {
-                                            fieldName: c.field,
-                                            directions: c.directions
-                                        }});
+    let orientationConstraints = constraints.filter(c => c.orientation).map(c => c.orientation);
+    let fieldDirectionConstraints: DirectionalRelation[] = orientationConstraints.filter(c => c.field)
+        .map(c => {
+            return {
+                fieldName: c.field,
+                directions: c.directions
+            }
+        });
 
 
-    let sigOrientationConstraints : SigDirection[] = orientationConstraints.filter(c => c.sigs)
-                                        .map(c => {
+    let sigOrientationConstraints: SigDirection[] = orientationConstraints.filter(c => c.sigs)
+        .map(c => {
 
-                                            let source = c.sigs[0];
-                                            let target = c.sigs[1];
-                                            return {
-                                                sigName: source,
-                                                target: target,
-                                                directions: c.directions
-                                            }
-                                        });
+            let source = c.sigs[0];
+            let target = c.sigs[1];
+            return {
+                sigName: source,
+                target: target,
+                directions: c.directions
+            }
+        });
 
 
     return {
@@ -169,7 +180,7 @@ function extractConstraints(constraints : any[]) : any {
     }
 }
 
-function extractDirectives(directives : any[]) : any {
+function extractDirectives(directives: any[]): any {
 
     // Need to parse these
 
@@ -182,36 +193,40 @@ function extractDirectives(directives : any[]) : any {
     let colors = directives.filter(d => d.color).map(d => d.color);
     let flags = directives.filter(d => d.flag).map(d => d.flag);
 
-    let sigIcons : IconDefinition[] = icons.map(d => {
+    let sigIcons: IconDefinition[] = icons.map(d => {
         return {
             sigName: d.sig,
             path: d.icon.path,
             height: d.icon.height,
             width: d.icon.width
-        }});
-    
-    let sigColors : SigColor[] = colors
-                                .map(d => {
-                                    return {
-                                        sigName: d.sig,
-                                        color: d.value
-                                    }});
-    
-    let attributeFields : AttributeDefinition[] = attributes
+        }
+    });
+
+    let sigColors: SigColor[] = colors
+        .map(d => {
+            return {
+                sigName: d.sig,
+                color: d.value
+            }
+        });
+
+    let attributeFields: AttributeDefinition[] = attributes
         .map(d => {
             return {
                 fieldName: d.field
-            }});
+            }
+        });
 
-    let sigProjections : ProjectionDefinition[] = projections
+    let sigProjections: ProjectionDefinition[] = projections
         .map(d => {
             return {
                 sigName: d.sig
-            }});
-    
+            }
+        });
+
     let hideDisconnected = flags.includes("hideDisconnected");
     let hideDisconnectedBuiltIns = flags.includes("hideDisconnectedBuiltIns");
-    
+
 
     return {
         sigIcons,
