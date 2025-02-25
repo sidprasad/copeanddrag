@@ -222,7 +222,7 @@ app.post('/', (req, res) => {
         source_content: "", //HACK
         sourceFileName: "",
         instAsString,
-        errors: error,
+        errors: error.replace(/\n/g, "<br>"),
         loggingEnabled
     });
 });

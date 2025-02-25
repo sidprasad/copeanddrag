@@ -4,6 +4,11 @@ import { DEFAULT_LAYOUT, LayoutSpec, DirectionalRelation, SigDirection, ClusterR
 import * as yaml from 'js-yaml';
 
 
+
+const ORIENTATION_DIRECTIONS = ["above", "below", "left", "right", "directlyAbove", "directlyBelow", "directlyLeft", "directlyRight"];
+const CYCLIC_DIRECTIONS = ["clockwise", "counterclockwise"];
+const GROUP_TARGETS = ["domain", "range"];
+
 /*
 
 constraints:
@@ -107,7 +112,7 @@ export function copeToLayoutSpec(s: string): LayoutSpec {
             layoutSpec.sigDirections = sigOrientationConstraints;
         }
         catch (e) {
-            throw new Error("Error parsing Cope and Drag constraints block." + e);
+            throw new Error("Error parsing constraints.\n" + e.message);
         }
     }
 
@@ -123,7 +128,7 @@ export function copeToLayoutSpec(s: string): LayoutSpec {
         }
 
         catch (e) {
-            throw new Error("Error parsing Cope and Drag directives block." + e);
+            throw new Error("Error parsing directives.\n" + e.message);
         }
     }
     return layoutSpec;
@@ -170,6 +175,41 @@ function extractConstraints(constraints: any[]): any {
                 directions: c.directions
             }
         });
+
+
+    //////
+
+    for (let c of fieldDirectionConstraints) {
+        for (let d of c.directions) {
+            if (!ORIENTATION_DIRECTIONS.includes(d)) {
+                throw new Error("Invalid orientation direction: " + d + " for field " + c.fieldName + ".\nValid directions are: " + ORIENTATION_DIRECTIONS.join(", "));
+            }
+        }
+    }
+
+    for (let c of sigOrientationConstraints) {
+        for (let d of c.directions) {
+            if (!ORIENTATION_DIRECTIONS.includes(d)) {
+                throw new Error("Invalid orientation direction: " + d + " for sig " + c.sigName + ".\nValid directions are: " + ORIENTATION_DIRECTIONS.join(", "));
+            }
+        }
+    }
+
+    for (let c of closures) {
+        if (!CYCLIC_DIRECTIONS.includes(c.direction)) {
+            throw new Error("Invalid cyclic direction: " + c.direction + " for field " + c.fieldName + ".\nValid directions are: " + CYCLIC_DIRECTIONS.join(", "));
+        }
+    }
+
+    // Cluster relations
+    for (let c of clusterRelations) {
+        if (!GROUP_TARGETS.includes(c.groupOn)) {
+            throw new Error("Invalid group target: " + c.groupOn + " for field " + c.fieldName + ".\nValid targets are: " + GROUP_TARGETS.join(", "));
+        }
+
+    }
+
+    //////
 
 
     return {
