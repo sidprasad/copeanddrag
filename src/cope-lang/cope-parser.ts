@@ -1,3 +1,4 @@
+import { group } from 'console';
 import { DEFAULT_LAYOUT, LayoutSpec, DirectionalRelation, SigDirection, ClusterRelation, AttributeDefinition, SigColor, ProjectionDefinition, ClosureDefinition, IconDefinition } from '../layout/layoutspec';
 
 // Import js-yaml
@@ -148,9 +149,11 @@ function extractConstraints(constraints: any[]): any {
 
     let clusterRelations: ClusterRelation[] = constraints.filter(c => c.group)
         .map(c => {
+            let groupOn = c.group.target || "range";
+
             return {
                 fieldName: c.group.field,
-                groupOn: c.group.target
+                groupOn: groupOn
             }
         });
 
@@ -170,9 +173,7 @@ function extractConstraints(constraints: any[]): any {
             let source = c.sigs[0];
             let target = c.sigs[1];
 
-            if (!target) {
-                target = "range";
-            }
+
 
             return {
                 sigName: source,
