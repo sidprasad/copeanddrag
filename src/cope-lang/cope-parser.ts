@@ -169,6 +169,11 @@ function extractConstraints(constraints: any[]): any {
 
             let source = c.sigs[0];
             let target = c.sigs[1];
+
+            if (!target) {
+                target = "range";
+            }
+
             return {
                 sigName: source,
                 target: target,
