@@ -10,40 +10,6 @@ const dy_for_linespacing = 5; // Adjust for spacing between lines
 //////////
 
 
-// I wonder, can we first run this WITHOUT grouping
-// and then a second run WITH grouping
-
-
-function areNodesOverlapping(n1, n2) {
-
-
-    let b1 = n1.innerBounds;
-    let b2 = n2.innerBounds;
-
-    let n1_above_n2 = b1.Y < b2.y;
-    let n1_below_n2 = b1.y > b2.Y;
-    let n1_left_of_n2 = b1.X < b2.x;
-    let n1_right_of_n2 = b1.x > b2.X;
-
-    let verticalOverlap = !n1_above_n2 && !n1_below_n2;
-    let horizontalOverlap = !n1_left_of_n2 && !n1_right_of_n2;
-   
-    return verticalOverlap || horizontalOverlap;
-}
-
-function findOverlappingNodes(nodes) {
-
-    let overlappingNodes = [];
-    for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-            console.log("Checking overlap between", nodes[i].__data__, nodes[j].__data__);
-            if (areNodesOverlapping(nodes[i].__data__, nodes[j].__data__)) {
-                overlappingNodes.push([nodes[i], nodes[j]]);
-            }
-        }
-    }
-    return overlappingNodes;
-}
 
 
 
@@ -192,7 +158,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .links(edges)
         .constraints(constraints)
         .groups(groups)
-        .groupCompactness(0.1)
+        .groupCompactness(1e-3)
         .symmetricDiffLinkLengths(min_sep + default_node_width);
 
 
@@ -204,7 +170,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     var routeEdges = function () {
         
         try {
-            colaLayout.prepareEdgeRouting(margin );
+            colaLayout.prepareEdgeRouting(margin / 3);
             console.log("Routing edges for the nth time", ++edgeRouteIdx);
 
             // What I want to do is change the angle based on the number of edges between the same nodes
@@ -826,21 +792,5 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         initialUserConstraintIterations,
         initialAllConstraintsIterations,
         gridSnapIterations)
-        .on("end", 
-            () => {
-
-
-                // const nodeElements = svg.selectAll(".node").nodes();
-                // let overlapping = findOverlappingNodes(nodeElements);
-                // console.log("Overlapping nodes", overlapping);
-
-                routeEdges();
-
-                //if(edgeRouteIdx <= 1) {
-                    // Check if any nodes are overlapping
-
-                //}
-
-            }
-        );
+        .on("end", routeEdges);
 }
