@@ -1,14 +1,49 @@
 
+
 /** COnstants */
 const initialUnconstrainedIterations = 10; //unconstrained initial layout iterations
 const initialUserConstraintIterations = 100; // initial layout iterations with user-specified constraints
-const initialAllConstraintsIterations = 50; // initial layout iterations with all constraints including non-overlap
+const initialAllConstraintsIterations = 1000; // initial layout iterations with all constraints including non-overlap
 const gridSnapIterations = 5; // iterations of "grid snap", which pulls nodes towards grid cell centers - grid of size node[0].width - only really makes sense if all nodes have the same width and heigh
 const margin = 10;
 const dy_for_linespacing = 5; // Adjust for spacing between lines
 //////////
 
 
+// I wonder, can we first run this WITHOUT grouping
+// and then a second run WITH grouping
+
+
+function areNodesOverlapping(n1, n2) {
+
+
+    let b1 = n1.innerBounds;
+    let b2 = n2.innerBounds;
+
+    let n1_above_n2 = b1.Y < b2.y;
+    let n1_below_n2 = b1.y > b2.Y;
+    let n1_left_of_n2 = b1.X < b2.x;
+    let n1_right_of_n2 = b1.x > b2.X;
+
+    let verticalOverlap = !n1_above_n2 && !n1_below_n2;
+    let horizontalOverlap = !n1_left_of_n2 && !n1_right_of_n2;
+   
+    return verticalOverlap || horizontalOverlap;
+}
+
+function findOverlappingNodes(nodes) {
+
+    let overlappingNodes = [];
+    for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+            console.log("Checking overlap between", nodes[i].__data__, nodes[j].__data__);
+            if (areNodesOverlapping(nodes[i].__data__, nodes[j].__data__)) {
+                overlappingNodes.push([nodes[i], nodes[j]]);
+            }
+        }
+    }
+    return overlappingNodes;
+}
 
 
 
@@ -141,7 +176,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     var svg = d3.select(".zoomable");
 
     var colaLayout = cola.d3adaptor(d3)
-        .convergenceThreshold(1e-2)
+        .convergenceThreshold(1e-3)
         .avoidOverlaps(true)
         .handleDisconnected(true)
         .size([width, height]);
@@ -157,7 +192,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .links(edges)
         .constraints(constraints)
         .groups(groups)
-        .groupCompactness(1e-3)
+        .groupCompactness(0.1)
         .symmetricDiffLinkLengths(min_sep + default_node_width);
 
 
@@ -169,7 +204,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     var routeEdges = function () {
         
         try {
-            colaLayout.prepareEdgeRouting(margin / 3);
+            colaLayout.prepareEdgeRouting(margin );
             console.log("Routing edges for the nth time", ++edgeRouteIdx);
 
             // What I want to do is change the angle based on the number of edges between the same nodes
@@ -199,17 +234,22 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             link.attr("d", function (d, i) {
 
                 let n = d.id;
-                const srcNode = d.source;
-                const tgtNode = d.target;
-  
-
 
                 try {
                     var route = colaLayout.routeEdge(d);
                 } catch (e) {
-                    console.error(e);
-                    console.log("Error routing edge", srcNode, srcElement, tgtNode, tgtElement);
-                    return;
+                    //console.error(e);
+
+                    console.log("Error routing edge", d.id, `from ${d.source.id} to ${d.target.id}`);
+                    //alert(`Error routing edge. You may have to click and drag ${d.target.id} or ${d.source.id} to resolve layout.`)
+                    
+                    let runtimeMessages = document.getElementById("runtime_messages");
+                    let dismissableAlert = document.createElement("div");
+                    dismissableAlert.className = "alert alert-danger alert-dismissible fade show";
+                    dismissableAlert.setAttribute("role", "alert");
+                    dismissableAlert.innerHTML = `Runtime (WebCola) error when laying out an edge from ${d.source.id} to ${d.target.id}. You may have to click and drag these nodes slightly nodes to un-stick layout.`;
+                    runtimeMessages.appendChild(dismissableAlert);
+                    return lineFunction([{ x: d.source.x, y: d.source.y }, { x: d.target.x, y: d.target.y }]);
                 }
 
                 // This is a special case for group edges
@@ -786,5 +826,21 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         initialUserConstraintIterations,
         initialAllConstraintsIterations,
         gridSnapIterations)
-        .on("end", routeEdges);
+        .on("end", 
+            () => {
+
+
+                // const nodeElements = svg.selectAll(".node").nodes();
+                // let overlapping = findOverlappingNodes(nodeElements);
+                // console.log("Overlapping nodes", overlapping);
+
+                routeEdges();
+
+                //if(edgeRouteIdx <= 1) {
+                    // Check if any nodes are overlapping
+
+                //}
+
+            }
+        );
 }
