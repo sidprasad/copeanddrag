@@ -204,10 +204,9 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 try {
                     var route = colaLayout.routeEdge(d);
                 } catch (e) {
-                    //console.error(e);
 
                     console.log("Error routing edge", d.id, `from ${d.source.id} to ${d.target.id}`);
-                    //alert(`Error routing edge. You may have to click and drag ${d.target.id} or ${d.source.id} to resolve layout.`)
+                    console.error(e);
                     
                     let runtimeMessages = document.getElementById("runtime_messages");
                     let dismissableAlert = document.createElement("div");
