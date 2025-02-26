@@ -194,12 +194,7 @@ export class WebColaLayout {
 
       let distance = constraint.minDistance + (node1.width / 2) + (node2.width / 2);
       
-      
       return this.leftConstraint(this.getNodeIndex(constraint.left.id), this.getNodeIndex(constraint.right.id), distance);
-
-
-
-
     }
 
     if (isTopConstraint(constraint)) {
