@@ -127,8 +127,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     }
 
     function getNodeIndex(n) {
-
-        // Check if n is of type string
         const nodeId = typeof n === 'string' ? n : n.id;
         return nodes.findIndex(node => node.id === nodeId);
     }
@@ -139,27 +137,20 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         node.name = node.id;
     });
 
-
-    var color = d3.scaleOrdinal(d3.schemeCategory20);
     var svg_top = d3.select("#svg").call(zoom);
     var svg = d3.select(".zoomable");
 
     var colaLayout = cola.d3adaptor(d3)
-        //.convergenceThreshold(0.1) // TODO: What should we do here?
+        .convergenceThreshold(1e-2)
         .avoidOverlaps(true)
         .handleDisconnected(true)
         .size([width, height]);
 
     const min_sep = 50;
-    const default_node_width = 70;
-
-
+    const default_node_width = 100;
 
     // TODO: Figure out WHEN to use flowLayout and when not to use it.
     // I think having directly above/ below makes it impossible to have flow layout 'y' *unless we have heirarchy*
-
-    // TODO: Need to think about this
-
 
     colaLayout
         .nodes(nodes)
@@ -169,23 +160,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .groupCompactness(1e-3)
         .symmetricDiffLinkLengths(min_sep + default_node_width);
 
-    // const anyCnD = (constraints.length > 0) || (groups.length > 0);
-
-    // if (!anyCnD) {
-    //     colaLayout
-    //         .flowLayout("y", 100);
-    // }
-
-    // colaLayout
-    //     .nodes(nodes)
-    //     .links(edges)
-    //     .constraints(constraints)
-    //     .groups(groups)
-    //     .groupCompactness(1e-3)
-    //     //.flowLayout("y", 100) // Adding this in causes an issue in terms of layout. This is in line with the DAGRE estimate
-    //     //.symmetricDiffLinkLengths(min_sep + default_node_width, 0.1);
-    //     //.jaccardLinkLengths(LINK_DISTANCE, 2);
-    //      // I *think* this is minimum link distance
 
     var lineFunction = d3.line()
         .x(function (d) { return d.x; })
@@ -224,18 +198,20 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
             link.attr("d", function (d, i) {
 
-                var route = colaLayout.routeEdge(d);
-
-
-                // Get all edges between the two nodes, regardless of direction
-                const allEdgesBetweenSourceAndTarget = edges.filter(edge => {
-                    return (edge.source.id == d.source.id && edge.target.id == d.target.id) ||
-                        (edge.source.id == d.target.id && edge.target.id == d.source.id);
-                });
-
-
-
                 let n = d.id;
+                const srcNode = d.source;
+                const tgtNode = d.target;
+  
+
+
+                try {
+                    var route = colaLayout.routeEdge(d);
+                } catch (e) {
+                    console.error(e);
+                    console.log("Error routing edge", srcNode, srcElement, tgtNode, tgtElement);
+                    return;
+                }
+
                 // This is a special case for group edges
                 if (n.startsWith("_g_")) {
                     let source = d.source;
@@ -322,7 +298,12 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 }
 
 
-
+                // Get all edges between the two nodes, regardless of direction
+                const allEdgesBetweenSourceAndTarget = edges.filter(edge => {
+                    return (edge.source.id == d.source.id && edge.target.id == d.target.id) ||
+                        (edge.source.id == d.target.id && edge.target.id == d.source.id);
+                });
+                
 
                 // If there are only two points in the route, get the midpoint of the route and add it to the route
                 if (route.length === 2) {
@@ -602,9 +583,11 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .text(function (d) { return d.mostSpecificType; });
 
 
-    var label = svg.selectAll(".label")
-        .data(nodes)
-        .enter().append("text")
+    var label = 
+        //svg.selectAll(".label")
+        //.data(nodes)
+        node.append("text")
+        //.enter().append("text")
         .attr("class", "label")
         .each(function (d) {
 
@@ -744,15 +727,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     let potentialTargetGroups = getContainingGroups(groups, target);
                     let potentialSourceGroups = getContainingGroups(groups, source);
 
-
                     let targetGroup = potentialTargetGroups.find(group => group.keyNode === sourceIndex);
                     let sourceGroup = potentialSourceGroups.find(group => group.keyNode === targetIndex);
-
-                    /*
-
-                        group has bounds, inner bounds AND padding.
-
-                    */
 
                     if (sourceGroup) {
                         source = sourceGroup;
