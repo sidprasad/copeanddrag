@@ -732,16 +732,9 @@ export class LayoutInstance {
                     constraints.push(this.topConstraint(next_node, node, this.minSepHeight, layoutNodes));
                 }
             }
-
-
-
-
         });
-
         return constraints;
     }
-
-
 
     applySigConstraints(ai: AlloyInstance, layoutNodes: LayoutNode[]): LayoutConstraint[] {
 
@@ -911,7 +904,7 @@ export class LayoutInstance {
 
 
 
-    public leftConstraint(leftId: string, rightId: string, minDistance: number, layoutNodes: LayoutNode[]): LeftConstraint {
+    private leftConstraint(leftId: string, rightId: string, minDistance: number, layoutNodes: LayoutNode[]): LeftConstraint {
 
         let left = layoutNodes.find((node) => node.id === leftId);
         let right = layoutNodes.find((node) => node.id === rightId);
@@ -919,7 +912,7 @@ export class LayoutInstance {
         return { left: left, right: right, minDistance: minDistance };
     }
 
-    public topConstraint(topId: string, bottomId: string, minDistance: number, layoutNodes: LayoutNode[]): TopConstraint {
+    private topConstraint(topId: string, bottomId: string, minDistance: number, layoutNodes: LayoutNode[]): TopConstraint {
 
         let top = layoutNodes.find((node) => node.id === topId);
         let bottom = layoutNodes.find((node) => node.id === bottomId);
