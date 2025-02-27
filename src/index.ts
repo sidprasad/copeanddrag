@@ -33,7 +33,7 @@ app.set('view engine', 'ejs');
 
 // This is a hack. I'm not sure
 // how to encode the version number.
-const version = "1.1.4";
+const version = "1.2.0";
 
 const secretKey = "cope-and-drag-logging-key";
 
