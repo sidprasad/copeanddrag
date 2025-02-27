@@ -12,6 +12,7 @@ import { generateGraph } from '../alloy-graph';
 
 import { ColorPicker } from './colorpicker';
 
+const UNIVERSAL_TYPE = "univ";
 
 
 export class LayoutInstance {
@@ -390,7 +391,7 @@ export class LayoutInstance {
 
     private getNodeTypes(node: string, a: AlloyInstance): string[] {
         let type = getAtomType(a, node);
-        let allTypes = type.types;
+        let allTypes = type.types.concat(UNIVERSAL_TYPE);
         return allTypes;
     }
 
@@ -657,10 +658,10 @@ export class LayoutInstance {
     applyClosureConstraint(g: Graph, layoutNodes: LayoutNode[], relName: string, direction: string, appliesTo: string[]): LayoutConstraint[] {
         let direction_mult: number = 0;
         if (direction === "clockwise") {
-            direction_mult = 1;
+            direction_mult = -1;
         }
         else if (direction === "counterclockwise") {
-            direction_mult = -1; // IS THIS RIGHT OR THE OTHER WAY?
+            direction_mult = 1; // IS THIS RIGHT OR THE OTHER WAY?
         }
 
         // And now we filter out unrelated nodes here I think?

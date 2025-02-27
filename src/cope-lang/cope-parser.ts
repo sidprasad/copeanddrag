@@ -165,7 +165,7 @@ function extractConstraints(constraints: any[]): any {
     let orientationConstraints = constraints.filter(c => c.orientation).map(c => c.orientation);
     let fieldDirectionConstraints: DirectionalRelation[] = orientationConstraints.filter(c => c.field)
         .map(c => {
-            let appliesTo = c.cyclic.appliesTo || DEFAULT_FIELD_APPLIES_TO;
+            let appliesTo = c.appliesTo || DEFAULT_FIELD_APPLIES_TO;
             return {
                 fieldName: c.field,
                 directions: c.directions,
