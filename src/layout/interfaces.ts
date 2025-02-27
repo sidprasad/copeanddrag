@@ -1,3 +1,4 @@
+import { types } from "util";
 
 
 export interface LayoutGroup {
@@ -20,6 +21,7 @@ interface LayoutNode {
     width : number;
     height : number;
     mostSpecificType : string;
+    types : string[];
 }
 
 

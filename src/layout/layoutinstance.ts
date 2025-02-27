@@ -4,7 +4,7 @@ import { AlloyInstance, getAtomType, getInstanceTypes } from '../alloy-instance'
 import { isBuiltin, AlloyType } from '../alloy-instance/src/type';
 import { AlloyAtom } from '../alloy-instance/src/atom';
 import { applyProjections } from '../alloy-instance/src/projection';
-import { IconDefinition } from './layoutspec';
+import { DirectionalRelation, FieldDirection, IconDefinition } from './layoutspec';
 import { LayoutSpec, ClosureDefinition, ClusterRelation, parseLayoutSpec, SigDirection } from './layoutspec';
 import { LayoutNode, LayoutEdge, LayoutConstraint, InstanceLayout, LeftConstraint, TopConstraint, AlignmentConstraint, LayoutGroup } from './interfaces';
 
@@ -12,6 +12,7 @@ import { generateGraph } from '../alloy-graph';
 
 import { ColorPicker } from './colorpicker';
 
+const UNIVERSAL_TYPE = "univ";
 
 
 export class LayoutInstance {
@@ -62,15 +63,15 @@ export class LayoutInstance {
     }
 
 
-    public checkConstraintConsistency() : { consistent: boolean, error : string} {
+    public checkConstraintConsistency(): { consistent: boolean, error: string } {
         let sigDirections = this._layoutSpec.sigDirections || [];
         let fieldDirections = this._layoutSpec.fieldDirections || [];
-        
+
         // We will have to get to this at some point. Hopefully the parser 
 
 
 
-        function areDirectionsConsistent(directions : string[]) : boolean {
+        function areDirectionsConsistent(directions: string[]): boolean {
 
             // If "above" and  "below" are present, return false
             if (directions.includes("above") && directions.includes("below")) {
@@ -158,10 +159,10 @@ export class LayoutInstance {
             }
             fieldToFlow[fieldName] = direction;
         }
-        
 
 
-        return { consistent: true, error: ""};
+
+        return { consistent: true, error: "" };
     }
 
 
@@ -180,13 +181,13 @@ export class LayoutInstance {
         return this._layoutSpec.hideDisconnectedBuiltIns || false;
     }
 
-    getFieldLayout(fieldId: string): string[] {
+    private getFieldLayout(fieldId: string): DirectionalRelation | undefined {
 
         const fieldDirection = this._layoutSpec.fieldDirections.find((field) => field.fieldName === fieldId);
         if (fieldDirection) {
-            return fieldDirection.directions;
+            return fieldDirection;
         }
-        return [];
+        return undefined;
     }
 
     isAttributeField(fieldId: string): boolean {
@@ -388,6 +389,12 @@ export class LayoutInstance {
         return mostSpecificType;
     }
 
+    private getNodeTypes(node: string, a: AlloyInstance): string[] {
+        let type = getAtomType(a, node);
+        let allTypes = type.types.concat(UNIVERSAL_TYPE);
+        return allTypes;
+    }
+
 
     private colorNodesByType(g: Graph, a: AlloyInstance): Record<string, string> {
 
@@ -399,11 +406,11 @@ export class LayoutInstance {
 
         // Ensure that we have colors that are NOT in the sigColors
         let usedColors = Object.values(this._sigColors);
-        
+
         let colorsByType: Record<string, string> = {};
         let types_with_user_colors = Object.keys(this._sigColors);
 
-  
+
         types.forEach((type, index) => {
             // If the type has a color specified, use that
             if (this._sigColors[type.id]) {
@@ -493,13 +500,13 @@ export class LayoutInstance {
 
         // finalProjectionChoices : { type : string, projectedAtom : string, atoms : string[]} 
         let finalProjectionChoices = Object.entries(projections)
-        
-        .filter(([typeId, atomId]) => projectedSigs.includes(typeId)) // This is crucial for scenarios where the projection is changed.
-        
-        .map(([typeId, atomId]) => {
-            let atoms = atomsPerProjectedType[typeId];
-            return { type: typeId, projectedAtom: atomId, atoms: atoms };
-        });
+
+            .filter(([typeId, atomId]) => projectedSigs.includes(typeId)) // This is crucial for scenarios where the projection is changed.
+
+            .map(([typeId, atomId]) => {
+                let atoms = atomsPerProjectedType[typeId];
+                return { type: typeId, projectedAtom: atomId, atoms: atoms };
+            });
 
         let projectedInstance = applyProjections(ai, projectedAtomIds);
         return { projectedInstance, finalProjectionChoices };
@@ -531,7 +538,7 @@ export class LayoutInstance {
             const nodeHeight = this._sigIcons[type.id] ? this._sigIcons[type.id].height : this.DEFAULT_NODE_HEIGHT;
             const nodeWidth = this._sigIcons[type.id] ? this._sigIcons[type.id].width : this.DEFAULT_NODE_WIDTH;
 
-
+            const allTypes = this.getNodeTypes(nodeId, a);
             const mostSpecificType = this.getMostSpecificType(nodeId, a);
             // TODO: ensure that iconPath exists
 
@@ -550,15 +557,19 @@ export class LayoutInstance {
                 icon: iconPath,
                 height: nodeHeight,
                 width: nodeWidth,
-                mostSpecificType: mostSpecificType
+                mostSpecificType: mostSpecificType,
+                types: allTypes
             };
         });
 
 
         let constraints: LayoutConstraint[] = this.applySigConstraints(ai, layoutNodes);
 
+
+        ///// APPLYING THE CONSTRAINTS HERE, WE NEED TO FILTER ON TYPE //// aka APPLIESTO
+
         // Now we apply the closure constraints
-        let closureConstraints = this.applyClosureConstraints(g, layoutNodes, groups);
+        let closureConstraints = this.applyClosureConstraints(g, layoutNodes);
         // Append the closure constraints to the constraints
         constraints = constraints.concat(closureConstraints);
 
@@ -572,38 +583,46 @@ export class LayoutInstance {
             let target = layoutNodes.find((node) => node.id === edge.w);
             let relName = this.getRelationName(g, edge);
 
+            let fieldLayout = this.getFieldLayout(relName);
 
-            this.getFieldLayout(relName).forEach((direction) => {
-                if (direction === "left") {
-                    constraints.push(this.leftConstraint(target.id, source.id, this.minSepWidth, layoutNodes));
-                }
-                else if (direction === "above") {
-                    constraints.push(this.topConstraint(target.id, source.id, this.minSepHeight, layoutNodes));
-                }
-                else if (direction === "right") {
-                    constraints.push(this.leftConstraint(source.id, target.id, this.minSepWidth, layoutNodes));
-                }
-                else if (direction === "below") {
-                    constraints.push(this.topConstraint(source.id, target.id, this.minSepHeight, layoutNodes));
-                }
-                else if (direction === "directlyLeft") {
-                    constraints.push(this.leftConstraint(target.id, source.id, this.minSepWidth, layoutNodes));
-                    constraints.push(this.ensureSameYConstraint(target.id, source.id, layoutNodes));
-                }
-                else if (direction === "directlyAbove") {
-                    constraints.push(this.topConstraint(target.id, source.id, this.minSepHeight, layoutNodes));
-                    constraints.push(this.ensureSameXConstraint(target.id, source.id, layoutNodes));
-                }
-                else if (direction === "directlyRight") {
-                    constraints.push(this.leftConstraint(source.id, target.id, this.minSepWidth, layoutNodes));
-                    constraints.push(this.ensureSameYConstraint(target.id, source.id, layoutNodes));
-                }
-                else if (direction === "directlyBelow") {
-                    constraints.push(this.topConstraint(source.id, target.id, this.minSepHeight, layoutNodes));
-                    constraints.push(this.ensureSameXConstraint(target.id, source.id, layoutNodes));
-                }
-            });
+            let fieldDirections = fieldLayout ? fieldLayout.directions : [];
 
+            let appliesTo = fieldLayout ? fieldLayout.appliesTo : [];
+            let shouldApplyConstraints = this.appliesToEdge(edge, appliesTo, layoutNodes);
+
+            if (shouldApplyConstraints) {
+
+                fieldDirections.forEach((direction) => {
+                    if (direction === "left") {
+                        constraints.push(this.leftConstraint(target.id, source.id, this.minSepWidth, layoutNodes));
+                    }
+                    else if (direction === "above") {
+                        constraints.push(this.topConstraint(target.id, source.id, this.minSepHeight, layoutNodes));
+                    }
+                    else if (direction === "right") {
+                        constraints.push(this.leftConstraint(source.id, target.id, this.minSepWidth, layoutNodes));
+                    }
+                    else if (direction === "below") {
+                        constraints.push(this.topConstraint(source.id, target.id, this.minSepHeight, layoutNodes));
+                    }
+                    else if (direction === "directlyLeft") {
+                        constraints.push(this.leftConstraint(target.id, source.id, this.minSepWidth, layoutNodes));
+                        constraints.push(this.ensureSameYConstraint(target.id, source.id, layoutNodes));
+                    }
+                    else if (direction === "directlyAbove") {
+                        constraints.push(this.topConstraint(target.id, source.id, this.minSepHeight, layoutNodes));
+                        constraints.push(this.ensureSameXConstraint(target.id, source.id, layoutNodes));
+                    }
+                    else if (direction === "directlyRight") {
+                        constraints.push(this.leftConstraint(source.id, target.id, this.minSepWidth, layoutNodes));
+                        constraints.push(this.ensureSameYConstraint(target.id, source.id, layoutNodes));
+                    }
+                    else if (direction === "directlyBelow") {
+                        constraints.push(this.topConstraint(source.id, target.id, this.minSepHeight, layoutNodes));
+                        constraints.push(this.ensureSameXConstraint(target.id, source.id, layoutNodes));
+                    }
+                });
+            }
             let e: LayoutEdge = {
                 source: source,
                 target: target,
@@ -624,29 +643,31 @@ export class LayoutInstance {
     }
 
 
-    applyClosureConstraints(g: Graph, layoutNodes: LayoutNode[], groups: LayoutGroup[]): LayoutConstraint[] {
+    applyClosureConstraints(g: Graph, layoutNodes: LayoutNode[]): LayoutConstraint[] {
 
         const closures = this.getClosures();
 
         let constraints = closures.map((closure) => {
-            return this.applyClosureConstraintWithoutACentroid(g, layoutNodes, closure.fieldName, closure.direction, groups);
+            return this.applyClosureConstraint(g, layoutNodes, closure.fieldName, closure.direction, closure.appliesTo);
         });
 
         return constraints.flat();
 
     }
 
-    applyClosureConstraintWithoutACentroid(g: Graph, layoutNodes: LayoutNode[], relName: string, direction: string, groups: LayoutGroup[]): LayoutConstraint[] {
+    applyClosureConstraint(g: Graph, layoutNodes: LayoutNode[], relName: string, direction: string, appliesTo: string[]): LayoutConstraint[] {
         let direction_mult: number = 0;
         if (direction === "clockwise") {
-            direction_mult = 1;
+            direction_mult = -1;
         }
         else if (direction === "counterclockwise") {
-            direction_mult = -1; // IS THIS RIGHT OR THE OTHER WAY?
+            direction_mult = 1; // IS THIS RIGHT OR THE OTHER WAY?
         }
 
+        // And now we filter out unrelated nodes here I think?
         let relationEdges = g.edges().filter(edge => {
-            return this.getRelationName(g, edge) === relName;
+            return (this.getRelationName(g, edge) === relName)
+                && this.appliesToEdge(edge, appliesTo, layoutNodes);
         });
 
         if (relationEdges.length === 0) { return []; }
@@ -660,41 +681,7 @@ export class LayoutInstance {
 
             // One thing we dont have here is PREVENTING FRAGMENTS FROM OVERLAPPING
 
-
             const angleStep = (direction_mult * 2 * Math.PI) / relatedNodes.length;
-            //let index = 0;
-
-
-
-
-            // There is actually more to do here. if they are laid out, the nodes must
-            // ALSO not be to the left or right one another.
-            // What this means is an alternative impl, where it has to do with 'x', 'y'.
-
-
-            // So in order:
-            /*
-
-
-                we have 5 nodes we need to arrange in a regular shape (with min distance 100)
-
-                - First lay them all out in reference to a centroid.
-
-
-                - Then in order, determine which nodes are to the left/right of one another.
-
-                // For instance, if we start from the left. The first node should be to the left of the second node, and NOT above it.
-
-                // But, this changes every 90 degrees. So the angle matters.
-
-                // If the angle is between 0 and 90: each node should be to the left and below the next node.
-                // If the angle is between 90 and 180: each node should be to the left of and above the next node.
-                // If the angle is between 180 and 270: each node should be to the right of and above the next node.
-                // If the angle is between 270 and 360: each node should be to the right of and below the next node.
-
-                // However, there are phase transitions right? Rather, we might want to maintain this for things like say, a square.
-
-            */
 
             for (var i = 0; i < relatedNodes.length; i++) {
 
@@ -717,7 +704,7 @@ export class LayoutInstance {
 
                 // Now we need to determine the direction of the nodes
                 // relative to one another.
-                if(current_node_x > next_node_x) {
+                if (current_node_x > next_node_x) {
                     constraints.push(this.leftConstraint(next_node, node, this.minSepWidth, layoutNodes));
                 }
                 // HMM. Should this be <= or just an else?
@@ -725,7 +712,7 @@ export class LayoutInstance {
                     constraints.push(this.leftConstraint(node, next_node, this.minSepWidth, layoutNodes));
                 }
 
-                if(current_node_y > next_node_y) {
+                if (current_node_y > next_node_y) {
                     constraints.push(this.topConstraint(node, next_node, this.minSepHeight, layoutNodes));
                 }
                 else {
@@ -747,7 +734,7 @@ export class LayoutInstance {
 
             // This is a hack, something is wrong with the types.
             let targetType = nodeTypes.find((type) => {
-                
+
                 // First check if sigDirection.target is a string
                 if (typeof sigDirection.target === "string") {
                     return type.id === sigDirection.target;
@@ -858,8 +845,6 @@ export class LayoutInstance {
         return components;
     }
 
-
-
     private orderNodesByEdges(edges): string[][] {
 
         let inNodes = edges.map(edge => edge.w);
@@ -935,4 +920,28 @@ export class LayoutInstance {
 
         return { axis: "x", node1: node1, node2: node2 };
     }
+
+
+
+
+    private appliesToEdge(edge: Edge, appliesTo: string[], layoutNodes: LayoutNode[]): boolean {
+
+        let edgeSrcId = edge.v;
+        let edgeDestId = edge.w;
+        // Now get the nodes 
+        let srcNode: LayoutNode = layoutNodes.find((node) => node.id === edgeSrcId);
+        let destNode: LayoutNode = layoutNodes.find((node) => node.id === edgeDestId);
+
+        // Now get the types of the nodes
+        let srcTypes = srcNode.types;
+        let destTypes = destNode.types;
+
+
+        let srcType = appliesTo[0];
+        let destType = appliesTo[1];
+
+        return srcTypes.includes(srcType) && destTypes.includes(destType);
+
+    }
+
 }
