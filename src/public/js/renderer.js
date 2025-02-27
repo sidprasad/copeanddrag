@@ -255,7 +255,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
 
                     // Only one of source group and target group can be a group.
-
                     // Within source group, see if the target is the key
 
                     function closestPointOnRect(bounds, point) {
