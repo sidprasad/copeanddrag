@@ -72,15 +72,16 @@ class ConstraintValidator {
 
     public validateGroupConstraints(): string {
 
+        // This identifies if there ARE any overlapping non-subgroups
         let overlappingNonSubgroups = false;
-
+        
         this.groups.forEach(group => {
             this.groups.forEach(otherGroup => {
 
-                const groupIndex = this.getGroupIndex(group.name);
-                const otherGroupIndex = this.getGroupIndex(otherGroup.name);
+                // const groupIndex = this.getGroupIndex(group.name);
+                // const otherGroupIndex = this.getGroupIndex(otherGroup.name);
 
-                if (groupIndex === otherGroupIndex || overlappingNonSubgroups) {
+                if (group.name === otherGroup.name || overlappingNonSubgroups) {
                     return;
                 }
 
@@ -91,25 +92,18 @@ class ConstraintValidator {
                     overlappingNonSubgroups = intersection.length > 0;
 
                     if (overlappingNonSubgroups) {
-                        let intersectingGroupNames = intersection.map((index) => this.colaNodes[index].id).join(', ');
-
+                        let intersectingGroupNames = intersection.join(', ');
                         this.error = `Layout not satisfiable! [ ${intersectingGroupNames} ] are in groups ${group.name} and ${otherGroup.name}, but neither group is contained in the other. Groups must be either nested or disjoint.`;
                     }
                 }
             })
         });
-
-
-
-
         return this.error;
     }
 
     private getNodeIndex(nodeId: string) {
         return this.nodes.findIndex(node => node.id === nodeId);
     }
-
-
 
     private orientationConstraintToString(constraint) {
 
@@ -296,50 +290,22 @@ class ConstraintValidator {
     }
 
 
-    // TODO: Is this correct?    
-    private isSubGroup(subgroup, group): boolean {
 
-        if (subgroup === group) {
-            return true;
-        }
-        const immediateSubgroups = group.groups;
-
-        if (!immediateSubgroups || immediateSubgroups.length === 0) {
-            return false;
-        }
-
-        if (immediateSubgroups.includes(this.getGroupIndex(subgroup))) {
-            return true;
-        }
-        return immediateSubgroups.some((sg) => this.isSubGroup(subgroup, this.groups[sg]));
+    private isSubGroup(subgroup : LayoutGroup, group : LayoutGroup): boolean {
+        const sgElements = subgroup.nodeIds;
+        const gElements = group.nodeIds;
+        return sgElements.every((element) => gElements.includes(element));
     }
 
 
 
+    private groupIntersection(group1 : LayoutGroup, group2 : LayoutGroup): string[] {
+        const g1Elements = group1.nodeIds;
+        const g2Elements = group2.nodeIds;
 
-    private getAllLeaves(group): Set<number> {
-        const leaves: Set<number> = group.leaves ? new Set(group.leaves) : new Set();
-        const subGroups = group.groups;
-        if (!subGroups) {
-            return leaves;
-        }
-
-        let subGroupLeaves: Set<number>[] = subGroups.map((subgroup) => this.getAllLeaves(this.groups[subgroup]));
-
-        // Now get the union set of leaves and subGroupLeaves
-        subGroupLeaves.forEach((subGroupLeafSet) => {
-            subGroupLeafSet.forEach((leaf) => leaves.add(leaf));
-        });
-
-        return leaves;
-    }
-
-
-    private groupIntersection(group1, group2): number[] {
-        const leaves1 = this.getAllLeaves(group1);
-        const leaves2 = this.getAllLeaves(group2);
-
-        return intersection([...leaves1], [...leaves2]);
+        // Get elements that are in both groups
+        const commonElements = intersection(g1Elements, g2Elements);
+        return commonElements;
     }
 }
 
