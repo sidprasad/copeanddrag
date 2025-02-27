@@ -228,9 +228,6 @@ class ConstraintValidator {
         // Make sure the solver has solved
         this.solver.solve();
 
-
-
-
         // Now first, create the normalized groups.
         this.horizontallyAligned = this.normalizeAlignment(this.horizontallyAligned);
         this.verticallyAligned = this.normalizeAlignment(this.verticallyAligned);
