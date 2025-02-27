@@ -11,24 +11,6 @@ const dy_for_linespacing = 5; // Adjust for spacing between lines
 
 
 
-function createCustomMouseEvent (type,x,y) {
-    var event = document.createEvent("MouseEvents");
-    event.initMouseEvent(type, true, (type != "mousemove"), window, 0, x, y, x, y, false, false, false, false, 0, document.body.parentNode);
-    return event;
-}
-
-// Is this right?
-function dragNode(node, x, y) {
-    node.dispatchEvent(createCustomMouseEvent('mousedown', x,y,false));
-    node.dispatchEvent(createCustomMouseEvent('mousemove', x,y,false));
-    node.dispatchEvent(createCustomMouseEvent('mouseup', x,y,false));
-}
-
-// Maybe this can help too?
-// view-source:https://marvl.infotech.monash.edu/webcola/examples/onlinebrowse.html
-/////////////////////////////////////////////
-
-
 function adjustPointToRectanglePerimeter(point, rect) {
     const { x, y, width, height } = rect;
     const padding = 3; // Padding in pixels
