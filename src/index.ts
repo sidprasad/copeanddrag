@@ -5,7 +5,7 @@ import { AlloyAtom, AlloyDatum, AlloyInstance, AlloyType, parseAlloyXML } from '
 import { LayoutInstance } from './layout/layoutinstance';
 
 import { WebColaLayout } from './webcola-gen/graphtowebcola';
-import { ConstraintValidator } from './webcola-gen/constraint-validator';
+import { ConstraintValidator } from './layout/constraint-validator';
 import { InstanceLayout } from './layout/interfaces';
 import { copeToLayoutSpec } from './cope-lang/cope-parser';
 import { parseLayoutSpec } from './layout/layoutspec';
@@ -31,6 +31,10 @@ app.set('view engine', 'ejs');
 
 
 
+// This is a hack. I'm not sure
+// how to encode the version number.
+const version = "1.1.4";
+
 const secretKey = "cope-and-drag-logging-key";
 
 // Function to get or generate a persistent user ID using HMAC
@@ -47,9 +51,6 @@ function getPersistentUserId(): string {
     }
 }
 
-// This is a hack. I'm not sure
-// how to encode the version number.
-const version = "1.1.3";
 const userId = getPersistentUserId();
 const logger = new Logger(userId, version);
 
@@ -162,6 +163,14 @@ app.post('/', (req, res) => {
         var instAsString = instanceToInst(instances[instanceNumber]);
         var { layout, projectionData } = li.generateLayout(instances[instanceNumber], projections);
 
+        const constraintValidator = new ConstraintValidator(layout);
+        const inconsistent_error = constraintValidator.validateConstraints();
+        if (inconsistent_error) {
+            // Conflict between constraints and instance
+            throw new Error("The instance being visualized is inconsistent with layout constraints.<br><br> " + inconsistent_error);
+        }
+
+
         let cl = new WebColaLayout(layout);
         var colaConstraints = cl.colaConstraints;
         var colaNodes = cl.colaNodes;
@@ -169,17 +178,6 @@ app.post('/', (req, res) => {
         var colaGroups = cl.groupDefinitions;
         var height = cl.FIG_HEIGHT;
         var width = cl.FIG_WIDTH;
-
-
-        const constraintValidator = new ConstraintValidator(colaConstraints, colaNodes, colaGroups);
-        const inconsistent_error = constraintValidator.validateConstraints();
-        if (inconsistent_error) {
-            // Conflict between constraints and instance
-            throw new Error("The instance being visualized is inconsistent with layout constraints.<br><br> " + inconsistent_error);
-        }
-
-        // BUT ALSO, the moment there is an error we should not do the
-        // rest. E.g., get cola nodes, colka edges, etc.
     }
     catch (e) {
         error = e.message;
@@ -313,15 +311,9 @@ app.get('/example/:name', (req, res) => {
 
     var { layout, projectionData } = li.generateLayout(instances[instanceNumber], projections);
 
-    var instAsString = instanceToInst(instances[instanceNumber]);
-    let cl = new WebColaLayout(layout);
-    let colaConstraints = cl.colaConstraints;
-    let colaNodes = cl.colaNodes;
-    let colaEdges = cl.colaEdges;
-    let colaGroups = cl.groupDefinitions;
-
-    const constraintValidator = new ConstraintValidator(colaConstraints, colaNodes, colaGroups);
+    const constraintValidator = new ConstraintValidator(layout);
     const error = constraintValidator.validateConstraints();
+
     if (error) {
 
         // TODO: THe reporting here should be more meaningful at some point.
@@ -330,6 +322,17 @@ app.get('/example/:name', (req, res) => {
         res.status(418).send(error);
         return;
     }
+    
+
+
+
+    var instAsString = instanceToInst(instances[instanceNumber]);
+    let cl = new WebColaLayout(layout);
+    let colaConstraints = cl.colaConstraints;
+    let colaNodes = cl.colaNodes;
+    let colaEdges = cl.colaEdges;
+    let colaGroups = cl.groupDefinitions;
+
 
 
     let height = cl.FIG_HEIGHT;

@@ -654,10 +654,6 @@ export class LayoutInstance {
         let relatedNodeFragments = this.orderNodesByEdges(relationEdges);
         var fragment_num = 0;
 
-
-
-     
-
         let constraints: LayoutConstraint[] = [];
         relatedNodeFragments.forEach((relatedNodes) => {
             const minRadius = 100; // Example fixed distance. This needs to change.
@@ -736,16 +732,9 @@ export class LayoutInstance {
                     constraints.push(this.topConstraint(next_node, node, this.minSepHeight, layoutNodes));
                 }
             }
-
-
-
-
         });
-
         return constraints;
     }
-
-
 
     applySigConstraints(ai: AlloyInstance, layoutNodes: LayoutNode[]): LayoutConstraint[] {
 
@@ -946,9 +935,4 @@ export class LayoutInstance {
 
         return { axis: "x", node1: node1, node2: node2 };
     }
-
-
-
-    // TODO: We should also have a validate layout function that checks if the layout is satisfiable.
-
 }

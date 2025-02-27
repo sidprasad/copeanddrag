@@ -99,6 +99,7 @@ export class WebColaLayout {
 
 
     const separationConstraint = {
+      type: "separation",
       axis: 'x',
       left: leftNode,
       right: rightNode,
@@ -111,6 +112,7 @@ export class WebColaLayout {
   private topConstraint(topNode: number, bottomNode: number, sep: number) {
     // Define a separation constraint to place node A above node B
     const separationConstraint = {
+      type: "separation",
       axis: 'y',
       left: topNode,
       right: bottomNode,
@@ -214,12 +216,18 @@ export class WebColaLayout {
 
     if (isAlignmentConstraint(constraint)) {
 
+      let gap = Math.floor(Math.random() * 2); // a random number between 0 and 1
+      // This is a hack to potentially ameliorate cola stability issues
+      // causing nodes to be placed on top of each other.
+
+
       // Is this right or do I have to switch axes. Check.
       const alignmentConstraint = {
+        type: "separation",
         axis: constraint.axis,
         left: this.getNodeIndex(constraint.node1.id),
         right: this.getNodeIndex(constraint.node2.id),
-        gap: 0,
+        gap: 0, 
         'equality': true
       }
       

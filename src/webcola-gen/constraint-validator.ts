@@ -3,7 +3,11 @@ import { NodeWithMetadata } from './graphtowebcola';
 import { intersection } from 'lodash';
 import { relative } from 'path';
 
-class ConstraintValidator {
+
+/*
+    Deprecated. Moving to layout\constraint-validator.ts
+*/
+class ColaConstraintValidator {
 
     private webcolaConstraints: any[];
     private solver: SimplexSolver;
@@ -11,14 +15,9 @@ class ConstraintValidator {
 
     private variables: { [key: string]: { x: Variable, y: Variable } };
 
-
     private added_constraints: any[];
-
     private groups: any[];
-
     error: string;
-
-
 
     constructor(webcolaConstraints: any[], nodes: NodeWithMetadata[], groups: any[]) {
         this.webcolaConstraints = webcolaConstraints;
@@ -223,4 +222,4 @@ class ConstraintValidator {
 }
 
 
-export { ConstraintValidator };
+//export { ConstraintValidator };

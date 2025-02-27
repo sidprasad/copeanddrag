@@ -11,8 +11,6 @@ const dy_for_linespacing = 5; // Adjust for spacing between lines
 
 
 
-
-
 function adjustPointToRectanglePerimeter(point, rect) {
     const { x, y, width, height } = rect;
     const padding = 3; // Padding in pixels
@@ -207,6 +205,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
                     console.log("Error routing edge", d.id, `from ${d.source.id} to ${d.target.id}`);
                     console.error(e);
+
                     
                     let runtimeMessages = document.getElementById("runtime_messages");
                     let dismissableAlert = document.createElement("div");
@@ -238,14 +237,11 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
 
                     // Only one of source group and target group can be a group.
-
                     // Within source group, see if the target is the key
 
                     function closestPointOnRect(bounds, point) {
                         // Destructure the rectangle bounds
                         const { x, y, X, Y } = bounds;
-
-
 
                         // Calculate the rectangle's edges
                         const left = x;
