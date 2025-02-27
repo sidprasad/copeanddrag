@@ -1,0 +1,331 @@
+import { SimplexSolver, Variable, Expression, Strength, Inequality, LEQ, GEQ, LE } from 'cassowary';
+import { intersection } from 'lodash';
+import { InstanceLayout, LayoutNode, LayoutEdge, LayoutGroup, LayoutConstraint , isLeftConstraint, isTopConstraint, isAlignmentConstraint, TopConstraint, LeftConstraint, AlignmentConstraint } from './interfaces';
+
+/// TODO: Should examine LAYOUT CONSTRAINTS NOT COLA CONSTRAINTS
+class ConstraintValidator {
+
+    private solver: SimplexSolver;
+    private variables: { [key: string]: { x: Variable, y: Variable } };
+
+    private added_constraints: any[];
+    error: string;
+
+    orientationConstraints: LayoutConstraint[];
+    nodes: LayoutNode[];
+    edges: LayoutEdge[];
+    groups: LayoutGroup[];
+
+
+    public horizontallyAligned : LayoutNode[][] = [];
+    public verticallyAligned : LayoutNode[][] = [];
+
+    constructor(layout: InstanceLayout) {
+
+        this.solver = new SimplexSolver();
+        this.nodes = layout.nodes;
+        this.edges = layout.edges;
+        this.orientationConstraints = layout.constraints;
+        this.variables = {};
+        this.groups = layout.groups;
+        this.added_constraints = [];
+        this.error = null;
+    }
+
+    public validateConstraints(): string {
+        // I think this works, but I need to test it
+        return this.validateGroupConstraints() || this.validatePositionalConstraints();
+    }
+
+    public validatePositionalConstraints(): string {
+
+        this.nodes.forEach(node => {
+            let index = this.getNodeIndex(node.id);
+            this.variables[index] = {
+                x: new Variable(`${node.id}_x`),
+                y: new Variable(`${node.id}_y`),
+            };
+        });
+
+        for (let i = 0; i < this.orientationConstraints.length; i++) {
+            let constraint = this.orientationConstraints[i];
+            this.constraintToCassowary(constraint);
+            if (this.error) {
+                return this.error;
+            }
+        }
+        this.getAlignmentOrders();
+
+        // Now that the solver has solved, we can get an ALIGNMENT ORDER for the nodes.
+        
+
+        // How do we get the solution?
+
+
+
+        return this.error;
+    }
+
+    private getGroupIndex(groupName: string) {
+        return this.groups.findIndex(group => group.name === groupName);
+    }
+
+    public validateGroupConstraints(): string {
+
+        let overlappingNonSubgroups = false;
+
+        this.groups.forEach(group => {
+            this.groups.forEach(otherGroup => {
+
+                const groupIndex = this.getGroupIndex(group.name);
+                const otherGroupIndex = this.getGroupIndex(otherGroup.name);
+
+                if (groupIndex === otherGroupIndex || overlappingNonSubgroups) {
+                    return;
+                }
+
+
+                if (!this.isSubGroup(group, otherGroup) && !this.isSubGroup(otherGroup, group)) {
+
+                    let intersection = this.groupIntersection(group, otherGroup);
+                    overlappingNonSubgroups = intersection.length > 0;
+
+                    if(overlappingNonSubgroups) {
+                        let intersectingGroupNames = intersection.map((index) => this.colaNodes[index].id).join(', ');
+
+                        this.error = `Layout not satisfiable! [ ${intersectingGroupNames} ] are in groups ${group.name} and ${otherGroup.name}, but neither group is contained in the other. Groups must be either nested or disjoint.`;
+                    }
+                }
+            })
+        });
+
+
+
+
+        return this.error;
+    }
+
+    private getNodeIndex(nodeId: string) {
+        return this.nodes.findIndex(node => node.id === nodeId);
+    }
+
+
+
+    private colaOrientationConstraintToString(constraint) {
+
+        let axis = constraint.axis;
+        let equality = constraint?.equality || false;
+
+        let left_idx = constraint.left;
+        let right_idx = constraint.right;
+
+        let left = this.colaNodes[left_idx].id;
+        let right = this.colaNodes[right_idx].id;
+        let relativePosition = axis === 'x' ? 'to the left of ' : 'above ';
+        if (equality) {
+            if (axis === 'y') {
+                relativePosition = 'horizontally aligned with ';
+            }
+            else if (axis === 'x') {
+                relativePosition = 'vertically aligned with ';
+            }
+        }
+
+        return `ENSURE: ${left} is ${relativePosition} ${right}`;
+
+
+    }
+
+
+
+
+
+    private constraintToCassowary(constraint : LayoutConstraint) {        
+        if(isTopConstraint(constraint)) {
+            let tc = constraint as TopConstraint;
+
+            let top = tc.top;
+            let bottom = tc.bottom;
+            let minDistance = tc.minDistance;
+
+            const topId = this.getNodeIndex(top.id);
+            const bottomId = this.getNodeIndex(bottom.id);
+
+            let topVar = this.variables[topId].y;
+            let bottomVar = this.variables[bottomId].y;
+
+            let lhs = new Expression(topVar)
+                .plus(new Expression(minDistance));
+            let rhs = new Expression(bottomVar);
+
+            this.solver.addConstraint(new Inequality(lhs, LEQ, rhs, Strength.required));
+        }
+        else if(isLeftConstraint(constraint)) {
+            let lc = constraint as LeftConstraint;
+
+            let left = lc.left;
+            let right = lc.right;
+            let minDistance = lc.minDistance;
+
+            const leftId = this.getNodeIndex(left.id);
+            const rightId = this.getNodeIndex(right.id);
+
+            let leftVar = this.variables[leftId].x;
+            let rightVar = this.variables[rightId].x;
+
+            let lhs = new Expression(leftVar)
+                .plus(new Expression(minDistance));
+            let rhs = new Expression(rightVar);
+
+            this.solver.addConstraint(new Inequality(lhs, LEQ, rhs, Strength.required));
+        }
+        else if(isAlignmentConstraint(constraint)) {
+            
+
+            // This is trickier. We want to REGISTER alignment AS WELL.
+
+            let ac = constraint as AlignmentConstraint;
+            let axis = ac.axis;
+            let node1 = ac.node1;
+            let node2 = ac.node2;
+
+            const node1Id = this.getNodeIndex(node1.id);
+            const node2Id = this.getNodeIndex(node2.id);
+
+            let node1Var = this.variables[node1Id][axis];
+            let node2Var = this.variables[node2Id][axis];
+
+            let lhs = new Expression(node1Var);
+            let rhs = new Expression(node2Var);
+
+            this.solver.addConstraint(new Inequality(lhs, LEQ, rhs, Strength.required));
+            this.solver.addConstraint(new Inequality(lhs, GEQ, rhs, Strength.required));
+
+
+            // And register the alignment
+            if(axis === 'x') {
+                this.verticallyAligned.push([node1, node2]);
+            }
+            else if(axis === 'y') {
+                this.horizontallyAligned.push([node1, node2]);
+            }
+        }
+        else {
+            this.error = "Unknown constraint type";
+        }
+    }
+
+    private getAlignmentOrders(): void {
+        // Make sure the solver has solved
+        this.solver.solve();
+
+        // Now first, create the normalized groups.
+        this.horizontallyAligned = this.normalizeAlignment(this.horizontallyAligned);
+        this.verticallyAligned = this.normalizeAlignment(this.verticallyAligned);
+
+        // Now we need to get the order of the nodes in each group
+        for (let i = 0; i < this.horizontallyAligned.length; i++) {
+            this.horizontallyAligned[i].sort((a, b) => this.variables[this.getNodeIndex(a.id)].x.value - this.variables[this.getNodeIndex(b.id)].x.value);
+        }
+
+        for (let i = 0; i < this.verticallyAligned.length; i++) {
+            this.verticallyAligned[i].sort((a, b) => this.variables[this.getNodeIndex(a.id)].y.value - this.variables[this.getNodeIndex(b.id)].y.value);
+        }
+
+    }
+
+
+    private normalizeAlignment(aligned: LayoutNode[][]): LayoutNode[][] {
+        const merged: LayoutNode[][] = [];
+    
+
+        /*
+        Initial Merging: The first loop iterates over each group in the aligned array and checks if it has any common elements with the existing groups in the merged array. If it does, it merges them.
+        */
+
+        for (const group of aligned) {
+            let mergedWithExisting = false;
+    
+            for (const existing of merged) {
+                if (group.some(item => existing.includes(item))) {
+                    existing.push(...group.filter(item => !existing.includes(item)));
+                    mergedWithExisting = true;
+                    break;
+                }
+            }
+    
+            if (!mergedWithExisting) {
+                merged.push([...group]);
+            }
+        }
+    
+        // Final pass to ensure full transitive closure
+        let changed = true;
+        while (changed) {
+            changed = false;
+            for (let i = 0; i < merged.length; i++) {
+                for (let j = i + 1; j < merged.length; j++) {
+                    if (merged[i].some(item => merged[j].includes(item))) {
+                        merged[i].push(...merged[j].filter(item => !merged[i].includes(item)));
+                        merged.splice(j, 1);
+                        changed = true;
+                        break;
+                    }
+                }
+                if (changed) break;
+            }
+        }
+    
+        return merged;
+    }
+
+
+    // TODO: Is this correct?    
+    private isSubGroup(subgroup, group): boolean {
+
+        if (subgroup === group) {
+            return true;
+        }
+        const immediateSubgroups = group.groups;
+
+        if (!immediateSubgroups || immediateSubgroups.length === 0) {
+            return false;
+        }
+
+        if (immediateSubgroups.includes(this.getGroupIndex(subgroup))) {
+            return true;
+        }
+        return immediateSubgroups.some((sg) => this.isSubGroup(subgroup, this.groups[sg]));
+    }
+
+
+
+
+    private getAllLeaves(group): Set<number> {
+        const leaves: Set<number> = group.leaves ? new Set(group.leaves) : new Set();
+        const subGroups = group.groups;
+        if (!subGroups) {
+            return leaves;
+        }
+
+        let subGroupLeaves: Set<number>[] = subGroups.map((subgroup) => this.getAllLeaves(this.groups[subgroup]));
+
+        // Now get the union set of leaves and subGroupLeaves
+        subGroupLeaves.forEach((subGroupLeafSet) => {
+            subGroupLeafSet.forEach((leaf) => leaves.add(leaf));
+        });
+
+        return leaves;
+    }
+
+
+    private groupIntersection(group1, group2): number[] {
+        const leaves1 = this.getAllLeaves(group1);
+        const leaves2 = this.getAllLeaves(group2);
+
+        return intersection([...leaves1], [...leaves2]);
+    }
+}
+
+
+export { ConstraintValidator };

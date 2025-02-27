@@ -9,7 +9,6 @@ const margin = 10;
 const dy_for_linespacing = 5; // Adjust for spacing between lines
 //////////
 
-function inView(v) { return typeof v.viewgraphid !== 'undefined'; }
 
 
 function createCustomMouseEvent (type,x,y) {
@@ -22,7 +21,7 @@ function createCustomMouseEvent (type,x,y) {
 function dragNode(node, x, y) {
     node.dispatchEvent(createCustomMouseEvent('mousedown', x,y,false));
     node.dispatchEvent(createCustomMouseEvent('mousemove', x,y,false));
-    //node.dispatchEvent(createCustomMouseEvent('mouseup', x,y,false));
+    node.dispatchEvent(createCustomMouseEvent('mouseup', x,y,false));
 }
 
 // Maybe this can help too?
@@ -225,7 +224,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     console.log("Error routing edge", d.id, `from ${d.source.id} to ${d.target.id}`);
                     console.error(e);
 
-                    console.log(`In view?` , d.source, inView(d.source), d.target, inView(d.target));
                     
                     let runtimeMessages = document.getElementById("runtime_messages");
                     let dismissableAlert = document.createElement("div");
@@ -263,8 +261,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     function closestPointOnRect(bounds, point) {
                         // Destructure the rectangle bounds
                         const { x, y, X, Y } = bounds;
-
-
 
                         // Calculate the rectangle's edges
                         const left = x;
