@@ -26,8 +26,11 @@ export interface LayoutSpec {
     sigIcons? : IconDefinition[];
 }
 
+
+
 export interface DirectionalRelation extends fieldDefinition {
     directions : FieldDirection[];
+    appliesTo: string[];
 }
 
 export interface SigDirection extends sigDefinition {
@@ -49,6 +52,7 @@ export interface ProjectionDefinition extends sigDefinition {}
 
 export interface ClosureDefinition extends fieldDefinition {
     direction? : RotationDirection;
+    appliesTo : string[];
 }
 
 export interface IconDefinition extends sigDefinition {

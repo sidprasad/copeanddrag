@@ -10,6 +10,9 @@ const ORIENTATION_DIRECTIONS = ["above", "below", "left", "right", "directlyAbov
 const CYCLIC_DIRECTIONS = ["clockwise", "counterclockwise"];
 const GROUP_TARGETS = ["domain", "range"];
 
+
+const DEFAULT_FIELD_APPLIES_TO = ["univ", "univ"];
+
 /*
 
 constraints:
@@ -141,28 +144,32 @@ function extractConstraints(constraints: any[]): any {
 
     let closures: ClosureDefinition[] = constraints.filter(c => c.cyclic)
         .map(c => {
+            let appliesTo = c.cyclic.appliesTo || DEFAULT_FIELD_APPLIES_TO;
             return {
                 fieldName: c.cyclic.field,
-                direction: c.cyclic.direction || "clockwise"
+                direction: c.cyclic.direction || "clockwise",
+                appliesTo: appliesTo
             }
         });
 
     let clusterRelations: ClusterRelation[] = constraints.filter(c => c.group)
         .map(c => {
             let groupOn = c.group.target || "range";
-
+            
             return {
                 fieldName: c.group.field,
-                groupOn: groupOn
+                groupOn: groupOn,
             }
         });
 
     let orientationConstraints = constraints.filter(c => c.orientation).map(c => c.orientation);
     let fieldDirectionConstraints: DirectionalRelation[] = orientationConstraints.filter(c => c.field)
         .map(c => {
+            let appliesTo = c.cyclic.appliesTo || DEFAULT_FIELD_APPLIES_TO;
             return {
                 fieldName: c.field,
-                directions: c.directions
+                directions: c.directions,
+                appliesTo: appliesTo
             }
         });
 
@@ -172,8 +179,6 @@ function extractConstraints(constraints: any[]): any {
 
             let source = c.sigs[0];
             let target = c.sigs[1];
-
-
 
             return {
                 sigName: source,
