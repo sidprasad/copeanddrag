@@ -1,6 +1,7 @@
 import { SimplexSolver, Variable, Expression, Strength, Inequality, LEQ, GEQ, LE } from 'cassowary';
 import { intersection } from 'lodash';
 import { InstanceLayout, LayoutNode, LayoutEdge, LayoutGroup, LayoutConstraint, isLeftConstraint, isTopConstraint, isAlignmentConstraint, TopConstraint, LeftConstraint, AlignmentConstraint } from './interfaces';
+import { min } from 'd3';
 
 /// TODO: Should examine LAYOUT CONSTRAINTS NOT COLA CONSTRAINTS
 class ConstraintValidator {
@@ -11,17 +12,18 @@ class ConstraintValidator {
     private added_constraints: any[];
     error: string;
 
+    layout: InstanceLayout;
     orientationConstraints: LayoutConstraint[];
     nodes: LayoutNode[];
     edges: LayoutEdge[];
     groups: LayoutGroup[];
-
+    minPadding: number = 15;
 
     public horizontallyAligned: LayoutNode[][] = [];
     public verticallyAligned: LayoutNode[][] = [];
 
     constructor(layout: InstanceLayout) {
-
+        this.layout = layout;
         this.solver = new SimplexSolver();
         this.nodes = layout.nodes;
         this.edges = layout.edges;
@@ -54,20 +56,17 @@ class ConstraintValidator {
                 return this.error;
             }
         }
-        this.getAlignmentOrders();
+
+        this.solver.solve();
+
 
         // Now that the solver has solved, we can get an ALIGNMENT ORDER for the nodes.
-
-
-        // How do we get the solution?
-
-
+        let and_more_constraints = this.getAlignmentOrders();
+        
+        // Now add THESE constraints to the layout constraints
+        this.layout.constraints = this.layout.constraints.concat(and_more_constraints);
 
         return this.error;
-    }
-
-    private getGroupIndex(groupName: string) {
-        return this.groups.findIndex(group => group.name === groupName);
     }
 
     public validateGroupConstraints(): string {
@@ -225,23 +224,65 @@ class ConstraintValidator {
         }
     }
 
-    private getAlignmentOrders(): void {
+    private getAlignmentOrders(): LayoutConstraint[] {
         // Make sure the solver has solved
         this.solver.solve();
+
+
+
 
         // Now first, create the normalized groups.
         this.horizontallyAligned = this.normalizeAlignment(this.horizontallyAligned);
         this.verticallyAligned = this.normalizeAlignment(this.verticallyAligned);
 
+        let implicitAlignmentConstraints = [];
+
+
         // Now we need to get the order of the nodes in each group
         for (let i = 0; i < this.horizontallyAligned.length; i++) {
-            this.horizontallyAligned[i].sort((a, b) => this.variables[this.getNodeIndex(a.id)].x.value - this.variables[this.getNodeIndex(b.id)].x.value);
+            this.horizontallyAligned[i].sort((a, b) => this.variables[this.getNodeIndex(a.id)].x.value - this.variables[this.getNodeIndex(b.id)].x.value);   
         }
+
+        this.horizontallyAligned.forEach((alignedLeftToRight) => {
+
+            for (let i = 0; i < alignedLeftToRight.length - 1; i++) {
+                let node1 = alignedLeftToRight[i];
+                let node2 = alignedLeftToRight[i + 1];
+
+                let lc : LayoutConstraint =  { 
+                    left: node1, 
+                    right: node2,
+                    minDistance: this.minPadding
+                };
+
+                implicitAlignmentConstraints.push(lc);
+            }
+
+        });
+
 
         for (let i = 0; i < this.verticallyAligned.length; i++) {
             this.verticallyAligned[i].sort((a, b) => this.variables[this.getNodeIndex(a.id)].y.value - this.variables[this.getNodeIndex(b.id)].y.value);
         }
 
+
+        this.verticallyAligned.forEach((alignedTopToBottom) => {
+
+            for (let i = 0; i < alignedTopToBottom.length - 1; i++) {
+                let node1 = alignedTopToBottom[i];
+                let node2 = alignedTopToBottom[i + 1];
+
+                let tc : LayoutConstraint =  { 
+                    top: node1, 
+                    bottom: node2,
+                    minDistance: this.minPadding
+                };
+                implicitAlignmentConstraints.push(tc);
+            }
+        });
+
+
+        return implicitAlignmentConstraints;
     }
 
 

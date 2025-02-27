@@ -911,7 +911,7 @@ export class LayoutInstance {
 
 
 
-    private leftConstraint(leftId: string, rightId: string, minDistance: number, layoutNodes: LayoutNode[]): LeftConstraint {
+    public leftConstraint(leftId: string, rightId: string, minDistance: number, layoutNodes: LayoutNode[]): LeftConstraint {
 
         let left = layoutNodes.find((node) => node.id === leftId);
         let right = layoutNodes.find((node) => node.id === rightId);
@@ -919,7 +919,7 @@ export class LayoutInstance {
         return { left: left, right: right, minDistance: minDistance };
     }
 
-    private topConstraint(topId: string, bottomId: string, minDistance: number, layoutNodes: LayoutNode[]): TopConstraint {
+    public topConstraint(topId: string, bottomId: string, minDistance: number, layoutNodes: LayoutNode[]): TopConstraint {
 
         let top = layoutNodes.find((node) => node.id === topId);
         let bottom = layoutNodes.find((node) => node.id === bottomId);
@@ -942,4 +942,4 @@ export class LayoutInstance {
 
         return { axis: "x", node1: node1, node2: node2 };
     }
-
+}

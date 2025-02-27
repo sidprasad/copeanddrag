@@ -312,6 +312,7 @@ app.get('/example/:name', (req, res) => {
 
     const constraintValidator = new ConstraintValidator(layout);
     const error = constraintValidator.validateConstraints();
+
     if (error) {
 
         // TODO: THe reporting here should be more meaningful at some point.
@@ -320,7 +321,7 @@ app.get('/example/:name', (req, res) => {
         res.status(418).send(error);
         return;
     }
-
+    
 
 
 
