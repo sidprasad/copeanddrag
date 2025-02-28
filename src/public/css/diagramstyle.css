@@ -26,6 +26,13 @@
 
 }
 
+
+.disconnectedNode {
+    stroke: transparent;
+    fill: transparent;
+    cursor: move;
+}
+
 .link {
     stroke: #333330;
     fill: none;

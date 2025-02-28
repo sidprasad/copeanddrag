@@ -11,6 +11,7 @@ import { LayoutNode, LayoutEdge, LayoutConstraint, InstanceLayout, LeftConstrain
 import { generateGraph } from '../alloy-graph';
 
 import { ColorPicker } from './colorpicker';
+import { Group } from 'webcola';
 
 const UNIVERSAL_TYPE = "univ";
 
@@ -19,6 +20,7 @@ export class LayoutInstance {
 
 
     readonly hideThisEdge = "_h_"
+    static DISCONNECTED_PREFIX = "_d_"
     readonly DEFAULT_NODE_ICON_PATH: string = null;
     readonly DEFAULT_NODE_HEIGHT = 60;
     readonly DEFAULT_NODE_WIDTH = 100;
@@ -524,10 +526,14 @@ export class LayoutInstance {
         let g: Graph = generateGraph(ai, this.hideDisconnected, this.hideDisconnectedBuiltIns);
 
         const attributes = this.generateAttributes(g);
-        const groups = this.generateGroups(g);
+        let groups = this.generateGroups(g);
         const colors = this.colorNodesByType(g, a);
 
+
+        
+
         this.ensureNoExtraNodes(g, a);
+        let dcN = this.getDisconnectedNodes(g);
 
 
 
@@ -638,6 +644,15 @@ export class LayoutInstance {
         layoutEdges = layoutEdges.filter((edge) => !edge.id.startsWith(this.hideThisEdge));
 
 
+        // And now make sure that all the disconnected nodes (as identified)
+        // have some padding around them.
+        let dcnGroups = dcN.map((node) => {
+            return this.singletonGroup(node);
+        }
+        );
+        groups = groups.concat(dcnGroups);
+
+
         let layout = { nodes: layoutNodes, edges: layoutEdges, constraints: constraints, groups: groups };
         return { layout, projectionData };
     }
@@ -683,42 +698,95 @@ export class LayoutInstance {
 
             const angleStep = (direction_mult * 2 * Math.PI) / relatedNodes.length;
 
+
+            // TODO: Perhaps we should lay out ALL nodes along the circle, 
+            // and then use the relative positions to determine the constraints
+            // of EACH node to ALL other nodes in the fragment.
+
+            // So first lay out all nodes in the fragment
+            let fragmentNodePositions = {};
+            for (var i = 0; i < relatedNodes.length; i++) {
+                let theta = i * angleStep;
+                let x = minRadius * Math.cos(theta);
+                let y = minRadius * Math.sin(theta);
+                fragmentNodePositions[relatedNodes[i]] = { x: x, y: y };
+            }
+
+            // Now we determine the constraints
+
+            // TODO: Is this a better approach?
+            // Should we have some SIGMA (ALIGN IF WITHIN SIGMA OF EACH OTHER)
             for (var i = 0; i < relatedNodes.length; i++) {
 
-                let next_node_idx = (i + 1) % relatedNodes.length;
-                let node = relatedNodes[i];
-                let next_node = relatedNodes[next_node_idx];
+                for (var j = 0; j < relatedNodes.length; j++) {
+                    if (i !== j) {
+                        let node1 = relatedNodes[i];
+                        let node2 = relatedNodes[j];
+                        let node1_pos = fragmentNodePositions[node1];
+                        let node2_pos = fragmentNodePositions[node2];
 
+                        if (node1_pos.x > node2_pos.x) {
+                            constraints.push(this.leftConstraint(node2, node1, this.minSepWidth, layoutNodes));
+                        }
+                        else if (node1_pos.x < node2_pos.x) {
+                            constraints.push(this.leftConstraint(node1, node2, this.minSepWidth, layoutNodes));
+                        }
+                        else {
+                            // If they are on the same x-axis, we need to ensure that they are not on top of each other
+                            constraints.push(this.ensureSameXConstraint(node1, node2, layoutNodes));
+                        }
 
-                // Get the angle between the two nodes
-                let current_node_theta = i * angleStep;
-                let next_node_theta = next_node_idx * angleStep;
-
-                // This is a notional computation, where 
-                // we assume a circle of radius minRadius
-                let current_node_x = minRadius * Math.cos(current_node_theta);
-                let current_node_y = minRadius * Math.sin(current_node_theta);
-
-                let next_node_x = minRadius * Math.cos(next_node_theta);
-                let next_node_y = minRadius * Math.sin(next_node_theta);
-
-                // Now we need to determine the direction of the nodes
-                // relative to one another.
-                if (current_node_x > next_node_x) {
-                    constraints.push(this.leftConstraint(next_node, node, this.minSepWidth, layoutNodes));
-                }
-                // HMM. Should this be <= or just an else?
-                else {
-                    constraints.push(this.leftConstraint(node, next_node, this.minSepWidth, layoutNodes));
-                }
-
-                if (current_node_y > next_node_y) {
-                    constraints.push(this.topConstraint(node, next_node, this.minSepHeight, layoutNodes));
-                }
-                else {
-                    constraints.push(this.topConstraint(next_node, node, this.minSepHeight, layoutNodes));
+                        if (node1_pos.y > node2_pos.y) {
+                            constraints.push(this.topConstraint(node2, node1, this.minSepHeight, layoutNodes));
+                        }
+                        else if (node1_pos.y < node2_pos.y) {
+                            constraints.push(this.topConstraint(node1, node2, this.minSepHeight, layoutNodes));
+                        }
+                        else {
+                            // If they are on the same y-axis, we need to ensure that they are not on top of each other
+                            constraints.push(this.ensureSameYConstraint(node1, node2, layoutNodes));
+                        }
+                    }
                 }
             }
+
+
+            // for (var i = 0; i < relatedNodes.length; i++) {
+
+            //     let next_node_idx = (i + 1) % relatedNodes.length;
+            //     let node = relatedNodes[i];
+            //     let next_node = relatedNodes[next_node_idx];
+
+
+            //     // Get the angle between the two nodes
+            //     let current_node_theta = i * angleStep;
+            //     let next_node_theta = next_node_idx * angleStep;
+
+            //     // This is a notional computation, where 
+            //     // we assume a circle of radius minRadius
+            //     let current_node_x = minRadius * Math.cos(current_node_theta);
+            //     let current_node_y = minRadius * Math.sin(current_node_theta);
+
+            //     let next_node_x = minRadius * Math.cos(next_node_theta);
+            //     let next_node_y = minRadius * Math.sin(next_node_theta);
+
+            //     // Now we need to determine the direction of the nodes
+            //     // relative to one another.
+            //     if (current_node_x > next_node_x) {
+            //         constraints.push(this.leftConstraint(next_node, node, this.minSepWidth, layoutNodes));
+            //     }
+            //     // HMM. Should this be <= or just an else?
+            //     else {
+            //         constraints.push(this.leftConstraint(node, next_node, this.minSepWidth, layoutNodes));
+            //     }
+
+            //     if (current_node_y > next_node_y) {
+            //         constraints.push(this.topConstraint(node, next_node, this.minSepHeight, layoutNodes));
+            //     }
+            //     else {
+            //         constraints.push(this.topConstraint(next_node, node, this.minSepHeight, layoutNodes));
+            //     }
+            // }
         });
         return constraints;
     }
@@ -790,6 +858,20 @@ export class LayoutInstance {
             }
         });
         return constraints;
+    }
+
+
+    private getDisconnectedNodes(g: Graph): string[] {
+
+        let inNodes = g.edges().map(edge => edge.w);
+        let outNodes = g.edges().map(edge => edge.v);
+
+        // All nodes in the graph
+        let allNodes = new Set(g.nodes());
+        let allConnectedNodes = new Set([...inNodes, ...outNodes]);
+        let disconnectedNodes = [...allNodes].filter(node => !allConnectedNodes.has(node));
+        return disconnectedNodes;
+
     }
 
 
@@ -921,6 +1003,18 @@ export class LayoutInstance {
         return { axis: "x", node1: node1, node2: node2 };
     }
 
+    private singletonGroup(nodeId: string): LayoutGroup {
+
+        let groupName = `${LayoutInstance.DISCONNECTED_PREFIX}${nodeId}`;
+        
+        return {
+            name: groupName,
+            nodeIds: [nodeId],
+            keyNodeId: nodeId
+        }
+
+
+    }
 
 
 

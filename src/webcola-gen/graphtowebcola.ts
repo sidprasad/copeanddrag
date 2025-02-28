@@ -1,6 +1,7 @@
 import { Node } from 'webcola';
 import * as dagre from 'dagre';
 import { InstanceLayout, LayoutNode, LayoutEdge, LayoutConstraint, LayoutGroup, LeftConstraint, TopConstraint, AlignmentConstraint, isLeftConstraint, isTopConstraint, isAlignmentConstraint } from '../layout/interfaces';
+import { LayoutInstance } from '../layout/layoutinstance';
 
 
 
@@ -74,6 +75,8 @@ export class WebColaLayout {
     }
 
 
+
+
     this.colaNodes = instanceLayout.nodes.map(node => this.toColaNode(node));
     this.colaEdges = instanceLayout.edges.map(edge => this.toColaEdge(edge));
 
@@ -82,6 +85,15 @@ export class WebColaLayout {
 
 
     this.colaConstraints = instanceLayout.constraints.map(constraint => this.toColaConstraint(constraint));
+
+
+    //// IF THERE ARE NO CONSTRAINTS, THEN FIX THE NODES TO WHATEVER
+    // STERLING / DAGRE GIVES US. OTHERWISE JUST USE THOSE
+    // AS SUGGESTED STARTING POINTS
+    if (this.colaConstraints.length === 0 && this.dagre_graph) {
+      this.colaNodes.forEach(node => node.fixed = 1);
+    }
+
 
   }
 
@@ -147,7 +159,7 @@ export class WebColaLayout {
       let dagre_node = this.dagre_graph.node(node.id);
       x = dagre_node.x;
       y = dagre_node.y;
-      fixed = 1;
+      //fixed = 1; // THIS REALLY IS NOT GOOD!
     }
 
 
@@ -316,9 +328,15 @@ export class WebColaLayout {
 
     const colaGroupsBeforeSubgrouping = Object.entries(groupDefinitions).map(([key, value]) => {
 
-      let leaves = value.map((nodeId) => this.getNodeIndex(nodeId));
-      let padding = 10;
+
+      const defaultPadding = 10;
+      const disconnectedNodePadding = 30;
+      const disconnectedNodeMarker = LayoutInstance.DISCONNECTED_PREFIX;
+
+      let leaves = value.map((nodeId) => this.getNodeIndex(nodeId));  
       let name = key;
+
+      let padding = name.startsWith(disconnectedNodeMarker) ? disconnectedNodePadding : defaultPadding;
 
       return { leaves, padding, name };
     });
