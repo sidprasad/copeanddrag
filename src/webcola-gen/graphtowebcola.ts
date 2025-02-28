@@ -75,6 +75,8 @@ export class WebColaLayout {
     }
 
 
+
+
     this.colaNodes = instanceLayout.nodes.map(node => this.toColaNode(node));
     this.colaEdges = instanceLayout.edges.map(edge => this.toColaEdge(edge));
 
@@ -83,6 +85,15 @@ export class WebColaLayout {
 
 
     this.colaConstraints = instanceLayout.constraints.map(constraint => this.toColaConstraint(constraint));
+
+
+    //// IF THERE ARE NO CONSTRAINTS, THEN FIX THE NODES TO WHATEVER
+    // STERLING / DAGRE GIVES US. OTHERWISE JUST USE THOSE
+    // AS SUGGESTED STARTING POINTS
+    if (this.colaConstraints.length === 0 && this.dagre_graph) {
+      this.colaNodes.forEach(node => node.fixed = 1);
+    }
+
 
   }
 
@@ -148,7 +159,7 @@ export class WebColaLayout {
       let dagre_node = this.dagre_graph.node(node.id);
       x = dagre_node.x;
       y = dagre_node.y;
-      fixed = 1; // THIS REALLY IS NOT GOOD!
+      //fixed = 1; // THIS REALLY IS NOT GOOD!
     }
 
 
