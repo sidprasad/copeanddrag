@@ -1,6 +1,7 @@
 import { Node } from 'webcola';
 import * as dagre from 'dagre';
 import { InstanceLayout, LayoutNode, LayoutEdge, LayoutConstraint, LayoutGroup, LeftConstraint, TopConstraint, AlignmentConstraint, isLeftConstraint, isTopConstraint, isAlignmentConstraint } from '../layout/interfaces';
+import { LayoutInstance } from '../layout/layoutinstance';
 
 
 
@@ -147,7 +148,7 @@ export class WebColaLayout {
       let dagre_node = this.dagre_graph.node(node.id);
       x = dagre_node.x;
       y = dagre_node.y;
-      fixed = 1;
+      fixed = 1; // THIS REALLY IS NOT GOOD!
     }
 
 
@@ -316,9 +317,15 @@ export class WebColaLayout {
 
     const colaGroupsBeforeSubgrouping = Object.entries(groupDefinitions).map(([key, value]) => {
 
-      let leaves = value.map((nodeId) => this.getNodeIndex(nodeId));
-      let padding = 10;
+
+      const defaultPadding = 10;
+      const disconnectedNodePadding = 30;
+      const disconnectedNodeMarker = LayoutInstance.DISCONNECTED_PREFIX;
+
+      let leaves = value.map((nodeId) => this.getNodeIndex(nodeId));  
       let name = key;
+
+      let padding = name.startsWith(disconnectedNodeMarker) ? disconnectedNodePadding : defaultPadding;
 
       return { leaves, padding, name };
     });

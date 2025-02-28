@@ -641,13 +641,23 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
 
     // Add a rectangle for each group and a label at the top of the group
+    const DISCONNECTED_NODE_GROUP = "_d_";
 
     var group = svg.selectAll(".group")
         .data(groups)
         .enter().append("rect")
-        .attr("class", "group")
+        .attr("class", function (d) {
+            return d.name.startsWith(DISCONNECTED_NODE_GROUP) ? "disconnectedNode" : "group";
+        })
         .attr("rx", 8).attr("ry", 8)
         .style("fill", function (d, i) {
+
+            // If d.name starts with "_d_", color it transparent
+            if (d.name.startsWith(DISCONNECTED_NODE_GROUP)) {
+                return "transparent";
+            }
+
+
             var targetNode = nodes[d.keyNode];
             return targetNode.color;
         })

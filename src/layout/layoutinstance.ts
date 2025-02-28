@@ -11,6 +11,7 @@ import { LayoutNode, LayoutEdge, LayoutConstraint, InstanceLayout, LeftConstrain
 import { generateGraph } from '../alloy-graph';
 
 import { ColorPicker } from './colorpicker';
+import { Group } from 'webcola';
 
 const UNIVERSAL_TYPE = "univ";
 
@@ -19,6 +20,7 @@ export class LayoutInstance {
 
 
     readonly hideThisEdge = "_h_"
+    static DISCONNECTED_PREFIX = "_d_"
     readonly DEFAULT_NODE_ICON_PATH: string = null;
     readonly DEFAULT_NODE_HEIGHT = 60;
     readonly DEFAULT_NODE_WIDTH = 100;
@@ -524,10 +526,14 @@ export class LayoutInstance {
         let g: Graph = generateGraph(ai, this.hideDisconnected, this.hideDisconnectedBuiltIns);
 
         const attributes = this.generateAttributes(g);
-        const groups = this.generateGroups(g);
+        let groups = this.generateGroups(g);
         const colors = this.colorNodesByType(g, a);
 
+
+        
+
         this.ensureNoExtraNodes(g, a);
+        let dcN = this.getDisconnectedNodes(g);
 
 
 
@@ -638,6 +644,15 @@ export class LayoutInstance {
         layoutEdges = layoutEdges.filter((edge) => !edge.id.startsWith(this.hideThisEdge));
 
 
+        // And now make sure that all the disconnected nodes (as identified)
+        // have some padding around them.
+        let dcnGroups = dcN.map((node) => {
+            return this.singletonGroup(node);
+        }
+        );
+        groups = groups.concat(dcnGroups);
+
+
         let layout = { nodes: layoutNodes, edges: layoutEdges, constraints: constraints, groups: groups };
         return { layout, projectionData };
     }
@@ -700,6 +715,7 @@ export class LayoutInstance {
             // Now we determine the constraints
 
             // TODO: Is this a better approach?
+            // Should we have some SIGMA (ALIGN IF WITHIN SIGMA OF EACH OTHER)
             for (var i = 0; i < relatedNodes.length; i++) {
 
                 for (var j = 0; j < relatedNodes.length; j++) {
@@ -845,6 +861,20 @@ export class LayoutInstance {
     }
 
 
+    private getDisconnectedNodes(g: Graph): string[] {
+
+        let inNodes = g.edges().map(edge => edge.w);
+        let outNodes = g.edges().map(edge => edge.v);
+
+        // All nodes in the graph
+        let allNodes = new Set(g.nodes());
+        let allConnectedNodes = new Set([...inNodes, ...outNodes]);
+        let disconnectedNodes = [...allNodes].filter(node => !allConnectedNodes.has(node));
+        return disconnectedNodes;
+
+    }
+
+
     private findDisconnectedComponents(edges): string[][] {
         let inNodes = edges.map(edge => edge.w);
         let outNodes = edges.map(edge => edge.v);
@@ -973,6 +1003,18 @@ export class LayoutInstance {
         return { axis: "x", node1: node1, node2: node2 };
     }
 
+    private singletonGroup(nodeId: string): LayoutGroup {
+
+        let groupName = `${LayoutInstance.DISCONNECTED_PREFIX}${nodeId}`;
+        
+        return {
+            name: groupName,
+            nodeIds: [nodeId],
+            keyNodeId: nodeId
+        }
+
+
+    }
 
 
 
