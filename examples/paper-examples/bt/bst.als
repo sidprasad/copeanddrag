@@ -6,7 +6,6 @@ sig Node {
   right: lone Node  -- every node has at most one right-child
 }
 
-
 fun descendantsOf[ancestor: Node]: set Node {
   ancestor.^(left + right) -- nodes reachable via transitive closure
 }
@@ -17,8 +16,5 @@ pred binary_tree {
   all n: Node | some n.left => n.left != n.right 
   all n: Node | lone parent: Node | n in parent.(left+right)
 }
-
-
-
 
 run {binary_tree} for exactly 5 Node

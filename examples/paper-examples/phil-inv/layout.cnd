@@ -1,11 +1,21 @@
 constraints:
-    - cyclic : {field: Next}
-    - orientation: {field: leftFork, directions: [right] }
-    - orientation : {field: rightFork, directions: [right]}
+    - cyclic : {field: leftPhil}
+    - attribute: {field: rightPhil, direction: counterclockwise}
 directives:
     - projection : {sig: this/State}
     - projection: {sig: so/Ord}
     - projection: {sig: po/Ord}
+    - attribute: {field: Next}
     - flag: hideDisconnectedBuiltIns
-    - attribute: {field: leftPhil}
-    - attribute: {field: rightPhil}
+    - icon:
+        sig: this/Fork
+        icon:
+          path: 'img/fork.png'
+          height: 50
+          width: 50
+    - icon:
+        sig: this/Philosopher
+        icon:
+          path: 'img/person.png'
+          height: 50
+          width: 50

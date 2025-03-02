@@ -1,0 +1,11 @@
+constraints:
+    - cyclic : {field: Next}
+    - orientation: {field: leftFork, directions: [right] }
+    - orientation : {field: rightFork, directions: [right]}
+directives:
+    - projection : {sig: this/State}
+    - projection: {sig: so/Ord}
+    - projection: {sig: po/Ord}
+    - flag: hideDisconnectedBuiltIns
+    - attribute: {field: leftPhil}
+    - attribute: {field: rightPhil}
