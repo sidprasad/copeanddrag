@@ -8,8 +8,8 @@ directives:
         sig: Eye
         icon:
           path: 'img/eye.png'
-          height: 40
-          width: 40
+          height: 70
+          width: 70
     - icon:
         sig: Nose
         icon:
@@ -20,12 +20,12 @@ directives:
         sig: Mouth
         icon:
           path: "img/mouth.png"
-          height: 50
+          height: 70
           width: 200
     - icon:
         sig: EyeBrow
         icon:
           path: "img/eyebrow.png"
-          height: 30
-          width: 50
+          height: 50
+          width: 70
         
