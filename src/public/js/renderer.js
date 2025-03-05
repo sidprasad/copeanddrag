@@ -148,6 +148,27 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     const min_sep = 50;
     const default_node_width = 100;
 
+    ///// Check whats up TODO ////
+    let scaleFactorInput = document.getElementById("scaleFactor");
+    let scaleFactor = scaleFactorInput ? parseFloat(scaleFactorInput.value) : 1;
+
+    if (scaleFactorInput) {
+        scaleFactorInput.addEventListener("change", function () {
+            scaleFactor = parseFloat(scaleFactorInput.value) / 5;
+
+            let linkLength = (min_sep + default_node_width) / scaleFactor;
+            console.log("Link length", linkLength);
+
+            colaLayout.linkDistance(linkLength);
+            colaLayout.start(
+                initialUnconstrainedIterations,
+                initialUserConstraintIterations,
+                initialAllConstraintsIterations,
+                gridSnapIterations)
+                .on("end", routeEdges);
+        });
+    }
+
     // TODO: Figure out WHEN to use flowLayout and when not to use it.
     // I think having directly above/ below makes it impossible to have flow layout 'y' *unless we have heirarchy*
 
@@ -166,7 +187,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .curve(d3.curveBasis);
 
     var routeEdges = function () {
-        
+
         try {
             colaLayout.prepareEdgeRouting(margin / 3);
             console.log("Routing edges for the nth time", ++edgeRouteIdx);
@@ -206,7 +227,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     console.log("Error routing edge", d.id, `from ${d.source.id} to ${d.target.id}`);
                     console.error(e);
 
-                    
+
                     let runtimeMessages = document.getElementById("runtime_messages");
                     let dismissableAlert = document.createElement("div");
                     dismissableAlert.className = "alert alert-danger alert-dismissible fade show";
@@ -304,7 +325,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     return (edge.source.id == d.source.id && edge.target.id == d.target.id) ||
                         (edge.source.id == d.target.id && edge.target.id == d.source.id);
                 });
-                
+
 
                 // If there are only two points in the route, get the midpoint of the route and add it to the route
                 if (route.length === 2) {
@@ -584,40 +605,40 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .text(function (d) { return d.mostSpecificType; });
 
 
-    var label = 
+    var label =
         //svg.selectAll(".label")
         //.data(nodes)
         node.append("text")
-        //.enter().append("text")
-        .attr("class", "label")
-        .each(function (d) {
+            //.enter().append("text")
+            .attr("class", "label")
+            .each(function (d) {
 
-            if (isHiddenNode(d)) {
-                return;
-            }
+                if (isHiddenNode(d)) {
+                    return;
+                }
 
-            let displayLabel = d.icon ? "" : d.name;
+                let displayLabel = d.icon ? "" : d.name;
 
 
-            // Append tspan for d.name
-            d3.select(this).append("tspan")
-                .attr("x", 0) // Align with the parent text element
-                .attr("dy", "0em") // Start at the same vertical position
-                .style("font-weight", "bold")
-                .text(displayLabel);
-
-            var y = 1; // Start from the next line for attributes
-
-            // Append tspans for each attribute
-            for (let key in d.attributes) {
+                // Append tspan for d.name
                 d3.select(this).append("tspan")
                     .attr("x", 0) // Align with the parent text element
-                    .attr("dy", `${y}em`) // Move each attribute to a new line
-                    .text(key + ": " + d.attributes[key]);
-                y += 1; // Increment for the next line
-            }
-        })
-        .call(colaLayout.drag);
+                    .attr("dy", "0em") // Start at the same vertical position
+                    .style("font-weight", "bold")
+                    .text(displayLabel);
+
+                var y = 1; // Start from the next line for attributes
+
+                // Append tspans for each attribute
+                for (let key in d.attributes) {
+                    d3.select(this).append("tspan")
+                        .attr("x", 0) // Align with the parent text element
+                        .attr("dy", `${y}em`) // Move each attribute to a new line
+                        .text(key + ": " + d.attributes[key]);
+                    y += 1; // Increment for the next line
+                }
+            })
+            .call(colaLayout.drag);
 
 
     // Helper function to calculate new position along the path
@@ -702,8 +723,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             .attr("y", function (d) { return d.bounds.y; });
 
         mostSpecificTypeLabel
-            .attr("x", function (d) { return d.x - d.width/2 + 5; })
-            .attr("y", function (d) { return d.y - (d.height/2) + 10 ; })
+            .attr("x", function (d) { return d.x - d.width / 2 + 5; })
+            .attr("y", function (d) { return d.y - (d.height / 2) + 10; })
             .raise();
 
 
