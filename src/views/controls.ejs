@@ -52,6 +52,10 @@
         <input type="number" class="form-control" id="instancenumber" name="instancenumber"
             value="<%- instanceNumber %>">
     </div>
+    <div>
+        <label for="scaleFactor">Adjust Compactness</label>
+        <input type="range" class="form-control-range" id="scaleFactor" name="scaleFactor" min="0.1" max="5" step="0.1" value="1">
+    </div>
 
     <!-- Here, projections is a list of type { type : string, projectedAtom : string, atoms : string[]} 
              

@@ -148,6 +148,22 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     const min_sep = 50;
     const default_node_width = 100;
 
+    ///// Check whats up TODO ////
+    let scaleFactorInput = document.getElementById("scaleFactor");
+    let scaleFactor = scaleFactorInput ? parseFloat(scaleFactorInput.value) : 1;
+
+    if(scaleFactorInput) {
+        scaleFactorInput.addEventListener("change", function() {
+            scaleFactor = parseFloat(scaleFactorInput.value);
+            colaLayout.symmetricDiffLinkLengths(min_sep + default_node_width * scaleFactor);
+            colaLayout.start(
+                initialUnconstrainedIterations,
+                initialUserConstraintIterations,
+                initialAllConstraintsIterations,
+                gridSnapIterations)
+                .on("end", routeEdges);
+    });
+
     // TODO: Figure out WHEN to use flowLayout and when not to use it.
     // I think having directly above/ below makes it impossible to have flow layout 'y' *unless we have heirarchy*
 
@@ -157,7 +173,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .constraints(constraints)
         .groups(groups)
         .groupCompactness(1e-3)
-        .symmetricDiffLinkLengths(min_sep + default_node_width);
+        .symmetricDiffLinkLengths(min_sep + default_node_width * scaleFactor);
 
 
     var lineFunction = d3.line()
