@@ -156,7 +156,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         scaleFactorInput.addEventListener("change", function () {
             scaleFactor = parseFloat(scaleFactorInput.value);
 
-            let linkLength = min_sep + default_node_width * scaleFactor;
+            let linkLength = (min_sep + default_node_width) / scaleFactor;
             console.log("Link length", linkLength);
 
             colaLayout.linkDistance(linkLength);
@@ -178,7 +178,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .constraints(constraints)
         .groups(groups)
         .groupCompactness(1e-3)
-        .symmetricDiffLinkLengths(min_sep + default_node_width * scaleFactor);
+        .symmetricDiffLinkLengths(min_sep + default_node_width);
 
 
     var lineFunction = d3.line()
