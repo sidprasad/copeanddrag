@@ -1,0 +1,127 @@
+<alloy builddate="Monday, March 17th, 2025">
+<instance bitwidth="4" maxseq="-1" command="temporary-name_rbt_1" filename="/Users/siddharthaprasad/Desktop/copeanddrag/examples/misc-examples/redblack2/rbt.frg" version="4.1"  >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="RbNod" ID="4" parentID="2">
+
+</sig>
+
+<sig label="Red" ID="5" parentID="4">
+<atom label="N1"/><atom label="N4"/><atom label="N3"/><atom label="N2"/>
+</sig>
+
+<sig label="Black" ID="6" parentID="4">
+<atom label="N0"/>
+</sig>
+
+<sig label="RBLeaf" ID="7" parentID="6">
+<atom label="N9"/><atom label="N8"/><atom label="N7"/><atom label="N10"/><atom label="N6"/><atom label="N5"/>
+</sig>
+
+<field label="right" ID="8" parentID="4">
+<tuple><atom label="N0"/><atom label="N2"/></tuple>
+<tuple><atom label="N1"/><atom label="N5"/></tuple>
+<tuple><atom label="N4"/><atom label="N10"/></tuple>
+<tuple><atom label="N3"/><atom label="N6"/></tuple>
+<tuple><atom label="N2"/><atom label="N8"/></tuple>
+<types><type ID="4"/><type ID="4"/></types>
+
+</field>
+
+<field label="value" ID="9" parentID="4">
+<tuple><atom label="N0"/><atom label="5"/></tuple>
+<tuple><atom label="N1"/><atom label="1"/></tuple>
+<tuple><atom label="N9"/><atom label="0"/></tuple>
+<tuple><atom label="N8"/><atom label="0"/></tuple>
+<tuple><atom label="N4"/><atom label="1"/></tuple>
+<tuple><atom label="N7"/><atom label="0"/></tuple>
+<tuple><atom label="N10"/><atom label="0"/></tuple>
+<tuple><atom label="N6"/><atom label="0"/></tuple>
+<tuple><atom label="N5"/><atom label="0"/></tuple>
+<tuple><atom label="N3"/><atom label="2"/></tuple>
+<tuple><atom label="N2"/><atom label="6"/></tuple>
+<types><type ID="4"/><type ID="1"/></types>
+
+</field>
+
+<field label="left" ID="10" parentID="4">
+<tuple><atom label="N0"/><atom label="N1"/></tuple>
+<tuple><atom label="N1"/><atom label="N3"/></tuple>
+<tuple><atom label="N4"/><atom label="N9"/></tuple>
+<tuple><atom label="N3"/><atom label="N4"/></tuple>
+<tuple><atom label="N2"/><atom label="N7"/></tuple>
+<types><type ID="4"/><type ID="4"/></types>
+
+</field>
+
+
+</instance>
+
+<source filename="/Users/siddharthaprasad/Desktop/copeanddrag/examples/misc-examples/redblack2/rbt.frg" content="#lang forge
+&#xA;
+&#xA;
+&#xA;
+&#xA;
+&#xA;
+&#xA;sig RbNod {
+&#xA;  value: one Int,  
+&#xA;  left: lone RbNod, 
+&#xA;  right: lone RbNod
+&#xA;}
+&#xA;
+&#xA;
+&#xA;sig Black extends RbNod {}
+&#xA;sig Red extends RbNod {}
+&#xA;
+&#xA;sig RBLeaf extends Black {}
+&#xA;
+&#xA;
+&#xA;
+&#xA;pred leafsareleafs {
+&#xA;
+&#xA;    all n : RbNod | {
+&#xA;         ((no n.left) and (no n.right)) iff (n in RBLeaf)
+&#xA;    }
+&#xA;}
+&#xA;
+&#xA;/*
+&#xA;# z
+&#xA;#              N0  `Black(5)
+&#xA;#                 /      \
+&#xA;#           N1`Red(1)  N2`Red(6) --&amp;gt; (N7, N8)
+&#xA;#            /    \
+&#xA;#     N3`Red(2)  N5Black(0)
+&#xA;#       /      \
+&#xA;#   N4`Red(1)   N6`Black(0)
+&#xA;#   N9, N10
+&#xA;*/
+&#xA;
+&#xA;// z = rbnod(Black, 5, rbnod(Red, 1, rbnod(Red, 2, rbnod(Red, 1, rbleaf(Black, 0), rbleaf(Black, 0)), rbleaf(Black, 0)), rbleaf(Black, 0)), rbnod(Red, 6, rbleaf(Black, 0), rbleaf(Black, 0)))
+&#xA;
+&#xA;
+&#xA;inst z {
+&#xA;
+&#xA;    RbNod = `N0 + `N1 + `N2 + `N3 + `N4 + `N5 + `N6 + `N7 + `N8 + `N9 + `N10
+&#xA;    Black = `N0 + `N5 + `N6 + `N7 + `N8 + `N9 + `N10
+&#xA;    Red = `N1 + `N2 + `N3 + `N4
+&#xA;    value = `N0 -&amp;gt; 5 + `N1 -&amp;gt; 1 + `N2 -&amp;gt; 6 + `N3 -&amp;gt; 2 + `N4 -&amp;gt; 1 + `N5 -&amp;gt; 0 + `N6 -&amp;gt; 0 + `N7 -&amp;gt; 0 + `N8 -&amp;gt; 0 + `N9 -&amp;gt; 0 + `N10 -&amp;gt; 0
+&#xA;    left = `N0-&amp;gt;`N1 + `N1-&amp;gt;`N3 + `N3-&amp;gt;`N4 + `N4-&amp;gt;`N9 + `N2-&amp;gt;`N7
+&#xA;    right = `N0-&amp;gt;`N2 + `N2-&amp;gt;`N8 + `N1-&amp;gt;`N5 + `N3-&amp;gt;`N6 + `N4-&amp;gt;`N10
+&#xA;}
+&#xA;
+&#xA;run leafsareleafs for z
+&#xA;"></source>
+</alloy>
