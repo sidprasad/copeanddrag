@@ -1,0 +1,13 @@
+constraints:
+  - orientation: { field: left, directions: [below, left] }
+  - orientation: { field: right, directions: [below, right] }
+directives:
+  - attribute: { field: value }
+  - flag: hideDisconnected
+  - flag: hideDisconnectedBuiltIns
+  - color:
+        sig: Red
+        value: "red"
+  - color:
+      sig: Black
+      value: "black"

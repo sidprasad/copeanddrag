@@ -1,0 +1,8 @@
+site_name: Cope and Drag Docs
+repo_url: https://github.com/sidprasad/copeanddrag
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.indices
