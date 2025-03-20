@@ -11,7 +11,18 @@ constraints:
       field: next
       direction: clockwise  
       appliesTo: [Node, Node]
-```
+``` 
+
+
+<!-- | ![Left Image](img/ring-lights/asv_state1.png) | ```
+constraints:
+  - cyclic:
+      field: left
+      direction: clockwise  
+      appliesTo: [Node, Node]
+``` | ![Right Image](img/ring-lights/cnd_state1.png) |
+|------------------------------------|-----------------------------------------|-------------------------------------| -->
+
 
 #### Parameters
 

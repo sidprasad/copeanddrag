@@ -6,6 +6,9 @@ visualizations from scratch.
 This approach lets you get started quickly! Every well formed CnD spec
 (*even an empty spec*) produces a diagram. This is achieved via two kinds of operations:
 
+
+![Teaser Image](img/teaser.png)
+
 - [Constraints](constraints.md)
 - [Directives](directives.md)
 
