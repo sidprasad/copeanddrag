@@ -1,4 +1,4 @@
-# Cope-and-Drag : Diagramming by refinement
+# Cope and Drag
 
 CnD is a lightweight diagramming language designed for use with Alloy-like languages.
 Diagrams are built by refining default Alloy output, rather than requiring users to build 
@@ -9,8 +9,7 @@ This approach lets you get started quickly! Every well formed CnD spec
 - [Constraints](constraints.md)
 - [Directives](directives.md)
 
-
-Further documentation:
+----
 
 - [Syntax](syntax.md)
 - [Examples](examples.md)
