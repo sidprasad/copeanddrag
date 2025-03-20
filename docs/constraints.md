@@ -28,7 +28,7 @@ Example:
 ```
 This ensures that elements connected via `c1` are placed to the left and below their parent, while `c2` elements are positioned to the right and below.
 
-#### **Grouping Constraints**
+### **Grouping Constraints**
 Grouping constraints enforce that related elements are visually grouped together.
 
 Example:
