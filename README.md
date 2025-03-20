@@ -18,3 +18,8 @@ Cope and Drag is built to be easily deployed as an ExpressJs web application.
 4. Build/ in production mode.
    1.  `npm run build` This will compile the entire server into the `/dist` folder. This folder is portable and can be copied over to various targets.
    2.  `npm start` (or `node index dist/index.js`). This makes the CnD server available on localhost:3000
+   
+
+## Docs
+
+`mkdocs gh-deploy`

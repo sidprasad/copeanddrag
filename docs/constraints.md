@@ -2,6 +2,7 @@
 
 Cope and Drag **constraints** define rules about the relative positions of diagram elements.
 
+See [syntax](syntax.md) for detailed documentation.
 
 ### **Cyclic Constraints**
 Cyclic constraints enforce that elements related by a given field should be arranged in a circular layout.

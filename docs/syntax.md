@@ -12,40 +12,68 @@ A basic CnD specification follows this structure:
 ```yaml
 constraints:
   - <constraint-type>: <parameters>
+  - <constraint-type>: <parameters>
+  - <constraint-type>: <parameters>
+  .
+  .
+  .
 
 directives:
   - <directive-type>: <parameters>
+  - <directive-type>: <parameters>
+  .
+  .
+  .
 ```
 
 ---
 
-## Constraints
+# Constraints
 Constraints define spatial relationships between elements in the diagram. Each constraint consists of a **type** and associated **parameters**.
 
-### **Cyclic Constraints**
-Arranges elements related by a field in a circular layout.
+## **Cyclic Constraints**
+Cyclic constraints arranges elements related by a field in a circular layout.
+
 
 ```yaml
 constraints:
   - cyclic:
       field: next
-      direction: clockwise  # or counterclockwise
+      direction: clockwise  
+      appliesTo: [Node, Node]
 ```
 
-### **Orientation Constraints**
-Specifies the relative positioning of elements.
+#### Parameters
+
+- `field` : Name of the field in the source specification upon which the constraint acts
+- `direction` : [Optional] Direction in which elements will be laid out. One of `clockwise` or `counterclockwise`. Defaults to `clockwise`
+- `appliesTo` : [Optional] List of the form [`sourceSig`, `targetSig`] , describing output graph edges to which this constraint applies. Defaults to [`univ`, `univ`] (that is, all types).
+
+
+
+## **Orientation Constraints**
+Specify the relative positioning of elements.
+
+### Orientation for Fields
 
 ```yaml
 constraints:
   - orientation:
-      field: left
+      field: next
       directions: [left, below]  # Multiple allowed
-  - orientation:
-      field: right
-      directions: [right, below]
 ```
 
-Alternatively, orientation can apply to entire signatures:
+#### Parameters
+
+- `field` : Name of the field in the source specification upon which the constraint acts.
+- `directions` : Directions in which elements will be laid out. List of directions, which can be
+                `left`, `right`, `above`, `below`, `directlyAbove`, `directlyBelow`, `directlyLeft`, `directlyRight`.
+
+- `appliesTo` : [Optional] List of the form [`sourceSig`, `targetSig`] , describing output graph edges to which this constraint applies. Defaults to [`univ`, `univ`] (that is, all types).
+
+### Orientation for Sigs
+
+Alternatively, orientation can apply to entire sigs, defining constraints between all atoms of certain sig types.
 
 ```yaml
 constraints:
@@ -54,8 +82,17 @@ constraints:
       directions: [above]
 ```
 
-### **Grouping Constraints**
-Groups elements together based on a field.
+
+#### Parameters
+
+- `sigs` : List of sig names the source specification upon which the constraint acts. This list can have exactly 2 elements.
+- `directions` : Directions in which elements will be laid out. List of directions, which can be
+                `left`, `right`, `above`, `below`, `directlyAbove`, `directlyBelow`, `directlyLeft`, `directlyRight`.
+
+
+
+## **Grouping Constraints**
+Group elements together based on a field.
 
 ```yaml
 constraints:
@@ -64,60 +101,96 @@ constraints:
       target: domain  # or range
 ```
 
----
+#### Parameters
 
-## Directives
+- `field` : Name of the field in the source specification upon which the constraint acts.
+- `target` : [Optional] Which part of the field relation is grouped *upon*. Can be `range`  or `domain`. Default is `range`.
+
+
+------
+
+# Directives
 Directives control the visual representation of elements, including icons, colors, attributes, and visibility.
 
+### **Attribute Directives**
+
+These replace graph edges representing a relation with attribute fields within the source node of the edge. 
+
+```
+directives:
+    - attribute: {field: id}
+```
+
+#### Parameters
+- `field` : Name of the field in the source specification upon which the constraint acts.
+
+
+
 ### **Pictorial Directives**
-Assigns an icon to a signature.
+Assign an icon to all atoms of a certain sig.
 
 ```yaml
 directives:
   - pictorial:
       sig: Person
       icon:
-        path: person.svg
+        path: /path/to/person.png
         height: 20
         width: 20
 ```
 
-### **Theming Directives**
-Controls color, attributes, projections, and visibility.
+#### Parameters
 
-#### **Color Assignment**
-```yaml
+- `sig` : Sig name in the source specification.
+- `icon` : Object describing how the icon should be displayed.
+  - `path` : Path to the icon image (`png` and `jpg` supported).
+  - `height` : Height with which the icon should be displayed.
+  - `width` : Width with which the icon should be displayed.
+
+
+
+
+### **Color Directives**
+
+Allow specific hex-colors (or simple color names) to be associated with `sigs`.
+
+```
 directives:
-  - theming:
-      sig: Node
-      color: red
+    - color:
+        sig: Apple
+        value: "red"
 ```
 
-#### **Displaying Field Attributes**
-```yaml
+#### Parameters
+
+- `sig` : Sig name in the source specification.
+- `value` : Hex (or simple english) description of the color to be applied.
+
+
+
+
+### **Projection**
+These allow [projections](https://alloy.readthedocs.io/en/latest/tooling/visualizer.html#projection) over atoms of a certain type. 
+
+```
 directives:
-  - theming:
-      field: name
-      attribute: true
+    - projection: {sig: Ord}
 ```
 
-#### **Projection**
-Focuses the diagram on a specific signature.
-```yaml
+#### Parameters
+- `sig` : Sig name in the source specification.
+
+
+
+### **Visibility Flags**
+Controls which elements are hidden. 
+
+```
 directives:
-  - theming:
-      projection: Process
+    - flag: hideDisconnectedBuiltIns
 ```
 
-#### **Visibility Flags**
-Controls which elements are hidden.
+Current flags are:
+  - `hideDisconnected`: If true, hide all atoms in the graph that are not referenced by a relation.
+  - `hideDisconnectedBuiltIns`: If true, hide all atoms of built-in type (ex. `Int`) that are not referenced by a relation.
 
-```yaml
-directives:
-  - theming:
-      visibility: hideDisconnected  # or hideDisconnectedBuiltIns
-```
-
----
-
-This syntax provides a structured and lightweight way to refine Alloy visualizations without requiring complex custom code.
