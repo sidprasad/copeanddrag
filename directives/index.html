@@ -362,18 +362,6 @@
         
       
       
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Directives
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -384,70 +372,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#attributes" class="md-nav__link">
-    <span class="md-ellipsis">
-      Attributes
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#icons" class="md-nav__link">
-    <span class="md-ellipsis">
-      Icons
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#color" class="md-nav__link">
-    <span class="md-ellipsis">
-      Color
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#projection" class="md-nav__link">
-    <span class="md-ellipsis">
-      Projection
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#flags" class="md-nav__link">
-    <span class="md-ellipsis">
-      Flags
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
       
     </li>
   
@@ -515,59 +439,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#attributes" class="md-nav__link">
-    <span class="md-ellipsis">
-      Attributes
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#icons" class="md-nav__link">
-    <span class="md-ellipsis">
-      Icons
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#color" class="md-nav__link">
-    <span class="md-ellipsis">
-      Color
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#projection" class="md-nav__link">
-    <span class="md-ellipsis">
-      Projection
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#flags" class="md-nav__link">
-    <span class="md-ellipsis">
-      Flags
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -586,45 +457,10 @@
 
 
 <h1 id="directives">Directives</h1>
-<p>[TODO: Rewrite]</p>
-<p>Directives are statements on how (and which) elements in the graph should be rendered.</p>
-<h3 id="attributes">Attributes</h3>
-<p>These replace graph edges representing a relation with attribute fields within the source node of the edge. This is analogous to attributes in Sterling themes. In the example below, the relation <code>id</code> is shown as an attribute.</p>
-<pre><code>directives:
-    - attribute: {field: id}
-</code></pre>
-<h3 id="icons">Icons</h3>
-<p>These associate specific icons with atoms of a certain <code>sig</code> type.</p>
-<pre><code>  - icon:
-      sig: Apple
-      icon:
-        path: 'http://&lt;website&gt;/img/apple.png'
-        height: 70
-        width: 70
-</code></pre>
-<h3 id="color">Color</h3>
-<p>Allows specific hex-colors (or simple color names) to be associated with <code>sigs</code>.</p>
-<pre><code>directives:
-    - color:
-        sig: Apple
-        value: &quot;red&quot;
-</code></pre>
-<p>By default, we assign every <code>sig</code> a random color, that is respected by all atoms of that type.</p>
-<h3 id="projection">Projection</h3>
-<p>These allow <a href="https://alloy.readthedocs.io/en/latest/tooling/visualizer.html#projection">projections</a> over atoms of a certain type. 
-In the example below, the sig <code>Ord</code> is projected over.</p>
-<pre><code>directives:
-    - projection: {sig: Ord}
-</code></pre>
-<h3 id="flags">Flags</h3>
-<p>We also support some basic layout settings that act upon atoms of specific <code>sig</code> types.</p>
-<ul>
-<li><code>hideDisconnected</code>: If true, hide all atoms in the graph that are not referenced by a relation.</li>
-<li><code>hideDisconnectedBuiltIns</code>: If true, hide all atoms of built-in type (ex. <code>Int</code>) that are not referenced by a relation.</li>
-</ul>
-<pre><code>directives:
-    - flag: hideDisconnectedBuiltIns
-</code></pre>
+<p>Directives are statements on how (and which) elements in the graph should be rendered.
+See <a href="../syntax/">syntax</a> for detailed documentation.</p>
+<hr />
+<p>[TODO: Fill examples]</p>
 
 
 
