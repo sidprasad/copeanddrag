@@ -9,8 +9,5 @@ This approach lets you get started quickly! Every well formed CnD spec
 - [Constraints](constraints.md)
 - [Directives](directives.md)
 
-----
-
-- [Syntax](syntax.md)
-- [Examples](examples.md)
+More [examples](examples.md) are available here.
 
