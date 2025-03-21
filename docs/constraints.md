@@ -11,7 +11,18 @@ constraints:
       field: next
       direction: clockwise  
       appliesTo: [Node, Node]
-```
+``` 
+
+
+<!-- | ![Left Image](img/ring-lights/asv_state1.png) | ```
+constraints:
+  - cyclic:
+      field: left
+      direction: clockwise  
+      appliesTo: [Node, Node]
+``` | ![Right Image](img/ring-lights/cnd_state1.png) |
+|------------------------------------|-----------------------------------------|-------------------------------------| -->
+
 
 #### Parameters
 
@@ -84,11 +95,11 @@ All CnD constraints are **hard constraints**, and thus must be satisfied for a d
 
 **A single CnD constraint definition could be inherently unsatisfiable.** For example, a constraint on the `next` field that requires the same field to be laid out both leftwards and rightwards:
 
-   ```yaml
-   - orientation:
-       field: next
-       directions: [right, left]
-   ```
+```yaml
+- orientation:
+    field: next
+    directions: [right, left]
+```
 
 This represents a bug in the CnD spec, and can be identified statically. In this case, CnD produces an error message in terms of the constraints that could not be satisfied:
 
@@ -100,17 +111,17 @@ Field `next` cannot be laid out with directions: right, left.
 
 **Some constraints may be individually satisfiable, but become contradictory when laying out a specific instance.** This is akin to a dynamic error, as it depends on the structure of the instance being visualized. For example, consider the constraints:
 
-   ```yaml
-   - orientation:
-       sigs: [X, Y]
-       directions: [below]
-   - orientation:
-       sigs: [Y, Z]
-       directions: [below]
-   - orientation:
-       sigs: [Z, X]
-       directions: [below]
-   ```
+```yaml
+- orientation:
+    sigs: [X, Y]
+    directions: [below]
+- orientation:
+    sigs: [Y, Z]
+    directions: [below]
+- orientation:
+    sigs: [Z, X]
+    directions: [below]
+```
 If an instance’s elements form a cyclic dependency, the constraints become unsatisfiable. However, an instance may lack atoms of, say, `Z`, in which case the constraints are satisfiable.
 
 
