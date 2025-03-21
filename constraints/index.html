@@ -689,6 +689,15 @@
       direction: clockwise  
       appliesTo: [Node, Node]
 </code></pre>
+<!-- | ![Left Image](img/ring-lights/asv_state1.png) | ```
+constraints:
+  - cyclic:
+      field: left
+      direction: clockwise  
+      appliesTo: [Node, Node]
+``` | ![Right Image](img/ring-lights/cnd_state1.png) |
+|------------------------------------|-----------------------------------------|-------------------------------------| -->
+
 <h4 id="parameters">Parameters</h4>
 <ul>
 <li><code>field</code> : Name of the field in the source specification upon which the constraint acts</li>
@@ -742,26 +751,26 @@
 <h1 id="when-constraints-cannot-be-satisfied">When Constraints Cannot Be Satisfied</h1>
 <p>All CnD constraints are <strong>hard constraints</strong>, and thus must be satisfied for a diagram to be produced. Constraints might not be satisfied for one of two reasons:</p>
 <p><strong>A single CnD constraint definition could be inherently unsatisfiable.</strong> For example, a constraint on the <code>next</code> field that requires the same field to be laid out both leftwards and rightwards:</p>
-<p><code>yaml
-   - orientation:
-       field: next
-       directions: [right, left]</code></p>
+<pre><code class="language-yaml">- orientation:
+    field: next
+    directions: [right, left]
+</code></pre>
 <p>This represents a bug in the CnD spec, and can be identified statically. In this case, CnD produces an error message in terms of the constraints that could not be satisfied:</p>
 <pre><code>Error: Inconsistent orientation constraint:
 Field `next` cannot be laid out with directions: right, left.
 </code></pre>
 <p><strong>Some constraints may be individually satisfiable, but become contradictory when laying out a specific instance.</strong> This is akin to a dynamic error, as it depends on the structure of the instance being visualized. For example, consider the constraints:</p>
-<p><code>yaml
-   - orientation:
-       sigs: [X, Y]
-       directions: [below]
-   - orientation:
-       sigs: [Y, Z]
-       directions: [below]
-   - orientation:
-       sigs: [Z, X]
-       directions: [below]</code>
-If an instance’s elements form a cyclic dependency, the constraints become unsatisfiable. However, an instance may lack atoms of, say, <code>Z</code>, in which case the constraints are satisfiable.</p>
+<pre><code class="language-yaml">- orientation:
+    sigs: [X, Y]
+    directions: [below]
+- orientation:
+    sigs: [Y, Z]
+    directions: [below]
+- orientation:
+    sigs: [Z, X]
+    directions: [below]
+</code></pre>
+<p>If an instance’s elements form a cyclic dependency, the constraints become unsatisfiable. However, an instance may lack atoms of, say, <code>Z</code>, in which case the constraints are satisfiable.</p>
 <p>In both these cases, CnD <strong>does not produce a diagram</strong>. Instead, it provides an error message explaining that the constraints could not be met. </p>
 
 
