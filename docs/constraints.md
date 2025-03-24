@@ -2,26 +2,34 @@
 Constraints define spatial relationships between elements in the diagram. Each constraint consists of a **type** and associated **parameters**.
 
 ## **Cyclic Constraints**
-Cyclic constraints arranges elements related by a field in a circular layout.
+Cyclic constraints arranges elements related by a field in a circular layout. For example, the constraint below converts the image on the left to that on the right.
 
 
-```yaml
-constraints:
-  - cyclic:
-      field: next
-      direction: clockwise  
-      appliesTo: [Node, Node]
-``` 
+<div style="display: table; width: 100%; text-align: left;">
 
+  <!-- Left Image -->
+  <div style="display: table-cell; width: 33%; vertical-align: middle;">
+    <img src="../img/ring-lights/asv_state1.png" alt="Default Sterling output of a graph that looks linear." style="max-width: 100%; height: auto;">
+  </div>
 
-<!-- | ![Left Image](img/ring-lights/asv_state1.png) | ```
+  <!-- Code Block -->
+  <div style="display: table-cell; width: 33%; vertical-align: middle; padding: 0 10px;">
+<pre><code>
 constraints:
   - cyclic:
       field: left
       direction: clockwise  
       appliesTo: [Node, Node]
-``` | ![Right Image](img/ring-lights/cnd_state1.png) |
-|------------------------------------|-----------------------------------------|-------------------------------------| -->
+    </code></pre>
+  </div>
+
+  <!-- Right Image -->
+  <div style="display: table-cell; width: 33%; vertical-align: middle;">
+    <img src="../img/ring-lights/cnd_state1.png" alt="Sterling output refined to circular layout." style="max-width: 100%; height: auto;">
+  </div>
+
+</div>
+
 
 
 #### Parameters
@@ -37,12 +45,39 @@ Specify the relative positioning of elements.
 
 ### Orientation for Fields
 
-```yaml
+The following orientation constraints lay out elements related by a field named `down` directly below one another,
+and elements related by the field named `right` to be directly right of one another. This transforms the Sterling output on the left to that on the right.
+
+<div style="display: table; width: 100%; text-align: left;">
+
+  <!-- Left Image -->
+  <div style="display: table-cell; width: 33%; vertical-align: middle;">
+    <img src="../img/ttt/sterling.png" alt="Default image of some Sterling output" style="max-width: 100%; height: auto;">
+  </div>
+
+  <!-- Code Block -->
+  <div style="display: table-cell; width: 33%; vertical-align: middle; padding: 0 10px;">
+<pre><code>
 constraints:
   - orientation:
-      field: next
-      directions: [left, below]  # Multiple allowed
-```
+      field: down
+      directions:
+        - directlyBelow
+  - orientation:
+      field: right
+      directions:
+        - directlyRight
+    </code></pre>
+  </div>
+
+  <!-- Right Image -->
+  <div style="display: table-cell; width: 33%; vertical-align: middle;">
+    <img src="../img/ttt/cnd.png" alt="Sterling output refined to form a grid." style="max-width: 100%; height: auto;">
+  </div>
+
+</div>
+
+
 
 #### Parameters
 
@@ -60,7 +95,7 @@ Alternatively, orientation can apply to entire sigs, defining constraints betwee
 constraints:
   - orientation:
       sigs: [A, B]
-      directions: [above]
+      directions: [above, left]
 ```
 
 
@@ -73,14 +108,43 @@ constraints:
 
 
 ## **Grouping Constraints**
-Group elements together based on a field.
+Group elements together based on a field. The constraint below groups elements on the `domain` of the `animal` field. This transforms the Sterling output on the left to the output on the right.
 
-```yaml
+Grouping removes multiple edges between the group source(s) and target(s), and replaces them with the lowest number of arrows between group and element. Groups **cannot** intersect unless one is subsumed by another.
+
+<!-- ```yaml
 constraints:
-  - group:
-      field: category
-      target: domain  # or range
-```
+    - group: 
+        field: animals
+        target: domain
+``` -->
+
+<div style="display: table; width: 100%; text-align: left;">
+
+  <!-- Left Image -->
+  <div style="display: table-cell; width: 33%; vertical-align: middle;">
+    <img src="../img/gw/sterling_inst5.png" alt="Default image of some Sterling output" style="max-width: 100%; height: auto;">
+  </div>
+
+  <!-- Code Block -->
+  <div style="display: table-cell; width: 33%; vertical-align: middle; padding: 0 10px;">
+<pre><code>
+constraints:
+    - group: 
+        field: animals
+        target: domain
+    </code></pre>
+  </div>
+
+  <!-- Right Image -->
+  <div style="display: table-cell; width: 33%; vertical-align: middle;">
+    <img src="../img/gw/cnd_inst5.png" alt="Sterling output refined with grouping." style="max-width: 100%; height: auto;">
+  </div>
+
+</div>
+
+
+
 
 #### Parameters
 
