@@ -1,25 +1,12 @@
 # Lightweight Visualizations for Lightweight Formal Methods
 
+Cope and Drag (or `CnD`) is a constraint-based language 
+designed to help users quickly build, modify, and explore
+diagrams based on Alloy and Forge instances.
+The language is based on a small number of orthogonal primitives,
+and is grounded in the cognitive science literature on 
+effective diagramming.
 
-### How to Run Cope and Drag
 
-Cope and Drag is built to be easily deployed as an ExpressJs web application.
 
-#### Prerequisites
 
-- Node.js 
-- npm
-
-#### Installation
-
-1. Clone this repository
-2. Install dependencies: `npm install`
-3. Run in `dev` mode: `npm run dev`. This will make the CnD server available on localhost:3000
-4. Build/ in production mode.
-   1.  `npm run build` This will compile the entire server into the `/dist` folder. This folder is portable and can be copied over to various targets.
-   2.  `npm start` (or `node index dist/index.js`). This makes the CnD server available on localhost:3000
-   
-
-## Docs
-
-`mkdocs gh-deploy`
