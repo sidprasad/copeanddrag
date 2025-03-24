@@ -1,0 +1,51 @@
+name: Release Workflow
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger on tags starting with 'v', e.g., v1.0.0
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18 # Use the Node.js version compatible with your project
+          cache: 'npm'
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Step 4: Build the project
+      - name: Build the project
+        run: npm run build
+
+      # Step 5: Create a release
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            ## Changes
+            - Automatically generated release for tag ${{ github.ref_name }}.
+          draft: false
+          prerelease: false
+
+      # Step 6: Upload build artifacts (optional)
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: dist/
