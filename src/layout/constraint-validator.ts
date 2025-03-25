@@ -3,7 +3,7 @@ import { intersection } from 'lodash';
 import { InstanceLayout, LayoutNode, LayoutEdge, LayoutGroup, LayoutConstraint, isLeftConstraint, isTopConstraint, isAlignmentConstraint, TopConstraint, LeftConstraint, AlignmentConstraint } from './interfaces';
 import { min } from 'd3';
 
-/// TODO: Should examine LAYOUT CONSTRAINTS NOT COLA CONSTRAINTS
+
 class ConstraintValidator {
 
     private solver: SimplexSolver;

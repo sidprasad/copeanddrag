@@ -1,0 +1,74 @@
+<alloy builddate="Tuesday, March 25th, 2025">
+<instance bitwidth="4" maxseq="-1" command="temporary-name_source_1" filename="/Users/siddharthaprasad/Desktop/copeanddrag/examples/challenge/cycle-and-orientation/source.frg" version="4.1"  >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Node" ID="4" parentID="2">
+
+</sig>
+
+<sig label="A" ID="5" parentID="4">
+<atom label="A"/>
+</sig>
+
+<sig label="B" ID="6" parentID="4">
+<atom label="B"/>
+</sig>
+
+<sig label="C" ID="7" parentID="4">
+<atom label="C"/>
+</sig>
+
+<sig label="D" ID="8" parentID="4">
+<atom label="D"/>
+</sig>
+
+<field label="next" ID="9" parentID="4">
+<tuple><atom label="B"/><atom label="C"/></tuple>
+<tuple><atom label="C"/><atom label="D"/></tuple>
+<tuple><atom label="A"/><atom label="B"/></tuple>
+<types><type ID="4"/><type ID="4"/></types>
+
+</field>
+
+
+</instance>
+
+<source filename="/Users/siddharthaprasad/Desktop/copeanddrag/examples/challenge/cycle-and-orientation/source.frg" content="#lang forge
+&#xA;
+&#xA;abstract sig Node {
+&#xA;    next: lone Node
+&#xA;}
+&#xA;
+&#xA;one sig A extends Node {}
+&#xA;one sig B extends Node {}
+&#xA;one sig C extends Node {}
+&#xA;one sig D extends Node {}
+&#xA;
+&#xA;inst n1 {
+&#xA;
+&#xA;    
+&#xA;    A = `A
+&#xA;    B = `B
+&#xA;    C = `C
+&#xA;    D = `D
+&#xA;    Node = A + B + C + D
+&#xA;    next = `A -&amp;gt; `B + `B -&amp;gt; `C + `C -&amp;gt; `D 
+&#xA;}
+&#xA;
+&#xA;
+&#xA;run {} for n1
+&#xA;"></source>
+</alloy>

@@ -105,11 +105,8 @@ function getFormContents(req: any) {
 
 }
 
-
-
+// On a GET request, return the start CnD page.
 app.get('/', (req, res) => {
-
-
     res.render('diagram', {
         'height': 0,
         'width': 0,
@@ -127,8 +124,6 @@ app.get('/', (req, res) => {
         instAsString: "",
         errors: ""
     });
-
-
 });
 
 
@@ -138,10 +133,8 @@ app.post('/', (req, res) => {
     const cope = req.body.cope;
     let error = "";
 
-    // Should this move elsewhere?
+    // Logging and PERF.
     var loggingEnabled = (req.body.loggingEnabled == undefined) ? true : (req.body.loggingEnabled.toLowerCase() === 'enabled');
-
-
     const startTime = performance.now();
 
     try {
@@ -161,15 +154,12 @@ app.post('/', (req, res) => {
         }
 
         var instAsString = instanceToInst(instances[instanceNumber]);
-        var { layout, projectionData } = li.generateLayout(instances[instanceNumber], projections);
-
-        const constraintValidator = new ConstraintValidator(layout);
-        const inconsistent_error = constraintValidator.validateConstraints();
-        if (inconsistent_error) {
-            // Conflict between constraints and instance
-            throw new Error("The instance being visualized is inconsistent with layout constraints.<br><br> " + inconsistent_error);
+        try{
+            var { layout, projectionData } = li.generateLayout(instances[instanceNumber], projections);
         }
-
+        catch(e){
+            throw new Error("The instance being visualized is inconsistent with layout constraints.<br><br> " + e.message);
+        }
 
         let cl = new WebColaLayout(layout);
         var colaConstraints = cl.colaConstraints;
@@ -306,25 +296,12 @@ app.get('/example/:name', (req, res) => {
     let li = new LayoutInstance(layoutSpec);
 
 
-
-    //// It is not good hygiene to repeat code like this.
-
-    var { layout, projectionData } = li.generateLayout(instances[instanceNumber], projections);
-
-    const constraintValidator = new ConstraintValidator(layout);
-    const error = constraintValidator.validateConstraints();
-
-    if (error) {
-
-        // TODO: THe reporting here should be more meaningful at some point.
-        console.error("Error validating constraints:", error);
-        // This is "I am a teapot" error code, which is a joke error code.
-        res.status(418).send(error);
-        return;
+    try{
+        var { layout, projectionData } = li.generateLayout(instances[instanceNumber], projections);
     }
-    
-
-
+    catch(e){
+        throw new Error("The instance being visualized is inconsistent with layout constraints.<br><br> " + e.message);
+    }
 
     var instAsString = instanceToInst(instances[instanceNumber]);
     let cl = new WebColaLayout(layout);
@@ -332,8 +309,6 @@ app.get('/example/:name', (req, res) => {
     let colaNodes = cl.colaNodes;
     let colaEdges = cl.colaEdges;
     let colaGroups = cl.groupDefinitions;
-
-
 
     let height = cl.FIG_HEIGHT;
     let width = cl.FIG_WIDTH;
@@ -385,17 +360,10 @@ const shutdown = () => {
 
 
 
-
-
-
-
 app.post('/timing', (req, res) => {
     const clientTime = req.body.clientTime;
 
     console.log(`Client time: ${clientTime} ms`);
-
-
-
     res.json({ message: 'Client time received successfully' });
 });
 
