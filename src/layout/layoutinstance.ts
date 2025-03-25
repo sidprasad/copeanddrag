@@ -730,8 +730,10 @@ export class LayoutInstance {
             let offset = 0;
             let satisfyingAssignmentFound = false;
 
+            let finalFragmentConstraints : LayoutConstraint[] = [];
+            let currentLayoutError = null;
             while(!satisfyingAssignmentFound && offset < relatedNodes.length) {
-
+                currentLayoutError = null;
                 let fragmentConstraintsForCurrentOffset : LayoutConstraint[] = [];
 
                 for (var i = 0; i < relatedNodes.length; i++) {
@@ -777,6 +779,8 @@ export class LayoutInstance {
                     }
                 }
 
+                finalFragmentConstraints = fragmentConstraintsForCurrentOffset;
+
                 let allConstraintsForFragment : LayoutConstraint[] = fragmentConstraintsForCurrentOffset.concat(layoutWithoutCyclicConstraints.constraints);
 
                 let instanceLayout : InstanceLayout = {
@@ -786,10 +790,17 @@ export class LayoutInstance {
                     groups: layoutWithoutCyclicConstraints.groups
                 };
                 let validator = new ConstraintValidator(instanceLayout);
-                let currentLayoutError = validator.validateConstraints();
+                currentLayoutError = validator.validateConstraints();
                 // If we don't find anything, its done.
                 satisfyingAssignmentFound = currentLayoutError == null || currentLayoutError === "";
                 offset++;
+            }
+
+            if(!satisfyingAssignmentFound) {
+                throw new Error(currentLayoutError);
+            }
+            else {
+                constraints = constraints.concat(finalFragmentConstraints);
             }
         });
     
