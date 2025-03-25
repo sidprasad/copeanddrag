@@ -105,11 +105,8 @@ function getFormContents(req: any) {
 
 }
 
-
-
+// On a GET request, return the start CnD page.
 app.get('/', (req, res) => {
-
-
     res.render('diagram', {
         'height': 0,
         'width': 0,
@@ -127,8 +124,6 @@ app.get('/', (req, res) => {
         instAsString: "",
         errors: ""
     });
-
-
 });
 
 
@@ -138,10 +133,8 @@ app.post('/', (req, res) => {
     const cope = req.body.cope;
     let error = "";
 
-    // Should this move elsewhere?
+    // Logging and PERF.
     var loggingEnabled = (req.body.loggingEnabled == undefined) ? true : (req.body.loggingEnabled.toLowerCase() === 'enabled');
-
-
     const startTime = performance.now();
 
     try {

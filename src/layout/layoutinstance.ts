@@ -528,9 +528,7 @@ export class LayoutInstance {
         const attributes = this.generateAttributes(g);
         let groups = this.generateGroups(g);
         const colors = this.colorNodesByType(g, a);
-
-
-        
+       
 
         this.ensureNoExtraNodes(g, a);
         let dcN = this.getDisconnectedNodes(g);
@@ -576,8 +574,10 @@ export class LayoutInstance {
 
         // Now we apply the closure constraints
         let closureConstraints = this.applyClosureConstraints(g, layoutNodes);
+        
+        
         // Append the closure constraints to the constraints
-        constraints = constraints.concat(closureConstraints);
+        //constraints = constraints.concat(closureConstraints);
 
 
         // Now edges and relational constraints
@@ -670,13 +670,18 @@ export class LayoutInstance {
 
     }
 
+
+    // TODO: BUG: THis assumes a start position for the first fragment node.
+    // Better : Several options for the fragment.
+    // Best: First lay out non-closure constraints, then use those positions to determine the 
+    // start position of the fragment.
     applyClosureConstraint(g: Graph, layoutNodes: LayoutNode[], relName: string, direction: string, appliesTo: string[]): LayoutConstraint[] {
         let direction_mult: number = 0;
         if (direction === "clockwise") {
             direction_mult = 1;
         }
         else if (direction === "counterclockwise") {
-            direction_mult = -1; // IS THIS RIGHT OR THE OTHER WAY?
+            direction_mult = -1; 
         }
 
         // And now we filter out unrelated nodes here I think?
@@ -710,6 +715,9 @@ export class LayoutInstance {
                 let x = minRadius * Math.cos(theta);
                 let y = minRadius * Math.sin(theta);
                 fragmentNodePositions[relatedNodes[i]] = { x: x, y: y };
+
+                // ISSUE: This assumes a fixed fragment START position.
+
             }
 
             // Now we determine the constraints
