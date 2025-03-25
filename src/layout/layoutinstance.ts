@@ -303,9 +303,6 @@ export class LayoutInstance {
         return groups;
     }
 
-
-
-
     /**
      * Generates groups based on the specified graph.
      * @param g - The graph, which will be modified to remove the edges that are used to determine attributes.
@@ -385,7 +382,6 @@ export class LayoutInstance {
 
 
     private getMostSpecificType(node: string, a: AlloyInstance): string {
-
         let type = getAtomType(a, node);
         let allTypes = type.types;
         let mostSpecificType = allTypes[0];
@@ -460,8 +456,6 @@ export class LayoutInstance {
         }
         return this._layoutSpec.closures;
     }
-
-
 
 
     private applyLayoutProjections(ai: AlloyInstance, projections: Record<string, string>): { projectedInstance: AlloyInstance, finalProjectionChoices: { type: string, projectedAtom: string, atoms: string[] }[] } {
@@ -878,7 +872,6 @@ export class LayoutInstance {
 
 
     private getDisconnectedNodes(g: Graph): string[] {
-
         let inNodes = g.edges().map(edge => edge.w);
         let outNodes = g.edges().map(edge => edge.v);
 
@@ -887,7 +880,6 @@ export class LayoutInstance {
         let allConnectedNodes = new Set([...inNodes, ...outNodes]);
         let disconnectedNodes = [...allNodes].filter(node => !allConnectedNodes.has(node));
         return disconnectedNodes;
-
     }
 
 
@@ -1028,8 +1020,6 @@ export class LayoutInstance {
             nodeIds: [nodeId],
             keyNodeId: nodeId
         }
-
-
     }
 
 
