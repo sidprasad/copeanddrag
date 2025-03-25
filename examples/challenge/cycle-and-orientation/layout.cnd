@@ -1,0 +1,3 @@
+constraints:
+    - orientation: {sigs: [A, B], directions: [above]}
+    - cyclic: {field: next}
