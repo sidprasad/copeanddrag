@@ -11,7 +11,8 @@ import { LayoutNode, LayoutEdge, LayoutConstraint, InstanceLayout, LeftConstrain
 import { generateGraph } from '../alloy-graph';
 
 import { ColorPicker } from './colorpicker';
-import { Group } from 'webcola';
+import { Group, Layout } from 'webcola';
+import { ConstraintValidator } from './constraint-validator';
 
 const UNIVERSAL_TYPE = "univ";
 
@@ -514,39 +515,32 @@ export class LayoutInstance {
         return { projectedInstance, finalProjectionChoices };
     }
 
-
-
     public generateLayout(a: AlloyInstance, projections: Record<string, string>): { layout: InstanceLayout, projectionData: { type: string, projectedAtom: string, atoms: string[] }[] } {
 
         let projectionResult = this.applyLayoutProjections(a, projections);
-
         let ai = projectionResult.projectedInstance;
         let projectionData = projectionResult.finalProjectionChoices;
 
         let g: Graph = generateGraph(ai, this.hideDisconnected, this.hideDisconnectedBuiltIns);
 
+        /////// DIRECTIVES ///////
         const attributes = this.generateAttributes(g);
+
+
+        /// BUT GROUPS HAVE TO HAPPEN HERE///
         let groups = this.generateGroups(g);
         const colors = this.colorNodesByType(g, a);
-       
-
         this.ensureNoExtraNodes(g, a);
+
+
         let dcN = this.getDisconnectedNodes(g);
-
-
-
         let layoutNodes: LayoutNode[] = g.nodes().map((nodeId) => {
-
             let type = getAtomType(a, nodeId);
             let iconPath: string = this._sigIcons[type.id] ? this._sigIcons[type.id].path : this.DEFAULT_NODE_ICON_PATH;
             const nodeHeight = this._sigIcons[type.id] ? this._sigIcons[type.id].height : this.DEFAULT_NODE_HEIGHT;
             const nodeWidth = this._sigIcons[type.id] ? this._sigIcons[type.id].width : this.DEFAULT_NODE_WIDTH;
-
             const allTypes = this.getNodeTypes(nodeId, a);
             const mostSpecificType = this.getMostSpecificType(nodeId, a);
-            // TODO: ensure that iconPath exists
-
-            // Should we fallback to a default icon?
 
             let color = colors[nodeId];
             let nodeGroups = groups
@@ -567,17 +561,11 @@ export class LayoutInstance {
         });
 
 
+
+        ///////////// CONSTRAINTS ////////////
         let constraints: LayoutConstraint[] = this.applySigConstraints(ai, layoutNodes);
 
-
-        ///// APPLYING THE CONSTRAINTS HERE, WE NEED TO FILTER ON TYPE //// aka APPLIESTO
-
-        // Now we apply the closure constraints
-        let closureConstraints = this.applyClosureConstraints(g, layoutNodes);
-        
-        
-        // Append the closure constraints to the constraints
-        //constraints = constraints.concat(closureConstraints);
+      
 
 
         // Now edges and relational constraints
@@ -640,9 +628,33 @@ export class LayoutInstance {
         });
 
 
+        ///
+        let layoutWithoutCyclicConstraints : InstanceLayout = { nodes: layoutNodes, edges: layoutEdges, constraints: constraints, groups: groups };
+
+
+        // Here, I want to validate the constraints first.
+        const validatorWithoutCyclic = new ConstraintValidator(layoutWithoutCyclicConstraints);
+        const nonCyclicConstraintError = validatorWithoutCyclic.validateConstraints();
+
+        if (nonCyclicConstraintError) {
+            throw new Error(nonCyclicConstraintError);
+        }
+    
+
+        //////// NOW, we want to re-apply constraints, but with cyclic constraints
+        // perturbed.
+
+        // TODO:
+        // Now we apply the closure constraints
+        let closureConstraints = this.applyClosureConstraints(g, layoutNodes, layoutWithoutCyclicConstraints);
+    
+        //// TODO: Does this change?
+        // Append the closure constraints to the constraints
+        constraints = constraints.concat(closureConstraints);
+
+
         // Filter out all edges that are hidden
         layoutEdges = layoutEdges.filter((edge) => !edge.id.startsWith(this.hideThisEdge));
-
 
         // And now make sure that all the disconnected nodes (as identified)
         // have some padding around them.
@@ -658,12 +670,12 @@ export class LayoutInstance {
     }
 
 
-    applyClosureConstraints(g: Graph, layoutNodes: LayoutNode[]): LayoutConstraint[] {
+    applyClosureConstraints(g: Graph, layoutNodes: LayoutNode[], layoutWithoutCyclicConstraints: InstanceLayout): LayoutConstraint[] {
 
         const closures = this.getClosures();
 
         let constraints = closures.map((closure) => {
-            return this.applyClosureConstraint(g, layoutNodes, closure.fieldName, closure.direction, closure.appliesTo);
+            return this.applyClosureConstraint(g, layoutNodes, closure.fieldName, closure.direction, closure.appliesTo, layoutWithoutCyclicConstraints);
         });
 
         return constraints.flat();
@@ -675,7 +687,8 @@ export class LayoutInstance {
     // Better : Several options for the fragment.
     // Best: First lay out non-closure constraints, then use those positions to determine the 
     // start position of the fragment.
-    applyClosureConstraint(g: Graph, layoutNodes: LayoutNode[], relName: string, direction: string, appliesTo: string[]): LayoutConstraint[] {
+    applyClosureConstraint(g: Graph, layoutNodes: LayoutNode[], relName: string, direction: string, appliesTo: string[], layoutWithoutCyclicConstraints : InstanceLayout): LayoutConstraint[] {
+        
         let direction_mult: number = 0;
         if (direction === "clockwise") {
             direction_mult = 1;
@@ -695,6 +708,11 @@ export class LayoutInstance {
         let relatedNodeFragments = this.orderNodesByEdges(relationEdges);
         var fragment_num = 0;
 
+
+
+        // Here, we want to validate constraints EACH time a
+        // fragment is added, trying at least a few angle steps each time.
+
         let constraints: LayoutConstraint[] = [];
         relatedNodeFragments.forEach((relatedNodes) => {
             const minRadius = 100; // Example fixed distance. This needs to change.
@@ -703,99 +721,78 @@ export class LayoutInstance {
 
             const angleStep = (direction_mult * 2 * Math.PI) / relatedNodes.length;
 
-
-            // TODO: Perhaps we should lay out ALL nodes along the circle, 
-            // and then use the relative positions to determine the constraints
-            // of EACH node to ALL other nodes in the fragment.
-
             // So first lay out all nodes in the fragment
             let fragmentNodePositions = {};
-            for (var i = 0; i < relatedNodes.length; i++) {
-                let theta = i * angleStep;
-                let x = minRadius * Math.cos(theta);
-                let y = minRadius * Math.sin(theta);
-                fragmentNodePositions[relatedNodes[i]] = { x: x, y: y };
 
-                // ISSUE: This assumes a fixed fragment START position.
 
-            }
+
+
+            let offset = 0;
+            let satisfyingAssignmentFound = false;
+
+            while(!satisfyingAssignmentFound && offset < relatedNodes.length) {
+
+                let fragmentConstraintsForCurrentOffset : LayoutConstraint[] = [];
+
+                for (var i = 0; i < relatedNodes.length; i++) {
+                    let theta = (i + offset) * angleStep;
+                    let x = minRadius * Math.cos(theta);
+                    let y = minRadius * Math.sin(theta);
+                    fragmentNodePositions[relatedNodes[i]] = { x: x, y: y };
+                }
 
             // Now we determine the constraints
 
-            // TODO: Is this a better approach?
-            // Should we have some SIGMA (ALIGN IF WITHIN SIGMA OF EACH OTHER)
-            for (var i = 0; i < relatedNodes.length; i++) {
+                for (var i = 0; i < relatedNodes.length; i++) {
 
-                for (var j = 0; j < relatedNodes.length; j++) {
-                    if (i !== j) {
-                        let node1 = relatedNodes[i];
-                        let node2 = relatedNodes[j];
-                        let node1_pos = fragmentNodePositions[node1];
-                        let node2_pos = fragmentNodePositions[node2];
+                    for (var j = 0; j < relatedNodes.length; j++) {
+                        if (i !== j) {
+                            let node1 = relatedNodes[i];
+                            let node2 = relatedNodes[j];
+                            let node1_pos = fragmentNodePositions[node1];
+                            let node2_pos = fragmentNodePositions[node2];
 
-                        if (node1_pos.x > node2_pos.x) {
-                            constraints.push(this.leftConstraint(node2, node1, this.minSepWidth, layoutNodes));
-                        }
-                        else if (node1_pos.x < node2_pos.x) {
-                            constraints.push(this.leftConstraint(node1, node2, this.minSepWidth, layoutNodes));
-                        }
-                        else {
-                            // If they are on the same x-axis, we need to ensure that they are not on top of each other
-                            constraints.push(this.ensureSameXConstraint(node1, node2, layoutNodes));
-                        }
+                            if (node1_pos.x > node2_pos.x) {
+                                fragmentConstraintsForCurrentOffset.push(this.leftConstraint(node2, node1, this.minSepWidth, layoutNodes));
+                            }
+                            else if (node1_pos.x < node2_pos.x) {
+                                fragmentConstraintsForCurrentOffset.push(this.leftConstraint(node1, node2, this.minSepWidth, layoutNodes));
+                            }
+                            else {
+                                // If they are on the same x-axis, we need to ensure that they are not on top of each other
+                                fragmentConstraintsForCurrentOffset.push(this.ensureSameXConstraint(node1, node2, layoutNodes));
+                            }
 
-                        if (node1_pos.y > node2_pos.y) {
-                            constraints.push(this.topConstraint(node2, node1, this.minSepHeight, layoutNodes));
-                        }
-                        else if (node1_pos.y < node2_pos.y) {
-                            constraints.push(this.topConstraint(node1, node2, this.minSepHeight, layoutNodes));
-                        }
-                        else {
-                            // If they are on the same y-axis, we need to ensure that they are not on top of each other
-                            constraints.push(this.ensureSameYConstraint(node1, node2, layoutNodes));
+                            if (node1_pos.y > node2_pos.y) {
+                                fragmentConstraintsForCurrentOffset.push(this.topConstraint(node2, node1, this.minSepHeight, layoutNodes));
+                            }
+                            else if (node1_pos.y < node2_pos.y) {
+                                fragmentConstraintsForCurrentOffset.push(this.topConstraint(node1, node2, this.minSepHeight, layoutNodes));
+                            }
+                            else {
+                                // If they are on the same y-axis, we need to ensure that they are not on top of each other
+                                fragmentConstraintsForCurrentOffset.push(this.ensureSameYConstraint(node1, node2, layoutNodes));
+                            }
                         }
                     }
                 }
+
+                let allConstraintsForFragment : LayoutConstraint[] = fragmentConstraintsForCurrentOffset.concat(layoutWithoutCyclicConstraints.constraints);
+
+                let instanceLayout : InstanceLayout = {
+                    nodes: layoutWithoutCyclicConstraints.nodes,
+                    constraints: allConstraintsForFragment,
+                    edges: layoutWithoutCyclicConstraints.edges,
+                    groups: layoutWithoutCyclicConstraints.groups
+                };
+                let validator = new ConstraintValidator(instanceLayout);
+                let currentLayoutError = validator.validateConstraints();
+                // If we don't find anything, its done.
+                satisfyingAssignmentFound = currentLayoutError == null || currentLayoutError === "";
+                offset++;
             }
-
-
-            // for (var i = 0; i < relatedNodes.length; i++) {
-
-            //     let next_node_idx = (i + 1) % relatedNodes.length;
-            //     let node = relatedNodes[i];
-            //     let next_node = relatedNodes[next_node_idx];
-
-
-            //     // Get the angle between the two nodes
-            //     let current_node_theta = i * angleStep;
-            //     let next_node_theta = next_node_idx * angleStep;
-
-            //     // This is a notional computation, where 
-            //     // we assume a circle of radius minRadius
-            //     let current_node_x = minRadius * Math.cos(current_node_theta);
-            //     let current_node_y = minRadius * Math.sin(current_node_theta);
-
-            //     let next_node_x = minRadius * Math.cos(next_node_theta);
-            //     let next_node_y = minRadius * Math.sin(next_node_theta);
-
-            //     // Now we need to determine the direction of the nodes
-            //     // relative to one another.
-            //     if (current_node_x > next_node_x) {
-            //         constraints.push(this.leftConstraint(next_node, node, this.minSepWidth, layoutNodes));
-            //     }
-            //     // HMM. Should this be <= or just an else?
-            //     else {
-            //         constraints.push(this.leftConstraint(node, next_node, this.minSepWidth, layoutNodes));
-            //     }
-
-            //     if (current_node_y > next_node_y) {
-            //         constraints.push(this.topConstraint(node, next_node, this.minSepHeight, layoutNodes));
-            //     }
-            //     else {
-            //         constraints.push(this.topConstraint(next_node, node, this.minSepHeight, layoutNodes));
-            //     }
-            // }
         });
+    
         return constraints;
     }
 

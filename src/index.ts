@@ -154,14 +154,20 @@ app.post('/', (req, res) => {
         }
 
         var instAsString = instanceToInst(instances[instanceNumber]);
+        try{
         var { layout, projectionData } = li.generateLayout(instances[instanceNumber], projections);
-
-        const constraintValidator = new ConstraintValidator(layout);
-        const inconsistent_error = constraintValidator.validateConstraints();
-        if (inconsistent_error) {
-            // Conflict between constraints and instance
-            throw new Error("The instance being visualized is inconsistent with layout constraints.<br><br> " + inconsistent_error);
         }
+        catch(e){
+            throw new Error("The instance being visualized is inconsistent with layout constraints.<br><br> " + e.message);
+        }
+
+        //// TODO: Need to remove this///
+        // const constraintValidator = new ConstraintValidator(layout);
+        // const inconsistent_error = constraintValidator.validateConstraints();
+        // if (inconsistent_error) {
+        //     // Conflict between constraints and instance
+        //     throw new Error("The instance being visualized is inconsistent with layout constraints.<br><br> " + inconsistent_error);
+        // }
 
 
         let cl = new WebColaLayout(layout);
@@ -304,6 +310,8 @@ app.get('/example/:name', (req, res) => {
 
     var { layout, projectionData } = li.generateLayout(instances[instanceNumber], projections);
 
+
+    ///// TODO: Need to remove thius///
     const constraintValidator = new ConstraintValidator(layout);
     const error = constraintValidator.validateConstraints();
 
