@@ -35,6 +35,7 @@ jobs:
 
       # Step 5: Create a release
       - name: Create GitHub Release
+        id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -53,3 +54,14 @@ jobs:
         with:
           name: build-artifacts
           path: dist/
+
+      # Step 7: Upload artifacts to release
+      - name: Upload Release Assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/
+          asset_name: cnd.zip
+          asset_content_type: application/zip
