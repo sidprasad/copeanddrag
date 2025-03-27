@@ -1,6 +1,5 @@
 <div class="container" id="structuredEditor">
 
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; }
@@ -9,34 +8,32 @@
 
     <h2>Constraints</h2>
     <button type="button" onclick="addConstraint()">Add Constraint</button>
-    <form id="constraintForm"></form>
+    <div id="constraintContainer"></div> <!-- Replacing the form with a div -->
 
     <hr>
     <h2>Directives</h2>
 
-
     <hr>
-    <button type="button" onclick="exportYAML()">Export YAML</button>
-    <pre id="output"></pre>
+    <button type="button" onclick="writeToYAMLEditor()">Export to CnD</button>
 
     <script>
         function addConstraint() {
-            const form = document.getElementById("constraintForm");
+            const container = document.getElementById("constraintContainer"); // Use the div instead of a form
             const div = document.createElement("div");
             div.classList.add("constraint");
             div.innerHTML = `
                 <label>Type:
                     <select onchange="updateFields(this)">
                         <option value="cyclic">Cyclic</option>
-                        <option value="orientation-field">Orientation by Field)</option>
+                        <option value="orientation-field">Orientation by Field</option>
                         <option value="orientation-sig">Orientation by Sig</option>
                         <option value="group">Grouping</option>
                     </select>
                 </label>
                 <div class="params"></div>
-                <button type="button" type="button" onclick="removeConstraint(this)">Remove</button>
+                <button type="button" onclick="removeConstraint(this)">Remove</button>
             `;
-            form.appendChild(div);
+            container.appendChild(div);
             updateFields(div.querySelector("select"));
         }
 
@@ -59,7 +56,6 @@
                         <input type="text" name="targetType" value="univ" placeholder="DEFAULT">
                     </label>
                 `;
-
             } else if (type === "orientation-sig") {
                 paramsDiv.innerHTML = `
                     <label>Sigs:
@@ -78,28 +74,26 @@
                             <option value="directlyBelow">Directly Below</option>
                         </select>
                     </label>
-                    
                 `;
-
             } else if (type === "orientation-field") {
                 paramsDiv.innerHTML = `
-                <label>Field: <input type="text" name="field" required></label>
-                <label>Directions:
-                    <select name="directions" multiple>
-                        <option value="left">Left</option>
-                        <option value="right">Right</option>
-                        <option value="above">Above</option>
-                        <option value="below">Below</option>
-                        <option value="directlyLeft">Directly Left</option>
-                        <option value="directlyRight">Directly Right</option>
-                        <option value="directlyAbove">Directly Above</option>
-                        <option value="directlyBelow">Directly Below</option>
-                    </select>
-                </label>
-                <label>Applies To:
-                    <input type="text" name="sourceType" value="univ" placeholder="DEFAULT">
-                    <input type="text" name="targetType" value="univ" placeholder="DEFAULT">
-                </label>
+                    <label>Field: <input type="text" name="field" required></label>
+                    <label>Directions:
+                        <select name="directions" multiple>
+                            <option value="left">Left</option>
+                            <option value="right">Right</option>
+                            <option value="above">Above</option>
+                            <option value="below">Below</option>
+                            <option value="directlyLeft">Directly Left</option>
+                            <option value="directlyRight">Directly Right</option>
+                            <option value="directlyAbove">Directly Above</option>
+                            <option value="directlyBelow">Directly Below</option>
+                        </select>
+                    </label>
+                    <label>Applies To:
+                        <input type="text" name="sourceType" value="univ" placeholder="DEFAULT">
+                        <input type="text" name="targetType" value="univ" placeholder="DEFAULT">
+                    </label>
                 `;
             } else if (type === "group") {
                 paramsDiv.innerHTML = `
@@ -118,54 +112,51 @@
             button.parentElement.remove();
         }
 
-        function exportYAML() {
+        function writeToYAMLEditor() {
+            console.log("Writing to YAML editor");
             const constraints = [];
             document.querySelectorAll(".constraint").forEach(div => {
                 const type = div.querySelector("select").value;
                 const params = {};
 
-                // Hacky
-                const cnd_constr_type = type == "orientation-sig" ? "orientation" : 
-                                        type == "orientation-field" ? "orientation" : type;
-
-
-                if(type == "orientation-sig"){
+                if (type === "orientation-sig") {
                     params['sigs'] = [];
-                }
-                else if (type == "orientation-field" || type == "cyclic") {
+                } else if (type === "orientation-field" || type === "cyclic") {
                     params['appliesTo'] = [];
                 }
-        
+
                 div.querySelectorAll("input, select").forEach(input => {
                     if (input.multiple) {
-                        // Handle multiple selected values
                         params[input.name] = Array.from(input.selectedOptions).map(option => option.value);
-                    } else if(input.name == "sourceType"){
-                        // Handle multiple selected values
+                    } else if (input.name === "sourceType") {
                         params['appliesTo'][0] = input.value;
-                    }
-                    else if(input.name == "targetType"){
-                        // Handle multiple selected values
+                    } else if (input.name === "targetType") {
                         params['appliesTo'][1] = input.value;
-                    }
-                    else if(input.name == "sig1"){
-                        // Handle multiple selected values
-                        params['sigs'][0]= input.value;
-                    }
-                    else if(input.name == "sig2"){
+                    } else if (input.name === "sig1") {
+                        params['sigs'][0] = input.value;
+                    } else if (input.name === "sig2") {
                         params['sigs'][1] = input.value;
-                    }
-                    else if(input.name.length > 0){
+                    } else if (input.name.length > 0) {
                         params[input.name] = input.value;
                     }
                 });
-                console.log(params);
 
                 constraints.push({ [type]: params });
             });
-            
+
             const yamlStr = jsyaml.dump({ constraints });
-            document.getElementById("output").textContent = yamlStr;
+            //document.getElementById("output").textContent = yamlStr;
+
+             // Write the YAML string to the textarea with id="cope"
+            //const copeTextarea = document.getElementById("cope");
+            if (window.editor) {
+                window.editor.setValue(yamlStr);
+                
+            }
+            else {
+                alert("Window editor not found");
+            }
+
         }
     </script>
 </div>

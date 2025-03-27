@@ -45,13 +45,14 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         var copeTextarea = document.getElementById('cope');
-        var editor = CodeMirror.fromTextArea(copeTextarea, {
+        window.editor = CodeMirror.fromTextArea(copeTextarea, {
             mode: 'yaml',
             lineNumbers: true,
             theme: 'default',
             lineWrapping: false, // Disable line wrapping
         });
 
+        
 
 
         // Event listener for the Prettify button
@@ -59,30 +60,30 @@
 
             event.preventDefault();
             try {
-                var yamlContent = editor.getValue();
+                var yamlContent = window.editor.getValue();
                 var parsedYaml = jsyaml.load(yamlContent);
                 var formattedYaml = jsyaml.dump(parsedYaml);
-                editor.setValue(formattedYaml);
-                editor.getWrapperElement().classList.remove('is-invalid');
-                editor.getWrapperElement().classList.add('is-valid');
+                window.editor.setValue(formattedYaml);
+                window.editor.getWrapperElement().classList.remove('is-invalid');
+                window.editor.getWrapperElement().classList.add('is-valid');
             } catch (e) {
-                editor.getWrapperElement().classList.remove('is-valid');
-                editor.getWrapperElement().classList.add('is-invalid');
+                window.editor.getWrapperElement().classList.remove('is-valid');
+                window.editor.getWrapperElement().classList.add('is-invalid');
                 alert('Invalid YAML format: ' + e.message);
             }
         });
 
 
 
-        editor.on('blur', function () {
+        window.editor.on('blur', function () {
             try {
-                var yamlContent = editor.getValue();
+                var yamlContent = window.editor.getValue();
                 var parsedYaml = jsyaml.load(yamlContent);
-                editor.getWrapperElement().classList.remove('is-invalid');
-                editor.getWrapperElement().classList.add('is-valid');
+                window.editor.getWrapperElement().classList.remove('is-invalid');
+                window.editor.getWrapperElement().classList.add('is-valid');
             } catch (e) {
-                editor.getWrapperElement().classList.remove('is-valid');
-                editor.getWrapperElement().classList.add('is-invalid');
+                window.editor.getWrapperElement().classList.remove('is-valid');
+                window.editor.getWrapperElement().classList.add('is-invalid');
             }
         });
     });
