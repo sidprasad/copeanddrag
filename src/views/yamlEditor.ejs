@@ -20,13 +20,19 @@
             width: 100%;
             overflow: auto;
         }
+
     </style>
 
-        <label for="layoutannotation" class="lead">Layout</label> 
-        <!-- Check Syntax Button -->
-        <button id="prettify"   class="btn btn-outline-dark btn-sm">Check Syntax</button>
-        <!-- Actual Text Area with Content -->
-        <textarea class="form-control" id="cope" rows="10" name="cope"><%= cope ? cope : '' %></textarea>
+<textarea class="form-control" id="cope" rows="10" name="cope"><%= cope ? cope : '' %></textarea>
+
+
+</div>
+
+<!-- Text Area Block -->
+<div class="container">
+            <!-- <label for="layoutannotation" class="lead"><h2>Layout</h2></label> -->
+            <button id="prettify" class="btn btn-outline-dark btn-sm">Check Syntax</button>
+            <br>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
