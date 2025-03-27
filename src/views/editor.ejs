@@ -26,7 +26,8 @@
                 <label>Type:
                     <select onchange="updateFields(this)">
                         <option value="cyclic">Cyclic</option>
-                        <option value="orientation">Orientation</option>
+                        <option value="orientation-field">Orientation by Field)</option>
+                        <option value="orientation-sig">Orientation by Sig</option>
                         <option value="group">Grouping</option>
                     </select>
                 </label>
@@ -44,7 +45,7 @@
 
             if (type === "cyclic") {
                 paramsDiv.innerHTML = `
-                    <label>Field: <input type="text" name="field"></label>
+                    <label>Field: <input type="text" name="field" required></label>
                     <label>Direction:
                         <select name="direction">
                             <option value="clockwise">Clockwise</option>
@@ -56,11 +57,31 @@
                         <input type="text" name="targetType" value="univ" placeholder="DEFAULT">
                     </label>
                 `;
-            } else if (type === "orientation") {
+
+            } else if (type === "orientation-sig") {
                 paramsDiv.innerHTML = `
-                    <label>Field: <input type="text" name="field"></label>
-                                    <label>Field: <input type="text" name="field"></label>
-                <label>Field: <input type="text" name="field"></label>
+                    <label>Sigs:
+                        <input type="text" name="sig1" value="" placeholder="Sig 1" required>
+                        <input type="text" name="sig2" value="" placeholder="Sig 2" required>
+                    </label>
+                    <label>Directions:
+                        <select name="directions" multiple>
+                            <option value="left">Left</option>
+                            <option value="right">Right</option>
+                            <option value="above">Above</option>
+                            <option value="below">Below</option>
+                            <option value="directlyLeft">Directly Left</option>
+                            <option value="directlyRight">Directly Right</option>
+                            <option value="directlyAbove">Directly Above</option>
+                            <option value="directlyBelow">Directly Below</option>
+                        </select>
+                    </label>
+                    
+                `;
+
+            } else if (type === "orientation-field") {
+                paramsDiv.innerHTML = `
+                <label>Field: <input type="text" name="field" required></label>
                 <label>Directions:
                     <select name="directions" multiple>
                         <option value="left">Left</option>
@@ -80,7 +101,7 @@
                 `;
             } else if (type === "group") {
                 paramsDiv.innerHTML = `
-                    <label>Field: <input type="text" name="field"></label>
+                    <label>Field: <input type="text" name="field" required></label>
                     <label>Target:
                         <select name="target">
                             <option value="range">range</option>
@@ -100,13 +121,44 @@
             document.querySelectorAll(".constraint").forEach(div => {
                 const type = div.querySelector("select").value;
                 const params = {};
+
+                // Hacky
+                const cnd_constr_type = type == "orientation-sig" ? "orientation" : 
+                                        type == "orientation-field" ? "orientation" : type;
+
+
+                if(type == "orientation-sig"){
+                    params['sigs'] = [];
+                }
+                else if (type == "orientation-field" || type == "cyclic") {
+                    params['appliesTo'] = [];
+                }
+        
                 div.querySelectorAll("input, select").forEach(input => {
-                    if (input.name === "directions") {
-                        params[input.name] = input.value.split(",").map(s => s.trim());
-                    } else {
+                    if (input.multiple) {
+                        // Handle multiple selected values
+                        params[input.name] = Array.from(input.selectedOptions).map(option => option.value);
+                    } else if(input.name == "sourceType"){
+                        // Handle multiple selected values
+                        params['appliesTo'][0] = input.value;
+                    }
+                    else if(input.name == "targetType"){
+                        // Handle multiple selected values
+                        params['appliesTo'][1] = input.value;
+                    }
+                    else if(input.name == "sig1"){
+                        // Handle multiple selected values
+                        params['sigs'][0]= input.value;
+                    }
+                    else if(input.name == "sig2"){
+                        params['sigs'][1] = input.value;
+                    }
+                    else if(input.name.length > 0){
                         params[input.name] = input.value;
                     }
                 });
+                console.log(params);
+
                 constraints.push({ [type]: params });
             });
             
