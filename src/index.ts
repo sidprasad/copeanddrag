@@ -215,9 +215,6 @@ app.post('/', (req, res) => {
     });
 });
 
-app.get('/editor', (req, res) => {
-    res.render('editor');
-});
 
 
 app.get('/example', (req, res) => {

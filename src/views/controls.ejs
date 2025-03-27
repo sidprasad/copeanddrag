@@ -1,43 +1,32 @@
 <div id="controls" class="col">
 
-    <style>
-        .CodeMirror {
-            height: auto;
-            width: calc(30ch + 2px);
-            overflow: auto;
-        }
-
-        .CodeMirror.is-valid {
-            border: 1px solid #28a745;
-        }
-
-        .CodeMirror.is-invalid {
-            border: 2px solid #dc3545;
-        }
-
-        .cope {
-            height: auto;
-            width: 100%;
-            overflow: auto;
-        }
-    </style>
     <form id="controlsForm" method="post" action="/" style="padding-top: 5px;">
     <button type="submit" id='cola' class="btn btn-primary btn-lg btn-block">Apply Layout</button>
     <br>
+
+
+        <!-- HERE, we should be able to choose between structured and unstructured.  -->
+
+
     <div class="form-group">
         <label for="layoutannotation" class="lead">Layout</label> <button id="prettify"
             class="btn btn-outline-dark btn-sm">Check Syntax</button>
         <textarea class="form-control" id="cope" rows="10" name="cope"><%= cope ? cope : '' %></textarea>
     </div>
+
+
+    <!-- And here, we are in actual constrols terroir. -->
+
+
     <br>
-    <div class="form-group">
+    <div class="form-group" id="alloyDatumControlSection">
         <label for="alloydatum" class="btn btn-outline-dark btn-sm" id="alloyinstancelabel"
             style="cursor: pointer;">Edit Forge/Alloy Datum</label>
         <textarea class="form-control" id="alloydatum" rows="5" name="alloydatum"
             style="display: none;"><%= alloyDatum ? alloyDatum : '' %></textarea>
     </div>
     <br>
-    <div class="form-group">
+    <div class="form-group" id="loggingControlSection">
         <div class="d-flex justify-content-between align-items-center">
             <label for="loggingEnabled" class="form-check-label">Logging</label>
             <select class="form-control" id="loggingEnabled" name="loggingEnabled">
@@ -47,21 +36,19 @@
             <button type="button" class="btn btn-sm btn-outline-info float-right" data-toggle="modal" data-target="#loggingInfoModal" id="loggingmoreinfo">?</button>
         </div>
     </div>
-    <div class="form-group d-none">
+    <div class="form-group d-none" id="temporalInstanceNumberControl">
         <label for="instancenumber">Temporal Instance Number</label>
         <input type="number" class="form-control" id="instancenumber" name="instancenumber"
             value="<%- instanceNumber %>">
     </div>
-    <div>
+    <div id="compactnessControl">
         <label for="scaleFactor">Diagram Compactness</label>
         <input type="range" class="form-control-range" id="scaleFactor" name="scaleFactor" min="0.5" max="10" step="0.5" value="5">
     </div>
 
     <!-- Here, projections is a list of type { type : string, projectedAtom : string, atoms : string[]} 
-             
-                If projections is non-empty, then show each type as a form input  and projectedAtom as the selected element of atoms
-            -->
-
+     If projections is non-empty, then show each type as a form input  and projectedAtom as the selected element of atoms
+    -->
 
     <% if (projectionData && projectionData.length> 0) { %>
         <h4>Projections</h4>
@@ -82,34 +69,34 @@
             <% }); %>
                 <% } %>
 
-                    </form>
+    </form>
 
-                    <!-- Modal -->
-                    <div class="modal fade" id="loggingInfoModal" tabindex="-1" role="dialog"
-                        aria-labelledby="loggingInfoModalLabel" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="loggingInfoModalLabel">Logging Information</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    By enabling logging, you allow us to examine your <b>anonymized</b>
-                                    specifications and diagrams in order
-                                    to improve Cope and Drag, and understand its effectiveness.
-                                    <br><br>
-                                    Have questions? <a
-                                        href="https://docs.google.com/forms/d/e/1FAIpQLSdQcAlnW86OLlpmFovEiviToq5WMU10N4U_pz01N-9LUJ4qzQ/viewform?usp=dialog"
-                                        target="_blank">Fill out this form</a>.
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+    <!-- Modal for logging info.-->
+    <div class="modal fade" id="loggingInfoModal" tabindex="-1" role="dialog"
+        aria-labelledby="loggingInfoModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loggingInfoModalLabel">Logging Information</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    By enabling logging, you allow us to examine your <b>anonymized</b>
+                    specifications and diagrams in order
+                    to improve Cope and Drag, and understand its effectiveness.
+                    <br><br>
+                    Have questions? <a
+                        href="https://docs.google.com/forms/d/e/1FAIpQLSdQcAlnW86OLlpmFovEiviToq5WMU10N4U_pz01N-9LUJ4qzQ/viewform?usp=dialog"
+                        target="_blank">Fill out this form</a>.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
 
@@ -142,10 +129,7 @@
         });
 
 
-        // document.getElementById('loggingmoreinfo').addEventListener('click', function(event) {
 
-        //    // event.preventDefault();
-        // });
 
         // Event listener for the Prettify button
         document.getElementById('prettify').addEventListener('click', function (event) {
