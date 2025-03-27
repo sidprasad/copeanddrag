@@ -33,35 +33,43 @@ jobs:
       - name: Build the project
         run: npm run build
 
-      # Step 5: Create a release
+      # Step 5: Generate a unique tag (if needed)
+      - name: Generate Unique Tag
+        id: generate_tag
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "TAG_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
+          else
+            UNIQUE_TAG="v$(date +'%Y%m%d%H%M%S')"
+            echo "TAG_NAME=$UNIQUE_TAG" >> $GITHUB_ENV
+          fi
+
+      # Step 6: Create a release
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
+          tag_name: ${{ env.TAG_NAME }}
+          release_name: Release ${{ env.TAG_NAME }}
           body: |
             ## Changes
-            - Automatically generated release for tag ${{ github.ref_name }}.
+            - Automatically generated release for tag ${{ env.TAG_NAME }}.
           draft: false
           prerelease: false
 
-      # Step 6: Upload build artifacts
-      - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
-          path: dist/
+      # Step 7: Zip the build artifacts
+      - name: Zip Build Artifacts
+        run: zip -r cnd.zip dist/
 
-      # Step 7: Upload artifacts to release
+      # Step 8: Upload artifacts to release
       - name: Upload Release Assets
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/
+          asset_path: cnd.zip
           asset_name: cnd.zip
           asset_content_type: application/zip
