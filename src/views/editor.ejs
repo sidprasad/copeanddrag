@@ -51,11 +51,32 @@
                             <option value="counterclockwise">Counterclockwise</option>
                         </select>
                     </label>
+                    <label>Applies To:
+                        <input type="text" name="sourceType" value="univ" placeholder="DEFAULT">
+                        <input type="text" name="targetType" value="univ" placeholder="DEFAULT">
+                    </label>
                 `;
             } else if (type === "orientation") {
                 paramsDiv.innerHTML = `
                     <label>Field: <input type="text" name="field"></label>
-                    <label>Directions: <input type="text" name="directions" placeholder="comma-separated"></label>
+                                    <label>Field: <input type="text" name="field"></label>
+                <label>Field: <input type="text" name="field"></label>
+                <label>Directions:
+                    <select name="directions" multiple>
+                        <option value="left">Left</option>
+                        <option value="right">Right</option>
+                        <option value="above">Above</option>
+                        <option value="below">Below</option>
+                        <option value="directlyLeft">Directly Left</option>
+                        <option value="directlyRight">Directly Right</option>
+                        <option value="directlyAbove">Directly Above</option>
+                        <option value="directlyBelow">Directly Below</option>
+                    </select>
+                </label>
+                <label>Applies To:
+                    <input type="text" name="sourceType" value="univ" placeholder="DEFAULT">
+                    <input type="text" name="targetType" value="univ" placeholder="DEFAULT">
+                </label>
                 `;
             } else if (type === "group") {
                 paramsDiv.innerHTML = `
