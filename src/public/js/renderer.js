@@ -695,7 +695,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             let shouldShouldGroupLabel = d.showLabel || false;
             if (shouldShouldGroupLabel) {
                 if(d.padding) {
-                    console.log("increasing padding from ", d.padding);
                     d.padding = 20;
                 }
                 return d.name; 
