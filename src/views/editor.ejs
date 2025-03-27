@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YAML Constraint Form</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .constraint { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h2>Define Constraints</h2>
+    <button onclick="addConstraint()">Add Constraint</button>
+    <form id="constraintForm"></form>
+    <button onclick="exportYAML()">Export YAML</button>
+    <pre id="output"></pre>
+
+    <script>
+        function addConstraint() {
+            const form = document.getElementById("constraintForm");
+            const div = document.createElement("div");
+            div.classList.add("constraint");
+            div.innerHTML = `
+                <label>Type:
+                    <select onchange="updateFields(this)">
+                        <option value="cyclic">Cyclic</option>
+                        <option value="orientation">Orientation</option>
+                        <option value="group">Grouping</option>
+                    </select>
+                </label>
+                <div class="params"></div>
+                <button type="button" onclick="removeConstraint(this)">Remove</button>
+            `;
+            form.appendChild(div);
+            updateFields(div.querySelector("select"));
+        }
+
+        function updateFields(select) {
+            const paramsDiv = select.parentElement.nextElementSibling;
+            paramsDiv.innerHTML = "";
+            const type = select.value;
+
+            if (type === "cyclic") {
+                paramsDiv.innerHTML = `
+                    <label>Field: <input type="text" name="field"></label>
+                    <label>Direction:
+                        <select name="direction">
+                            <option value="clockwise">Clockwise</option>
+                            <option value="counterclockwise">Counterclockwise</option>
+                        </select>
+                    </label>
+                `;
+            } else if (type === "orientation") {
+                paramsDiv.innerHTML = `
+                    <label>Field: <input type="text" name="field"></label>
+                    <label>Directions: <input type="text" name="directions" placeholder="comma-separated"></label>
+                `;
+            } else if (type === "group") {
+                paramsDiv.innerHTML = `
+                    <label>Field: <input type="text" name="field"></label>
+                    <label>Target:
+                        <select name="target">
+                            <option value="range">range</option>
+                            <option value="domain">domain</option>
+                        </select>
+                    </label>
+                `;
+            }
+        }
+
+        function removeConstraint(button) {
+            button.parentElement.remove();
+        }
+
+        function exportYAML() {
+            const constraints = [];
+            document.querySelectorAll(".constraint").forEach(div => {
+                const type = div.querySelector("select").value;
+                const params = {};
+                div.querySelectorAll("input, select").forEach(input => {
+                    if (input.name === "directions") {
+                        params[input.name] = input.value.split(",").map(s => s.trim());
+                    } else {
+                        params[input.name] = input.value;
+                    }
+                });
+                constraints.push({ [type]: params });
+            });
+            
+            const yamlStr = jsyaml.dump({ constraints });
+            document.getElementById("output").textContent = yamlStr;
+        }
+    </script>
+</body>
+</html>
