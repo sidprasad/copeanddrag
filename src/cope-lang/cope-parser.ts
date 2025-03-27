@@ -155,10 +155,12 @@ function extractConstraints(constraints: any[]): any {
     let clusterRelations: ClusterRelation[] = constraints.filter(c => c.group)
         .map(c => {
             let groupOn = c.group.target || "range";
+            let showLabel = c.group.showLabel || false;
             
             return {
                 fieldName: c.group.field,
                 groupOn: groupOn,
+                showLabel: showLabel
             }
         });
 
