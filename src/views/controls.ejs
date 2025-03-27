@@ -5,13 +5,9 @@
     <br>
 
 
-        <!-- HERE, we should be able to choose between structured and unstructured.  -->
-
-
+     <!-- HERE, we should be able to choose between structured and yaml.  -->
     <div class="form-group">
-        <label for="layoutannotation" class="lead">Layout</label> <button id="prettify"
-            class="btn btn-outline-dark btn-sm">Check Syntax</button>
-        <textarea class="form-control" id="cope" rows="10" name="cope"><%= cope ? cope : '' %></textarea>
+        <%- include('yamlEditor') %>
     </div>
 
 
@@ -66,8 +62,8 @@
                         <% }); %>
                 </select>
             </div>
-            <% }); %>
-                <% } %>
+        <% }); %>
+    <% } %>
 
     </form>
 
@@ -109,13 +105,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/yaml/yaml.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        var copeTextarea = document.getElementById('cope');
-        var editor = CodeMirror.fromTextArea(copeTextarea, {
-            mode: 'yaml',
-            lineNumbers: true,
-            theme: 'default',
-            lineWrapping: false, // Disable line wrapping
-        });
+
 
         var alloyInstanceLabel = document.getElementById('alloyinstancelabel');
         var alloyDatumTextarea = document.getElementById('alloydatum');
@@ -125,42 +115,6 @@
                 alloyDatumTextarea.style.display = 'block';
             } else {
                 alloyDatumTextarea.style.display = 'none';
-            }
-        });
-
-
-
-
-        // Event listener for the Prettify button
-        document.getElementById('prettify').addEventListener('click', function (event) {
-
-            event.preventDefault();
-            try {
-                var yamlContent = editor.getValue();
-                var parsedYaml = jsyaml.load(yamlContent);
-                var formattedYaml = jsyaml.dump(parsedYaml);
-                editor.setValue(formattedYaml);
-                editor.getWrapperElement().classList.remove('is-invalid');
-                editor.getWrapperElement().classList.add('is-valid');
-            } catch (e) {
-                editor.getWrapperElement().classList.remove('is-valid');
-                editor.getWrapperElement().classList.add('is-invalid');
-                alert('Invalid YAML format: ' + e.message);
-            }
-        });
-
-
-
-        editor.on('blur', function () {
-            try {
-                var yamlContent = editor.getValue();
-                var parsedYaml = jsyaml.load(yamlContent);
-                editor.getWrapperElement().classList.remove('is-invalid');
-                editor.getWrapperElement().classList.add('is-valid');
-            } catch (e) {
-                editor.getWrapperElement().classList.remove('is-valid');
-                editor.getWrapperElement().classList.add('is-invalid');
-                // alert('Invalid YAML format: ' + e.message);
             }
         });
     });
