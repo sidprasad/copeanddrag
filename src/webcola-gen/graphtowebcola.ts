@@ -280,6 +280,7 @@ export class WebColaLayout {
         let keyIndex = this.getNodeIndex(keyNode);
         group['keyNode'] = keyIndex;
         group['id'] = grp.name;
+        group['showLabel'] = grp.showLabel;
       });
 
       return groupsAndSubgroups;

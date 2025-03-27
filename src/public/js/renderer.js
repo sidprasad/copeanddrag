@@ -691,9 +691,17 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .enter().append("text")
         .attr("class", "groupLabel")
         .text(function (d) {
+
+            let shouldShouldGroupLabel = d.showLabel || false;
+            if (shouldShouldGroupLabel) {
+                if(d.padding) {
+                    d.padding = 20;
+                }
+                return d.name; 
+            }
             // TODO: Added this
             return "";
-            //return d.name; 
+            //
         })
         .call(colaLayout.drag);
 

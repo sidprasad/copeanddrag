@@ -248,6 +248,9 @@ export class LayoutInstance {
             if (clusterSettings) {
                 // Default to range, but check what is being grouped on.
                 const groupOn = clusterSettings.groupOn || this.DEFAULT_GROUP_ON;
+                const showLabel = clusterSettings.showLabel || false;
+
+
                 let { source, target } = this.getGroupSourceAndTarget(edge, groupOn);
                 let groupName = target + ":" + this.getEdgeLabel(g, edge);
 
@@ -280,13 +283,11 @@ export class LayoutInstance {
                     {
                         name: groupName,
                         nodeIds: [source],
-                        keyNodeId: target
+                        keyNodeId: target,
+                        showLabel: showLabel
                     };
                     groups.push(newGroup);
                     // HACK: Don't remove the FIRST edge connecting node to group, we can respect SOME spatiality?
-
-
-
 
 
                     const groupEdgePrefix = "_g_"
@@ -1018,7 +1019,8 @@ export class LayoutInstance {
         return {
             name: groupName,
             nodeIds: [nodeId],
-            keyNodeId: nodeId
+            keyNodeId: nodeId,
+            showLabel: false
         }
     }
 

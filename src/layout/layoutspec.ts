@@ -40,6 +40,7 @@ export interface SigDirection extends sigDefinition {
 
 export interface ClusterRelation  extends fieldDefinition {
     groupOn? : ClusterTarget;
+    showLabel? : boolean;
 }
 
 export interface AttributeDefinition extends fieldDefinition {}

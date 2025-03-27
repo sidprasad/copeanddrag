@@ -10,6 +10,9 @@ export interface LayoutGroup {
 
     // The key node of the group
     keyNodeId : string;
+
+    // Show label
+    showLabel : boolean;
 }
 
 interface LayoutNode {

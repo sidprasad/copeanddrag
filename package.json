@@ -1,6 +1,6 @@
 {
   "name": "cope-and-drag",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "A web application for lightweight diagramming for Alloy/Forge.",
   "main": "dist/index.js",
   "keywords": [],
