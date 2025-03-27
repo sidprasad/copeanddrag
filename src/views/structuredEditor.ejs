@@ -8,7 +8,7 @@
     </style>
 
     <h2>Constraints</h2>
-    <button onclick="addConstraint()">Add Constraint</button>
+    <button type="button" onclick="addConstraint()">Add Constraint</button>
     <form id="constraintForm"></form>
 
     <hr>
@@ -16,7 +16,7 @@
 
 
     <hr>
-    <button onclick="exportYAML()">Export YAML</button>
+    <button type="button" onclick="exportYAML()">Export YAML</button>
     <pre id="output"></pre>
 
     <script>
@@ -34,7 +34,7 @@
                     </select>
                 </label>
                 <div class="params"></div>
-                <button type="button" onclick="removeConstraint(this)">Remove</button>
+                <button type="button" type="button" onclick="removeConstraint(this)">Remove</button>
             `;
             form.appendChild(div);
             updateFields(div.querySelector("select"));
