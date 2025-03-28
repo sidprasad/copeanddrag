@@ -206,13 +206,12 @@ function toYamlConstraintType(t) {
 }
 
 function resolveColorValue(color) {
-    try {
-        const resolvedColor = Color.parse(color); // Parse the color
-        return resolvedColor.to("hex").toString(); // Convert to hexadecimal format
-    } catch (e) {
-        console.warn(`Invalid color: ${color}. Defaulting to black.`);
-        return "#000000"; // Default to black if the color is invalid
+    const resolvedColor = tinycolor(color); // Use TinyColor to parse the color
+    if (resolvedColor.isValid()) {
+        return resolvedColor.toHexString(); // Convert to hexadecimal format
     }
+    console.warn(`Invalid color: ${color}. Defaulting to black.`);
+    return "#000000"; // Default to black if the color is invalid
 }
 
 function writeToYAMLEditor() {
