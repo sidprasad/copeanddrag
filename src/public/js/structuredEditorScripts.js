@@ -1,9 +1,5 @@
 
-function addConstraint() {
-    const container = document.getElementById("constraintContainer"); // Use the div instead of a form
-    const div = document.createElement("div");
-    div.classList.add("constraint");
-    div.innerHTML = `
+const CONSTRAINT_SELECT = `
         <label>Type:
             <select onchange="updateFields(this)">
                 <option value="cyclic">Cyclic</option>
@@ -15,31 +11,22 @@ function addConstraint() {
         <div class="params"></div>
         <button type="button" onclick="removeConstraint(this)">Remove</button>
     `;
-    container.appendChild(div);
-    updateFields(div.querySelector("select"));
-}
 
-function updateFields(select) {
-    const paramsDiv = select.parentElement.nextElementSibling;
-    paramsDiv.innerHTML = "";
-    const type = select.value;
+const CYCLIC_SELECTOR = `
+        <label>Field: <input type="text" name="field" required></label>
+        <label>Direction:
+            <select name="direction">
+                <option value="clockwise">Clockwise</option>
+                <option value="counterclockwise">Counterclockwise</option>
+            </select>
+        </label>
+        <label>Applies To:
+            <input type="text" name="sourceType" value="univ" placeholder="DEFAULT">
+            <input type="text" name="targetType" value="univ" placeholder="DEFAULT">
+        </label>
+    `;
 
-    if (type === "cyclic") {
-        paramsDiv.innerHTML = `
-            <label>Field: <input type="text" name="field" required></label>
-            <label>Direction:
-                <select name="direction">
-                    <option value="clockwise">Clockwise</option>
-                    <option value="counterclockwise">Counterclockwise</option>
-                </select>
-            </label>
-            <label>Applies To:
-                <input type="text" name="sourceType" value="univ" placeholder="DEFAULT">
-                <input type="text" name="targetType" value="univ" placeholder="DEFAULT">
-            </label>
-        `;
-    } else if (type === "orientation-sig") {
-        paramsDiv.innerHTML = `
+const ORIENTATION_SIG_SELECTOR = `
             <label>Sigs:
                 <input type="text" name="sig1" value="" placeholder="Sig 1" required>
                 <input type="text" name="sig2" value="" placeholder="Sig 2" required>
@@ -57,36 +44,62 @@ function updateFields(select) {
                 </select>
             </label>
         `;
+
+const ORIENTATION_FIELD_SELECTOR = `
+    <label>Field: <input type="text" name="field" required></label>
+    <label>Directions:
+        <select name="directions" multiple>
+            <option value="left">Left</option>
+            <option value="right">Right</option>
+            <option value="above">Above</option>
+            <option value="below">Below</option>
+            <option value="directlyLeft">Directly Left</option>
+            <option value="directlyRight">Directly Right</option>
+            <option value="directlyAbove">Directly Above</option>
+            <option value="directlyBelow">Directly Below</option>
+        </select>
+    </label>
+    <label>Applies To:
+        <input type="text" name="sourceType" value="univ" placeholder="DEFAULT">
+        <input type="text" name="targetType" value="univ" placeholder="DEFAULT">
+    </label>
+`;
+
+const GROUP_SELECTOR = `
+    <label>Field: <input type="text" name="field" required></label>
+    <label>Target:
+        <select name="target">
+            <option value="range">range</option>
+            <option value="domain">domain</option>
+        </select>
+    </label>
+`;
+
+
+
+function addConstraint() {
+    const container = document.getElementById("constraintContainer"); // Use the div instead of a form
+    const div = document.createElement("div");
+    div.classList.add("constraint");
+    div.innerHTML = CONSTRAINT_SELECT;
+
+    container.appendChild(div);
+    updateFields(div.querySelector("select"));
+}
+
+function updateFields(select) {
+    const paramsDiv = select.parentElement.nextElementSibling;
+    paramsDiv.innerHTML = "";
+    const type = select.value;
+
+    if (type === "cyclic") {
+        paramsDiv.innerHTML = CYCLIC_SELECTOR;
+    } else if (type === "orientation-sig") {
+        paramsDiv.innerHTML = ORIENTATION_SIG_SELECTOR;
     } else if (type === "orientation-field") {
-        paramsDiv.innerHTML = `
-            <label>Field: <input type="text" name="field" required></label>
-            <label>Directions:
-                <select name="directions" multiple>
-                    <option value="left">Left</option>
-                    <option value="right">Right</option>
-                    <option value="above">Above</option>
-                    <option value="below">Below</option>
-                    <option value="directlyLeft">Directly Left</option>
-                    <option value="directlyRight">Directly Right</option>
-                    <option value="directlyAbove">Directly Above</option>
-                    <option value="directlyBelow">Directly Below</option>
-                </select>
-            </label>
-            <label>Applies To:
-                <input type="text" name="sourceType" value="univ" placeholder="DEFAULT">
-                <input type="text" name="targetType" value="univ" placeholder="DEFAULT">
-            </label>
-        `;
+        paramsDiv.innerHTML = ORIENTATION_FIELD_SELECTOR;
     } else if (type === "group") {
-        paramsDiv.innerHTML = `
-            <label>Field: <input type="text" name="field" required></label>
-            <label>Target:
-                <select name="target">
-                    <option value="range">range</option>
-                    <option value="domain">domain</option>
-                </select>
-            </label>
-        `;
+        paramsDiv.innerHTML = GROUP_SELECTOR;
     }
 }
 
@@ -137,6 +150,31 @@ function writeToYAMLEditor() {
 }
 
 
+function get_constraint_type_from_yaml(constraint) {
+
+    const type = Object.keys(constraint)[0]; // Get the constraint type
+    const params = constraint[type]; // Get the parameters for the constraint
+
+    if (type == "cyclic") {
+        return "cyclic";
+    }
+    if (type == "orientation") {
+        if (params["sigs"]) {
+            return "orientation-sig";
+        }
+        if (params["field"]) {
+            return "orientation-field";
+        }
+    }
+
+    if (type == "group") {
+        return "group";
+    }
+    return "unknown";
+
+
+}
+
 
 function populateStructuredEditor() {
     if (!window.editor) {
@@ -156,43 +194,68 @@ function populateStructuredEditor() {
         // Populate the structured editor with constraints from the YAML
         if (parsedYaml && parsedYaml.constraints) {
             parsedYaml.constraints.forEach(constraint => {
-                const type = Object.keys(constraint)[0]; // Get the constraint type
-                const params = constraint[type]; // Get the parameters for the constraint
+
+                const type = get_constraint_type_from_yaml(constraint);
+                const params = constraint[Object.keys(constraint)[0]];
 
                 // Add a new constraint to the structured editor
                 const div = document.createElement("div");
                 div.classList.add("constraint");
-                div.innerHTML = `
-            <label>Type:
-                <select onchange="updateFields(this)">
-                    <option value="cyclic" ${type === "cyclic" ? "selected" : ""}>Cyclic</option>
-                    <option value="orientation-field" ${type === "orientation-field" ? "selected" : ""}>Orientation by Field</option>
-                    <option value="orientation-sig" ${type === "orientation-sig" ? "selected" : ""}>Orientation by Sig</option>
-                    <option value="group" ${type === "group" ? "selected" : ""}>Grouping</option>
-                </select>
-            </label>
-            <div class="params"></div>
-            <button type="button" onclick="removeConstraint(this)">Remove</button>
-        `;
+                div.innerHTML = CONSTRAINT_SELECT;
+
+
+                let sel = div.querySelector("select");
+                sel.value = type;
                 container.appendChild(div);
 
-                // Populate the fields based on the constraint type
-                const select = div.querySelector("select");
-                updateFields(select); // Dynamically generate the fields
+                updateFields(sel); // Dynamically generate the fields
                 const paramsDiv = div.querySelector(".params");
+
 
                 // Fill in the values for the generated fields
                 Object.keys(params).forEach(key => {
-                    const input = paramsDiv.querySelector(`[name="${key}"]`);
-                    if (input) {
-                        if (input.multiple && Array.isArray(params[key])) {
-                            // Handle multi-select fields
-                            Array.from(input.options).forEach(option => {
-                                option.selected = params[key].includes(option.value);
-                            });
-                        } else {
-                            // Handle single-value fields
-                            input.value = params[key];
+
+                    // This isn't right, since it depends on the query type. 
+                    // THere isn't a one-to-one mapping between the yaml and structured edit.
+
+
+
+
+                    // sigs and appliesTo are special cases
+                    if (key == "sigs") {
+                        let input1 = paramsDiv.querySelector(`[name="sig1"]`);
+                        let input2 = paramsDiv.querySelector(`[name="sig2"]`);
+                        if (input1) {
+                            input1.value = params["sigs"][0];
+                        }
+                        if (input2) {
+                            input2.value = params["sigs"][1];
+                        }
+                    }
+                    else if (key == "appliesTo") {
+                        let input1 = paramsDiv.querySelector(`[name="sourceType"]`);
+                        let input2 = paramsDiv.querySelector(`[name="targetType"]`);
+                        if (input1) {
+                            input1.value = params["appliesTo"][0];
+                        }
+                        if (input2) {
+                            input2.value = params["appliesTo"][1];
+                        }
+                    }
+                    else {
+
+
+                        let input = paramsDiv.querySelector(`[name="${key}"]`);
+                        if (input) {
+                            if (input.multiple && Array.isArray(params[key])) {
+                                // Handle multi-select fields
+                                Array.from(input.options).forEach(option => {
+                                    option.selected = params[key].includes(option.value);
+                                });
+                            } else {
+                                // Handle single-value fields
+                                input.value = params[key];
+                            }
                         }
                     }
                 });
