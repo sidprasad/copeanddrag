@@ -110,12 +110,20 @@ const COLOR_SELECTOR = `
 `;
 
 const ICON_SELECTOR = `
-    <label>Sig: <input type="text" name="sig" required placeholder="Enter signature"></label>
+    <label>Sig: <input type="text" name="sig" required placeholder="Sig name"></label>
     <label>Icon Path: <input type="text" name="path" required placeholder="/path/to/icon.png"></label>
     <label>Height: <input type="number" name="height" value="50"></label>
     <label>Width: <input type="number" name="width" value="70"></label>
 `;
 
+const FLAG_SELECTOR = `
+<label>Target:
+        <select name="flag">
+            <option value="hideDisconnectedBuiltIns">Hide disconnected built ins.</option>
+            <option value="hideDisconnected">Hide all disconnected.</option>
+        </select>
+    </label>
+`;
 
 function addConstraint() {
     const container = document.getElementById("constraintContainer"); // Use the div instead of a form
@@ -183,6 +191,9 @@ function removeDirective(button) {
 function writeToYAMLEditor() {
     console.log("Writing to YAML editor");
     const constraints = [];
+    const directives = [];
+
+
     document.querySelectorAll(".constraint").forEach(div => {
         const type = div.querySelector("select").value;
         const params = {};
@@ -212,7 +223,52 @@ function writeToYAMLEditor() {
         constraints.push({ [type]: params });
     });
 
-    const yamlStr = jsyaml.dump({ constraints });
+
+    console.log("Now directives");
+
+    document.querySelectorAll(".directive").forEach(div => {
+        const type = div.querySelector("select").value;
+
+        let params = {};
+        const isIcon = type === "icon";
+        const isFlag = type === "flag";
+
+        if(isIcon) {
+            params['icon'] = {};
+        }
+
+
+
+        div.querySelectorAll("input, select").forEach(input => {
+
+            
+            let key = input.name;
+            let value = input.value;
+
+
+            if (key.length > 0) {       
+                // Hacky special case
+                if(isIcon && (key === "height" || key === "width" || key === "path")) {
+                    params['icon'][key] = value;
+                } else if (input.multiple) {
+                    params[key] = Array.from(input.selectedOptions).map(option => option.value);
+                }
+                else if (isFlag) {
+                    // HACKY!!!
+                    params = value;
+                }
+                else {
+                    params[key] = value;
+                }
+            }
+        });
+        directives.push({ [type]: params });
+
+    });
+
+
+
+    const yamlStr = jsyaml.dump({ constraints, directives });
 
     if (window.editor) {
         window.editor.setValue(yamlStr);
@@ -250,23 +306,31 @@ function get_constraint_type_from_yaml(constraint) {
 
 
 function populateStructuredEditor() {
+
     if (!window.editor) {
         alert("Something went wrong. Please refresh the page and try again.");
         return;
     }
 
     try {
-        // Get the YAML content from the editor
         const yamlContent = window.editor.getValue();
         const parsedYaml = jsyaml.load(yamlContent);
 
         // Clear the existing constraints in the structured editor
-        const container = document.getElementById("constraintContainer");
-        container.innerHTML = "";
+        const constraintContainer = document.getElementById("constraintContainer");
+        constraintContainer.innerHTML = "";
+
+        const directiveContainer = document.getElementById("directiveContainer");
+        directiveContainer.innerHTML = "";
+
+
+        const constraints = parsedYaml ? parsedYaml.constraints : [];
+        const directives = parsedYaml ? parsedYaml.directives : [];
+
 
         // Populate the structured editor with constraints from the YAML
-        if (parsedYaml && parsedYaml.constraints) {
-            parsedYaml.constraints.forEach(constraint => {
+        if (constraints) {
+            constraints.forEach(constraint => {
 
                 const type = get_constraint_type_from_yaml(constraint);
                 const params = constraint[Object.keys(constraint)[0]];
@@ -279,7 +343,7 @@ function populateStructuredEditor() {
 
                 let sel = div.querySelector("select");
                 sel.value = type;
-                container.appendChild(div);
+                constraintContainer.appendChild(div);
 
                 updateFields(sel); // Dynamically generate the fields
                 const paramsDiv = div.querySelector(".params");
@@ -288,14 +352,11 @@ function populateStructuredEditor() {
                 // Fill in the values for the generated fields
                 Object.keys(params).forEach(key => {
 
-                    // This isn't right, since it depends on the query type. 
-                    // THere isn't a one-to-one mapping between the yaml and structured edit.
-
-
-
-
                     // sigs and appliesTo are special cases
                     if (key == "sigs") {
+
+                        // I think something is broken here?
+
                         let input1 = paramsDiv.querySelector(`[name="sig1"]`);
                         let input2 = paramsDiv.querySelector(`[name="sig2"]`);
                         if (input1) {
@@ -336,9 +397,49 @@ function populateStructuredEditor() {
         }
 
 
-        // And do something similar for directives
-        const directiveContainer = document.getElementById("directiveContainer");
+        // Populate the structured editor with directives from the YAML
+        if(directives) {
+            directives.forEach(directive => {
 
+                const type = Object.keys(directive)[0];
+                const params = directive[type];
+
+                // Add a new directive to the structured editor
+                const div = document.createElement("div");
+                div.classList.add("directive");
+                div.innerHTML = DIRECTIVE_SELECT;
+
+                let sel = div.querySelector("select");
+                sel.value = type;
+                directiveContainer.appendChild(div);
+
+                updateFields(sel); // Dynamically generate the fields
+                const paramsDiv = div.querySelector(".params");
+
+                // Fill in the values for the generated fields
+                Object.keys(params).forEach(key => {
+
+                    // TODO: Ensure this works for pictoral?
+                    // I think pictoral/icon is broken here.
+
+                    let input = paramsDiv.querySelector(`[name="${key}"]`);
+                    if (input) {
+                        if (input.multiple && Array.isArray(params[key])) {
+                            // Handle multi-select fields
+                            Array.from(input.options).forEach(option => {
+                                option.selected = params[key].includes(option.value);
+                            });
+                        } else {
+                            // Handle single-value fields
+                            input.value = params[key];
+                        }
+                    }
+
+
+                });
+
+            });
+        }
 
     } catch (e) {
         alert("Invalid YAML format: " + e.message);
