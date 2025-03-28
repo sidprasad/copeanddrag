@@ -148,5 +148,26 @@
             showStructuredEditorButton.classList.add('active');
             showYamlEditorButton.classList.remove('active');
         });
+
+
+        const form = document.getElementById('controlsForm');
+        const submitButton = document.getElementById('cola');
+
+        // Add a submit event listener to the form
+        form.addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the default form submission
+
+
+            // Check if the structured editor is in view.
+            if (structuredEditorControls.style.display === 'block') {
+                // If the structured editor is in view, populate the YAML editor
+                // with the structured editor contents.
+                writeToYAMLEditor();
+            }
+
+            form.submit(); // Submit the form
+
+        });
+
     });
 </script>
