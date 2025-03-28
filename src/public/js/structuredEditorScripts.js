@@ -1,20 +1,18 @@
 
 
-//     <!-- TODO: We need to sync to YAML before ApplyLayout is called, if this is visible.>
-
-
-
 const CONSTRAINT_SELECT = `
-        <label>Constraint Type:
+ <button class="close" title="Remove constraint" type="button" onclick="removeConstraint(this)">
+    <span aria-hidden="true">&times;</span>
+ </button>
+        <label>Type:
             <select onchange="updateFields(this)">
                 <option value="cyclic">Cyclic</option>
-                <option value="orientation-field">Orientation by Field</option>
-                <option value="orientation-sig">Orientation by Sig</option>
+                <option value="orientation-field">Orientation (Field)</option>
+                <option value="orientation-sig">Orientation (Sig)</option>
                 <option value="group">Grouping</option>
             </select>
         </label>
         <div class="params"></div>
-        <button type="button" onclick="removeConstraint(this)">Remove</button>
     `;
 
 const CYCLIC_SELECTOR = `
@@ -32,28 +30,13 @@ const CYCLIC_SELECTOR = `
     `;
 
 const ORIENTATION_SIG_SELECTOR = `
-            <label>Sigs:
-                <input type="text" name="sig1" value="" placeholder="Sig 1" required>
-                <input type="text" name="sig2" value="" placeholder="Sig 2" required>
-            </label>
-            <label>Directions:
-                <select name="directions" multiple>
-                    <option value="left">Left</option>
-                    <option value="right">Right</option>
-                    <option value="above">Above</option>
-                    <option value="below">Below</option>
-                    <option value="directlyLeft">Directly Left</option>
-                    <option value="directlyRight">Directly Right</option>
-                    <option value="directlyAbove">Directly Above</option>
-                    <option value="directlyBelow">Directly Below</option>
-                </select>
-            </label>
-        `;
-
-const ORIENTATION_FIELD_SELECTOR = `
-    <label>Field: <input type="text" name="field" required></label>
-    <label>Directions:
-        <select name="directions" multiple>
+    <label>Sigs:</label>
+    <div style="display: flex; gap: 10px; align-items: center;">
+        <input type="text" name="sig1" class="form-control form-control-sm" placeholder="Sig 1" required>
+        <input type="text" name="sig2" class="form-control form-control-sm" placeholder="Sig 2" required>
+    </div>
+    <label>Directions:            </label>
+        <select name="directions" class="form-control" multiple>
             <option value="left">Left</option>
             <option value="right">Right</option>
             <option value="above">Above</option>
@@ -63,11 +46,28 @@ const ORIENTATION_FIELD_SELECTOR = `
             <option value="directlyAbove">Directly Above</option>
             <option value="directlyBelow">Directly Below</option>
         </select>
-    </label>
-    <label>Applies To:
-        <input type="text" name="sourceType" value="univ" placeholder="DEFAULT">
-        <input type="text" name="targetType" value="univ" placeholder="DEFAULT">
-    </label>
+
+        `;
+
+const ORIENTATION_FIELD_SELECTOR = `
+    <label>Field:</label> <input type="text" class="form-control" name="field" required>
+    <label>Directions:            </label>
+        <select name="directions" class="form-control" multiple>
+            <option value="left">Left</option>
+            <option value="right">Right</option>
+            <option value="above">Above</option>
+            <option value="below">Below</option>
+            <option value="directlyLeft">Directly Left</option>
+            <option value="directlyRight">Directly Right</option>
+            <option value="directlyAbove">Directly Above</option>
+            <option value="directlyBelow">Directly Below</option>
+        </select>
+    <label>Applies To:</label>
+    <div style="display: flex; gap: 10px; align-items: center;">
+        <input type="text" class="form-control form-control-sm" name="sourceType" value="univ" placeholder="Source Type">
+        <input type="text" class="form-control form-control-sm" name="targetType" value="univ" placeholder="Target Type">
+    </div>
+
 `;
 
 const GROUP_SELECTOR = `
@@ -82,18 +82,20 @@ const GROUP_SELECTOR = `
 
 
 const DIRECTIVE_SELECT = `
-        <label>Directive Type:
-            <select onchange="updateFields(this)">
-                <option value="attribute">Attribute</option>
-                <option value="icon">Icon</option>
-                <option value="color">Color</option>
-                <option value="projection">Projection</option>
-                <option value="flag">Visibility Flag</option>
-            </select>
-        </label>
-        <div class="params"></div>
-        <button type="button" onclick="removeDirective(this)">Remove</button>
-    `;
+    <button class="close" title="Remove directive" type="button" onclick="removeDirective(this)">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <label>Type:
+        <select onchange="updateFields(this)">
+            <option value="attribute">Attribute</option>
+            <option value="icon">Icon</option>
+            <option value="color">Color</option>
+            <option value="projection">Projection</option>
+            <option value="flag">Visibility Flag</option>
+        </select>
+    </label>
+    <div class="params"></div>
+`;
 
 
 const ATTRIBUTE_SELECTOR = `
@@ -111,7 +113,7 @@ const COLOR_SELECTOR = `
 
 const ICON_SELECTOR = `
     <label>Sig: <input type="text" name="sig" required placeholder="Sig name"></label>
-    <label>Icon Path: <input type="text" name="path" required placeholder="/path/to/icon.png"></label>
+    <label>Path: <input type="text" name="path" required placeholder="/path/to/icon.png"></label>
     <label>Height: <input type="number" name="height" value="50"></label>
     <label>Width: <input type="number" name="width" value="70"></label>
 `;
