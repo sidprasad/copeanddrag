@@ -7,10 +7,16 @@
 
 
      <!-- HERE, we should be able to choose between structured and yaml.  -->
-    <div class="form-group">
+    <!-- Toggle Buttons -->
+    <div class="btn-group" role="group" aria-label="Editor Toggle">
+        <button type="button" class="btn btn-outline-primary active" id="showYamlEditor">CnD Editor</button>
+        <button type="button" class="btn btn-outline-primary" id="showStructuredEditor" >CnD Structured Editor</button>
+    </div>    
+
+    <div class="form-group" id="yamlEditorControls">
         <%- include('yamlEditor') %>
     </div>
-    <div class="form-group">
+    <div class="form-group" id="structuredEditorControls" style="display: none;">
         <%- include('structuredEditor') %>
     </div>
 
@@ -119,6 +125,24 @@
             } else {
                 alloyDatumTextarea.style.display = 'none';
             }
+        });
+
+        const showYamlEditorButton = document.getElementById('showYamlEditor');
+        const showStructuredEditorButton = document.getElementById('showStructuredEditor');
+        // Show YAML Editor and hide Structured Editor
+        showYamlEditorButton.addEventListener('click', function () {
+            yamlEditorControls.style.display = 'block';
+            showYamlEditorButton.classList.add('active');
+            showStructuredEditorButton.classList.remove('active');
+            structuredEditorControls.style.display = 'none';
+        });
+
+        // Show Structured Editor and hide YAML Editor
+        showStructuredEditorButton.addEventListener('click', function () {
+            yamlEditorControls.style.display = 'none';
+            structuredEditorControls.style.display = 'block';
+            showStructuredEditorButton.classList.add('active');
+            showYamlEditorButton.classList.remove('active');
         });
     });
 </script>
