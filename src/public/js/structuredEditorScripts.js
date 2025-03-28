@@ -106,7 +106,7 @@ const PROJECTION_SELECTOR = `
 
 const COLOR_SELECTOR = `
 <label>Sig: <input type="text" name="sig" required></label>
-<label>Color: <input type="color" name="color" required></label>
+<label>Color: <input type="color" name="value" required></label>
 `;
 
 const ICON_SELECTOR = `
@@ -188,6 +188,23 @@ function removeDirective(button) {
     button.parentElement.remove();
 }
 
+function toYamlConstraintType(t) {
+
+    if (t === "cyclic") {
+        return "cyclic";
+    }
+    if (t === "orientation-field") {
+        return "orientation";
+    }
+    if (t === "orientation-sig") {
+        return "orientation";
+    }
+    if (t === "group") {
+        return "group";
+    }
+    return "unknown";
+}
+
 function writeToYAMLEditor() {
     console.log("Writing to YAML editor");
     const constraints = [];
@@ -203,6 +220,9 @@ function writeToYAMLEditor() {
         } else if (type === "orientation-field" || type === "cyclic") {
             params['appliesTo'] = [];
         }
+
+
+
 
         div.querySelectorAll("input, select").forEach(input => {
             if (input.multiple) {
@@ -220,7 +240,7 @@ function writeToYAMLEditor() {
             }
         });
 
-        constraints.push({ [type]: params });
+        constraints.push({ [toYamlConstraintType(type)]: params });
     });
 
 
@@ -233,7 +253,7 @@ function writeToYAMLEditor() {
         const isIcon = type === "icon";
         const isFlag = type === "flag";
 
-        if(isIcon) {
+        if (isIcon) {
             params['icon'] = {};
         }
 
@@ -241,14 +261,14 @@ function writeToYAMLEditor() {
 
         div.querySelectorAll("input, select").forEach(input => {
 
-            
+
             let key = input.name;
             let value = input.value;
 
 
-            if (key.length > 0) {       
+            if (key.length > 0) {
                 // Hacky special case
-                if(isIcon && (key === "height" || key === "width" || key === "path")) {
+                if (isIcon && (key === "height" || key === "width" || key === "path")) {
                     params['icon'][key] = value;
                 } else if (input.multiple) {
                     params[key] = Array.from(input.selectedOptions).map(option => option.value);
@@ -267,8 +287,17 @@ function writeToYAMLEditor() {
     });
 
 
+    // Hacky but need to do this for defaults (esp. directives)
+    let combinedSpec = {};
+    if (constraints.length > 0) {
+        combinedSpec.constraints = constraints;
+    }
+    if (directives.length > 0) {
+        combinedSpec.directives = directives;
+    }
 
-    const yamlStr = jsyaml.dump({ constraints, directives });
+
+    const yamlStr = jsyaml.dump(combinedSpec);
 
     if (window.editor) {
         window.editor.setValue(yamlStr);
@@ -355,8 +384,6 @@ function populateStructuredEditor() {
                     // sigs and appliesTo are special cases
                     if (key == "sigs") {
 
-                        // I think something is broken here?
-
                         let input1 = paramsDiv.querySelector(`[name="sig1"]`);
                         let input2 = paramsDiv.querySelector(`[name="sig2"]`);
                         if (input1) {
@@ -398,7 +425,7 @@ function populateStructuredEditor() {
 
 
         // Populate the structured editor with directives from the YAML
-        if(directives) {
+        if (directives) {
             directives.forEach(directive => {
 
                 const type = Object.keys(directive)[0];
@@ -422,16 +449,30 @@ function populateStructuredEditor() {
                     // TODO: Ensure this works for pictoral?
                     // I think pictoral/icon is broken here.
 
-                    let input = paramsDiv.querySelector(`[name="${key}"]`);
-                    if (input) {
-                        if (input.multiple && Array.isArray(params[key])) {
-                            // Handle multi-select fields
-                            Array.from(input.options).forEach(option => {
-                                option.selected = params[key].includes(option.value);
-                            });
-                        } else {
-                            // Handle single-value fields
-                            input.value = params[key];
+                    if (key == "icon") {
+                        Object.keys(params[key]).forEach(iconKey => {
+                            let iconInput = paramsDiv.querySelector(`[name="${iconKey}"]`);
+                            if (iconInput) {
+                                iconInput.value = params[key][iconKey];
+                            }
+                        });
+                    }
+                    else {
+
+
+                        let input = paramsDiv.querySelector(`[name="${key}"]`);
+                        if (input) {
+
+
+                            if (input.multiple && Array.isArray(params[key])) {
+                                // Handle multi-select fields
+                                Array.from(input.options).forEach(option => {
+                                    option.selected = params[key].includes(option.value);
+                                });
+                            } else {
+                                // Handle single-value fields
+                                input.value = params[key];
+                            }
                         }
                     }
 
