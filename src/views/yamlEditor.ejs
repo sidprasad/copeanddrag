@@ -1,10 +1,19 @@
 <div id="yamlEditor" class="container-fluid">
 
     <style>
-        .CodeMirror {
+        /* .CodeMirror {
             height: auto;
             width: calc(30ch + 2px);
             overflow: auto;
+        } */
+
+        .CodeMirror {
+            height: auto;
+            width: 100%; /* Start with full width */
+            overflow: auto;
+            resize: horizontal; /* Allow horizontal resizing */
+            min-width: 30ch; /* Set a minimum width */
+            max-width: 100%; /* Set a maximum width */
         }
 
         .CodeMirror.is-valid {
