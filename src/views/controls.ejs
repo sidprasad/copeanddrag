@@ -1,4 +1,5 @@
 <div id="controls" class="col">
+    <script src="/js/structuredEditorScripts.js" defer></script>
 
     <form id="controlsForm" method="post" action="/" style="padding-top: 5px;">
     <button type="submit" id='cola' class="btn btn-primary btn-lg btn-block">Apply Layout</button>
@@ -131,6 +132,7 @@
         const showStructuredEditorButton = document.getElementById('showStructuredEditor');
         // Show YAML Editor and hide Structured Editor
         showYamlEditorButton.addEventListener('click', function () {
+            writeToYAMLEditor();
             yamlEditorControls.style.display = 'block';
             showYamlEditorButton.classList.add('active');
             showStructuredEditorButton.classList.remove('active');
@@ -139,6 +141,8 @@
 
         // Show Structured Editor and hide YAML Editor
         showStructuredEditorButton.addEventListener('click', function () {
+            // First set up the structured editor from the YAML contents.
+            populateStructuredEditor();
             yamlEditorControls.style.display = 'none';
             structuredEditorControls.style.display = 'block';
             showStructuredEditorButton.classList.add('active');

@@ -1,28 +1,26 @@
 <div class="container" id="structuredEditor">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
-    <script src="/js/structuredEditorScripts.js" defer></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
 
+    <style>
         .constraint {
             border: 1px solid #ccc;
             padding: 10px;
             margin: 10px 0;
         }
     </style>
-
-    <h2>Constraints</h2>
-    <button type="button" onclick="addConstraint()">Add Constraint</button>
-    <div id="constraintContainer"></div>
-
+    <div class="container">
+        <h2>Constraints</h2>
+        <button type="button" onclick="addConstraint()">Add Constraint</button>
+        <div id="constraintContainer"></div>
+    </div>
     <hr>
-    <h2>Directives</h2>
-    <div id="directiveContainer"></div> 
+    <div class="container">
+        <h2>Directives</h2>
+        <div id="directiveContainer"></div>
+    </div>
 
-    <hr>
+    <!-- <hr>
     <button type="button" onclick="writeToYAMLEditor()">Load to CnD</button>
-    <button type="button" onclick="populateStructuredEditor()">Load from CnD</button>
+    <button type="button" onclick="populateStructuredEditor()">Load from CnD</button> -->
 </div>
