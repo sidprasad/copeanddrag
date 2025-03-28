@@ -5,7 +5,7 @@
 
 
 const CONSTRAINT_SELECT = `
-        <label>Type:
+        <label>Constraint Type:
             <select onchange="updateFields(this)">
                 <option value="cyclic">Cyclic</option>
                 <option value="orientation-field">Orientation by Field</option>
@@ -81,6 +81,41 @@ const GROUP_SELECTOR = `
 `;
 
 
+const DIRECTIVE_SELECT = `
+        <label>Directive Type:
+            <select onchange="updateFields(this)">
+                <option value="attribute">Attribute</option>
+                <option value="icon">Icon</option>
+                <option value="color">Color</option>
+                <option value="projection">Projection</option>
+                <option value="flag">Visibility Flag</option>
+            </select>
+        </label>
+        <div class="params"></div>
+        <button type="button" onclick="removeDirective(this)">Remove</button>
+    `;
+
+
+const ATTRIBUTE_SELECTOR = `
+<label>Field: <input type="text" name="field" required></label>
+`;
+
+const PROJECTION_SELECTOR = `
+<label>Sig: <input type="text" name="sig" required></label>
+`;
+
+const COLOR_SELECTOR = `
+<label>Sig: <input type="text" name="sig" required></label>
+<label>Color: <input type="color" name="color" required></label>
+`;
+
+const ICON_SELECTOR = `
+    <label>Sig: <input type="text" name="sig" required placeholder="Enter signature"></label>
+    <label>Icon Path: <input type="text" name="path" required placeholder="/path/to/icon.png"></label>
+    <label>Height: <input type="number" name="height" value="50"></label>
+    <label>Width: <input type="number" name="width" value="70"></label>
+`;
+
 
 function addConstraint() {
     const container = document.getElementById("constraintContainer"); // Use the div instead of a form
@@ -92,11 +127,25 @@ function addConstraint() {
     updateFields(div.querySelector("select"));
 }
 
+
+function addDirective() {
+    const container = document.getElementById("directiveContainer");
+    const div = document.createElement("div");
+    div.classList.add("directive");
+    div.innerHTML = DIRECTIVE_SELECT;
+
+    container.appendChild(div);
+    updateFields(div.querySelector("select"));
+}
+
+
 function updateFields(select) {
     const paramsDiv = select.parentElement.nextElementSibling;
     paramsDiv.innerHTML = "";
     const type = select.value;
 
+
+    // Constraint Fields
     if (type === "cyclic") {
         paramsDiv.innerHTML = CYCLIC_SELECTOR;
     } else if (type === "orientation-sig") {
@@ -106,9 +155,28 @@ function updateFields(select) {
     } else if (type === "group") {
         paramsDiv.innerHTML = GROUP_SELECTOR;
     }
+
+
+
+    // Directive Fields
+    if (type === "attribute") {
+        paramsDiv.innerHTML = ATTRIBUTE_SELECTOR;
+    } else if (type === "icon") {
+        paramsDiv.innerHTML = ICON_SELECTOR;
+    } else if (type === "color") {
+        paramsDiv.innerHTML = COLOR_SELECTOR;
+    } else if (type === "projection") {
+        paramsDiv.innerHTML = PROJECTION_SELECTOR;
+    } else if (type === "flag") {
+        paramsDiv.innerHTML = FLAG_SELECTOR;
+    }
 }
 
 function removeConstraint(button) {
+    button.parentElement.remove();
+}
+
+function removeDirective(button) {
     button.parentElement.remove();
 }
 
