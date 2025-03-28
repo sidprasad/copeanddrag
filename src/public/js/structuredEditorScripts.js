@@ -99,32 +99,31 @@ const DIRECTIVE_SELECT = `
 
 
 const ATTRIBUTE_SELECTOR = `
-<label>Field: <input type="text" name="field" required></label>
+<label>Field:</label> <input type="text" name="field" class="form-control" required>
 `;
 
 const PROJECTION_SELECTOR = `
-<label>Sig: <input type="text" name="sig" required></label>
+<label>Sig:</label> <input type="text" class="form-control" name="sig" required>
 `;
 
 const COLOR_SELECTOR = `
-<label>Sig: <input type="text" name="sig" required></label>
-<label>Color: <input type="color" name="value" required></label>
+<label>Sig:</label> <input type="text" name="sig" class="form-control" required>
+<label>Color:</label> <input type="color" name="value" class="form-control" required>
 `;
 
 const ICON_SELECTOR = `
-    <label>Sig: <input type="text" name="sig" required placeholder="Sig name"></label>
-    <label>Path: <input type="text" name="path" required placeholder="/path/to/icon.png"></label>
-    <label>Height: <input type="number" name="height" value="50"></label>
-    <label>Width: <input type="number" name="width" value="70"></label>
+    <label>Sig:</label> <input type="text" name="sig" class="form-control" required placeholder="Sig name">
+    <label>Path:</label> <input type="text" name="path" class="form-control" required placeholder="/path/to/icon.png">
+    <label>Height:</label> <input type="number" class="form-control" name="height" value="50">
+    <label>Width:</label> <input type="number"class="form-control"  name="width" value="70">
 `;
 
 const FLAG_SELECTOR = `
-<label>Target:
-        <select name="flag">
-            <option value="hideDisconnectedBuiltIns">Hide disconnected built ins.</option>
-            <option value="hideDisconnected">Hide all disconnected.</option>
-        </select>
-    </label>
+<label>Target:</label>
+<select name="flag" class="form-control">
+    <option value="hideDisconnectedBuiltIns">Hide disconnected built ins.</option>
+    <option value="hideDisconnected">Hide all disconnected.</option>
+</select>
 `;
 
 function addConstraint() {
