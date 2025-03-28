@@ -1,4 +1,9 @@
 
+
+//     <!-- TODO: We need to sync to YAML before ApplyLayout is called, if this is visible.>
+
+
+
 const CONSTRAINT_SELECT = `
         <label>Type:
             <select onchange="updateFields(this)">

@@ -1,5 +1,5 @@
-<div class="container" id="structuredEditor">
-
+<div class="container-fluid" id="structuredEditor">
+    <br>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
 
     <style>
@@ -9,18 +9,19 @@
             margin: 10px 0;
         }
     </style>
-    <div class="container">
-        <h2>Constraints</h2>
-        <button type="button" onclick="addConstraint()">Add Constraint</button>
+
+    <div class="container-fluid">
+        <h5>Constraints  <button type="button" onclick="addConstraint()" title="Click to add a new constraint">+</button></h5>
+        <!-- <br> -->
+       
         <div id="constraintContainer"></div>
     </div>
     <hr>
-    <div class="container">
-        <h2>Directives</h2>
+    <div class="container-fluid">
+        <h5>Directives  <button type="button" onclick="addDirective()" title="Click to add a new directive">+</button></h5>
         <div id="directiveContainer"></div>
     </div>
 
-    <!-- <hr>
-    <button type="button" onclick="writeToYAMLEditor()">Load to CnD</button>
-    <button type="button" onclick="populateStructuredEditor()">Load from CnD</button> -->
+
+
 </div>

@@ -1,9 +1,9 @@
 #svg-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    /* Adjust as needed */
+    /*display: flex;*/
+    /*justify-content: center;*/
+    /*align-items: center;*/
+    /*height: 100vh;*/
+
 }
 
 .svg-border {
@@ -89,16 +89,16 @@
     flex-direction: row;
 }
 
-#svg-container {
+/* #svg-container {
     flex: 1;
     order: 1;
-}
+} */
 
 #controls {
-    flex: 0 0 300px; /* Adjust the width as needed */
-    order: 2;
-    margin-left: 20px; /* Optional: Add some space between the two divs */
-}
+    /* flex: 0 0 300px; 
+    order: 2; */
+    margin: 5px; 
+} 
 
 .link.highlighted {
     stroke: black; /* Change this to your desired highlight color */
