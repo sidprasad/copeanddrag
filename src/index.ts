@@ -33,7 +33,7 @@ app.use(express.json({ limit: '50mb' }));
 
 // This is a hack. I'm not sure
 // how to encode the version number.
-const version = "2.1.2";
+const version = "2.2.0";
 
 const secretKey = "cope-and-drag-logging-key";
 
@@ -214,6 +214,7 @@ app.post('/', (req, res) => {
         loggingEnabled
     });
 });
+
 
 
 app.get('/example', (req, res) => {

@@ -1,43 +1,38 @@
 <div id="controls" class="col">
+    <script src="/js/structuredEditorScripts.js" defer></script>
 
-    <style>
-        .CodeMirror {
-            height: auto;
-            width: calc(30ch + 2px);
-            overflow: auto;
-        }
-
-        .CodeMirror.is-valid {
-            border: 1px solid #28a745;
-        }
-
-        .CodeMirror.is-invalid {
-            border: 2px solid #dc3545;
-        }
-
-        .cope {
-            height: auto;
-            width: 100%;
-            overflow: auto;
-        }
-    </style>
     <form id="controlsForm" method="post" action="/" style="padding-top: 5px;">
     <button type="submit" id='cola' class="btn btn-primary btn-lg btn-block">Apply Layout</button>
     <br>
-    <div class="form-group">
-        <label for="layoutannotation" class="lead">Layout</label> <button id="prettify"
-            class="btn btn-outline-dark btn-sm">Check Syntax</button>
-        <textarea class="form-control" id="cope" rows="10" name="cope"><%= cope ? cope : '' %></textarea>
+    <hr>
+
+
+     <!-- HERE, we should be able to choose between structured and yaml.  -->
+    <!-- Toggle Buttons -->
+    <div class="btn-group" role="group" aria-label="Editor Toggle">
+        <button type="button" class="btn btn-outline-primary active" id="showYamlEditor">YAML View</button>
+        <button type="button" class="btn btn-outline-primary" id="showStructuredEditor" >Structured View</button>
+    </div>    
+
+    <div class="form-group" id="yamlEditorControls">
+        <%- include('yamlEditor') %>
     </div>
+    <div class="form-group" id="structuredEditorControls" style="display: none;">
+        <%- include('structuredEditor') %>
+    </div>
+
+    <!-- And here, we are in actual constrols terroir. -->
+
+
     <br>
-    <div class="form-group">
+    <div class="form-group" id="alloyDatumControlSection">
         <label for="alloydatum" class="btn btn-outline-dark btn-sm" id="alloyinstancelabel"
             style="cursor: pointer;">Edit Forge/Alloy Datum</label>
         <textarea class="form-control" id="alloydatum" rows="5" name="alloydatum"
             style="display: none;"><%= alloyDatum ? alloyDatum : '' %></textarea>
     </div>
     <br>
-    <div class="form-group">
+    <div class="form-group" id="loggingControlSection">
         <div class="d-flex justify-content-between align-items-center">
             <label for="loggingEnabled" class="form-check-label">Logging</label>
             <select class="form-control" id="loggingEnabled" name="loggingEnabled">
@@ -47,21 +42,19 @@
             <button type="button" class="btn btn-sm btn-outline-info float-right" data-toggle="modal" data-target="#loggingInfoModal" id="loggingmoreinfo">?</button>
         </div>
     </div>
-    <div class="form-group d-none">
+    <div class="form-group d-none" id="temporalInstanceNumberControl">
         <label for="instancenumber">Temporal Instance Number</label>
         <input type="number" class="form-control" id="instancenumber" name="instancenumber"
             value="<%- instanceNumber %>">
     </div>
-    <div>
+    <div id="compactnessControl">
         <label for="scaleFactor">Diagram Compactness</label>
         <input type="range" class="form-control-range" id="scaleFactor" name="scaleFactor" min="0.5" max="10" step="0.5" value="5">
     </div>
 
     <!-- Here, projections is a list of type { type : string, projectedAtom : string, atoms : string[]} 
-             
-                If projections is non-empty, then show each type as a form input  and projectedAtom as the selected element of atoms
-            -->
-
+     If projections is non-empty, then show each type as a form input  and projectedAtom as the selected element of atoms
+    -->
 
     <% if (projectionData && projectionData.length> 0) { %>
         <h4>Projections</h4>
@@ -79,37 +72,37 @@
                         <% }); %>
                 </select>
             </div>
-            <% }); %>
-                <% } %>
+        <% }); %>
+    <% } %>
 
-                    </form>
+    </form>
 
-                    <!-- Modal -->
-                    <div class="modal fade" id="loggingInfoModal" tabindex="-1" role="dialog"
-                        aria-labelledby="loggingInfoModalLabel" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="loggingInfoModalLabel">Logging Information</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    By enabling logging, you allow us to examine your <b>anonymized</b>
-                                    specifications and diagrams in order
-                                    to improve Cope and Drag, and understand its effectiveness.
-                                    <br><br>
-                                    Have questions? <a
-                                        href="https://docs.google.com/forms/d/e/1FAIpQLSdQcAlnW86OLlpmFovEiviToq5WMU10N4U_pz01N-9LUJ4qzQ/viewform?usp=dialog"
-                                        target="_blank">Fill out this form</a>.
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+    <!-- Modal for logging info.-->
+    <div class="modal fade" id="loggingInfoModal" tabindex="-1" role="dialog"
+        aria-labelledby="loggingInfoModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loggingInfoModalLabel">Logging Information</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    By enabling logging, you allow us to examine your <b>anonymized</b>
+                    specifications and diagrams in order
+                    to improve Cope and Drag, and understand its effectiveness.
+                    <br><br>
+                    Have questions? <a
+                        href="https://docs.google.com/forms/d/e/1FAIpQLSdQcAlnW86OLlpmFovEiviToq5WMU10N4U_pz01N-9LUJ4qzQ/viewform?usp=dialog"
+                        target="_blank">Fill out this form</a>.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
 
@@ -122,13 +115,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/yaml/yaml.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        var copeTextarea = document.getElementById('cope');
-        var editor = CodeMirror.fromTextArea(copeTextarea, {
-            mode: 'yaml',
-            lineNumbers: true,
-            theme: 'default',
-            lineWrapping: false, // Disable line wrapping
-        });
+
 
         var alloyInstanceLabel = document.getElementById('alloyinstancelabel');
         var alloyDatumTextarea = document.getElementById('alloydatum');
@@ -141,43 +128,46 @@
             }
         });
 
+        const showYamlEditorButton = document.getElementById('showYamlEditor');
+        const showStructuredEditorButton = document.getElementById('showStructuredEditor');
+        // Show YAML Editor and hide Structured Editor
+        showYamlEditorButton.addEventListener('click', function () {
+            writeToYAMLEditor();
+            yamlEditorControls.style.display = 'block';
+            showYamlEditorButton.classList.add('active');
+            showStructuredEditorButton.classList.remove('active');
+            structuredEditorControls.style.display = 'none';
+        });
 
-        // document.getElementById('loggingmoreinfo').addEventListener('click', function(event) {
-
-        //    // event.preventDefault();
-        // });
-
-        // Event listener for the Prettify button
-        document.getElementById('prettify').addEventListener('click', function (event) {
-
-            event.preventDefault();
-            try {
-                var yamlContent = editor.getValue();
-                var parsedYaml = jsyaml.load(yamlContent);
-                var formattedYaml = jsyaml.dump(parsedYaml);
-                editor.setValue(formattedYaml);
-                editor.getWrapperElement().classList.remove('is-invalid');
-                editor.getWrapperElement().classList.add('is-valid');
-            } catch (e) {
-                editor.getWrapperElement().classList.remove('is-valid');
-                editor.getWrapperElement().classList.add('is-invalid');
-                alert('Invalid YAML format: ' + e.message);
-            }
+        // Show Structured Editor and hide YAML Editor
+        showStructuredEditorButton.addEventListener('click', function () {
+            // First set up the structured editor from the YAML contents.
+            populateStructuredEditor();
+            yamlEditorControls.style.display = 'none';
+            structuredEditorControls.style.display = 'block';
+            showStructuredEditorButton.classList.add('active');
+            showYamlEditorButton.classList.remove('active');
         });
 
 
+        const form = document.getElementById('controlsForm');
+        const submitButton = document.getElementById('cola');
 
-        editor.on('blur', function () {
-            try {
-                var yamlContent = editor.getValue();
-                var parsedYaml = jsyaml.load(yamlContent);
-                editor.getWrapperElement().classList.remove('is-invalid');
-                editor.getWrapperElement().classList.add('is-valid');
-            } catch (e) {
-                editor.getWrapperElement().classList.remove('is-valid');
-                editor.getWrapperElement().classList.add('is-invalid');
-                // alert('Invalid YAML format: ' + e.message);
+        // Add a submit event listener to the form
+        form.addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the default form submission
+
+
+            // Check if the structured editor is in view.
+            if (structuredEditorControls.style.display === 'block') {
+                // If the structured editor is in view, populate the YAML editor
+                // with the structured editor contents.
+                writeToYAMLEditor();
             }
+
+            form.submit(); // Submit the form
+
         });
+
     });
 </script>

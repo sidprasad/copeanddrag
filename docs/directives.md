@@ -21,7 +21,7 @@ Assign an icon to all atoms of a certain sig.
 
 ```yaml
 directives:
-  - pictorial:
+  - icon:
       sig: Person
       icon:
         path: /path/to/person.png

@@ -1,8 +1,6 @@
 <!-- TODO: Add to each list -->
-<div id="reltable-container" class="col-sm-2">
+<div id="reltable-container">
     <div class="row">
-
-
         <div class="card" id="relationcard" style="display: none;">
             <div class="card-body">
                 <div id="reldescr">
@@ -15,23 +13,23 @@
         </div>
     </div>
     <script>
-                // Function to check the length of relationList and show/hide relationcard
-                function updateRelationCardVisibility() {
-                    var relationList = document.getElementById('relationList');
-                    var relationCard = document.getElementById('relationcard');
-                    if (relationList.children.length > 0) {
-                        relationCard.style.display = 'block';
-                    } else {
-                        relationCard.style.display = 'none';
-                    }
-                }
+        // Function to check the length of relationList and show/hide relationcard
+        function updateRelationCardVisibility() {
+            var relationList = document.getElementById('relationList');
+            var relationCard = document.getElementById('relationcard');
+            if (relationList.children.length > 0) {
+                relationCard.style.display = 'block';
+            } else {
+                relationCard.style.display = 'none';
+            }
+        }
 
-                // Initial check
-                updateRelationCardVisibility();
+        // Initial check
+        updateRelationCardVisibility();
 
-                // MutationObserver to watch for changes in relationList
-                var observer = new MutationObserver(updateRelationCardVisibility);
-                observer.observe(document.getElementById('relationList'), { childList: true });
+        // MutationObserver to watch for changes in relationList
+        var observer = new MutationObserver(updateRelationCardVisibility);
+        observer.observe(document.getElementById('relationList'), { childList: true });
 
     </script>
 
