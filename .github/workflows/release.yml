@@ -53,9 +53,7 @@ jobs:
         with:
           tag_name: ${{ env.TAG_NAME }}
           release_name: Release ${{ env.TAG_NAME }}
-          body: |
-            ## Changes
-            - Automatically generated release for tag ${{ env.TAG_NAME }}.
+          generate_release_notes: true
           draft: false
           prerelease: false
 
