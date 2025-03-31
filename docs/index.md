@@ -10,12 +10,17 @@ This approach lets you get started quickly! Every well formed CnD spec
 
 ## What do CnD specs look like?
 
-CnD uses a YAML-like syntax to define constraints and directives for refining Alloy-generated diagrams. A CnD specification consists of two primary components:
+A CnD specification consists of two primary components:
 
 - **[Constraints](constraints.md)** that define spatial relationships between elements.
 - **[Directives](directives.md)** that Control visual styling and representation.
 
-These are combined to form a full CnD spec:
+These can be expressed both via YAML and a structured, no code interface. 
+
+
+### YAML Syntax
+
+CnD code is written in a YAML-like syntax. These are combined to form a full CnD spec:
 
 ```yaml
 constraints:
@@ -35,7 +40,13 @@ directives:
 ---
 
 
-![Teaser Image](img/teaser.png)
+### No Code Interface
 
-More [examples](examples.md) are available here.
+The structured view provides a no code interface for authoring CnD specifications.
+
+![Structured View](img/structuredView.png)
+
+
+----
+
 
