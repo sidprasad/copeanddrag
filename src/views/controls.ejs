@@ -116,7 +116,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
 
-
+        // THis has to do with the Alloy inst.
         var alloyInstanceLabel = document.getElementById('alloyinstancelabel');
         var alloyDatumTextarea = document.getElementById('alloydatum');
 
@@ -130,23 +130,52 @@
 
         const showYamlEditorButton = document.getElementById('showYamlEditor');
         const showStructuredEditorButton = document.getElementById('showStructuredEditor');
-        // Show YAML Editor and hide Structured Editor
-        showYamlEditorButton.addEventListener('click', function () {
-            writeToYAMLEditor();
+
+        let yamlEditorControls = document.getElementById('yamlEditorControls');
+        let structuredEditorControls = document.getElementById('structuredEditorControls');
+
+        function showYamlEditor() {
             yamlEditorControls.style.display = 'block';
             showYamlEditorButton.classList.add('active');
             showStructuredEditorButton.classList.remove('active');
             structuredEditorControls.style.display = 'none';
+
+            // And add to local storage
+            localStorage.setItem('editorView', 'yaml');
+        }
+
+        function showStructuredEditor() {
+            yamlEditorControls.style.display = 'none';
+            structuredEditorControls.style.display = 'block';
+            showStructuredEditorButton.classList.add('active');
+            showYamlEditorButton.classList.remove('active');
+
+            // And add to local storage
+            localStorage.setItem('editorView', 'structured');
+        }
+
+        // Check local storage for the editor view preference
+        const editorView = localStorage.getItem('editorView');
+        if (editorView === 'structured') {
+            populateStructuredEditor();
+            showStructuredEditor();
+        } else {
+            showYamlEditor();
+        }
+
+
+
+        // Show YAML Editor and hide Structured Editor
+        showYamlEditorButton.addEventListener('click', function () {
+            writeToYAMLEditor();
+            showYamlEditor();
         });
 
         // Show Structured Editor and hide YAML Editor
         showStructuredEditorButton.addEventListener('click', function () {
             // First set up the structured editor from the YAML contents.
             populateStructuredEditor();
-            yamlEditorControls.style.display = 'none';
-            structuredEditorControls.style.display = 'block';
-            showStructuredEditorButton.classList.add('active');
-            showYamlEditorButton.classList.remove('active');
+            showStructuredEditor();
         });
 
 
@@ -156,17 +185,11 @@
         // Add a submit event listener to the form
         form.addEventListener('submit', function (event) {
             event.preventDefault(); // Prevent the default form submission
-
-
             // Check if the structured editor is in view.
             if (structuredEditorControls.style.display === 'block') {
-                // If the structured editor is in view, populate the YAML editor
-                // with the structured editor contents.
                 writeToYAMLEditor();
             }
-
             form.submit(); // Submit the form
-
         });
 
     });
