@@ -346,6 +346,30 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="What do CnD specs look like?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#yaml-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      YAML Syntax
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-code-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      No Code Interface
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -452,6 +476,30 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="What do CnD specs look like?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#yaml-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      YAML Syntax
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-code-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      No Code Interface
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -480,12 +528,14 @@ visualizations from scratch.
 This approach lets you get started quickly! Every well formed CnD spec
 (<em>even an empty spec</em>) produces a diagram.</p>
 <h2 id="what-do-cnd-specs-look-like">What do CnD specs look like?</h2>
-<p>CnD uses a YAML-like syntax to define constraints and directives for refining Alloy-generated diagrams. A CnD specification consists of two primary components:</p>
+<p>A CnD specification consists of two primary components:</p>
 <ul>
 <li><strong><a href="constraints/">Constraints</a></strong> that define spatial relationships between elements.</li>
 <li><strong><a href="directives/">Directives</a></strong> that Control visual styling and representation.</li>
 </ul>
-<p>These are combined to form a full CnD spec:</p>
+<p>These can be expressed both via YAML and a structured, no code interface. </p>
+<h3 id="yaml-syntax">YAML Syntax</h3>
+<p>CnD code is written in a YAML-like syntax. These are combined to form a full CnD spec:</p>
 <pre><code class="language-yaml">constraints:
   - &lt;constraint-type&gt;: &lt;parameters&gt;
   - &lt;constraint-type&gt;: &lt;parameters&gt;
@@ -500,8 +550,10 @@ directives:
   .
 </code></pre>
 <hr />
-<p><img alt="Teaser Image" src="img/teaser.png" /></p>
-<p>More <a href="examples/">examples</a> are available here.</p>
+<h3 id="no-code-interface">No Code Interface</h3>
+<p>The structured view provides a no code interface for authoring CnD specifications.</p>
+<p><img alt="Structured View" src="img/structuredView.png" /></p>
+<hr />
 
 
 
