@@ -1,0 +1,43 @@
+/* Sidebar container */
+.controls-sidebar {
+    position: fixed;
+    top: 0;
+
+    height: 100%;
+    background-color: #f8f9fa;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    transition: right 0.3s ease; /* Smooth sliding effect */
+    z-index: 1050;
+}
+
+/* When the sidebar is visible */
+.controls-sidebar.show {
+    right: 0; /* Slide into view */
+}
+
+/* Toggle button */
+.toggle-button {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1100;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+/* Chevron icon */
+.chevron {
+    font-size: 20px;
+    transition: transform 0.3s ease; /* Rotate animation */
+}
+
+/* Rotate chevron when sidebar is open */
+.controls-sidebar.show + .toggle-button .chevron {
+    transform: rotate(180deg);
+}
