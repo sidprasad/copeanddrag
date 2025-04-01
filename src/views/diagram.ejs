@@ -13,6 +13,7 @@
 
     <link rel="icon" type="image/svg+xml" href="/img/logo.svg">
     <link rel="stylesheet" href="/css/diagramstyle.css">
+    <link rel="stylesheet" href="/css/controls.css">
 
     <script src="https://marvl.infotech.monash.edu/webcola/extern/graphlib-dot.min.js"></script>
     <!-- Full version -->
@@ -37,6 +38,24 @@
             } else {
                 console.error('Missing required data for layout');
             }
+
+
+
+            const toggleButton = document.getElementById('toggleControls');
+            const controlsSidebar = document.getElementById('controlsSidebar');
+            const toggleIcon = document.getElementById('toggleIcon');
+
+            toggleButton.addEventListener('click', function () {
+                // Toggle the "show" class on the sidebar
+                controlsSidebar.classList.toggle('show');
+
+                // Rotate the chevron icon
+                if (controlsSidebar.classList.contains('show')) {
+                    toggleIcon.innerHTML = '&raquo;'; // Chevron pointing right
+                } else {
+                    toggleIcon.innerHTML = '&laquo;'; // Chevron pointing left
+                }
+            });
         });
     </script>
 
@@ -64,7 +83,6 @@
     <nav class="navbar navbar-light bg-light">
         <h3 class="navbar-brand">Cope and Drag</h3>
         <a href="https://sidprasad.github.io/copeanddrag/" target="_blank"><button>Read the docs</button></a>
-       
     </nav>
     <% if (errors && errors.trim().length > 0) { %>
         
@@ -80,9 +98,6 @@
     </div>
 
     <div class="container-fluid">
-
-
-
         <%- include('temporalminimap') %>
 
         <div class="row">
@@ -97,7 +112,15 @@
             </div>
 
             <div class="col">
-                <%- include('controls') %>
+                <!-- Toggle Button -->
+                <button id="toggleControls" class="btn btn-primary toggle-button">
+                    <span id="toggleIcon" class="chevron">&raquo;</span>
+                </button>
+
+                <!-- Collapsible Sidebar -->
+                <div id="controlsSidebar" class="collapse show controls-sidebar">
+                    <%- include('controls') %>
+                </div>
             </div>
                         
 
