@@ -1,6 +1,6 @@
 
 
-function downloadHighResPNG(scaleFactor = 3) {
+window.downloadHighResPNG = function (scaleFactor = 3) {
     const svg = document.getElementById("svg");
     const serializer = new XMLSerializer();
     let source = serializer.serializeToString(svg);
