@@ -38,6 +38,23 @@
                 console.error('Missing required data for layout');
             }
         });
+
+        document.addEventListener('DOMContentLoaded', function () {
+        const toggleExploreColButton = document.getElementById('toggleExploreCol');
+        const toggleControlsColButton = document.getElementById('toggleControlsCol');
+        const exploreCol = document.getElementById('exploreCol');
+        const controlsCol = document.getElementById('controlsCol');
+
+        // Toggle Explore Column
+        toggleExploreColButton.addEventListener('click', function () {
+            exploreCol.classList.toggle('hidden');
+        });
+
+        // Toggle Controls Column
+        toggleControlsColButton.addEventListener('click', function () {
+            controlsCol.classList.toggle('hidden');
+        });
+    });
     </script>
 
     <script type="module">
@@ -56,7 +73,12 @@
             document.getElementById('controlsForm').submit();
         };
     </script>
-
+    <style>
+        /* Hide elements with the hidden class */
+        .hidden {
+            display: none !important;
+        }
+    </style>
     
 </head>
 
@@ -64,7 +86,8 @@
     <nav class="navbar navbar-light bg-light">
         <h3 class="navbar-brand">Cope and Drag</h3>
         <a href="https://sidprasad.github.io/copeanddrag/" target="_blank"><button>Read the docs</button></a>
-       
+        <button id="toggleExploreCol" class="btn btn-primary">Toggle Explore</button>
+        <button id="toggleControlsCol" class="btn btn-primary">Toggle Controls</button>
     </nav>
     <% if (errors && errors.trim().length > 0) { %>
         
@@ -81,12 +104,10 @@
 
     <div class="container-fluid">
 
-
-
         <%- include('temporalminimap') %>
 
         <div class="row">
-            <div class="col">
+            <div class="col" id="exploreCol">
 
                 <%- include('relationTable') %>
 
@@ -96,7 +117,7 @@
                 <%- include('diagramsvg') %>
             </div>
 
-            <div class="col">
+            <div class="col" id="controlsCol">
                 <%- include('controls') %>
             </div>
                         
