@@ -187,9 +187,9 @@ function downloadHighResPNG(scaleFactor = 3) {
             <button id="toggleControlsCol" class="btn btn-outline-secondary">Hide Controls</button>
 
             <br>
-            <button id="diagramDownloadButton" class="btn btn-outline-dark" onclick="downloadHighResPNG(5);" >Download Diagram</button>
+            <button id="diagramDownloadButton" class="btn btn-outline-secondary" onclick="downloadHighResPNG(5);" >Download Diagram</button>
             <% if (instAsString) { %>
-                <button id="instButton" class="btn btn-outline-dark">As Forge Instance</button>
+                <button id="instButton" class="btn btn-outline-secondary">As Forge Instance</button>
             <% } %>
         
             <br>
@@ -214,7 +214,7 @@ function downloadHighResPNG(scaleFactor = 3) {
         <%- include('temporalminimap') %>
 
         <div class="row">
-            <div class="col" id="exploreCol">
+            <div class="col" id="exploreCol" >
 
                 <%- include('relationTable') %>
 
