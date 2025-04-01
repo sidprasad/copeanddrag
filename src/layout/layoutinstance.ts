@@ -635,7 +635,10 @@ export class LayoutInstance {
             throw new Error(nonCyclicConstraintError);
         }
     
-
+        // We have to do this update, since the actual validator
+        // updates the layotu when needed.
+        
+        constraints = layoutWithoutCyclicConstraints.constraints;
         //////// NOW, we want to re-apply constraints, but with cyclic constraints
         // perturbed.
 
@@ -644,6 +647,9 @@ export class LayoutInstance {
         let closureConstraints = this.applyClosureConstraints(g, layoutNodes, layoutWithoutCyclicConstraints);
     
         //// TODO: Does this change?
+
+        
+
         // Append the closure constraints to the constraints
         constraints = constraints.concat(closureConstraints);
 

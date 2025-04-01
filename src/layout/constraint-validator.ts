@@ -59,6 +59,7 @@ class ConstraintValidator {
 
         this.solver.solve();
 
+        //// TODO: Does adding these play badly when we have circular layouts?
 
         // Now that the solver has solved, we can get an ALIGNMENT ORDER for the nodes.
         let and_more_constraints = this.getAlignmentOrders();
