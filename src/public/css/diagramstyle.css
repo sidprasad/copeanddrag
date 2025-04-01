@@ -1,9 +1,20 @@
-#svg-container {
+ #svg-container {
     /*display: flex;*/
     /*justify-content: center;*/
     /*align-items: center;*/
     /*height: 100vh;*/
 
+} 
+
+#svg {
+    width: 100%; /* SVG takes full width of its container */
+    height: 100%; /* SVG takes full height of its container */
+    min-width: 30vw; /* Set a minimum width for the SVG */
+    max-width: 95vw; /* Set a maximum height for the SVG */
+    min-height: 80vh; /* Set minimum height to 80% of the viewport height */
+    max-height: 95vh; /* Set maximum height to 90% of the viewport height */
+
+    border: 1px solid #ccc; /* Optional: Add a border for clarity */
 }
 
 .svg-border {
