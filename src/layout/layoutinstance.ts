@@ -636,19 +636,19 @@ export class LayoutInstance {
         }
     
         // We have to do this update, since the actual validator
-        // updates the layotu when needed.
-        
+        // updates the layotu when needed. HOWEVER, THIS INTRODUCES
+        // ANOTHER POTENTIAL BUG, I THINK. WHAT IF CIRCULAR PERTURBATIONS CHANGE 
+        // DIRECTLY RIGHT/LEFT?
+
         constraints = layoutWithoutCyclicConstraints.constraints;
         //////// NOW, we want to re-apply constraints, but with cyclic constraints
         // perturbed.
 
-        // TODO:
         // Now we apply the closure constraints
         let closureConstraints = this.applyClosureConstraints(g, layoutNodes, layoutWithoutCyclicConstraints);
     
-        //// TODO: Does this change?
-
-        
+        //// BUG: Does this change? THERE IS A POTENTIAL FOR A BUG HERE, SINCE
+        /// DIFFERENT CURCULAR LAYOTU MAY INTERACT ODD.
 
         // Append the closure constraints to the constraints
         constraints = constraints.concat(closureConstraints);
