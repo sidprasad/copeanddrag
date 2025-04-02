@@ -306,8 +306,13 @@ function writeToYAMLEditor() {
         combinedSpec.directives = directives;
     }
 
+    let yamlStr = "";
 
-    const yamlStr = jsyaml.dump(combinedSpec);
+    if(Object.keys(combinedSpec).length > 0) {
+        yamlStr = jsyaml.dump(combinedSpec);
+    }
+
+    // const yamlStr = jsyaml.dump(combinedSpec);
 
     if (window.editor) {
         window.editor.setValue(yamlStr);
@@ -453,46 +458,56 @@ function populateStructuredEditor() {
                 updateFields(sel); // Dynamically generate the fields
                 const paramsDiv = div.querySelector(".params");
 
-                // Fill in the values for the generated fields
-                Object.keys(params).forEach(key => {
 
-                    // TODO: Ensure this works for pictoral?
-                    // I think pictoral/icon is broken here.
+                // Check if params is an object or a string
 
-                    if (key == "icon") {
-                        Object.keys(params[key]).forEach(iconKey => {
-                            let iconInput = paramsDiv.querySelector(`[name="${iconKey}"]`);
-                            if (iconInput) {
-                                iconInput.value = params[key][iconKey];
-                            }
-                        });
-                    }
-                    else {
+                // This is for simple flag select style scenarios.
+                if (typeof params === "string") {
+                    let singleInput = paramsDiv.querySelector(`[name="${type}"]`);
+                        if (singleInput) {
+                            singleInput.value = params;
+                        }
+                }
+                else if (typeof params === "object") {
+                    // Fill in the values for the generated fields
+                    Object.keys(params).forEach(key => {
 
 
-                        let input = paramsDiv.querySelector(`[name="${key}"]`);
-                        if (input) {
+                        if (key == "icon") {
+                            Object.keys(params[key]).forEach(iconKey => {
+                                let iconInput = paramsDiv.querySelector(`[name="${iconKey}"]`);
+                                if (iconInput) {
+                                    iconInput.value = params[key][iconKey];
+                                }
+                            });
+                        }
+                        else {
 
 
-                            if (input.multiple && Array.isArray(params[key])) {
-                                // Handle multi-select fields
-                                Array.from(input.options).forEach(option => {
-                                    option.selected = params[key].includes(option.value);
-                                });
-                            } else if (input.type === "color") {
-                                // Handle color fields
-                                input.value = resolveColorValue(params[key]);
-                            }
-                            else {
-                                // Handle single-value fields
-                                input.value = params[key];
+                            let input = paramsDiv.querySelector(`[name="${key}"]`);
+                            if (input) {
+
+
+                                if (input.multiple && Array.isArray(params[key])) {
+                                    // Handle multi-select fields
+                                    Array.from(input.options).forEach(option => {
+                                        option.selected = params[key].includes(option.value);
+                                    });
+                                } else if (input.type === "color") {
+                                    // Handle color fields
+                                    input.value = resolveColorValue(params[key]);
+                                }
+                                else {
+                                    console.log("Setting value for " + key + " to " + params[key]);
+                                    // Handle single-value fields
+                                    input.value = params[key];
+                                }
                             }
                         }
-                    }
 
 
-                });
-
+                    });
+                }
             });
         }
 
