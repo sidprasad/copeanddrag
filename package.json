@@ -23,7 +23,8 @@
     "build": "npm run clean && ncc build src/index.ts -o dist && npm run copy-files",
     "copy-files": "cpx \"views/**/*\" dist/views && cpx \"public/**/*\" dist/public",
     "start": "node dist/index.js",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "publish-docs": "mkdocs gh-deploy"
   },
   "dependencies": {
     "@types/d3": "^7.4.3",
