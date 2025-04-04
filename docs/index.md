@@ -8,6 +8,12 @@ visualizations from scratch.
 This approach lets you get started quickly! Every well formed CnD spec
 (*even an empty spec*) produces a diagram.
 
+## Installing CnD
+
+`CnD` is packaged as an easy to install webserver! Download `CnD` from [Releases](https://github.com/sidprasad/copeanddrag/releases),
+and launch it by running `node index.js`. This will make the `CnD` server available on `localhost:3000`.
+
+
 ## What do CnD specs look like?
 
 A CnD specification consists of two primary components:
@@ -44,8 +50,7 @@ directives:
 
 The structured view provides a no code interface for authoring CnD specifications.
 
-![Structured View](img/structuredView.png)
-
+![No Code Interface Screenshot](img/nocode.png)
 
 ----
 
