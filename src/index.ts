@@ -13,6 +13,8 @@ import { instanceToInst } from './forge-util/instanceToInst';
 import { Event, Logger, LogLevel } from './logging/logger';
 import * as os from 'os';
 import * as crypto from 'crypto'; 
+import {ForgeExprEvaluatorUtil} from 'forge-expr-evaluator';
+import { getSourceCodeFromDatum } from './forge-util/sourceFromDatum';
 
 const express = require('express');
 const path = require('path');
@@ -33,7 +35,7 @@ app.use(express.json({ limit: '50mb' }));
 
 // This is a hack. I'm not sure
 // how to encode the version number.
-const version = "2.2.3";
+const version = "2.3.0";
 
 const secretKey = "cope-and-drag-logging-key";
 
@@ -53,6 +55,10 @@ function getPersistentUserId(): string {
 
 const userId = getPersistentUserId();
 const logger = new Logger(userId, version);
+
+
+
+
 
 
 function getFormContents(req: any) {
@@ -99,8 +105,19 @@ function getFormContents(req: any) {
     let coopeNonEmpty = cope && cope.length > 0;
 
     let layoutSpec = coopeNonEmpty ? copeToLayoutSpec(cope) : parseLayoutSpec("");
+
+    let source = getSourceCodeFromDatum(alloyDatum);
+
+
+
+
+    let interpreter = new ForgeExprEvaluatorUtil(
+        alloyDatum,
+        source
+    );
+
     let li = new LayoutInstance(layoutSpec);
-    return { instances, li, instanceNumber, loopBack, projections };
+    return { instances, li, instanceNumber, loopBack, projections, interpreter };
 
 
 }
@@ -139,7 +156,7 @@ app.post('/', (req, res) => {
 
     try {
 
-        var { instances, li, instanceNumber, loopBack, projections } = getFormContents(req);
+        var { instances, li, instanceNumber, loopBack, projections, interpreter } = getFormContents(req);
         var num_instances = instances.length;
 
         if (instanceNumber >= num_instances) {

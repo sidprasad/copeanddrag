@@ -2,7 +2,6 @@
 import { Graph, Edge } from 'graphlib';
 import { AlloyInstance, getAtomType, getInstanceTypes } from '../alloy-instance';
 import { isBuiltin, AlloyType } from '../alloy-instance/src/type';
-import { AlloyAtom } from '../alloy-instance/src/atom';
 import { applyProjections } from '../alloy-instance/src/projection';
 import { DirectionalRelation, FieldDirection, IconDefinition } from './layoutspec';
 import { LayoutSpec, ClosureDefinition, ClusterRelation, parseLayoutSpec, SigDirection } from './layoutspec';
@@ -10,8 +9,10 @@ import { LayoutNode, LayoutEdge, LayoutConstraint, InstanceLayout, LeftConstrain
 
 import { generateGraph } from '../alloy-graph';
 
+
+import {ForgeExprEvaluatorUtil} from 'forge-expr-evaluator';
+
 import { ColorPicker } from './colorpicker';
-import { Group, Layout } from 'webcola';
 import { ConstraintValidator } from './constraint-validator';
 
 const UNIVERSAL_TYPE = "univ";

@@ -67,3 +67,4 @@ export function instanceToInst(instance: AlloyInstance): string {
 
     return `${PREFIX}\n${inst}\n${POSTFIX}`;
 }
+

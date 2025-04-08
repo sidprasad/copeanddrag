@@ -1,10 +1,11 @@
-<alloy builddate="Thursday, August 8th, 2024">
-<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/no-name.rkt" version="3.5" prefixLength="12" loop="10" >
+<alloy builddate="Tuesday, April 8th, 2025">
+<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/Users/siddharthaprasad/Desktop/copeanddrag/examples/misc-examples/goats_and_wolves/goats_and_wolves.frg" version="4.1" prefixLength="12" loop="10" >
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>
 
 <sig label="Int" ID="1" parentID="2" builtin="yes">
+
 </sig>
 
 <sig label="univ" ID="2" builtin="yes">
@@ -61,12 +62,13 @@
 
 
 </instance>
-<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/no-name.rkt" version="3.5" prefixLength="12" loop="10" >
+<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/Users/siddharthaprasad/Desktop/copeanddrag/examples/misc-examples/goats_and_wolves/goats_and_wolves.frg" version="4.1" prefixLength="12" loop="10" >
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>
 
 <sig label="Int" ID="1" parentID="2" builtin="yes">
+
 </sig>
 
 <sig label="univ" ID="2" builtin="yes">
@@ -123,12 +125,13 @@
 
 
 </instance>
-<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/no-name.rkt" version="3.5" prefixLength="12" loop="10" >
+<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/Users/siddharthaprasad/Desktop/copeanddrag/examples/misc-examples/goats_and_wolves/goats_and_wolves.frg" version="4.1" prefixLength="12" loop="10" >
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>
 
 <sig label="Int" ID="1" parentID="2" builtin="yes">
+
 </sig>
 
 <sig label="univ" ID="2" builtin="yes">
@@ -185,12 +188,13 @@
 
 
 </instance>
-<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/no-name.rkt" version="3.5" prefixLength="12" loop="10" >
+<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/Users/siddharthaprasad/Desktop/copeanddrag/examples/misc-examples/goats_and_wolves/goats_and_wolves.frg" version="4.1" prefixLength="12" loop="10" >
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>
 
 <sig label="Int" ID="1" parentID="2" builtin="yes">
+
 </sig>
 
 <sig label="univ" ID="2" builtin="yes">
@@ -247,12 +251,13 @@
 
 
 </instance>
-<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/no-name.rkt" version="3.5" prefixLength="12" loop="10" >
+<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/Users/siddharthaprasad/Desktop/copeanddrag/examples/misc-examples/goats_and_wolves/goats_and_wolves.frg" version="4.1" prefixLength="12" loop="10" >
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>
 
 <sig label="Int" ID="1" parentID="2" builtin="yes">
+
 </sig>
 
 <sig label="univ" ID="2" builtin="yes">
@@ -309,12 +314,13 @@
 
 
 </instance>
-<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/no-name.rkt" version="3.5" prefixLength="12" loop="10" >
+<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/Users/siddharthaprasad/Desktop/copeanddrag/examples/misc-examples/goats_and_wolves/goats_and_wolves.frg" version="4.1" prefixLength="12" loop="10" >
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>
 
 <sig label="Int" ID="1" parentID="2" builtin="yes">
+
 </sig>
 
 <sig label="univ" ID="2" builtin="yes">
@@ -371,12 +377,13 @@
 
 
 </instance>
-<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/no-name.rkt" version="3.5" prefixLength="12" loop="10" >
+<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/Users/siddharthaprasad/Desktop/copeanddrag/examples/misc-examples/goats_and_wolves/goats_and_wolves.frg" version="4.1" prefixLength="12" loop="10" >
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>
 
 <sig label="Int" ID="1" parentID="2" builtin="yes">
+
 </sig>
 
 <sig label="univ" ID="2" builtin="yes">
@@ -433,12 +440,13 @@
 
 
 </instance>
-<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/no-name.rkt" version="3.5" prefixLength="12" loop="10" >
+<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/Users/siddharthaprasad/Desktop/copeanddrag/examples/misc-examples/goats_and_wolves/goats_and_wolves.frg" version="4.1" prefixLength="12" loop="10" >
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>
 
 <sig label="Int" ID="1" parentID="2" builtin="yes">
+
 </sig>
 
 <sig label="univ" ID="2" builtin="yes">
@@ -495,12 +503,13 @@
 
 
 </instance>
-<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/no-name.rkt" version="3.5" prefixLength="12" loop="10" >
+<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/Users/siddharthaprasad/Desktop/copeanddrag/examples/misc-examples/goats_and_wolves/goats_and_wolves.frg" version="4.1" prefixLength="12" loop="10" >
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>
 
 <sig label="Int" ID="1" parentID="2" builtin="yes">
+
 </sig>
 
 <sig label="univ" ID="2" builtin="yes">
@@ -557,12 +566,13 @@
 
 
 </instance>
-<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/no-name.rkt" version="3.5" prefixLength="12" loop="10" >
+<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/Users/siddharthaprasad/Desktop/copeanddrag/examples/misc-examples/goats_and_wolves/goats_and_wolves.frg" version="4.1" prefixLength="12" loop="10" >
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>
 
 <sig label="Int" ID="1" parentID="2" builtin="yes">
+
 </sig>
 
 <sig label="univ" ID="2" builtin="yes">
@@ -619,12 +629,13 @@
 
 
 </instance>
-<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/no-name.rkt" version="3.5" prefixLength="12" loop="10" >
+<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/Users/siddharthaprasad/Desktop/copeanddrag/examples/misc-examples/goats_and_wolves/goats_and_wolves.frg" version="4.1" prefixLength="12" loop="10" >
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>
 
 <sig label="Int" ID="1" parentID="2" builtin="yes">
+
 </sig>
 
 <sig label="univ" ID="2" builtin="yes">
@@ -681,12 +692,13 @@
 
 
 </instance>
-<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/no-name.rkt" version="3.5" prefixLength="12" loop="10" >
+<instance bitwidth="4" maxseq="-1" command="temporary-name_goats_and_wolves_1" filename="/Users/siddharthaprasad/Desktop/copeanddrag/examples/misc-examples/goats_and_wolves/goats_and_wolves.frg" version="4.1" prefixLength="12" loop="10" >
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>
 
 <sig label="Int" ID="1" parentID="2" builtin="yes">
+
 </sig>
 
 <sig label="univ" ID="2" builtin="yes">
@@ -744,5 +756,86 @@
 
 </instance>
 
-<source filename="/no-name.rkt" content="// Couldn't open source file (/no-name.rkt) (info: (2 . posix)). Is the file saved?"></source>
+<source filename="/Users/siddharthaprasad/Desktop/copeanddrag/examples/misc-examples/goats_and_wolves/goats_and_wolves.frg" content="#lang forge/temporal
+&#xA;
+&#xA;option max_tracelength 12
+&#xA;option min_tracelength 12
+&#xA;
+&#xA;---------- Definitions ----------
+&#xA;
+&#xA;abstract sig Position {
+&#xA;    var animals: set GWAnimal
+&#xA;}
+&#xA;one sig Near extends Position {}
+&#xA;one sig Far extends Position {}
+&#xA;
+&#xA;abstract sig GWAnimal {}
+&#xA;sig Goat extends GWAnimal {}
+&#xA;sig Wolf extends GWAnimal {}
+&#xA;
+&#xA;one sig GWBoat {
+&#xA;    var location: one Position
+&#xA;}
+&#xA;
+&#xA;pred GWvalidState {
+&#xA;     // For this problem, valid states are ones which are physically reasonable:
+&#xA;    //  - animals should be on one side or the other, but not both
+&#xA;    no a: GWAnimal | a in Near.animals and a in Far.animals
+&#xA;    GWAnimal = Near.animals + Far.animals
+&#xA;    // - boat must be on a side
+&#xA;    GWBoat.location = Near or GWBoat.location = Far
+&#xA;}
+&#xA;
+&#xA;// Each of the predicates below should *assume* valid states
+&#xA;// but should *not enforce* valid states.
+&#xA;
+&#xA;pred GWinitState {
+&#xA;    // All of the animals and the boat should start on the near side
+&#xA;    GWAnimal = Near.animals
+&#xA;    GWBoat.location = Near
+&#xA;}
+&#xA;
+&#xA;pred GWfinalState {
+&#xA;    // We want to see all of the animals reach the far side.
+&#xA;    GWAnimal = Far.animals
+&#xA;}
+&#xA;
+&#xA;pred GWmove[to, from: Position] {
+&#xA;    // The boat can carry at most two animals each way,
+&#xA;    // but it can't travel across the river on its own.
+&#xA;    GWBoat.location = from
+&#xA;    GWBoat.location' = to
+&#xA;    // One animal will cross iff a1 == a2
+&#xA;    some a1, a2: GWAnimal | {
+&#xA;        a1 in from.animals
+&#xA;        a2 in from.animals
+&#xA;        from.animals' = from.animals - (a1 + a2)
+&#xA;        to.animals' = to.animals + (a1 + a2)
+&#xA;    }
+&#xA;}
+&#xA;
+&#xA;-----------------------------------------
+&#xA;
+&#xA;pred GWneverEating {
+&#xA;    // If the sheep are out numbered on one of the sides,
+&#xA;    // then the wolves can overpower and eat them!
+&#xA;    // Check to see if we can avoid that.
+&#xA;    // Need the implication since we don't know if there are any goats to be outnumbered
+&#xA;    #{g: Goat | g in Near.animals} &amp;gt; 0 implies (#{w: Wolf | w in Near.animals} &amp;lt;= #{g: Goat | g in Near.animals})
+&#xA;    #{g: Goat | g in Far.animals} &amp;gt; 0 implies (#{w: Wolf | w in Far.animals} &amp;lt;= #{g: Goat | g in Far.animals})
+&#xA;}
+&#xA;
+&#xA;pred GWtraces {
+&#xA;    GWinitState
+&#xA;    eventually GWfinalState
+&#xA;    always GWvalidState
+&#xA;    always GWneverEating
+&#xA;    always (GWmove[Near, Far] or GWmove[Far, Near])
+&#xA;}
+&#xA;
+&#xA;run {
+&#xA;    GWtraces
+&#xA;} for exactly 6 GWAnimal, exactly 3 Goat, exactly 3 Wolf
+&#xA;
+&#xA;"></source>
 </alloy>
