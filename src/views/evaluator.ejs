@@ -37,8 +37,9 @@
         if (!expression) return;
   
         // Get other fields
-        const mode = document.getElementById('modeSelect').value;
-        const debug = document.getElementById('debugCheckbox').checked;
+        
+        const alloydatum = document.getElementById('alloydatum').value;
+        const instancenumber = document.getElementById('instancenumber').value;
   
         input.disabled = true;
   
@@ -48,8 +49,8 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               expression,
-              mode,
-              debug
+              alloydatum,
+              instancenumber,
             })
           });
   

@@ -374,10 +374,10 @@ app.post('/timing', (req, res) => {
 });
 
 
-app.post('/interpreter', (req, res) => {
+app.post('/evaluator', (req, res) => {
 
     const alloyDatum : string = req.body.alloydatum;
-    const expr : string = req.body.expr;
+    const expr : string = req.body.expression;
     const instanceNumber = parseInt(req.body.instancenumber) || 0;
     // And evaluate
     let evaluator = new WrappedForgeEvaluator(alloyDatum);
