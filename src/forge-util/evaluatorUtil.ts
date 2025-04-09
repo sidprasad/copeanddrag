@@ -3,14 +3,15 @@ import { DOMParser } from '@xmldom/xmldom';
 import {ForgeExprEvaluatorUtil} from 'forge-expr-evaluator';
 
 
-// {erhaps this should be a class.
 
-
-class WrappedForgeEvaluator {
+export class WrappedForgeEvaluator {
+    public sourceDatum: any;
     private evaluator: ForgeExprEvaluatorUtil;
     private sourceCode: string;
 
     static getSourceCodeFromDatum(datum: any): string {
+
+
         const xmlParser = new DOMParser();
         const xmlDoc = xmlParser.parseFromString(datum, "application/xml");
       
@@ -32,6 +33,13 @@ class WrappedForgeEvaluator {
 
 
     constructor(datumAsXML: any) {
+
+        // TODO: Better, more graceful failure.
+
+
+        // There may just *be no source code* in the datum.
+
+        this.sourceDatum = datumAsXML;
         this.sourceCode = WrappedForgeEvaluator.getSourceCodeFromDatum(datumAsXML);
         this.evaluator = new ForgeExprEvaluatorUtil(datumAsXML, this.sourceCode);
     }
@@ -43,7 +51,15 @@ class WrappedForgeEvaluator {
     }
 
 
-    public evaluate(expr: string): any {
+    public evaluate(expr: string, instanceIndex? : number): any {
+
+        let result = this.evaluator.evaluateExpression(expr, instanceIndex);
+
+        // We may need to do some post-processing on the result.
+
+
+        return result;
+
     }
 
 }

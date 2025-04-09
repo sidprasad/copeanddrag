@@ -14,7 +14,7 @@ import { Event, Logger, LogLevel } from './logging/logger';
 import * as os from 'os';
 import * as crypto from 'crypto'; 
 
-import { getEvaluatorFromDatum } from './forge-util/evaluatorUtil';
+import { WrappedForgeEvaluator } from './forge-util/evaluatorUtil';
 
 const express = require('express');
 const path = require('path');
@@ -371,6 +371,21 @@ app.post('/timing', (req, res) => {
 
     console.log(`Client time: ${clientTime} ms`);
     res.json({ message: 'Client time received successfully' });
+});
+
+
+app.post('/interpreter', (req, res) => {
+
+    const alloyDatum : string = req.body.alloydatum;
+    const expr : string = req.body.expr;
+    const instanceNumber = parseInt(req.body.instancenumber) || 0;
+    // And evaluate
+    let evaluator = new WrappedForgeEvaluator(alloyDatum);
+    let result = evaluator.evaluate(expr, instanceNumber);
+
+
+    // Finally, respond with the result
+    res.json({ result });
 });
 
 process.on('SIGINT', shutdown);
