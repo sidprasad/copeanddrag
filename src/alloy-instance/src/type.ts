@@ -16,7 +16,7 @@ export interface AlloyType {
   meta?: TypeMeta;
 }
 
-interface TypeMeta {
+export interface TypeMeta {
   abstract?: boolean;
   builtin?: boolean;
   enum?: boolean;

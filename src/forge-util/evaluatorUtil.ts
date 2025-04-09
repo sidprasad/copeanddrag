@@ -1,10 +1,27 @@
 import { DOMParser } from '@xmldom/xmldom';
 
 import {ForgeExprEvaluatorUtil} from 'forge-expr-evaluator';
-import { AlloyDatum, AlloyRelation, parseAlloyXML, AlloyTuple , AlloyInstance} from '../alloy-instance';
-import {DatumParsed, ParsedValue, Relation, Sig, InstanceData, ForgeTuple} from 'forge-expr-evaluator/dist/types';
+import { AlloyDatum, AlloyRelation, parseAlloyXML, AlloyTuple , AlloyInstance, AlloyType} from '../alloy-instance';
+import {DatumParsed, ParsedValue, Relation, Sig, InstanceData, ForgeTuple, BuiltinType} from 'forge-expr-evaluator/dist/types';
+
+import { TypeMeta } from '../alloy-instance/src/type';
+
+function toForgeType(type: AlloyType) : Sig | BuiltinType {
 
 
+    let meta = type.meta && type.meta.builtin ? {
+        builtin: type.meta.builtin
+    } : undefined
+
+     return {
+        _: type._,
+        id: type.id,
+        types: type.types,
+        atoms: type.atoms,
+        meta: meta
+    };
+
+}
 
 function toForgeTuple(tuple: AlloyTuple) : ForgeTuple {
     return {
@@ -29,6 +46,66 @@ function toRelation(r : AlloyRelation) : Relation {
 function toInstanceData(id: AlloyInstance) : InstanceData {
 
    // TODO
+
+   /*
+   export interface AlloyInstance {
+     types: Record<string, AlloyType>;
+     relations: Record<string, AlloyRelation>;
+     skolems: Record<string, AlloyRelation>;
+   }
+     */
+
+
+   /*
+
+export interface InstanceData {
+    types: {
+        "seq/Int": BuiltinType;
+        Int: BuiltinType;
+        univ: BuiltinType;
+        [key: string]: Sig;
+    };
+    relations: {
+        [key: string]: Relation;
+    };
+    skolems: any;
+}
+   */
+
+    let alloyRelations = id.relations;
+    let alloySkolems = id.skolems;
+    let alloyTypes = id.types;
+
+    let forgeRelations : Record<string, Relation> = {};
+    for (let key in alloyRelations) {
+        forgeRelations[key] = toRelation(alloyRelations[key]);
+    }
+
+    let forgeTypes: {
+        "seq/Int": BuiltinType;
+        Int: BuiltinType;
+        univ: BuiltinType;
+        [key: string]: Sig;
+    } = {
+        "seq/Int": toForgeType(alloyTypes["seq/Int"]) as BuiltinType,
+        Int: toForgeType(alloyTypes["Int"]) as BuiltinType,
+        univ: toForgeType(alloyTypes["univ"]) as BuiltinType,
+    };
+    
+    // Dynamically add other keys from alloyTypes
+    for (let key in alloyTypes) {
+        if (key !== "seq/Int" && key !== "Int" && key !== "univ") {
+            forgeTypes[key] = toForgeType(alloyTypes[key]);
+        }
+    }
+
+    // We have to ensure some things here!
+
+    return {
+        types: forgeTypes,
+        relations: forgeRelations,
+        skolems: alloySkolems
+    };
 
 }
 
@@ -74,20 +151,9 @@ function alloyXMLToDatumParsed(datum: string): DatumParsed {
     let ad: AlloyDatum = parseAlloyXML(datum);
     // Now need to convert ad to ParsedValue
 
-    let instanceData : InstanceData[] = ad.instances.map((instance) => {
-       
-        return {
-            types : instance.types,
-            relations : instance.relations,
-            skolems : instance.skolems,
-        }
-
-
-    });
-
-
-    let parsedValue = {
-        bitwidth: ad.bitwidth,
+    let parsedValue: ParsedValue = {
+        instances: ad.instances.map((instance) => toInstanceData(instance)),
+        bitwidth: ad.bitwidth
     };
 
 
@@ -132,16 +198,10 @@ export class WrappedForgeEvaluator {
         // We need to create a datum here that is appropriate for the evaluator.
         var ad: AlloyDatum = parseAlloyXML(datumAsXML);
 
-        let pv : ParsedValue = toParsedValue(ad);
-
-        let datumParsed : DatumParsed = {
-            parsed : pv,
-            data: datumAsXML
-        }
+        let datumParsed: DatumParsed = alloyXMLToDatumParsed(datumAsXML);
 
 
-
-        // There may just *be no source code* in the datum.
+        // TODO: There may just *be no source code* in the datum.
 
         this.sourceDatum = datumAsXML;
         this.sourceCode = WrappedForgeEvaluator.getSourceCodeFromDatum(datumAsXML);
