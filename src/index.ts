@@ -384,6 +384,8 @@ app.post('/evaluator', (req, res) => {
     let result = evaluator.evaluate(expr, instanceNumber);
 
 
+    // result needs to be converted to a string
+
     // Finally, respond with the result
     res.json({ result });
 });
