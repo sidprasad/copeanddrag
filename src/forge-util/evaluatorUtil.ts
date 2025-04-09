@@ -4,7 +4,6 @@ import {ForgeExprEvaluatorUtil} from 'forge-expr-evaluator';
 import { AlloyDatum, AlloyRelation, parseAlloyXML, AlloyTuple , AlloyInstance, AlloyType} from '../alloy-instance';
 import {DatumParsed, ParsedValue, Relation, Sig, InstanceData, ForgeTuple, BuiltinType} from 'forge-expr-evaluator/dist/types';
 
-import { TypeMeta } from '../alloy-instance/src/type';
 
 function toForgeType(type: AlloyType) : Sig | BuiltinType {
 
@@ -163,6 +162,35 @@ function alloyXMLToDatumParsed(datum: string): DatumParsed {
     };
 }
 
+export class EvalResult {
+
+
+    private result : string | string[][];
+
+    constructor(result: string | string[][]) {
+        this.result = result;
+    }
+
+    public prettyPrint() : string {
+        if (typeof this.result === 'string') {
+            return this.result;
+        } else {
+            let tupleStringArray: string[] = [];
+            // For each tuple in the result, join the elements with a ->
+            for (let i = 0; i < this.result.length; i++) {
+                let tuple : string[] = this.result[i];
+                let tupleString = tuple.join("->");
+                tupleStringArray.push(tupleString);
+            }
+            // Now join the tuplesStringArray with " , "
+            let resultString = tupleStringArray.join(" , ");
+            return resultString;
+        }
+    }
+
+
+}
+
 export class WrappedForgeEvaluator {
     public sourceDatum: any;
     private evaluator: ForgeExprEvaluatorUtil;
@@ -215,15 +243,10 @@ export class WrappedForgeEvaluator {
     }
 
 
-    public evaluate(expr: string, instanceIndex? : number): any {
+    public evaluate(expr: string, instanceIndex? : number): EvalResult {
 
         let result = this.evaluator.evaluateExpression(expr, instanceIndex);
-
-        // We may need to do some post-processing on the result.
-
-
-        return result;
-
+        return new EvalResult(result);
     }
 
 }
