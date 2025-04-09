@@ -13,8 +13,8 @@ import { instanceToInst } from './forge-util/instanceToInst';
 import { Event, Logger, LogLevel } from './logging/logger';
 import * as os from 'os';
 import * as crypto from 'crypto'; 
-import {ForgeExprEvaluatorUtil} from 'forge-expr-evaluator';
-import { getSourceCodeFromDatum } from './forge-util/sourceFromDatum';
+
+import { getEvaluatorFromDatum } from './forge-util/evaluatorUtil';
 
 const express = require('express');
 const path = require('path');
@@ -103,21 +103,9 @@ function getFormContents(req: any) {
     let loopBack = ad.loopBack || -1;
 
     let coopeNonEmpty = cope && cope.length > 0;
-
     let layoutSpec = coopeNonEmpty ? copeToLayoutSpec(cope) : parseLayoutSpec("");
-
-    let source = getSourceCodeFromDatum(alloyDatum);
-
-
-
-
-    let interpreter = new ForgeExprEvaluatorUtil(
-        alloyDatum,
-        source
-    );
-
     let li = new LayoutInstance(layoutSpec);
-    return { instances, li, instanceNumber, loopBack, projections, interpreter };
+    return { instances, li, instanceNumber, loopBack, projections };
 
 
 }
@@ -156,7 +144,7 @@ app.post('/', (req, res) => {
 
     try {
 
-        var { instances, li, instanceNumber, loopBack, projections, interpreter } = getFormContents(req);
+        var { instances, li, instanceNumber, loopBack, projections } = getFormContents(req);
         var num_instances = instances.length;
 
         if (instanceNumber >= num_instances) {

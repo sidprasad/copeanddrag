@@ -1,0 +1,71 @@
+<!-- Need to improve / test -->
+
+<div class="container mt-4">
+    <h2>Evaluator</h2>
+  
+  
+    <!-- REPL output -->
+    <div id="replOutput" class="border p-3 mb-3 bg-dark text-white rounded" style="min-height: 200px; font-family: monospace; white-space: pre-wrap;">
+      <!-- REPL history gets appended here -->
+    </div>
+  
+    <!-- Input form -->
+    <form id="evaluatorForm" class="d-flex" onsubmit="return false;">
+      <span class="me-2">></span>
+      <input
+        type="text"
+        class="form-control"
+        id="expressionInput"
+        name="expression"
+        autocomplete="off"
+        placeholder="Enter expression..."
+        required
+      >
+    </form>
+  </div>
+  
+  <script>
+    const form = document.getElementById('evaluatorForm');
+    const input = document.getElementById('expressionInput');
+    const replOutput = document.getElementById('replOutput');
+  
+    input.addEventListener('keydown', async function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+  
+        const expression = input.value.trim();
+        if (!expression) return;
+  
+        // Get other fields
+        const mode = document.getElementById('modeSelect').value;
+        const debug = document.getElementById('debugCheckbox').checked;
+  
+        input.disabled = true;
+  
+        try {
+          const res = await fetch('/evaluator', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              expression,
+              mode,
+              debug
+            })
+          });
+  
+          const data = await res.json();
+          const output = data.result || 'No result';
+  
+          replOutput.textContent += `> ${expression}\n${output}\n\n`;
+          replOutput.scrollTop = replOutput.scrollHeight;
+        } catch (err) {
+          replOutput.textContent += `> ${expression}\n[error: ${err.message}]\n\n`;
+        }
+  
+        input.value = '';
+        input.disabled = false;
+        input.focus();
+      }
+    });
+  </script>
+  
