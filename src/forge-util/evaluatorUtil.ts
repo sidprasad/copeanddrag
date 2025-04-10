@@ -142,25 +142,17 @@ function toParsedValue(ad : AlloyDatum) : ParsedValue {
 
 }
 
-
-
 function alloyXMLToDatumParsed(datum: string): DatumParsed {
-    // Convert the AlloyDatum to a DatumParsed object
-
     let ad: AlloyDatum = parseAlloyXML(datum);
-    // Now need to convert ad to ParsedValue
-
-    let parsedValue: ParsedValue = {
-        instances: ad.instances.map((instance) => toInstanceData(instance)),
-        bitwidth: ad.bitwidth
-    };
-
+    let parsedValue: ParsedValue = toParsedValue(ad);
 
     return {
         parsed: parsedValue,
         data: datum
     };
 }
+
+
 
 export class EvalResult {
 
@@ -188,6 +180,16 @@ export class EvalResult {
         }
     }
 
+    /*
+        Only true if the result is #t
+    */
+    public selector() : boolean {
+        // If the result is a string, it is not selected.
+        if (typeof this.result === 'string') {
+            return this.result === "#t";
+        } 
+        return false;
+    }
 
 }
 

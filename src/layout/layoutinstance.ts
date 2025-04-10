@@ -1,4 +1,3 @@
-
 import { Graph, Edge } from 'graphlib';
 import { AlloyInstance, getAtomType, getInstanceTypes } from '../alloy-instance';
 import { isBuiltin, AlloyType } from '../alloy-instance/src/type';
@@ -9,14 +8,16 @@ import { LayoutNode, LayoutEdge, LayoutConstraint, InstanceLayout, LeftConstrain
 
 import { generateGraph } from '../alloy-graph';
 
-
-import {ForgeExprEvaluatorUtil} from 'forge-expr-evaluator';
-
+import { WrappedForgeEvaluator } from '../forge-util/evaluatorUtil';
 import { ColorPicker } from './colorpicker';
 import { ConstraintValidator } from './constraint-validator';
 
 const UNIVERSAL_TYPE = "univ";
 
+
+const SRC_TEMPLATE = "<<SRC>>";
+const TGT_TEMPLATE = "<<TGT>>";
+const ALWAYS_APPLIES = "#t";
 
 export class LayoutInstance {
 
@@ -37,24 +38,32 @@ export class LayoutInstance {
     public readonly minSepHeight = 15;
     public readonly minSepWidth = 15;
 
+    private evaluator : WrappedForgeEvaluator;
 
-    constructor(layoutSpec: LayoutSpec) {
+
+    constructor(layoutSpec: LayoutSpec, evaluator: WrappedForgeEvaluator) {
+        this.evaluator = evaluator;
         this._layoutSpec = layoutSpec;
 
         this._sigColors = {};
+
+
+        // TODO: Check applies to here!
         if (this._layoutSpec.sigColors) {
             this._layoutSpec.sigColors.forEach((sigColor) => {
+
+
                 this._sigColors[sigColor.sigName] = sigColor.color;
             });
         }
 
+        // TODO: CHeck applies to here!
         this._sigIcons = {};
         if (this._layoutSpec.sigIcons) {
             this._layoutSpec.sigIcons.forEach((sigIcon) => {
                 this._sigIcons[sigIcon.sigName] = sigIcon;
             });
         }
-
 
 
         if (this._layoutSpec.closures) {
@@ -232,6 +241,10 @@ export class LayoutInstance {
      */
     private generateGroups(g: Graph): LayoutGroup[] {
 
+        // TODO: Check applies to
+
+
+
         let groups: LayoutGroup[] = [];
         // Should we also remove the groups from the graph?
 
@@ -311,6 +324,11 @@ export class LayoutInstance {
      * @returns A record of attributes
      */
     private generateAttributes(g: Graph): Record<string, Record<string, string[]>> {
+
+
+        // TODO: CHeck applies to
+
+
 
         // Node : [] of attributes
         let attributes: Record<string, Record<string, string[]>> = {};
@@ -577,7 +595,7 @@ export class LayoutInstance {
 
             let fieldDirections = fieldLayout ? fieldLayout.directions : [];
 
-            let appliesTo = fieldLayout ? fieldLayout.appliesTo : [];
+            let appliesTo = fieldLayout ? fieldLayout.appliesTo : ALWAYS_APPLIES;
             let shouldApplyConstraints = this.appliesToEdge(edge, appliesTo, layoutNodes);
 
             if (shouldApplyConstraints) {
@@ -685,11 +703,7 @@ export class LayoutInstance {
     }
 
 
-    // TODO: BUG: THis assumes a start position for the first fragment node.
-    // Better : Several options for the fragment.
-    // Best: First lay out non-closure constraints, then use those positions to determine the 
-    // start position of the fragment.
-    applyClosureConstraint(g: Graph, layoutNodes: LayoutNode[], relName: string, direction: string, appliesTo: string[], layoutWithoutCyclicConstraints : InstanceLayout): LayoutConstraint[] {
+    applyClosureConstraint(g: Graph, layoutNodes: LayoutNode[], relName: string, direction: string, appliesTo: string, layoutWithoutCyclicConstraints : InstanceLayout): LayoutConstraint[] {
         
         let direction_mult: number = 0;
         if (direction === "clockwise") {
@@ -1032,8 +1046,30 @@ export class LayoutInstance {
     }
 
 
+    // SRC AND TGT ARE BOTH ASSUMED TO BE THE SAME NODE
+    private appliesToNode(layoutNode : LayoutNode, selectorExpr: string): boolean {
+        // Perf optimization.
+        if (selectorExpr.trim() === ALWAYS_APPLIES) {
+            return true;
+        }
 
-    private appliesToEdge(edge: Edge, appliesTo: string[], layoutNodes: LayoutNode[]): boolean {
+        // Now get the selector
+        let expr = this.replaceInSelector(selectorExpr, layoutNode.id, layoutNode.id);
+        // Now evaluate
+        let res = this.evaluator.evaluate(expr);
+        let selected : boolean = res.selector();
+        return selected;
+    }
+
+
+    // TODO: Rewrite this to take in selectors
+    private appliesToEdge(edge: Edge, selectorExpr: string, layoutNodes: LayoutNode[]): boolean {
+
+        // Perf optimization.
+        if (selectorExpr.trim() === ALWAYS_APPLIES) {
+            return true;
+        }
+
 
         let edgeSrcId = edge.v;
         let edgeDestId = edge.w;
@@ -1041,16 +1077,24 @@ export class LayoutInstance {
         let srcNode: LayoutNode = layoutNodes.find((node) => node.id === edgeSrcId);
         let destNode: LayoutNode = layoutNodes.find((node) => node.id === edgeDestId);
 
-        // Now get the types of the nodes
-        let srcTypes = srcNode.types;
-        let destTypes = destNode.types;
 
-
-        let srcType = appliesTo[0];
-        let destType = appliesTo[1];
-
-        return srcTypes.includes(srcType) && destTypes.includes(destType);
-
+        // Now get the selector
+        let expr = this.replaceInSelector(selectorExpr, srcNode.id, destNode.id);
+        // Now evaluate
+        let res = this.evaluator.evaluate(expr);
+        let selected : boolean = res.selector();
+        return selected;
     }
+
+
+    private replaceInSelector(selector: string, src: string, tgt: string): string {
+        // Replace all instances of SRC_TEMPLATE and TGT_TEMPLATE in the selector
+        let replaced = selector
+            .replace(new RegExp(SRC_TEMPLATE, 'g'), src)
+            .replace(new RegExp(TGT_TEMPLATE, 'g'), tgt);
+
+        return replaced;
+    }
+        
 
 }

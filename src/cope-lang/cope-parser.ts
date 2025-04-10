@@ -11,54 +11,9 @@ const CYCLIC_DIRECTIONS = ["clockwise", "counterclockwise"];
 const GROUP_TARGETS = ["domain", "range"];
 
 
-const DEFAULT_FIELD_APPLIES_TO = ["univ", "univ"];
+// const DEFAULT_FIELD_APPLIES_TO = ["univ", "univ"];
+const DEFAULT_APPLIES_TO = "#t";
 
-/*
-
-constraints:
-  - cyclic:
-      field: left
-      direction: clockwise
-
-  - orientation:
-      field: left
-      directions: 
-        - below
-        - left
-
-  - orientation:
-      sigs:
-        - A
-        - B
-      directions: 
-        - right
-
-  - group:
-      field: relatedItems
-      target: domain
-
-directives:
-  - icon:
-      sig: Person
-      icon:
-        path: /icons/person.svg
-        height: 50
-        width: 50
-
-  - color:
-        sig: File
-        value: "#FF5733"
-
-  - attribute:
-        field: value
-
-  - projection:
-      sig: Folder
-
-  - flag: hideDisconnected
-
-
-*/
 
 export function copeToLayoutSpec(s: string): LayoutSpec {
 
@@ -69,24 +24,6 @@ export function copeToLayoutSpec(s: string): LayoutSpec {
 
     // First, parse the YAML
     let parsed = yaml.load(s);
-
-    /*
-    export interface LayoutSpec {
-    fieldDirections : DirectionalRelation[];
-    sigDirections : SigDirection[];
-    groupBy : ClusterRelation[];
-    attributeFields : AttributeDefinition[];
-    hideDisconnected? : boolean;
-    hideDisconnectedBuiltIns? : boolean;
-
-    sigColors? : SigColor[];
-    projections? : ProjectionDefinition[];
-    closures? : ClosureDefinition[];
-    sigIcons? : IconDefinition[];
-}
-    */
-
-
 
 
     // Now extract the constraints and directives
@@ -144,7 +81,7 @@ function extractConstraints(constraints: any[]): any {
 
     let closures: ClosureDefinition[] = constraints.filter(c => c.cyclic)
         .map(c => {
-            let appliesTo = c.cyclic.appliesTo || DEFAULT_FIELD_APPLIES_TO;
+            let appliesTo = c.cyclic.appliesTo || DEFAULT_APPLIES_TO;
             return {
                 fieldName: c.cyclic.field,
                 direction: c.cyclic.direction || "clockwise",
@@ -156,18 +93,19 @@ function extractConstraints(constraints: any[]): any {
         .map(c => {
             let groupOn = c.group.target || "range";
             let showLabel = c.group.showLabel || false;
-            
+            let appliesTo = c.group.appliesTo || DEFAULT_APPLIES_TO;
             return {
                 fieldName: c.group.field,
                 groupOn: groupOn,
-                showLabel: showLabel
+                showLabel: showLabel,
+                appliesTo: appliesTo
             }
         });
 
     let orientationConstraints = constraints.filter(c => c.orientation).map(c => c.orientation);
     let fieldDirectionConstraints: DirectionalRelation[] = orientationConstraints.filter(c => c.field)
         .map(c => {
-            let appliesTo = c.appliesTo || DEFAULT_FIELD_APPLIES_TO;
+            let appliesTo = c.appliesTo || DEFAULT_APPLIES_TO;
             return {
                 fieldName: c.field,
                 directions: c.directions,
@@ -181,11 +119,12 @@ function extractConstraints(constraints: any[]): any {
 
             let source = c.sigs[0];
             let target = c.sigs[1];
-
+            let appliesTo = c.appliesTo || DEFAULT_APPLIES_TO;
             return {
                 sigName: source,
                 target: target,
-                directions: c.directions
+                directions: c.directions,
+                appliesTo: appliesTo
             }
         });
 
@@ -235,11 +174,6 @@ function extractConstraints(constraints: any[]): any {
 
 function extractDirectives(directives: any[]): any {
 
-    // Need to parse these
-
-    // If there is no directive, each
-
-
     let icons = directives.filter(d => d.icon).map(d => d.icon);
     let attributes = directives.filter(d => d.attribute).map(d => d.attribute);
     let projections = directives.filter(d => d.projection).map(d => d.projection);
@@ -251,7 +185,8 @@ function extractDirectives(directives: any[]): any {
             sigName: d.sig,
             path: d.icon.path,
             height: d.icon.height,
-            width: d.icon.width
+            width: d.icon.width,
+            appliesTo: d.appliesTo || DEFAULT_APPLIES_TO
         }
     });
 
@@ -259,17 +194,20 @@ function extractDirectives(directives: any[]): any {
         .map(d => {
             return {
                 sigName: d.sig,
-                color: d.value
+                color: d.value,
+                appliesTo: d.appliesTo || DEFAULT_APPLIES_TO
             }
         });
 
     let attributeFields: AttributeDefinition[] = attributes
         .map(d => {
             return {
-                fieldName: d.field
+                fieldName: d.field,
+                appliesTo: d.appliesTo || DEFAULT_APPLIES_TO
             }
         });
 
+    // THIS OMITS THE APPLIESTO FIELD
     let sigProjections: ProjectionDefinition[] = projections
         .map(d => {
             return {

@@ -1,7 +1,15 @@
-
 export type FieldDirection = "above" | "below" | "left" | "right" | "directlyAbove" | "directlyBelow" | "directlyLeft" | "directlyRight";
 export type RotationDirection = "clockwise" | "counterclockwise";
 export type ClusterTarget = "domain" | "range";
+
+
+
+// Properties on all top-level operations (constraints and directives).
+
+
+export interface Operation {
+    appliesTo? : string;
+}
 
 
 export interface fieldDefinition {
@@ -28,36 +36,33 @@ export interface LayoutSpec {
 
 
 
-export interface DirectionalRelation extends fieldDefinition {
+export interface DirectionalRelation extends fieldDefinition, Operation {
     directions : FieldDirection[];
-    appliesTo: string[];
 }
 
-export interface SigDirection extends sigDefinition {
+export interface SigDirection extends sigDefinition, Operation {
     target : sigDefinition;
     directions : FieldDirection[];
 }
 
-export interface ClusterRelation  extends fieldDefinition {
+export interface ClusterRelation  extends fieldDefinition, Operation {
     groupOn? : ClusterTarget;
     showLabel? : boolean;
 }
 
-export interface AttributeDefinition extends fieldDefinition {}
+export interface AttributeDefinition extends fieldDefinition, Operation {}
 
-export interface SigColor extends sigDefinition {
+export interface SigColor extends sigDefinition, Operation {
     color : string;
 }
 
-export interface ProjectionDefinition extends sigDefinition {}
+export interface ProjectionDefinition extends Omit<Operation, "appliesTo">, sigDefinition {}
 
-export interface ClosureDefinition extends fieldDefinition {
+export interface ClosureDefinition extends fieldDefinition, Operation {
     direction? : RotationDirection;
-    appliesTo : string[];
 }
 
-export interface IconDefinition extends sigDefinition {
-
+export interface IconDefinition extends sigDefinition, Operation {
     path : string;
     height : number;
     width : number;
