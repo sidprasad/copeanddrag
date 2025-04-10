@@ -4,6 +4,8 @@ export type RelativeDirection = "above" | "below" | "left" | "right" | "directly
 export type RotationDirection = "clockwise" | "counterclockwise";
 export type ClusterTarget = "domain" | "range";
 
+
+//// THESE ONLY APPLY IN PREDICATE TYPE THINGS ///
 export const DEFAULT_APPLIES_TO = "#t";
 export const TEMPLATE_VAR_SRC = "<<SRC>>";
 export const TEMPLATE_VAR_TGT = "<<TGT>>";
@@ -52,9 +54,16 @@ export interface GroupBySelector {
     name: string;
 }
 
-export interface GroupByField extends ConstraintOperation {
+
+export interface GroupByField  {
     // And applies to selects the thing to group ON
     field : string;
+
+    // And this is the element upon WHICH to group (ie. the key)
+    groupOn : number;
+
+    // And this is what gets grouped
+    addToGroup : number;
 }
 
 
@@ -266,6 +275,8 @@ class SigDirections {
 
 }
 
+
+// This is wrong -- only works for binary relations.
 class FieldTargetGroup  {
     field : string;
     groupOn? : ClusterTarget;
@@ -279,7 +290,7 @@ class FieldTargetGroup  {
     }
 
     toCoreConstraint() : GroupByField {
-        let groupOnRelPart : string = this.groupOn || "range";
+        //let groupOnRelPart : string = this.groupOn || "range";
         // // TODO: DOuble check this
         // let v1 = randidentifier(6);
         // let groupOnExpr : string = (groupOnRelPart === "domain") ?
@@ -287,12 +298,21 @@ class FieldTargetGroup  {
         // : `{ ${v1} : univ | (some ${this.field}.${v1})  }`;        
         
 
-        let appliesTo : string = (groupOnRelPart === "domain") ?
-            `(some ${TEMPLATE_VAR_SRC}.${this.field})`
-            : `(some ${this.field}.${TEMPLATE_VAR_TGT})`;
+        // let appliesTo : string = (groupOnRelPart === "domain") ?
+        //     `(some ${TEMPLATE_VAR_SRC}.${this.field})`
+        //     : `(some ${this.field}.${TEMPLATE_VAR_TGT})`;
+
+
+
+        /////THis is wrong and only works for binary relations //
+        // If domain --> 0
+        // If range --> 1
+        let gOn : number = (this.groupOn === "domain") ? 0 : 1;
+        let gTo : number = (this.groupOn === "domain") ? 1 : 0;
         
         return {
-            appliesTo: appliesTo,
+            groupOn: gOn,
+            addToGroup: gTo,
             field: this.field,
         };
 
@@ -477,17 +497,22 @@ function parseConstraints(constraints: any[]):   ConstraintsBlock
             }
 
             // If not, we parse from the CORE constraint
-            if(!c.group.appliesTo) {
-                throw new Error("Grouping constraint must have appliesTo field");
+            if(!c.group.groupOn) {
+                throw new Error("Grouping constraint must have groupOn field");
             }
 
             if(!c.group.field) {
                 throw new Error("Grouping constraint must specify a field");
             }
 
+            if(!c.group.addToGroup) {
+                throw new Error("Grouping constraint must specify addToGroup");
+            }
+
             return {
-                appliesTo: c.group.appliesTo,
+                groupOn: c.group.groupOn,
                 field: c.group.field,
+                addToGroup: c.group.addToGroup,
             }
         });
 

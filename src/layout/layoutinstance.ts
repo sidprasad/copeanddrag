@@ -6,14 +6,18 @@ import { applyProjections } from '../alloy-instance/src/projection';
 
 
 
-import { LayoutNode, LayoutEdge, LayoutConstraint, InstanceLayout, 
-    LeftConstraint, TopConstraint, AlignmentConstraint, LayoutGroup } from './interfaces';
+import {
+    LayoutNode, LayoutEdge, LayoutConstraint, InstanceLayout,
+    LeftConstraint, TopConstraint, AlignmentConstraint, LayoutGroup
+} from './interfaces';
 import { DEFAULT_APPLIES_TO, TEMPLATE_VAR_SRC, TEMPLATE_VAR_TGT } from './layoutspec';
-import { LayoutSpec, parseLayoutSpec,  
-        RelativeOrientationConstraint, GroupingConstraint, CyclicOrientationConstraint,
-        RelativeDirection, RotationDirection,
-        AtomColorDirective, AtomIconDirective, AtomSizeDirective, AttributeDirective, ProjectionDirective
-    } from './layoutspec';
+import {
+    LayoutSpec, parseLayoutSpec,
+    RelativeOrientationConstraint, CyclicOrientationConstraint,
+    GroupByField, GroupBySelector,
+    RelativeDirection, RotationDirection,
+    AtomColorDirective, AtomIconDirective, AtomSizeDirective, AttributeDirective, ProjectionDirective
+} from './layoutspec';
 
 
 
@@ -47,11 +51,11 @@ export class LayoutInstance {
     public readonly minSepHeight = 15;
     public readonly minSepWidth = 15;
 
-    private evaluator : WrappedForgeEvaluator;
-    private instanceNum : number;
+    private evaluator: WrappedForgeEvaluator;
+    private instanceNum: number;
 
 
-    constructor(layoutSpec: LayoutSpec, evaluator: WrappedForgeEvaluator, instNum : number = 0) {
+    constructor(layoutSpec: LayoutSpec, evaluator: WrappedForgeEvaluator, instNum: number = 0) {
         this.instanceNum = instNum;
         this.evaluator = evaluator;
         this._layoutSpec = layoutSpec;
@@ -252,9 +256,14 @@ export class LayoutInstance {
      */
     private generateGroups(g: Graph): LayoutGroup[] {
 
-        let groupingConstraints : GroupingConstraint[] = this._layoutSpec.constraints.grouping;
+        //let groupingConstraints : GroupingConstraint[] = this._layoutSpec.constraints.grouping;
 
-        if (!groupingConstraints) {
+
+        let groupByFieldConstraints: GroupByField[] = this._layoutSpec.constraints.grouping.byfield;
+        let groupBySelectorConstraints: GroupBySelector[] = this._layoutSpec.constraints.grouping.byselector;
+
+
+        if (!groupByFieldConstraints && !groupBySelectorConstraints) {
             return [];
         }
 
@@ -262,128 +271,107 @@ export class LayoutInstance {
         // Should we also remove the groups from the graph?
 
 
-
-        // I don't think we IMMEDIATELY need to go through the graph
-        // edges.
+        // First we go through the group by selector constraints.
 
 
-        for (var gc of groupingConstraints) {
+        for (var gc of groupBySelectorConstraints) {
 
-            let appliesTo = gc.appliesTo || DEFAULT_APPLIES_TO;
             let selector = gc.groupElementSelector;
-
-
-            // First, check if applies to works.
-
-            let appliesToRes = this.evaluator.evaluate(appliesTo, this.instanceNum);
-            if(!appliesToRes.appliesTo()) {
-                continue;
-            }
-
             let selectorRes = this.evaluator.evaluate(selector, this.instanceNum);
-            let selectedElements : string[][] = selectorRes.selected();
+            let selectedElements: string[][] = selectorRes.selected();
 
-
+            // Nothing to do if there are no selected elements, or 
+            // if things are typed weirdly.
             if (selectedElements.length === 0 || selectedElements.some((element) => element.length > 1)) {
                 continue;
             }
 
             let groupElements = selectedElements.map((element) => element[0]);
+            let keyNode = groupElements[0];
 
-            // Questions // TODO
-
-            // 1. What is the group name? We don't know anymore. Maybe you ask the user.
-            // 2. Is there a remove edges option?
-            
-
-            //// This is really tricky, since we want to remove edges from the group right? ///
-
-            let newGroup: LayoutGroup =
-            {
-                name: groupName,
-                nodeIds: [source],
-                keyNodeId: target,
-                showLabel: showLabel
+            // Question: Does **just** having LayoutGroup work? Like what does a keyNode even mean?
+            let newGroup: LayoutGroup = {
+                name: gc.name,
+                nodeIds: groupElements,
+                keyNodeId: "", // WAIT, THERE IS NO KEY NODE
+                showLabel: true // TODO: HACK
             };
-
+            groups.push(newGroup);
         }
 
 
-
+        // Now we go through the group by field constraints.
 
         let graphEdges = [...g.edges()];
 
-        // Go through all edge labels in the graph
+
+        function getConstraintsRelatedToField(fieldName: string) {
+            let fieldConstraints = groupByFieldConstraints.filter((field) => field.field === fieldName);
+            return fieldConstraints;
+        }
+
         graphEdges.forEach((edge) => {
             const edgeId = edge.name;
-
-
-
-
-
-
             const relName = this.getRelationName(g, edge);
+            let  edgeTuples = this.getEdgeAsTuple(g, edge);
+            let edgeLabel = this.getEdgeLabel(g, edge);
+
+            let relatedConstraints = getConstraintsRelatedToField(relName);
+
+            if (relatedConstraints.length === 0) {
+                return;
+            }
+
+            relatedConstraints.forEach((c) => {
+
+                const groupOn =  c.groupOn; // This is the part of the relation tuple that is the key.
+                const addToGroup = c.addToGroup; // This is the part of the relation tuple that is IN the group.
 
 
-            // clusterSettings is defined only if the field should be used to group atoms
-            const clusterSettings = this.getClusterSettings(relName);
+                let arity = edgeTuples.length;
 
-            if (clusterSettings) {
-                // Default to range, but check what is being grouped on.
-                const groupOn = clusterSettings.groupOn || this.DEFAULT_GROUP_ON;
-                const showLabel = clusterSettings.showLabel || false;
+                let sourceInGraph = edgeTuples[0];
+                let targetInGraph = edgeTuples[arity - 1];
+                let key = edgeTuples[groupOn];
+                let toAdd = edgeTuples[addToGroup];
 
+                // AND KEY is what you REALLY group on.
 
-                let { source, target } = this.getGroupSourceAndTarget(edge, groupOn);
-                let groupName = target + ":" + this.getEdgeLabel(g, edge);
+                let groupName = key + ":" + edgeLabel;
 
                 // Check if the group already exists
                 let existingGroup: LayoutGroup = groups.find((group) => group.name === groupName);
 
-                const edgeLabel = this.getEdgeLabel(g, edge);
                 if (existingGroup) {
-                    existingGroup.nodeIds.push(source);
+                    existingGroup.nodeIds.push(toAdd);
                     // But also remove this edge from the graph.
                     g.removeEdge(edge.v, edge.w, edgeId);
-
-
-                    /// WHAT IF WE WANT TO KEEP THE EDGE?
-
-
+                    // Remove the edge and then add it again.
+                    /// This is specifically so that other orientation properties hold.
+                    /// Ideally, this HACK would be removed.
                     const newId = this.hideThisEdge + edgeId;
-                    // Maybe remove the edge and then add it again.
                     g.removeEdge(edge.v, edge.w, edgeId);
                     g.setEdge(edge.v, edge.w, edgeLabel, newId);
-
-
-                    //////////////////////////
-
-
                 }
                 else {
 
                     let newGroup: LayoutGroup =
                     {
                         name: groupName,
-                        nodeIds: [source],
-                        keyNodeId: target,
-                        showLabel: showLabel
+                        nodeIds: [toAdd],
+                        keyNodeId: key,
+                        showLabel: true // For now
                     };
                     groups.push(newGroup);
                     // HACK: Don't remove the FIRST edge connecting node to group, we can respect SOME spatiality?
-
-
                     const groupEdgePrefix = "_g_"
                     const newId = groupEdgePrefix + edgeId;
-                    // Maybe remove the edge and then add it again.
                     g.removeEdge(edge.v, edge.w, edgeId);
                     g.setEdge(edge.v, edge.w, edgeLabel, newId);
-
-
                 }
-            }
-        });
 
+            }); 
+        });
         return groups;
     }
 
@@ -538,6 +526,29 @@ export class LayoutInstance {
         return g.edge(edge.v, edge.w, edge.name);
     }
 
+    private getEdgeAsTuple(g: Graph, edge: Edge): string[] {
+
+        let nodeIds : string[] = [];
+        // The 0th element is the edge source
+
+        // The middle elements are in a list [] embedded in the label
+        // The last element is the edge target
+
+        let edgeLabel = this.getEdgeLabel(g, edge);
+
+        nodeIds.push(edge.v);
+
+        let middle: string[] = [];
+        if (edgeLabel.includes("[") && edgeLabel.includes("]")) {
+            middle = edgeLabel.split("[")[1].split("]")[0].split(",").map((x) => x.trim());
+        }
+        nodeIds = nodeIds.concat(middle);
+        nodeIds.push(edge.w);
+
+        return nodeIds;
+    }
+
+
 
     public getClosures(): ClosureDefinition[] {
         if (!this._layoutSpec.closures) {
@@ -648,7 +659,7 @@ export class LayoutInstance {
         ///////////// CONSTRAINTS ////////////
         let constraints: LayoutConstraint[] = this.applySigConstraints(ai, layoutNodes);
 
-      
+
 
 
         // Now edges and relational constraints
@@ -712,7 +723,7 @@ export class LayoutInstance {
 
 
         ///
-        let layoutWithoutCyclicConstraints : InstanceLayout = { nodes: layoutNodes, edges: layoutEdges, constraints: constraints, groups: groups };
+        let layoutWithoutCyclicConstraints: InstanceLayout = { nodes: layoutNodes, edges: layoutEdges, constraints: constraints, groups: groups };
 
 
         // Here, I want to validate the constraints first.
@@ -722,7 +733,7 @@ export class LayoutInstance {
         if (nonCyclicConstraintError) {
             throw new Error(nonCyclicConstraintError);
         }
-    
+
         // We have to do this update, since the actual validator
         // updates the layotu when needed. HOWEVER, THIS INTRODUCES
         // ANOTHER POTENTIAL BUG, I THINK. WHAT IF CIRCULAR PERTURBATIONS CHANGE 
@@ -734,7 +745,7 @@ export class LayoutInstance {
 
         // Now we apply the closure constraints
         let closureConstraints = this.applyClosureConstraints(g, layoutNodes, layoutWithoutCyclicConstraints);
-    
+
         //// BUG: Does this change? THERE IS A POTENTIAL FOR A BUG HERE, SINCE
         /// DIFFERENT CURCULAR LAYOTU MAY INTERACT ODD.
 
@@ -772,14 +783,14 @@ export class LayoutInstance {
     }
 
 
-    applyClosureConstraint(g: Graph, layoutNodes: LayoutNode[], relName: string, direction: string, appliesTo: string, layoutWithoutCyclicConstraints : InstanceLayout): LayoutConstraint[] {
-        
+    applyClosureConstraint(g: Graph, layoutNodes: LayoutNode[], relName: string, direction: string, appliesTo: string, layoutWithoutCyclicConstraints: InstanceLayout): LayoutConstraint[] {
+
         let direction_mult: number = 0;
         if (direction === "clockwise") {
             direction_mult = 1;
         }
         else if (direction === "counterclockwise") {
-            direction_mult = -1; 
+            direction_mult = -1;
         }
 
         // And now we filter out unrelated nodes here I think?
@@ -815,11 +826,11 @@ export class LayoutInstance {
             let offset = 0;
             let satisfyingAssignmentFound = false;
 
-            let finalFragmentConstraints : LayoutConstraint[] = [];
+            let finalFragmentConstraints: LayoutConstraint[] = [];
             let currentLayoutError = null;
-            while(!satisfyingAssignmentFound && offset < relatedNodes.length) {
+            while (!satisfyingAssignmentFound && offset < relatedNodes.length) {
                 currentLayoutError = null;
-                let fragmentConstraintsForCurrentOffset : LayoutConstraint[] = [];
+                let fragmentConstraintsForCurrentOffset: LayoutConstraint[] = [];
 
                 for (var i = 0; i < relatedNodes.length; i++) {
                     let theta = (i + offset) * angleStep;
@@ -828,7 +839,7 @@ export class LayoutInstance {
                     fragmentNodePositions[relatedNodes[i]] = { x: x, y: y };
                 }
 
-            // Now we determine the constraints
+                // Now we determine the constraints
 
                 for (var i = 0; i < relatedNodes.length; i++) {
 
@@ -866,9 +877,9 @@ export class LayoutInstance {
 
                 finalFragmentConstraints = fragmentConstraintsForCurrentOffset;
 
-                let allConstraintsForFragment : LayoutConstraint[] = fragmentConstraintsForCurrentOffset.concat(layoutWithoutCyclicConstraints.constraints);
+                let allConstraintsForFragment: LayoutConstraint[] = fragmentConstraintsForCurrentOffset.concat(layoutWithoutCyclicConstraints.constraints);
 
-                let instanceLayout : InstanceLayout = {
+                let instanceLayout: InstanceLayout = {
                     nodes: layoutWithoutCyclicConstraints.nodes,
                     constraints: allConstraintsForFragment,
                     edges: layoutWithoutCyclicConstraints.edges,
@@ -881,14 +892,14 @@ export class LayoutInstance {
                 offset++;
             }
 
-            if(!satisfyingAssignmentFound) {
+            if (!satisfyingAssignmentFound) {
                 throw new Error(currentLayoutError);
             }
             else {
                 constraints = constraints.concat(finalFragmentConstraints);
             }
         });
-    
+
         return constraints;
     }
 
@@ -1105,7 +1116,7 @@ export class LayoutInstance {
     private singletonGroup(nodeId: string): LayoutGroup {
 
         let groupName = `${LayoutInstance.DISCONNECTED_PREFIX}${nodeId}`;
-        
+
         return {
             name: groupName,
             nodeIds: [nodeId],
@@ -1116,7 +1127,7 @@ export class LayoutInstance {
 
 
     // SRC AND TGT ARE BOTH ASSUMED TO BE THE SAME NODE
-    private appliesToNode(layoutNode : LayoutNode, selectorExpr: string): boolean {
+    private appliesToNode(layoutNode: LayoutNode, selectorExpr: string): boolean {
         // Perf optimization.
         if (selectorExpr.trim() === DEFAULT_APPLIES_TO) {
             return true;
@@ -1126,7 +1137,7 @@ export class LayoutInstance {
         let expr = this.replaceInSelector(selectorExpr, layoutNode.id, layoutNode.id);
         // Now evaluate
         let res = this.evaluator.evaluate(expr);
-        let selected : boolean = res.appliesTo();
+        let selected: boolean = res.appliesTo();
         return selected;
     }
 
@@ -1151,7 +1162,7 @@ export class LayoutInstance {
         let expr = this.replaceInSelector(selectorExpr, srcNode.id, destNode.id);
         // Now evaluate
         let res = this.evaluator.evaluate(expr);
-        let selected : boolean = res.appliesTo();
+        let selected: boolean = res.appliesTo();
         return selected;
     }
 
@@ -1164,6 +1175,6 @@ export class LayoutInstance {
 
         return replaced;
     }
-        
+
 
 }
