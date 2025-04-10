@@ -8,9 +8,30 @@ export type ClusterTarget = "domain" | "range";
 
 
 export interface Operation {
+
+}
+
+
+export interface ConstraintOperation extends Operation {
+
     appliesTo? : string;
 }
 
+export interface DirectiveOperation extends Operation {}
+
+export interface VisualManipulation extends Operation {
+    appliesTo? : string;
+}
+
+// Right now, we don't support these.
+export interface HidingDirective extends Operation {}
+
+
+// SUGAR //
+
+
+
+////// FieldDefinition and SigDefinition are really just SUGAR for OPERATION ////
 
 export interface fieldDefinition {
     fieldName : string;
@@ -19,6 +40,29 @@ export interface fieldDefinition {
 export interface sigDefinition {
     sigName : string;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 export interface LayoutSpec {
     fieldDirections : DirectionalRelation[];
