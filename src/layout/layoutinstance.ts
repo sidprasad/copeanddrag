@@ -2,7 +2,7 @@ import { Graph, Edge } from 'graphlib';
 import { AlloyInstance, getAtomType, getInstanceTypes } from '../alloy-instance';
 import { isBuiltin, AlloyType } from '../alloy-instance/src/type';
 import { applyProjections } from '../alloy-instance/src/projection';
-import { DirectionalRelation, FieldDirection, IconDefinition } from './layoutspec';
+import { DirectionalRelation, RelativeDirection, IconDefinition } from './layoutspec';
 import { LayoutSpec, ClosureDefinition, ClusterRelation, parseLayoutSpec, SigDirection } from './layoutspec';
 import { LayoutNode, LayoutEdge, LayoutConstraint, InstanceLayout, LeftConstraint, TopConstraint, AlignmentConstraint, LayoutGroup } from './interfaces';
 
@@ -1057,7 +1057,7 @@ export class LayoutInstance {
         let expr = this.replaceInSelector(selectorExpr, layoutNode.id, layoutNode.id);
         // Now evaluate
         let res = this.evaluator.evaluate(expr);
-        let selected : boolean = res.selector();
+        let selected : boolean = res.appliesTo();
         return selected;
     }
 
@@ -1082,7 +1082,7 @@ export class LayoutInstance {
         let expr = this.replaceInSelector(selectorExpr, srcNode.id, destNode.id);
         // Now evaluate
         let res = this.evaluator.evaluate(expr);
-        let selected : boolean = res.selector();
+        let selected : boolean = res.appliesTo();
         return selected;
     }
 
