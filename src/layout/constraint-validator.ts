@@ -1,7 +1,6 @@
 import { SimplexSolver, Variable, Expression, Strength, Inequality, LEQ, GEQ, LE } from 'cassowary';
 import { intersection } from 'lodash';
 import { InstanceLayout, LayoutNode, LayoutEdge, LayoutGroup, LayoutConstraint, isLeftConstraint, isTopConstraint, isAlignmentConstraint, TopConstraint, LeftConstraint, AlignmentConstraint } from './interfaces';
-import { min } from 'd3';
 
 
 class ConstraintValidator {

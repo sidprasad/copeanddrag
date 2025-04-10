@@ -4,9 +4,9 @@ export type RelativeDirection = "above" | "below" | "left" | "right" | "directly
 export type RotationDirection = "clockwise" | "counterclockwise";
 export type ClusterTarget = "domain" | "range";
 
-const DEFAULT_APPLIES_TO = "#t";
-const TEMPLATE_VAR_SRC = "<<SRC>>";
-const TEMPLATE_VAR_TGT = "<<TGT>>";
+export const DEFAULT_APPLIES_TO = "#t";
+export const TEMPLATE_VAR_SRC = "<<SRC>>";
+export const TEMPLATE_VAR_TGT = "<<TGT>>";
 
 
 function randidentifier(len: number = 6): string {

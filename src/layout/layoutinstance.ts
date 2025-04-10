@@ -2,9 +2,22 @@ import { Graph, Edge } from 'graphlib';
 import { AlloyInstance, getAtomType, getInstanceTypes } from '../alloy-instance';
 import { isBuiltin, AlloyType } from '../alloy-instance/src/type';
 import { applyProjections } from '../alloy-instance/src/projection';
-import { DirectionalRelation, RelativeDirection, IconDefinition } from './layoutspec';
-import { LayoutSpec, ClosureDefinition, ClusterRelation, parseLayoutSpec, SigDirection } from './layoutspec';
-import { LayoutNode, LayoutEdge, LayoutConstraint, InstanceLayout, LeftConstraint, TopConstraint, AlignmentConstraint, LayoutGroup } from './interfaces';
+
+
+
+
+import { LayoutNode, LayoutEdge, LayoutConstraint, InstanceLayout, 
+    LeftConstraint, TopConstraint, AlignmentConstraint, LayoutGroup } from './interfaces';
+import { DEFAULT_APPLIES_TO, TEMPLATE_VAR_SRC, TEMPLATE_VAR_TGT } from './layoutspec';
+import { LayoutSpec, parseLayoutSpec,  
+        RelativeOrientationConstraint, GroupingConstraint, CyclicOrientationConstraint,
+        RelativeDirection, RotationDirection,
+        AtomColorDirective, AtomIconDirective, AtomSizeDirective, AttributeDirective, ProjectionDirective
+    } from './layoutspec';
+
+
+
+
 
 import { generateGraph } from '../alloy-graph';
 
@@ -14,10 +27,6 @@ import { ConstraintValidator } from './constraint-validator';
 
 const UNIVERSAL_TYPE = "univ";
 
-
-const SRC_TEMPLATE = "<<SRC>>";
-const TGT_TEMPLATE = "<<TGT>>";
-const ALWAYS_APPLIES = "#t";
 
 export class LayoutInstance {
 
@@ -595,7 +604,7 @@ export class LayoutInstance {
 
             let fieldDirections = fieldLayout ? fieldLayout.directions : [];
 
-            let appliesTo = fieldLayout ? fieldLayout.appliesTo : ALWAYS_APPLIES;
+            let appliesTo = fieldLayout ? fieldLayout.appliesTo : DEFAULT_APPLIES_TO;
             let shouldApplyConstraints = this.appliesToEdge(edge, appliesTo, layoutNodes);
 
             if (shouldApplyConstraints) {
@@ -1049,7 +1058,7 @@ export class LayoutInstance {
     // SRC AND TGT ARE BOTH ASSUMED TO BE THE SAME NODE
     private appliesToNode(layoutNode : LayoutNode, selectorExpr: string): boolean {
         // Perf optimization.
-        if (selectorExpr.trim() === ALWAYS_APPLIES) {
+        if (selectorExpr.trim() === DEFAULT_APPLIES_TO) {
             return true;
         }
 
@@ -1066,7 +1075,7 @@ export class LayoutInstance {
     private appliesToEdge(edge: Edge, selectorExpr: string, layoutNodes: LayoutNode[]): boolean {
 
         // Perf optimization.
-        if (selectorExpr.trim() === ALWAYS_APPLIES) {
+        if (selectorExpr.trim() === DEFAULT_APPLIES_TO) {
             return true;
         }
 
@@ -1088,10 +1097,10 @@ export class LayoutInstance {
 
 
     private replaceInSelector(selector: string, src: string, tgt: string): string {
-        // Replace all instances of SRC_TEMPLATE and TGT_TEMPLATE in the selector
+        // Replace all instances of TEMPLATE_VAR_SRC and TEMPLATE_VAR_TGT in the selector
         let replaced = selector
-            .replace(new RegExp(SRC_TEMPLATE, 'g'), src)
-            .replace(new RegExp(TGT_TEMPLATE, 'g'), tgt);
+            .replace(new RegExp(TEMPLATE_VAR_SRC, 'g'), src)
+            .replace(new RegExp(TEMPLATE_VAR_TGT, 'g'), tgt);
 
         return replaced;
     }
