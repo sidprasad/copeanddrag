@@ -37,11 +37,26 @@ export interface RelativeOrientationConstraint extends ConstraintOperation {
 }
 
 
-export interface GroupingConstraint extends ConstraintOperation {
-    // AND THIS IS NOT A APPLIES TO BUT A SELECTOR EXPRESSION
+
+//// TODO: Actually, do we have two kinds of grouping constraints now?
+
+// Group by selector.
+// Group bt field (with applies to)
+
+
+
+
+
+export interface GroupBySelector {
     groupElementSelector : string;
-    showLabel? : boolean;
+    name: string;
 }
+
+export interface GroupByField extends ConstraintOperation {
+    // And applies to selects the thing to group ON
+    field : string;
+}
+
 
 export interface CyclicOrientationConstraint extends ConstraintOperation {
     direction : RotationDirection;
@@ -87,14 +102,25 @@ export interface ProjectionDirective extends HidingDirective {
 
 /////////////////////////////////////////////////
 
+interface ConstraintsBlock 
+{
+    orientation : {
+        relative: RelativeOrientationConstraint[];
+        cyclic: CyclicOrientationConstraint[];
+    };
+    grouping : {
+        byfield : GroupByField[];
+        byselector : GroupBySelector[];
+    }
+
+}
+
+
+
 
 export interface LayoutSpec {
 
-    constraints: {
-        orientation : RelativeOrientationConstraint[];
-        grouping : GroupingConstraint[];
-        cyclic : CyclicOrientationConstraint[];
-    }
+    constraints: ConstraintsBlock
 
     directives : {
         colors: AtomColorDirective[];
@@ -240,7 +266,7 @@ class SigDirections {
 
 }
 
-class GroupOnField  {
+class FieldTargetGroup  {
     field : string;
     groupOn? : ClusterTarget;
     showLabel? : boolean;
@@ -252,28 +278,27 @@ class GroupOnField  {
         this.showLabel = showLabel;
     }
 
-    toCoreConstraint() : GroupingConstraint {
-
-        let appliesTo : string = DEFAULT_APPLIES_TO;
+    toCoreConstraint() : GroupByField {
         let groupOnRelPart : string = this.groupOn || "range";
-    
-        // TODO: DOuble check this
-        let v1 = randidentifier(6);
-        let groupOnExpr : string = (groupOnRelPart === "domain") ?
-        `{ ${v1} : univ | (some ${v1}.${this.field})  }`
-        : `{ ${v1} : univ | (some ${this.field}.${v1})  }`;        
+        // // TODO: DOuble check this
+        // let v1 = randidentifier(6);
+        // let groupOnExpr : string = (groupOnRelPart === "domain") ?
+        // `{ ${v1} : univ | (some ${v1}.${this.field})  }`
+        // : `{ ${v1} : univ | (some ${this.field}.${v1})  }`;        
         
 
+        let appliesTo : string = (groupOnRelPart === "domain") ?
+            `(some ${TEMPLATE_VAR_SRC}.${this.field})`
+            : `(some ${this.field}.${TEMPLATE_VAR_TGT})`;
         
         return {
             appliesTo: appliesTo,
-            groupElementSelector: groupOnExpr,
-            showLabel: this.showLabel || false
+            field: this.field,
         };
 
     }
 
-    static isGroupOnField(f: any): f is GroupOnField {
+    static isGroupOnField(f: any): f is FieldTargetGroup {
         return (
             typeof f === "object" &&
             f !== null &&
@@ -283,16 +308,16 @@ class GroupOnField  {
         );
     }
 
-    static fromCnDObject(c: any): GroupOnField | undefined {
+    static fromCnDObject(c: any): FieldTargetGroup | undefined {
         let hasFields = c.group && c.group.field;
-        if(!hasFields && !GroupOnField.isGroupOnField(c)) {
+        if(!hasFields && !FieldTargetGroup.isGroupOnField(c)) {
             return undefined;
         }
         let fieldName = c.group.field;
         let groupOn = c.group.target || "range";
         let showLabel = c.group.showLabel || false;
 
-        return new GroupOnField(fieldName, groupOn, showLabel);
+        return new FieldTargetGroup(fieldName, groupOn, showLabel);
     }
 
 }
@@ -383,13 +408,11 @@ export function parseLayoutSpec(s: string): LayoutSpec {
     return layoutSpec;
 }
 
+interface ConstrBlock : {
+    ori
+}
 
-
-function parseConstraints(constraints: any[]):   {
-                                    orientation : RelativeOrientationConstraint[];
-                                    grouping : GroupingConstraint[];
-                                    cyclic : CyclicOrientationConstraint[];
-                                }
+function parseConstraints(constraints: any[]):   ConstraintsBlock
 {
 
 
@@ -446,9 +469,9 @@ function parseConstraints(constraints: any[]):   {
         });
 
 
-    let groupingConstraints: GroupingConstraint[] = constraints.filter(c => c.group)
+    let byfield: GroupByField[] = constraints.filter(c => c.group)
         .map(c => {
-            let asGroupOnField = GroupOnField.fromCnDObject(c);
+            let asGroupOnField = FieldTargetGroup.fromCnDObject(c);
             if(asGroupOnField) {
                 return asGroupOnField.toCoreConstraint();
             }
@@ -458,21 +481,40 @@ function parseConstraints(constraints: any[]):   {
                 throw new Error("Grouping constraint must have appliesTo field");
             }
 
-            if(!c.group.groupElements) {
-                throw new Error("Grouping constraint must have groupElements field");
+            if(!c.group.field) {
+                throw new Error("Grouping constraint must specify a field");
             }
 
             return {
                 appliesTo: c.group.appliesTo,
-                groupElementSelector: c.group.groupElements,
-                showLabel: c.group.showLabel || false
+                field: c.group.field,
+            }
+        });
+
+    let byselector: GroupBySelector[] = constraints.filter(c => c.group)
+        .map(c => {
+            if(!c.group.elementSelector) {
+                throw new Error("Grouping constraint must have an elementSelector.");
+            }
+            if(!c.group.name) {
+                throw new Error("Grouping constraint must have a name.");
+            }
+
+            return {
+                groupElementSelector: c.group.elementSelector,
+                name: c.group.name
             }
         });
 
     return {
-        orientation: relativeOrientationConstraints,
-        grouping: groupingConstraints,
-        cyclic: cyclicConstraints
+        orientation: {
+            relative: relativeOrientationConstraints,
+            cyclic: cyclicConstraints
+        },
+        grouping: {
+            byfield: byfield,
+            byselector: byselector
+        }
     }
 
 }

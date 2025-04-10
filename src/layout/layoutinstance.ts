@@ -267,7 +267,7 @@ export class LayoutInstance {
         // edges.
 
 
-        for (var gc : GroupingConstraint of groupingConstraints) {
+        for (var gc of groupingConstraints) {
 
             let appliesTo = gc.appliesTo || DEFAULT_APPLIES_TO;
             let selector = gc.groupElementSelector;
@@ -284,10 +284,27 @@ export class LayoutInstance {
             let selectedElements : string[][] = selectorRes.selected();
 
 
-            // Now, we need to find the ELEMENTS in the group that were selected this way.
+            if (selectedElements.length === 0 || selectedElements.some((element) => element.length > 1)) {
+                continue;
+            }
+
+            let groupElements = selectedElements.map((element) => element[0]);
+
+            // Questions // TODO
+
+            // 1. What is the group name? We don't know anymore. Maybe you ask the user.
+            // 2. Is there a remove edges option?
+            
 
             //// This is really tricky, since we want to remove edges from the group right? ///
 
+            let newGroup: LayoutGroup =
+            {
+                name: groupName,
+                nodeIds: [source],
+                keyNodeId: target,
+                showLabel: showLabel
+            };
 
         }
 
