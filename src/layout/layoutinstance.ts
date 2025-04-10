@@ -20,7 +20,6 @@ import { LayoutSpec, parseLayoutSpec,
 
 
 import { generateGraph } from '../alloy-graph';
-
 import { WrappedForgeEvaluator } from '../forge-util/evaluatorUtil';
 import { ColorPicker } from './colorpicker';
 import { ConstraintValidator } from './constraint-validator';
@@ -40,17 +39,20 @@ export class LayoutInstance {
     private readonly _layoutSpec: LayoutSpec;
     readonly DEFAULT_GROUP_ON: string = "range";
 
-    private readonly _sigColors: Record<string, string>;
 
+    // NOW needs to be ATOM colors and ATOM Icons
+    private readonly _sigColors: Record<string, string>;
     private readonly _sigIcons: Record<string, IconDefinition>;
 
     public readonly minSepHeight = 15;
     public readonly minSepWidth = 15;
 
     private evaluator : WrappedForgeEvaluator;
+    private instanceNum : number;
 
 
-    constructor(layoutSpec: LayoutSpec, evaluator: WrappedForgeEvaluator) {
+    constructor(layoutSpec: LayoutSpec, evaluator: WrappedForgeEvaluator, instNum : number = 0) {
+        this.instanceNum = instNum;
         this.evaluator = evaluator;
         this._layoutSpec = layoutSpec;
 
@@ -75,13 +77,13 @@ export class LayoutInstance {
         }
 
 
-        if (this._layoutSpec.closures) {
-            this._layoutSpec.closures.forEach((closure) => {
-                if (!closure.direction) {
-                    closure.direction = "clockwise";
-                }
-            });
-        }
+        // if (this._layoutSpec.closures) {
+        //     this._layoutSpec.closures.forEach((closure) => {
+        //         if (!closure.direction) {
+        //             closure.direction = "clockwise";
+        //         }
+        //     });
+        // }
     }
 
 
@@ -250,18 +252,59 @@ export class LayoutInstance {
      */
     private generateGroups(g: Graph): LayoutGroup[] {
 
-        // TODO: Check applies to
+        let groupingConstraints : GroupingConstraint[] = this._layoutSpec.constraints.grouping;
 
-
+        if (!groupingConstraints) {
+            return [];
+        }
 
         let groups: LayoutGroup[] = [];
         // Should we also remove the groups from the graph?
+
+
+
+        // I don't think we IMMEDIATELY need to go through the graph
+        // edges.
+
+
+        for (var gc : GroupingConstraint of groupingConstraints) {
+
+            let appliesTo = gc.appliesTo || DEFAULT_APPLIES_TO;
+            let selector = gc.groupElementSelector;
+
+
+            // First, check if applies to works.
+
+            let appliesToRes = this.evaluator.evaluate(appliesTo, this.instanceNum);
+            if(!appliesToRes.appliesTo()) {
+                continue;
+            }
+
+            let selectorRes = this.evaluator.evaluate(selector, this.instanceNum);
+            let selectedElements : string[][] = selectorRes.selected();
+
+
+            // Now, we need to find the ELEMENTS in the group that were selected this way.
+
+            //// This is really tricky, since we want to remove edges from the group right? ///
+
+
+        }
+
+
+
 
         let graphEdges = [...g.edges()];
 
         // Go through all edge labels in the graph
         graphEdges.forEach((edge) => {
             const edgeId = edge.name;
+
+
+
+
+
+
             const relName = this.getRelationName(g, edge);
 
 
@@ -552,7 +595,7 @@ export class LayoutInstance {
 
         /// BUT GROUPS HAVE TO HAPPEN HERE///
         let groups = this.generateGroups(g);
-        const colors = this.colorNodesByType(g, a);
+        //const colors = this.colorNodesByType(g, a);
         this.ensureNoExtraNodes(g, a);
 
 

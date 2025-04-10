@@ -39,7 +39,7 @@ export interface RelativeOrientationConstraint extends ConstraintOperation {
 
 export interface GroupingConstraint extends ConstraintOperation {
     // AND THIS IS NOT A APPLIES TO BUT A SELECTOR EXPRESSION
-    groupElements : string;
+    groupElementSelector : string;
     showLabel? : boolean;
 }
 
@@ -267,7 +267,7 @@ class GroupOnField  {
         
         return {
             appliesTo: appliesTo,
-            groupElements: groupOnExpr,
+            groupElementSelector: groupOnExpr,
             showLabel: this.showLabel || false
         };
 
@@ -464,7 +464,7 @@ function parseConstraints(constraints: any[]):   {
 
             return {
                 appliesTo: c.group.appliesTo,
-                groupElements: c.group.groupElements,
+                groupElementSelector: c.group.groupElements,
                 showLabel: c.group.showLabel || false
             }
         });
