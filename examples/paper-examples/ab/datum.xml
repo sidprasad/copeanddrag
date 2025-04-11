@@ -1,10 +1,11 @@
-<alloy builddate="Wednesday, November 13th, 2024">
-<instance bitwidth="4" maxseq="-1" command="temporary-name_source_1" filename="/no-name.rkt" version="3.5"  >
+<alloy builddate="Friday, April 11th, 2025">
+<instance bitwidth="4" maxseq="-1" command="temporary-name_source_1" filename="/Users/siddharthaprasad/Desktop/copeanddrag/examples/paper-examples/ab/source.frg" version="4.1"  >
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>
 
 <sig label="Int" ID="1" parentID="2" builtin="yes">
+
 </sig>
 
 <sig label="univ" ID="2" builtin="yes">
@@ -25,5 +26,16 @@
 
 </instance>
 
-<source filename="/no-name.rkt" content="// Couldn't open source file (/no-name.rkt) (info: (2 . posix)). Is the file saved?"></source>
+<source filename="source.frg" content="#lang forge
+&#xA;
+&#xA;one sig A {}
+&#xA;one sig B {}
+&#xA;
+&#xA;inst ab {
+&#xA;    A = `A
+&#xA;    B = `B
+&#xA;}
+&#xA;
+&#xA;run {} for ab
+&#xA;"></source>
 </alloy>

@@ -5,5 +5,5 @@ constraints:
       addToGroup: 1
 
   - group:
-      elementSelector: "univ"
+      elementSelector: "Wolf"
       name: "everythingGroup"

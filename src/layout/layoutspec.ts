@@ -533,6 +533,7 @@ function parseConstraints(constraints: any[]):   ConstraintsBlock
         .map(c => {
 
             var isInternallyConsistent = true;
+            let constr = c.orientation as RelativeOrientationConstraint;
 
             let asFieldDirections = FieldDirections.fromCnDObject(c);
             if(asFieldDirections) {
@@ -540,6 +541,7 @@ function parseConstraints(constraints: any[]):   ConstraintsBlock
                 if(!isInternallyConsistent) {
                     throw new Error(asFieldDirections.inconsistencyMessage());
                 }  
+                constr = asFieldDirections as RelativeOrientationConstraint;
             }
 
             let asSigDirections = SigDirections.fromCnDObject(c);
@@ -548,20 +550,24 @@ function parseConstraints(constraints: any[]):   ConstraintsBlock
                 if(!isInternallyConsistent) {
                     throw new Error(asSigDirections.inconsistencyMessage());
                 }  
+                constr = asSigDirections as RelativeOrientationConstraint;
             }
 
+            
+
+
             // If not, we parse from the CORE constraint
-            if(!c.orientation.appliesTo) {
+            if(!constr.appliesTo) {
                 throw new Error("Orientation constraint must have appliesTo field");
             }
 
-            if(!c.orientation.directions) {
+            if(!constr.directions) {
                 throw new Error("Orientation constraint must have directions field");
             }
 
             let roc = new RelativeOrientationConstraint(
-                c.orientation.directions,
-                c.orientation.appliesTo
+                constr.directions,
+                constr.appliesTo
             );
             isInternallyConsistent = roc.isInternallyConsistent();
             if(!isInternallyConsistent) {

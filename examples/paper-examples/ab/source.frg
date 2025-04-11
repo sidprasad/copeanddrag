@@ -3,9 +3,12 @@
 one sig A {}
 one sig B {}
 
-inst ab {
-    A = `A
-    B = `B
-}
 
-run {} for ab
+run {}
+
+// inst ab {
+//     A = `A
+//     B = `B
+// }
+
+// run {} for ab
