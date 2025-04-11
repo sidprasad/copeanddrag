@@ -101,7 +101,12 @@ function getFormContents(req: any) {
     let instances = ad.instances;
     let loopBack = ad.loopBack || -1;
     let evaluator = new WrappedForgeEvaluator(alloyDatum);
+
+
+    // Internal consistency checks happen here.
     let layoutSpec : LayoutSpec = parseLayoutSpec(cope);
+    
+    
     let li = new LayoutInstance(layoutSpec,  evaluator , instanceNumber);
     return { instances, li, instanceNumber, loopBack, projections };
 }
@@ -149,10 +154,7 @@ app.post('/', (req, res) => {
             loopBack = 0;
         }
 
-        var internal_inconsistency = li.checkConstraintConsistency();
-        if (!internal_inconsistency.consistent) {
-            throw new Error(internal_inconsistency.error);
-        }
+
 
         var instAsString = instanceToInst(instances[instanceNumber]);
         try{

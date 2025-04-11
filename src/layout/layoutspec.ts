@@ -1,3 +1,4 @@
+import { all } from 'axios';
 import * as yaml from 'js-yaml';
 
 export type RelativeDirection = "above" | "below" | "left" | "right" | "directlyAbove" | "directlyBelow" | "directlyLeft" | "directlyRight";
@@ -21,32 +22,95 @@ function randidentifier(len: number = 6): string {
     return result;
 }
 
+
+
+
+
+
 /////////// COPE AND DRAG CORE ////////////
 
 export interface Operation {}
 
 
-export interface ConstraintOperation extends Operation {
-    appliesTo? : string;
+class ConstraintOperation implements Operation {
+    appliesTo: string;
+    constructor(appliesTo: string) {
+        this.appliesTo = appliesTo;
+    }
+    isInternallyConsistent(): boolean {
+        // Default implementation, can be overridden by subclasses
+        return true;
+    }
+
+    inconsistencyMessage(): string {
+        return `Inconsistent Constraint Operation: ${this.appliesTo}`;  
+    }
 }
 
 
 
 // So we have 3 kinds of constraint operations //
 
-export interface RelativeOrientationConstraint extends ConstraintOperation {
+export class RelativeOrientationConstraint extends ConstraintOperation {
     directions : RelativeDirection[];
+
+    constructor(directions: RelativeDirection[], appliesTo: string) {
+        super(appliesTo);
+        this.directions = directions;
+    }
+    
+    override isInternallyConsistent(): boolean {
+
+        // If "above" and  "below" are present, return false
+        if (this.directions.includes("above") && this.directions.includes("below")) {
+            return false;
+        }
+
+        // If "left" and "right" are present, return false
+        if (this.directions.includes("left") && this.directions.includes("right")) {
+            return false;
+        }
+
+        // If directlyLeft is present, the only other possible value should be left
+        if (this.directions.includes("directlyLeft")) {
+            // Ensure that all other values in the array are "left"
+            if (!this.directions.every((direction) => direction === "left" || direction === "directlyLeft")) {
+                return false;
+            }
+        }
+
+        // If directlyRight is present, the only other possible value should be right
+        if (this.directions.includes("directlyRight")) {
+            // Ensure that all other values in the array are "right"
+            if (!this.directions.every((direction) => direction === "right" || direction === "directlyRight")) {
+                return false;
+            }
+        }
+
+        // If directlyAbove is present, the only other possible value should be above
+        if (this.directions.includes("directlyAbove")) {
+            // Ensure that all other values in the array are "above"
+            if (!this.directions.every((direction) => direction === "above" || direction === "directlyAbove")) {
+                return false;
+            }
+        }
+
+        // If directlyBelow is present, the only other possible value should be below
+        if (this.directions.includes("directlyBelow")) {
+            // Ensure that all other values in the array are "below"
+            if (!this.directions.every((direction) => direction === "below" || direction === "directlyBelow")) {
+                return false;
+            }
+        }
+            return true;
+        }
+
+
+    override inconsistencyMessage(): string {
+        let dirStr : string = this.directions.join(", ");
+        return `Inconsistent Relative Orientation Constraint: Directions [${dirStr}] applied to: ${this.appliesTo}.`;  
+    }
 }
-
-
-
-//// TODO: Actually, do we have two kinds of grouping constraints now?
-
-// Group by selector.
-// Group bt field (with applies to)
-
-
-
 
 
 export interface GroupBySelector {
@@ -66,9 +130,18 @@ export interface GroupByField  {
     addToGroup : number;
 }
 
-// Question -- DOESN"T ORDER MATTER HERE?
-export interface CyclicOrientationConstraint extends ConstraintOperation {
+
+export class CyclicOrientationConstraint extends ConstraintOperation {
     direction : RotationDirection;
+
+    constructor(direction: RotationDirection, appliesTo: string) {
+        super(appliesTo);
+        this.direction = direction;
+    }
+
+    override inconsistencyMessage(): string {
+        return `Inconsistent Cyclic Orientation Constraint: Direction ${this.direction} applied to: ${this.appliesTo}.`;  
+    }
 }
 
 
@@ -144,9 +217,14 @@ export interface LayoutSpec {
 
 const DEFAULT_LAYOUT : LayoutSpec = {
     constraints: {
-        orientation: [],
-        grouping: [],
-        cyclic: []
+        orientation : {
+            relative: [] as RelativeOrientationConstraint[],
+            cyclic: [] as CyclicOrientationConstraint[]
+        },
+        grouping : {
+            byfield : [] as GroupByField[],
+            byselector : [] as GroupBySelector[]
+        }
     },
     directives: {
         colors: [],
@@ -182,21 +260,21 @@ function sigToPredicate(sigName: string) : string {
 
 
 // Field Directions //
-class FieldDirections {
+class FieldDirections extends RelativeOrientationConstraint {
+
     fieldName : string;
-    directions : RelativeDirection[];
 
     constructor(fieldName: string, directions: RelativeDirection[]) {
-        this.fieldName = fieldName;
-        this.directions = directions;
+
+        let appliesTo = fieldToPredicate(fieldName);
+        super(directions, appliesTo);
+        this.fieldName = fieldName;       
+
     }
 
-    toCoreConstraint() : RelativeOrientationConstraint {
-        let appliesTo : string = fieldToPredicate(this.fieldName);
-        return {
-            appliesTo: appliesTo,
-            directions: this.directions
-        };
+    override inconsistencyMessage(): string {
+        let dirStr : string = this.directions.join(", ");
+        return `Field ${this.fieldName} cannot be laid out in directions [${dirStr}].`;  
     }
 
     static isFieldDirections(f: any): f is FieldDirections {
@@ -227,23 +305,16 @@ class FieldDirections {
 
 
 // Sig Directions //
-class SigDirections {
+class SigDirections extends RelativeOrientationConstraint { 
     sigName : string;
     target : string;
-    directions : RelativeDirection[];
+
 
     constructor(sigName: string, target: string, directions: RelativeDirection[]) {
+        let appliesTo = `(${TEMPLATE_VAR_SRC} in ${sigName}) and (${TEMPLATE_VAR_TGT} in ${target})`;
+        super(directions, appliesTo);
         this.sigName = sigName;
         this.target = target;
-        this.directions = directions;
-    }
-
-    toCoreConstraint() : RelativeOrientationConstraint {
-        let appliesTo = `(${TEMPLATE_VAR_SRC} in ${this.sigName}) and (${TEMPLATE_VAR_TGT} in ${this.target})`;
-        return {
-            appliesTo: appliesTo,
-            directions: this.directions
-        }
     }
 
     static isSigDirections(f: any): f is SigDirections {
@@ -272,6 +343,11 @@ class SigDirections {
         return new SigDirections(sigName, target, directions);
     }
 
+
+    override inconsistencyMessage(): string {
+        let dirStr : string = this.directions.join(", ");
+        return `Sigs ${this.sigName} and ${this.target} cannot be ${dirStr} of one another.`;  
+    }
 
 }
 
@@ -342,22 +418,13 @@ class FieldTargetGroup  {
 
 }
 
-class FieldCyclic {
+class FieldCyclic extends CyclicOrientationConstraint{
     field : string;
-    direction? : RotationDirection;
 
     constructor(field: string, direction?: RotationDirection) {
+        let appliesTo : string = fieldToPredicate(field);
+        super(direction, appliesTo);
         this.field = field;
-        this.direction = direction;
-    }
-
-
-    toCoreConstraint() : CyclicOrientationConstraint {
-        let appliesTo : string = fieldToPredicate(this.field);
-        return {
-            appliesTo: appliesTo,
-            direction: this.direction || "clockwise"
-        };
     }
 
     static isFieldCyclic(f: any): f is FieldCyclic {
@@ -378,6 +445,10 @@ class FieldCyclic {
         let direction = c.cyclic.direction || "clockwise";
 
         return new FieldCyclic(fieldName, direction);
+    }
+
+    override inconsistencyMessage(): string {
+        return `Field ${this.field} cannot be laid out in direction ${this.direction}.`;  
     }
 }
 
@@ -428,49 +499,60 @@ export function parseLayoutSpec(s: string): LayoutSpec {
     return layoutSpec;
 }
 
-interface ConstrBlock : {
-    ori
-}
 
 function parseConstraints(constraints: any[]):   ConstraintsBlock
 {
+
+
+    let directionsByField : Record<string, RotationDirection> = {};
+
+    let allFieldCyclic : FieldCyclic[] = constraints.filter(c => c.cyclic && FieldCyclic.isFieldCyclic(c))
+    allFieldCyclic.forEach(c => {
+
+        if (!directionsByField[c.field]) {
+            directionsByField[c.field] = c.direction;
+        }
+        else if (directionsByField[c.field] !== c.direction) {
+            throw new Error(`Inconsistent cyclic constraint for field ${c.field}: ${directionsByField[c.field]} vs ${c.direction}`);
+        }
+    });
 
 
     // All cyclic orientation constraints should start with 'cyclic'
     let cyclicConstraints: CyclicOrientationConstraint[] = constraints.filter(c => c.cyclic)
         .map(c => {
             
-            let asFieldCyclic = FieldCyclic.fromCnDObject(c);
-            if(asFieldCyclic) {
-                return asFieldCyclic.toCoreConstraint();
-            }
-            // If not, we parse from the CORE constraint
-
-            // TODO: Parse errors!
-
             if(!c.cyclic.appliesTo) {
                 throw new Error("Cyclic constraint must have appliesTo field");
             }
 
-            return {
-                appliesTo: c.cyclic.appliesTo,
-                direction: c.cyclic.direction || "clockwise"
-            };
-
+            return new CyclicOrientationConstraint(
+                c.cyclic.direction || "clockwise",
+                c.cyclic.appliesTo
+            );
         });
 
 
 
     let relativeOrientationConstraints: RelativeOrientationConstraint[] = constraints.filter(c => c.orientation)
         .map(c => {
+
+            var isInternallyConsistent = true;
+
             let asFieldDirections = FieldDirections.fromCnDObject(c);
             if(asFieldDirections) {
-                return asFieldDirections.toCoreConstraint();
+                isInternallyConsistent = asFieldDirections.isInternallyConsistent();
+                if(!isInternallyConsistent) {
+                    throw new Error(asFieldDirections.inconsistencyMessage());
+                }  
             }
 
             let asSigDirections = SigDirections.fromCnDObject(c);
             if(asSigDirections) {
-                return asSigDirections.toCoreConstraint();
+                isInternallyConsistent = asSigDirections.isInternallyConsistent();
+                if(!isInternallyConsistent) {
+                    throw new Error(asSigDirections.inconsistencyMessage());
+                }  
             }
 
             // If not, we parse from the CORE constraint
@@ -482,10 +564,15 @@ function parseConstraints(constraints: any[]):   ConstraintsBlock
                 throw new Error("Orientation constraint must have directions field");
             }
 
-            return {
-                appliesTo: c.orientation.appliesTo,
-                directions: c.orientation.directions
+            let roc = new RelativeOrientationConstraint(
+                c.orientation.directions,
+                c.orientation.appliesTo
+            );
+            isInternallyConsistent = roc.isInternallyConsistent();
+            if(!isInternallyConsistent) {
+                throw new Error(roc.inconsistencyMessage());
             }
+            return roc;
         });
 
 

@@ -64,151 +64,22 @@ export class LayoutInstance {
         this.instanceNum = instNum;
         this.evaluator = evaluator;
         this._layoutSpec = layoutSpec;
-
-
-
-        /* This should be a default dict of colors by sig type */
-        this._sigColors = {        };
-
-
-        // TODO: Check applies to here!
-        if (this._layoutSpec.sigColors) {
-            this._layoutSpec.sigColors.forEach((sigColor) => {
-
-
-                this._sigColors[sigColor.sigName] = sigColor.color;
-            });
-        }
-
-        // TODO: CHeck applies to here!
-        this._sigIcons = {};
-        if (this._layoutSpec.sigIcons) {
-            this._layoutSpec.sigIcons.forEach((sigIcon) => {
-                this._sigIcons[sigIcon.sigName] = sigIcon;
-            });
-        }
-
-
-
-    }
-
-
-    public checkConstraintConsistency(): { consistent: boolean, error: string } {
-        let sigDirections = this._layoutSpec.sigDirections || [];
-        let fieldDirections = this._layoutSpec.fieldDirections || [];
-
-        // We will have to get to this at some point. Hopefully the parser 
-
-
-
-        function areDirectionsConsistent(directions: string[]): boolean {
-
-            // If "above" and  "below" are present, return false
-            if (directions.includes("above") && directions.includes("below")) {
-                return false;
-            }
-
-            // If "left" and "right" are present, return false
-            if (directions.includes("left") && directions.includes("right")) {
-                return false;
-            }
-
-            // If directlyLeft is present, the only other possible value should be left
-            if (directions.includes("directlyLeft")) {
-                // Ensure that all other values in the array are "left"
-                if (!directions.every((direction) => direction === "left" || direction === "directlyLeft")) {
-                    return false;
-                }
-            }
-
-            // If directlyRight is present, the only other possible value should be right
-            if (directions.includes("directlyRight")) {
-                // Ensure that all other values in the array are "right"
-                if (!directions.every((direction) => direction === "right" || direction === "directlyRight")) {
-                    return false;
-                }
-            }
-
-            // If directlyAbove is present, the only other possible value should be above
-            if (directions.includes("directlyAbove")) {
-                // Ensure that all other values in the array are "above"
-                if (!directions.every((direction) => direction === "above" || direction === "directlyAbove")) {
-                    return false;
-                }
-            }
-
-            // If directlyBelow is present, the only other possible value should be below
-            if (directions.includes("directlyBelow")) {
-                // Ensure that all other values in the array are "below"
-                if (!directions.every((direction) => direction === "below" || direction === "directlyBelow")) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-
-
-        // First check that all sigDirections are consistent
-        for (let i = 0; i < sigDirections.length; i++) {
-            let sigDirection = sigDirections[i];
-            let sourceSig = sigDirection.sigName;
-            let targetSig = sigDirection.target.sigName;
-            let directions = sigDirection.directions || [];
-
-            if (!areDirectionsConsistent(directions)) {
-                let directionsString = directions.join(", ");
-                return { consistent: false, error: `Inconsistent orientation constraint: Sigs <code>${sourceSig}</code> and <code>${targetSig}</code> cannot have relative directions: <code>${directionsString}</code>.` };
-            }
-        }
-
-        // Then check that all fieldDirections are consistent
-        for (let i = 0; i < fieldDirections.length; i++) {
-            let fieldDirection = fieldDirections[i];
-            let fieldName = fieldDirection.fieldName;
-            let directions = fieldDirection.directions || [];
-
-            if (!areDirectionsConsistent(directions)) {
-                let directionsString = directions.join(", ");
-                return { consistent: false, error: `Inconsistent orientation constraint:  Field <code>${fieldName}</code> cannot be laid out with directions: <code>${directionsString}</code>.` };
-            }
-        }
-
-
-        let closures = this._layoutSpec.closures || [];
-
-        // Build a map of field names to flow, using closures
-        let fieldToFlow = {};
-        for (let i = 0; i < closures.length; i++) {
-            let closure = closures[i];
-            let fieldName = closure.fieldName;
-            let direction = closure.direction;
-
-            if (fieldToFlow[fieldName] && fieldToFlow[fieldName] !== direction) {
-                return { consistent: false, error: `Inconsistent cyclic constraints: Field ${fieldName} cannot be laid out ${direction} and ${fieldToFlow[direction]}.` };
-            }
-            fieldToFlow[fieldName] = direction;
-        }
-
-
-
-        return { consistent: true, error: "" };
     }
 
 
     get projectedSigs(): string[] {
-        if (!this._layoutSpec.projections) {
+        if (!this._layoutSpec.directives.projections) {
             return [];
         }
-        return this._layoutSpec.projections.map((projection) => projection.sigName);
+        return this._layoutSpec.directives.projections.map((projection) => projection.sig);
     }
 
     get hideDisconnected(): boolean {
-        return this._layoutSpec.hideDisconnected || false;
+        return this._layoutSpec.directives.hideDisconnected || false;
     }
 
     get hideDisconnectedBuiltIns(): boolean {
-        return this._layoutSpec.hideDisconnectedBuiltIns || false;
+        return this._layoutSpec.directives.hideDisconnectedBuiltIns || false;
     }
 
 
@@ -436,49 +307,7 @@ export class LayoutInstance {
         return allTypes;
     }
 
-    
-    private colorNodesByType(g: Graph, a: AlloyInstance): Record<string, string> {
 
-
-        let nodes = [...g.nodes()];
-        let types = getInstanceTypes(a);
-        let colorPicker = new ColorPicker(types.length);
-
-
-        // Ensure that we have colors that are NOT in the sigColors
-        let usedColors = Object.values(this._sigColors);
-
-        let colorsByType: Record<string, string> = {};
-        let types_with_user_colors = Object.keys(this._sigColors);
-
-
-        types.forEach((type, index) => {
-            // If the type has a color specified, use that
-            if (this._sigColors[type.id]) {
-                colorsByType[type.id] = this._sigColors[type.id];
-            }
-            else {
-                // But we want to make sure that the phylo color is not already in use.
-                colorsByType[type.id] = colorPicker.getNextColor();
-            }
-        });
-
-
-        let colorsByNode = {};
-        nodes.forEach((node) => {
-            // Get the type of the node
-            let type = getAtomType(a, node);
-            let allTypes = type.types;
-
-
-            // Get the first element of allTypes that 
-            // is also an element of types_with_user_colors
-            let type_id = allTypes.find((type) => types_with_user_colors.includes(type)) || type.id;
-            let color = colorsByType[type_id];
-            colorsByNode[node] = color;
-        });
-        return colorsByNode;
-    }
 
 
     public getRelationName(g: Graph, edge: Edge): string {
