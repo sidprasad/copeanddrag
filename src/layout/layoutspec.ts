@@ -66,7 +66,7 @@ export interface GroupByField  {
     addToGroup : number;
 }
 
-
+// Question -- DOESN"T ORDER MATTER HERE?
 export interface CyclicOrientationConstraint extends ConstraintOperation {
     direction : RotationDirection;
 }
