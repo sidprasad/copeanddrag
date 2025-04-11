@@ -1,0 +1,5 @@
+constraints:
+  - group:
+      field: animals
+      groupOn: 0
+      addToGroup: 1

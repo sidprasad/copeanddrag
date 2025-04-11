@@ -345,7 +345,7 @@ class SigDirections extends RelativeOrientationConstraint {
 
 }
 
-
+/*
 // This is wrong -- only works for binary relations.
 class FieldTargetGroup  {
     field : string;
@@ -411,6 +411,7 @@ class FieldTargetGroup  {
     }
 
 }
+*/
 
 class FieldCyclic extends CyclicOrientationConstraint{
     field : string;
@@ -573,21 +574,21 @@ function parseConstraints(constraints: any[]):   ConstraintsBlock
     let byfield: GroupByField[] = constraints.filter(c => c.group)
         .filter(c => c.group.field)
         .map(c => {
-            let asGroupOnField = FieldTargetGroup.fromCnDObject(c);
-            if(asGroupOnField) {
-                return asGroupOnField.toCoreConstraint();
-            }
+            // let asGroupOnField = FieldTargetGroup.fromCnDObject(c);
+            // if(asGroupOnField) {
+            //     return asGroupOnField.toCoreConstraint();
+            // }
 
             // If not, we parse from the CORE constraint
-            if(!c.group.groupOn) {
+            if(c.group.groupOn == undefined) {
                 throw new Error("Grouping constraint must have groupOn field");
             }
 
-            if(!c.group.field) {
+            if(c.group.field == undefined) {
                 throw new Error("Grouping constraint must specify a field");
             }
 
-            if(!c.group.addToGroup) {
+            if(c.group.addToGroup == undefined) {
                 throw new Error("Grouping constraint must specify addToGroup");
             }
 

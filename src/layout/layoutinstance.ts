@@ -148,7 +148,10 @@ export class LayoutInstance {
 
 
         function getConstraintsRelatedToField(fieldName: string) {
-            let fieldConstraints = groupByFieldConstraints.filter((field) => field.field === fieldName);
+            let fieldConstraints = groupByFieldConstraints.filter((d) => {
+                let match = d.field === fieldName
+                return match;
+            });
             return fieldConstraints;
         }
 
