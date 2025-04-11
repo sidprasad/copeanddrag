@@ -7,8 +7,7 @@ import { LayoutInstance } from './layout/layoutinstance';
 import { WebColaLayout } from './webcola-gen/graphtowebcola';
 import { ConstraintValidator } from './layout/constraint-validator';
 import { InstanceLayout } from './layout/interfaces';
-import { copeToLayoutSpec } from './cope-lang/cope-parser';
-import { parseLayoutSpec } from './layout/layoutspec';
+import { LayoutSpec, parseLayoutSpec } from './layout/layoutspec';
 import { instanceToInst } from './forge-util/instanceToInst';
 import { Event, Logger, LogLevel } from './logging/logger';
 import * as os from 'os';
@@ -101,13 +100,10 @@ function getFormContents(req: any) {
     }
     let instances = ad.instances;
     let loopBack = ad.loopBack || -1;
-
-    let coopeNonEmpty = cope && cope.length > 0;
-    let layoutSpec = coopeNonEmpty ? copeToLayoutSpec(cope) : parseLayoutSpec("");
-    let li = new LayoutInstance(layoutSpec);
+    let evaluator = new WrappedForgeEvaluator(alloyDatum);
+    let layoutSpec : LayoutSpec = parseLayoutSpec(cope);
+    let li = new LayoutInstance(layoutSpec,  evaluator , instanceNumber);
     return { instances, li, instanceNumber, loopBack, projections };
-
-
 }
 
 // On a GET request, return the start CnD page.
