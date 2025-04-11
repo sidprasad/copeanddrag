@@ -252,12 +252,6 @@ function fieldToPredicate(fieldName : string) : string {
 }
 
 
-function sigToPredicate(sigName: string) : string {
-
-    return `(${TEMPLATE_VAR_SRC} in ${sigName}) or (${TEMPLATE_VAR_TGT} in ${sigName})`;
-
-}
-
 
 // Field Directions //
 class FieldDirections extends RelativeOrientationConstraint {
@@ -577,6 +571,7 @@ function parseConstraints(constraints: any[]):   ConstraintsBlock
 
 
     let byfield: GroupByField[] = constraints.filter(c => c.group)
+        .filter(c => c.group.field)
         .map(c => {
             let asGroupOnField = FieldTargetGroup.fromCnDObject(c);
             if(asGroupOnField) {
@@ -604,6 +599,7 @@ function parseConstraints(constraints: any[]):   ConstraintsBlock
         });
 
     let byselector: GroupBySelector[] = constraints.filter(c => c.group)
+        .filter(c => c.group.elementSelector)
         .map(c => {
             if(!c.group.elementSelector) {
                 throw new Error("Grouping constraint must have an elementSelector.");
