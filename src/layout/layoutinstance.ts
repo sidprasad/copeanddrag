@@ -129,13 +129,13 @@ export class LayoutInstance {
             }
 
             let groupElements = selectedElements.map((element) => element[0]);
-            let keyNode = groupElements[0];
+            let keyNode = groupElements[0]; // TODO: WAIT, THERE IS NO KEY NODE
 
             // Question: Does **just** having LayoutGroup work? Like what does a keyNode even mean?
             let newGroup: LayoutGroup = {
                 name: gc.name,
                 nodeIds: groupElements,
-                keyNodeId: "", // WAIT, THERE IS NO KEY NODE
+                keyNodeId: keyNode, 
                 showLabel: true // TODO: HACK
             };
             groups.push(newGroup);
