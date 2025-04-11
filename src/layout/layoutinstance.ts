@@ -53,11 +53,6 @@ export class LayoutInstance {
     private readonly _layoutSpec: LayoutSpec;
     readonly DEFAULT_GROUP_ON: string = "range";
 
-
-    // NOW needs to be ATOM colors and ATOM Icons
-    private readonly _sigColors: Record<string, string>;
-    private readonly _sigIcons: Record<string, IconDefinition>;
-
     public readonly minSepHeight = 15;
     public readonly minSepWidth = 15;
 
@@ -70,7 +65,10 @@ export class LayoutInstance {
         this.evaluator = evaluator;
         this._layoutSpec = layoutSpec;
 
-        this._sigColors = {};
+
+
+        /* This should be a default dict of colors by sig type */
+        this._sigColors = {        };
 
 
         // TODO: Check applies to here!
@@ -91,13 +89,7 @@ export class LayoutInstance {
         }
 
 
-        // if (this._layoutSpec.closures) {
-        //     this._layoutSpec.closures.forEach((closure) => {
-        //         if (!closure.direction) {
-        //             closure.direction = "clockwise";
-        //         }
-        //     });
-        // }
+
     }
 
 
@@ -219,45 +211,14 @@ export class LayoutInstance {
         return this._layoutSpec.hideDisconnectedBuiltIns || false;
     }
 
-    private getFieldLayout(fieldId: string): DirectionalRelation | undefined {
 
-        const fieldDirection = this._layoutSpec.fieldDirections.find((field) => field.fieldName === fieldId);
-        if (fieldDirection) {
-            return fieldDirection;
-        }
-        return undefined;
-    }
 
     isAttributeField(fieldId: string): boolean {
-        const isAttributeRel = this._layoutSpec.attributeFields.find((field) => field.fieldName === fieldId);
+        const isAttributeRel = this._layoutSpec.directives.attributes.find((ad) => ad.field === fieldId);
         return isAttributeRel ? true : false;
     }
 
 
-    private getClusterSettings(fieldId: string): ClusterRelation | undefined {
-        return this._layoutSpec.groupBy.find((cluster) => cluster.fieldName === fieldId);
-    }
-
-
-
-    private getGroupSourceAndTarget(edge: Edge, groupOn: string) {
-        let source = "";
-        let target = "";
-
-        if (groupOn === "domain") {
-            source = edge.w;
-            target = edge.v;
-        } else if (groupOn == "range") {
-            source = edge.v;
-            target = edge.w;
-        }
-        else {
-            // Default to range
-            source = edge.v;
-            target = edge.w;
-        }
-        return { source, target };
-    }
 
     /**
      * Generates groups based on the specified graph.
@@ -391,12 +352,6 @@ export class LayoutInstance {
      * @returns A record of attributes
      */
     private generateAttributes(g: Graph): Record<string, Record<string, string[]>> {
-
-
-        // TODO: CHeck applies to
-
-
-
         // Node : [] of attributes
         let attributes: Record<string, Record<string, string[]>> = {};
 
@@ -481,7 +436,7 @@ export class LayoutInstance {
         return allTypes;
     }
 
-
+    
     private colorNodesByType(g: Graph, a: AlloyInstance): Record<string, string> {
 
 
@@ -611,44 +566,36 @@ export class LayoutInstance {
         return { projectedInstance, finalProjectionChoices };
     }
 
+
+
+
+
+
     public generateLayout(a: AlloyInstance, projections: Record<string, string>): { layout: InstanceLayout, projectionData: { type: string, projectedAtom: string, atoms: string[] }[] } {
 
+        let defaultSigColors = this.getSigColors(a);
         let projectionResult = this.applyLayoutProjections(a, projections);
         let ai = projectionResult.projectedInstance;
         let projectionData = projectionResult.finalProjectionChoices;
 
         let g: Graph = generateGraph(ai, this.hideDisconnected, this.hideDisconnectedBuiltIns);
 
-        /////// DIRECTIVES ///////
-
-
         const attributes = this.generateAttributes(g);
 
 
-        /// BUT GROUPS HAVE TO HAPPEN HERE///
+        /// Groups have to happen here ///
         let groups = this.generateGroups(g);
-
-
-        // TODO: We now need to color and size EACH atom individually.
-        //const colors = this.colorNodesByType(g, a);
         this.ensureNoExtraNodes(g, a);
-
-
         let dcN = this.getDisconnectedNodes(g);
 
-
-
-        //// WE SHOULD DO COLORS, HEIGHT, AND WIDTH HERE ////
-
         let layoutNodes: LayoutNode[] = g.nodes().map((nodeId) => {
-            let type = getAtomType(a, nodeId);
-            let iconPath: string = this._sigIcons[type.id] ? this._sigIcons[type.id].path : this.DEFAULT_NODE_ICON_PATH;
-            const nodeHeight = this._sigIcons[type.id] ? this._sigIcons[type.id].height : this.DEFAULT_NODE_HEIGHT;
-            const nodeWidth = this._sigIcons[type.id] ? this._sigIcons[type.id].width : this.DEFAULT_NODE_WIDTH;
-            const allTypes = this.getNodeTypes(nodeId, a);
-            const mostSpecificType = this.getMostSpecificType(nodeId, a);
 
-            let color = colors[nodeId];
+            let color = this.getNodeColor(nodeId, a, defaultSigColors);
+            let iconPath = this.getNodeIcon(nodeId);
+            let {height, width} = this.getNodeSize(nodeId);
+            const mostSpecificType = this.getMostSpecificType(nodeId, a);
+            const allTypes = this.getNodeTypes(nodeId, a);
+
             let nodeGroups = groups
                 .filter((group) => group.nodeIds.includes(nodeId))
                 .map((group) => group.name);
@@ -659,8 +606,8 @@ export class LayoutInstance {
                 groups: nodeGroups,
                 attributes: nodeAttributes,
                 icon: iconPath,
-                height: nodeHeight,
-                width: nodeWidth,
+                height: height,
+                width: width,
                 mostSpecificType: mostSpecificType,
                 types: allTypes
             };
@@ -696,13 +643,6 @@ export class LayoutInstance {
             TODO: Replacing this with something like MiniZinc would
             make this much easier, since the solver could support disjunctions.
 
-            Potential Issues:         
-            
-
-
-
-                //// BUG: Does this change? THERE IS A POTENTIAL FOR A BUG HERE, SINCE
-        /// DIFFERENT CURCULAR LAYOUT MAY INTERACT ODD.
         */
 
         // First, ensure that the layout is satisfiable BEFORE cyclic constraints.
@@ -724,10 +664,7 @@ export class LayoutInstance {
 
         // This function applies permutations of the cyclic constraints
         // until it finds a satisfying layout, or it runs out of permutations.
-        let closureConstraints = this.applyClosureConstraints(g, layoutNodes, layoutWithoutCyclicConstraints);
-
-
-
+        let closureConstraints = this.applyCyclicConstraints(layoutNodes, layoutWithoutCyclicConstraints);
         // Append the closure constraints to the constraints
         constraints = constraints.concat(closureConstraints);
 
@@ -1127,4 +1064,79 @@ export class LayoutInstance {
     }
 
 
+
+    private getNodeColor(nodeId: string, a : AlloyInstance, defaultSigColors : Record<string, string>): string {
+        
+        
+        let t = this.getMostSpecificType(nodeId, a);
+        let nodeColor = defaultSigColors[t] || "transparent";
+
+
+        let colorDirecives = this._layoutSpec.directives.colors;
+
+
+        for (let colorDirective of colorDirecives) {
+            let appliesTo = colorDirective.appliesTo;
+            let color = colorDirective.color;
+
+            let appliesToExpr = this.replaceInExpr(appliesTo, nodeId, nodeId);
+            let res = this.evaluator.evaluate(appliesToExpr, this.instanceNum).appliesTo();
+            if (res) {
+                nodeColor = color;
+                break;
+            }
+        }
+
+        return nodeColor;
+    }
+
+    private getNodeSize(nodeId: string): { width: number, height: number } {
+
+        let nodeSize = { width: this.DEFAULT_NODE_WIDTH, height: this.DEFAULT_NODE_HEIGHT };
+
+        let sizeDirectives = this._layoutSpec.directives.sizes;
+        for (let sizeDirective of sizeDirectives) {
+            let appliesTo = sizeDirective.appliesTo;
+            let width = sizeDirective.width;
+            let height = sizeDirective.height;
+
+            let appliesToExpr = this.replaceInExpr(appliesTo, nodeId, nodeId);
+            let res = this.evaluator.evaluate(appliesToExpr, this.instanceNum).appliesTo();
+            if (res) {
+                nodeSize.width = width;
+                nodeSize.height = height;
+                break;
+            }
+        }
+        return nodeSize;
+    }
+
+    private getNodeIcon(nodeId : string) : string {
+        let iconPath = this.DEFAULT_NODE_ICON_PATH;
+        let iconDirectives = this._layoutSpec.directives.icons;
+        for (let iconDirective of iconDirectives) {
+            let appliesTo = iconDirective.appliesTo;
+            let path = iconDirective.path;
+
+            let appliesToExpr = this.replaceInExpr(appliesTo, nodeId, nodeId);
+            let res = this.evaluator.evaluate(appliesToExpr, this.instanceNum).appliesTo();
+            if (res) {
+                iconPath = path;
+                break;
+            }
+        }
+        return iconPath;
+    }
+
+
+    private getSigColors(ai : AlloyInstance) : Record<string, string> {
+        let sigColors = {};
+        
+        let types = getInstanceTypes(ai);
+        let colorPicker = new ColorPicker(types.length);
+        types.forEach((type) => {
+            sigColors[type.id] = colorPicker.getNextColor();
+        });
+        return sigColors;
+    }
 }
