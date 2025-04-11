@@ -1,18 +1,20 @@
 import { DOMParser } from '@xmldom/xmldom';
 
-import {ForgeExprEvaluatorUtil} from 'forge-expr-evaluator';
-import { AlloyDatum, AlloyRelation, parseAlloyXML, AlloyTuple , AlloyInstance, AlloyType} from '../alloy-instance';
-import {DatumParsed, ParsedValue, Relation, Sig, InstanceData, ForgeTuple, BuiltinType} from 'forge-expr-evaluator/dist/types';
+import { ForgeExprEvaluatorUtil } from 'forge-expr-evaluator';
+import { AlloyDatum, AlloyRelation, parseAlloyXML, AlloyTuple, AlloyInstance, AlloyType } from '../alloy-instance';
+import { DatumParsed, ParsedValue, Relation, Sig, InstanceData, ForgeTuple, BuiltinType } from 'forge-expr-evaluator/dist/types';
 
 
-function toForgeType(type: AlloyType) : Sig | BuiltinType {
+
+
+function toForgeType(type: AlloyType): Sig | BuiltinType {
 
 
     let meta = type.meta && type.meta.builtin ? {
         builtin: type.meta.builtin
     } : undefined
 
-     return {
+    return {
         _: type._,
         id: type.id,
         types: type.types,
@@ -22,7 +24,7 @@ function toForgeType(type: AlloyType) : Sig | BuiltinType {
 
 }
 
-function toForgeTuple(tuple: AlloyTuple) : ForgeTuple {
+function toForgeTuple(tuple: AlloyTuple): ForgeTuple {
     return {
         _: tuple._,
         types: tuple.types,
@@ -30,7 +32,7 @@ function toForgeTuple(tuple: AlloyTuple) : ForgeTuple {
     };
 }
 
-function toRelation(r : AlloyRelation) : Relation {
+function toRelation(r: AlloyRelation): Relation {
 
     return {
         _: r._,
@@ -40,42 +42,15 @@ function toRelation(r : AlloyRelation) : Relation {
         tuples: r.tuples.map((tuple) => toForgeTuple(tuple))
     };
 
- }
-
-function toInstanceData(id: AlloyInstance) : InstanceData {
-
-   // TODO
-
-   /*
-   export interface AlloyInstance {
-     types: Record<string, AlloyType>;
-     relations: Record<string, AlloyRelation>;
-     skolems: Record<string, AlloyRelation>;
-   }
-     */
-
-
-   /*
-
-export interface InstanceData {
-    types: {
-        "seq/Int": BuiltinType;
-        Int: BuiltinType;
-        univ: BuiltinType;
-        [key: string]: Sig;
-    };
-    relations: {
-        [key: string]: Relation;
-    };
-    skolems: any;
 }
-   */
+
+function toInstanceData(id: AlloyInstance): InstanceData {
 
     let alloyRelations = id.relations;
     let alloySkolems = id.skolems;
     let alloyTypes = id.types;
 
-    let forgeRelations : Record<string, Relation> = {};
+    let forgeRelations: Record<string, Relation> = {};
     for (let key in alloyRelations) {
         forgeRelations[key] = toRelation(alloyRelations[key]);
     }
@@ -90,7 +65,7 @@ export interface InstanceData {
         Int: toForgeType(alloyTypes["Int"]) as BuiltinType,
         univ: toForgeType(alloyTypes["univ"]) as BuiltinType,
     };
-    
+
     // Dynamically add other keys from alloyTypes
     for (let key in alloyTypes) {
         if (key !== "seq/Int" && key !== "Int" && key !== "univ") {
@@ -109,7 +84,7 @@ export interface InstanceData {
 }
 
 
-function toParsedValue(ad : AlloyDatum) : ParsedValue {
+function toParsedValue(ad: AlloyDatum): ParsedValue {
 
     // export interface AlloyDatum {
     //   instances: AlloyInstance[];
@@ -142,19 +117,9 @@ function toParsedValue(ad : AlloyDatum) : ParsedValue {
 
 }
 
-
-
 function alloyXMLToDatumParsed(datum: string): DatumParsed {
-    // Convert the AlloyDatum to a DatumParsed object
-
     let ad: AlloyDatum = parseAlloyXML(datum);
-    // Now need to convert ad to ParsedValue
-
-    let parsedValue: ParsedValue = {
-        instances: ad.instances.map((instance) => toInstanceData(instance)),
-        bitwidth: ad.bitwidth
-    };
-
+    let parsedValue: ParsedValue = toParsedValue(ad);
 
     return {
         parsed: parsedValue,
@@ -162,23 +127,25 @@ function alloyXMLToDatumParsed(datum: string): DatumParsed {
     };
 }
 
+
+
 export class EvalResult {
 
 
-    private result : string | string[][];
+    private result: string | string[][];
 
     constructor(result: string | string[][]) {
         this.result = result;
     }
 
-    public prettyPrint() : string {
+    public prettyPrint(): string {
         if (typeof this.result === 'string') {
             return this.result;
         } else {
             let tupleStringArray: string[] = [];
             // For each tuple in the result, join the elements with a ->
             for (let i = 0; i < this.result.length; i++) {
-                let tuple : string[] = this.result[i];
+                let tuple: string[] = this.result[i];
                 let tupleString = tuple.join("->");
                 tupleStringArray.push(tupleString);
             }
@@ -188,6 +155,28 @@ export class EvalResult {
         }
     }
 
+    /*
+        Only true if the result is #t
+    */
+    public appliesTo(): boolean {
+        // If the result is a string, it is not selected.
+        if (typeof this.result === 'string') {
+            return this.result === "#t";
+        }
+        return false;
+    }
+
+
+    /* 
+        Specifically returns the elements IF a set.
+        TODO: For grouping, we *will* have to figure out how to determine the correct node.
+    */
+    public selected(): string[][] {
+        if (typeof this.result === 'string') {
+            return [];
+        }
+        return this.result;
+    }
 
 }
 
@@ -199,20 +188,20 @@ export class WrappedForgeEvaluator {
     static getSourceCodeFromDatum(datum: any): string {
         const xmlParser = new DOMParser();
         const xmlDoc = xmlParser.parseFromString(datum, "application/xml");
-      
-    
+
+
         // How do I get the <source> element from the XML document?
         const sourceElement = xmlDoc.getElementsByTagName("source")[0];
-        if(!sourceElement) {
+        if (!sourceElement) {
             throw new Error("No <source> element found in XML");
         }
-    
+
         // Also, how do I get the content attribute from the <source> element?
         const content = sourceElement.getAttribute("content");
-        if(!content) {
+        if (!content) {
             throw new Error("No content attribute found in <source> element");
         }
-    
+
         return content;
     }
 
@@ -243,7 +232,7 @@ export class WrappedForgeEvaluator {
     }
 
 
-    public evaluate(expr: string, instanceIndex? : number): EvalResult {
+    public evaluate(expr: string, instanceIndex?: number): EvalResult {
 
         let result = this.evaluator.evaluateExpression(expr, instanceIndex);
         return new EvalResult(result);

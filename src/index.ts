@@ -7,8 +7,7 @@ import { LayoutInstance } from './layout/layoutinstance';
 import { WebColaLayout } from './webcola-gen/graphtowebcola';
 import { ConstraintValidator } from './layout/constraint-validator';
 import { InstanceLayout } from './layout/interfaces';
-import { copeToLayoutSpec } from './cope-lang/cope-parser';
-import { parseLayoutSpec } from './layout/layoutspec';
+import { LayoutSpec, parseLayoutSpec } from './layout/layoutspec';
 import { instanceToInst } from './forge-util/instanceToInst';
 import { Event, Logger, LogLevel } from './logging/logger';
 import * as os from 'os';
@@ -101,13 +100,15 @@ function getFormContents(req: any) {
     }
     let instances = ad.instances;
     let loopBack = ad.loopBack || -1;
+    let evaluator = new WrappedForgeEvaluator(alloyDatum);
 
-    let coopeNonEmpty = cope && cope.length > 0;
-    let layoutSpec = coopeNonEmpty ? copeToLayoutSpec(cope) : parseLayoutSpec("");
-    let li = new LayoutInstance(layoutSpec);
+
+    // Internal consistency checks happen here.
+    let layoutSpec : LayoutSpec = parseLayoutSpec(cope);
+    
+    
+    let li = new LayoutInstance(layoutSpec,  evaluator , instanceNumber);
     return { instances, li, instanceNumber, loopBack, projections };
-
-
 }
 
 // On a GET request, return the start CnD page.
@@ -153,10 +154,7 @@ app.post('/', (req, res) => {
             loopBack = 0;
         }
 
-        var internal_inconsistency = li.checkConstraintConsistency();
-        if (!internal_inconsistency.consistent) {
-            throw new Error(internal_inconsistency.error);
-        }
+
 
         var instAsString = instanceToInst(instances[instanceNumber]);
         try{
@@ -222,126 +220,7 @@ app.post('/', (req, res) => {
 
 
 
-app.get('/example', (req, res) => {
 
-    const examplesDir = path.join(path.join(__dirname, '..', 'examples'), 'paper-examples');
-
-    // Get the names of all the directories in examplesDir
-    let exampleNames = fs.readdirSync(examplesDir, { withFileTypes: true })
-        .filter(dirent => dirent.isDirectory())
-        .map(dirent => dirent.name);
-
-    res.render('examplehome', { exampleNames });
-});
-
-
-// Need to do this better, but for now, 
-// reuse code.
-app.get('/example/:name', (req, res) => {
-    // Get the example name
-    let exampleName = req.params.name;
-
-    // Define the path to the /examples directory
-    const examplesDir = path.join(
-        path.join(
-            path.join(__dirname, '..', 'examples'),
-            'paper-examples'),
-        exampleName);
-
-    // Check if the directory exists
-    if (!fs.existsSync(examplesDir)) {
-        res.status(404).send('Example not found');
-        return;
-    }
-
-
-    const datumFile = path.join(examplesDir, 'datum.xml');
-    const cndFile = path.join(examplesDir, 'layout.cnd');
-
-    // Ensure the files exist
-    if (!fs.existsSync(datumFile) || !fs.existsSync(cndFile)) {
-        res.status(404).send('Example not found');
-        return;
-    }
-
-    var source_content = "";
-    var sourceFileName = "";
-
-
-
-    let sourceAlloyPath = path.join(examplesDir, 'source.als');
-    let sourceFrgPath = path.join(examplesDir, 'source.frg');
-
-
-    let srcAlloy = fs.existsSync(sourceAlloyPath) ? fs.readFileSync(sourceAlloyPath, 'utf8') : "";
-    let srcFrg = fs.existsSync(sourceFrgPath) ? fs.readFileSync(sourceFrgPath, 'utf8') : "";
-
-
-    if (srcAlloy.length > 0) {
-        source_content = srcAlloy;
-        sourceFileName = `${exampleName}.als`;
-    }
-    else if (srcFrg.length > 0) {
-        source_content = srcFrg;
-        sourceFileName = `${exampleName}.frg`;
-    }
-
-    // Read the files
-    const alloyDatum = fs.readFileSync(datumFile, 'utf8');
-    const cope = fs.readFileSync(cndFile, 'utf8');
-
-    // Eventually, read these from the displayConfig file
-    const instanceNumber = 0;
-    const projections: Record<string, string> = {};
-
-    let ad: AlloyDatum = parseAlloyXML(alloyDatum);
-    let instances = ad.instances;
-    let num_instances = instances.length;
-    let loopBack = ad.loopBack || -1;
-    let layoutSpec = copeToLayoutSpec(cope);
-    let li = new LayoutInstance(layoutSpec);
-
-
-    try{
-        var { layout, projectionData } = li.generateLayout(instances[instanceNumber], projections);
-    }
-    catch(e){
-        throw new Error("The instance being visualized is inconsistent with layout constraints.<br><br> " + e.message);
-    }
-
-    var instAsString = instanceToInst(instances[instanceNumber]);
-    let cl = new WebColaLayout(layout);
-    let colaConstraints = cl.colaConstraints;
-    let colaNodes = cl.colaNodes;
-    let colaEdges = cl.colaEdges;
-    let colaGroups = cl.groupDefinitions;
-
-    let height = cl.FIG_HEIGHT;
-    let width = cl.FIG_WIDTH;
-
-    res.render('diagram', {
-        'height': height,
-        'width': width,
-        'colaNodes': colaNodes,
-        'colaEdges': colaEdges,
-        'colaConstraints': colaConstraints,
-        'colaGroups': colaGroups,
-        instanceNumber,
-        num_instances,
-        layoutAnnotation: "",
-        alloyDatum,
-        loopBack,
-        cope,
-        projectionData,
-        source_content,
-        sourceFileName,
-        instAsString,
-        errors: "",
-        loggingEnabled: true
-    });
-
-
-});
 
 const server = http.createServer(app);
 

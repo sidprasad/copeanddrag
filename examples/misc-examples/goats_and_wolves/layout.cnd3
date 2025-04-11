@@ -1,0 +1,9 @@
+constraints:
+  - group:
+      field: animals
+      groupOn: 0
+      addToGroup: 1
+
+  - group:
+      elementSelector: "univ"
+      name: "everythingGroup"
