@@ -265,99 +265,8 @@ const DEFAULT_LAYOUT : LayoutSpec = {
 
 
 
-// Field Directions //
-class FieldDirections extends RelativeOrientationConstraint {
-
-    fieldName : string;
-    arity : number;
-
-    constructor(fieldName: string, directions: RelativeDirection[]) {
-
-        let appliesTo = selectorForField(fieldName, arity);
-        super(directions, appliesTo);
-        this.fieldName = fieldName;       
-
-    }
-
-    override inconsistencyMessage(): string {
-        let dirStr : string = this.directions.join(", ");
-        return `Field ${this.fieldName} of arity ${arity} cannot be laid out in directions [${dirStr}].`;  
-    }
-
-    static isFieldDirections(f: any): f is FieldDirections {
-        return (
-            typeof f === "object" &&
-            f !== null &&
-            typeof f.field === "string" &&
-            Array.isArray(f.directions) &&
-            f.directions.every((dir: any) =>
-                ["above", "below", "left", "right", "directlyAbove", "directlyBelow", "directlyLeft", "directlyRight"].includes(dir)
-            )
-        );
-    }
-
-    static fromCnDObject(c: any): FieldDirections | undefined {
-
-        let hasFields = c.orientation && c.orientation.field && c.orientation.directions;
-        if(!hasFields && !FieldDirections.isFieldDirections(c)) {
-            return undefined;
-        }
-        let fieldName = c.orientation.field;
-        let directions = c.orientation.directions;
-        let arity = c.orientation.arity;
-
-        return new FieldDirections(fieldName, directions, arity);
-    }
-
-}
 
 
-// Sig Directions //
-class SigDirections extends RelativeOrientationConstraint { 
-    sigName : string;
-    target : string;
-
-
-    constructor(sigName: string, target: string, directions: RelativeDirection[]) {
-        let appliesTo = `(${TEMPLATE_VAR_SRC} in ${sigName}) and (${TEMPLATE_VAR_TGT} in ${target})`;
-        super(directions, appliesTo);
-        this.sigName = sigName;
-        this.target = target;
-    }
-
-    static isSigDirections(f: any): f is SigDirections {
-        return (
-            typeof f === "object" &&
-            f !== null &&
-            typeof f.sigName === "string" &&
-            typeof f.target === "string" &&
-            Array.isArray(f.directions) &&
-            f.directions.every((dir: any) =>
-                ["above", "below", "left", "right", "directlyAbove", "directlyBelow", "directlyLeft", "directlyRight"].includes(dir)
-            )
-        );
-    }
-
-
-    static fromCnDObject(c: any): SigDirections | undefined {
-        let hasFields = c.orientation && c.orientation.sigs && c.orientation.directions;
-        if(!hasFields && !SigDirections.isSigDirections(c)) {
-            return undefined;
-        }
-        let sigName = c.orientation.sigs[0];
-        let target = c.orientation.sigs[1];
-        let directions = c.orientation.directions;
-
-        return new SigDirections(sigName, target, directions);
-    }
-
-
-    override inconsistencyMessage(): string {
-        let dirStr : string = this.directions.join(", ");
-        return `Sigs ${this.sigName} and ${this.target} cannot be ${dirStr} of one another.`;  
-    }
-
-}
 
 /*
 // This is wrong -- only works for binary relations.
@@ -427,39 +336,6 @@ class FieldTargetGroup  {
 }
 */
 
-class FieldCyclic extends CyclicOrientationConstraint{
-    field : string;
-
-    constructor(field: string, direction?: RotationDirection) {
-        let appliesTo : string = fieldToPredicate(field);
-        super(direction, appliesTo);
-        this.field = field;
-    }
-
-    static isFieldCyclic(f: any): f is FieldCyclic {
-        return (
-            typeof f === "object" &&
-            f !== null &&
-            typeof f.field === "string" &&
-            (f.direction === undefined || ["clockwise", "counterclockwise"].includes(f.direction))
-        );
-    }
-
-    static fromCnDObject(c: any): FieldCyclic | undefined {
-        let hasFields = c.cyclic && c.cyclic.field;
-        if(!hasFields && !FieldCyclic.isFieldCyclic(c)) {
-            return undefined;
-        }
-        let fieldName = c.cyclic.field;
-        let direction = c.cyclic.direction || "clockwise";
-
-        return new FieldCyclic(fieldName, direction);
-    }
-
-    override inconsistencyMessage(): string {
-        return `Field ${this.field} cannot be laid out in direction ${this.direction}.`;  
-    }
-}
 
 
 /////////
@@ -513,33 +389,34 @@ function parseConstraints(constraints: any[]):   ConstraintsBlock
 {
 
 
-    let directionsByField : Record<string, RotationDirection> = {};
-
-    let allFieldCyclic : FieldCyclic[] = constraints.filter(c => c.cyclic && FieldCyclic.isFieldCyclic(c))
-    allFieldCyclic.forEach(c => {
-
-        if (!directionsByField[c.field]) {
-            directionsByField[c.field] = c.direction;
-        }
-        else if (directionsByField[c.field] !== c.direction) {
-            throw new Error(`Inconsistent cyclic constraint for field ${c.field}: ${directionsByField[c.field]} vs ${c.direction}`);
-        }
-    });
-
-
     // All cyclic orientation constraints should start with 'cyclic'
     let cyclicConstraints: CyclicOrientationConstraint[] = constraints.filter(c => c.cyclic)
         .map(c => {
             
-            if(!c.cyclic.appliesTo) {
-                throw new Error("Cyclic constraint must have appliesTo field");
+            if(!c.cyclic.selector) {
+                throw new Error("Cyclic constraint must have a selector");
             }
 
             return new CyclicOrientationConstraint(
                 c.cyclic.direction || "clockwise",
-                c.cyclic.appliesTo
+                c.cyclic.selector
             );
         });
+
+
+        let cyclicDirectionsBySelector : Record<string, RotationDirection> = {};
+
+        cyclicConstraints.forEach(c => {
+            let k = c.selector.trim();
+
+            if (!cyclicDirectionsBySelector[k]) {
+                cyclicDirectionsBySelector[k] = c.direction;
+            }
+            else if (cyclicDirectionsBySelector[k] !== c.direction) {
+                throw new Error(`Inconsistent cyclic constraint for selector ${k}: ${cyclicDirectionsBySelector[k]}, ${c.direction}`);
+            }
+        });
+    
 
 
 
@@ -549,30 +426,10 @@ function parseConstraints(constraints: any[]):   ConstraintsBlock
             var isInternallyConsistent = true;
             let constr = c.orientation as RelativeOrientationConstraint;
 
-            let asFieldDirections = FieldDirections.fromCnDObject(c);
-            if(asFieldDirections) {
-                isInternallyConsistent = asFieldDirections.isInternallyConsistent();
-                if(!isInternallyConsistent) {
-                    throw new Error(asFieldDirections.inconsistencyMessage());
-                }  
-                constr = asFieldDirections as RelativeOrientationConstraint;
-            }
-
-            let asSigDirections = SigDirections.fromCnDObject(c);
-            if(asSigDirections) {
-                isInternallyConsistent = asSigDirections.isInternallyConsistent();
-                if(!isInternallyConsistent) {
-                    throw new Error(asSigDirections.inconsistencyMessage());
-                }  
-                constr = asSigDirections as RelativeOrientationConstraint;
-            }
-
-            
-
 
             // If not, we parse from the CORE constraint
-            if(!constr.appliesTo) {
-                throw new Error("Orientation constraint must have appliesTo field");
+            if(!constr.selector) {
+                throw new Error("Orientation constraint must have selector field");
             }
 
             if(!constr.directions) {
@@ -581,7 +438,7 @@ function parseConstraints(constraints: any[]):   ConstraintsBlock
 
             let roc = new RelativeOrientationConstraint(
                 constr.directions,
-                constr.appliesTo
+                constr.selector
             );
             isInternallyConsistent = roc.isInternallyConsistent();
             if(!isInternallyConsistent) {
@@ -594,10 +451,6 @@ function parseConstraints(constraints: any[]):   ConstraintsBlock
     let byfield: GroupByField[] = constraints.filter(c => c.group)
         .filter(c => c.group.field)
         .map(c => {
-            // let asGroupOnField = FieldTargetGroup.fromCnDObject(c);
-            // if(asGroupOnField) {
-            //     return asGroupOnField.toCoreConstraint();
-            // }
 
             // If not, we parse from the CORE constraint
             if(c.group.groupOn == undefined) {
@@ -620,19 +473,15 @@ function parseConstraints(constraints: any[]):   ConstraintsBlock
         });
 
     let byselector: GroupBySelector[] = constraints.filter(c => c.group)
-        .filter(c => c.group.elementSelector)
+        .filter(c => c.group.selector)
         .map(c => {
-            if(!c.group.elementSelector) {
-                throw new Error("Grouping constraint must have an elementSelector.");
+            if(!c.group.selector) {
+                throw new Error("Grouping constraint must have a selector.");
             }
             if(!c.group.name) {
                 throw new Error("Grouping constraint must have a name.");
             }
-
-            return {
-                groupElementSelector: c.group.elementSelector,
-                name: c.group.name
-            }
+            return new GroupBySelector(c.group.selector, c.group.name);
         });
 
     return {
@@ -666,14 +515,14 @@ function parseDirectives(directives: any[]): {
 
                     return {
                         path: d.path,
-                        appliesTo: d.icon.appliesTo
+                        selector: d.icon.selector
                     }
                 });
     let colors : AtomColorDirective[] = directives.filter(d => d.color)
                 .map(d => {
                     return {
                         color: d.color.color,
-                        appliesTo: d.color.appliesTo
+                        selector: d.color.selector
                     }
                 });
 
@@ -682,7 +531,7 @@ function parseDirectives(directives: any[]): {
                     return {
                         height: d.size.height,
                         width: d.size.width,
-                        appliesTo: d.size.appliesTo
+                        selector: d.size.selector
                     }
                 });
 

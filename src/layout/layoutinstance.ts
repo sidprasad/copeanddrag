@@ -10,13 +10,11 @@ import {
     LayoutNode, LayoutEdge, LayoutConstraint, InstanceLayout,
     LeftConstraint, TopConstraint, AlignmentConstraint, LayoutGroup
 } from './interfaces';
-import { DEFAULT_APPLIES_TO, TEMPLATE_VAR_SRC, TEMPLATE_VAR_TGT } from './layoutspec';
+
 import {
     LayoutSpec, parseLayoutSpec,
     RelativeOrientationConstraint, CyclicOrientationConstraint,
-    GroupByField, GroupBySelector,
-    RelativeDirection, RotationDirection,
-    AtomColorDirective, AtomIconDirective, AtomSizeDirective, AttributeDirective, ProjectionDirective
+    GroupByField, GroupBySelector
 } from './layoutspec';
 
 
