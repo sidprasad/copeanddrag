@@ -33,10 +33,9 @@ const UNIVERSAL_TYPE = "univ";
 
 
 
-interface LayoutNodePath  
-{
-    Path : LayoutNode[]
-    LoopsTo : LayoutNode | undefined
+interface LayoutNodePath {
+    Path: LayoutNode[]
+    LoopsTo: LayoutNode | undefined
 };
 
 
@@ -118,25 +117,24 @@ export class LayoutInstance {
 
         for (var gc of groupBySelectorConstraints) {
 
-            let selector = gc.groupElementSelector;
+            let selector = gc.selector;
             let selectorRes = this.evaluator.evaluate(selector, this.instanceNum);
-            let selectedElements: string[][] = selectorRes.selected();
+            let selectedElements: string[] = selectorRes.selectedAtoms();
 
             // Nothing to do if there are no selected elements, or 
             // if things are typed weirdly.
-            if (selectedElements.length === 0 || selectedElements.some((element) => element.length > 1)) {
+            if (selectedElements.length === 0) {
                 continue;
             }
 
-            let groupElements = selectedElements.map((element) => element[0]);
-            let keyNode = groupElements[0]; // TODO: WAIT, THERE IS NO KEY NODE
+            let keyNode = selectedElements[0]; // TODO: WAIT, THERE IS NO KEY NODE
 
             // Question: Does **just** having LayoutGroup work? Like what does a keyNode even mean?
             let newGroup: LayoutGroup = {
                 name: gc.name,
-                nodeIds: groupElements,
-                keyNodeId: keyNode, 
-                showLabel: true // TODO: HACK
+                nodeIds: selectedElements,
+                keyNodeId: keyNode,
+                showLabel: true
             };
             groups.push(newGroup);
         }
@@ -158,7 +156,7 @@ export class LayoutInstance {
         graphEdges.forEach((edge) => {
             const edgeId = edge.name;
             const relName = this.getRelationName(g, edge);
-            let  edgeTuples = this.getEdgeAsTuple(g, edge);
+            let edgeTuples = this.getEdgeAsTuple(g, edge);
             let edgeLabel = this.getEdgeLabel(g, edge);
 
             let relatedConstraints = getConstraintsRelatedToField(relName);
@@ -169,7 +167,7 @@ export class LayoutInstance {
 
             relatedConstraints.forEach((c) => {
 
-                const groupOn =  c.groupOn; // This is the part of the relation tuple that is the key.
+                const groupOn = c.groupOn; // This is the part of the relation tuple that is the key.
                 const addToGroup = c.addToGroup; // This is the part of the relation tuple that is IN the group.
 
 
@@ -215,7 +213,7 @@ export class LayoutInstance {
                     g.setEdge(edge.v, edge.w, edgeLabel, newId);
                 }
 
-            }); 
+            });
         });
         return groups;
     }
@@ -325,7 +323,7 @@ export class LayoutInstance {
 
     private getEdgeAsTuple(g: Graph, edge: Edge): string[] {
 
-        let nodeIds : string[] = [];
+        let nodeIds: string[] = [];
         // The 0th element is the edge source
 
         // The middle elements are in a list [] embedded in the label
@@ -424,7 +422,7 @@ export class LayoutInstance {
 
             let color = this.getNodeColor(nodeId, a, defaultSigColors);
             let iconPath = this.getNodeIcon(nodeId);
-            let {height, width} = this.getNodeSize(nodeId);
+            let { height, width } = this.getNodeSize(nodeId);
             const mostSpecificType = this.getMostSpecificType(nodeId, a);
             const allTypes = this.getNodeTypes(nodeId, a);
 
@@ -478,20 +476,20 @@ export class LayoutInstance {
         */
 
         // First, ensure that the layout is satisfiable BEFORE cyclic constraints.
-            let layoutWithoutCyclicConstraints: InstanceLayout = { nodes: layoutNodes, edges: layoutEdges, constraints: constraints, groups: groups };
-            const validatorWithoutCyclic = new ConstraintValidator(layoutWithoutCyclicConstraints);
-            const nonCyclicConstraintError = validatorWithoutCyclic.validateConstraints();
+        let layoutWithoutCyclicConstraints: InstanceLayout = { nodes: layoutNodes, edges: layoutEdges, constraints: constraints, groups: groups };
+        const validatorWithoutCyclic = new ConstraintValidator(layoutWithoutCyclicConstraints);
+        const nonCyclicConstraintError = validatorWithoutCyclic.validateConstraints();
 
-            if (nonCyclicConstraintError) {
-                throw new Error(nonCyclicConstraintError);
-            }
+        if (nonCyclicConstraintError) {
+            throw new Error(nonCyclicConstraintError);
+        }
         // And updating constraints, since the validator may add constraints.
         // (IN particular these would be non-overlap constraints for spacing in groups.)
         // TODO: However, this introduces
         // ANOTHER POTENTIAL BUG, I THINK. WHAT IF CIRCULAR PERTURBATIONS CHANGE 
         // DIRECTLY RIGHT/LEFT?
         constraints = layoutWithoutCyclicConstraints.constraints;
-        
+
 
 
         // This function applies permutations of the cyclic constraints
@@ -534,7 +532,7 @@ export class LayoutInstance {
         return constraints.flat();
     }
 
-    applyCyclicConstraint(c : CyclicOrientationConstraint, layoutNodes: LayoutNode[], layoutWithoutCyclicConstraints: InstanceLayout): LayoutConstraint[] {
+    applyCyclicConstraint(c: CyclicOrientationConstraint, layoutNodes: LayoutNode[], layoutWithoutCyclicConstraints: InstanceLayout): LayoutConstraint[] {
         //let relName = c.fieldName;
         let direction = c.direction;
         let direction_mult: number = 0;
@@ -549,15 +547,15 @@ export class LayoutInstance {
 
 
         // Next Node 
-        let nextNodeMap : Map<LayoutNode, LayoutNode[]> = new Map<LayoutNode, LayoutNode[]>();
+        let nextNodeMap: Map<LayoutNode, LayoutNode[]> = new Map<LayoutNode, LayoutNode[]>();
         for (let i = 0; i < layoutNodes.length; i++) {
             let srcN = layoutNodes[i];
 
-            
+
             nextNodeMap.set(srcN, []);
             for (let j = 0; j < layoutNodes.length; j++) {
                 let tgtN = layoutNodes[j];
-                
+
                 // Now we do an APPLIES TO HERE
                 let appliesToExpr = this.replaceInExpr(appliesTo, srcN.id, tgtN.id);
                 let addToFragment = this.evaluator.evaluate(appliesToExpr, this.instanceNum).appliesTo();
@@ -576,7 +574,7 @@ export class LayoutInstance {
         relatedNodeFragments.forEach((relatedNodesPath) => {
             const minRadius = 100; // Example fixed distance. 
             let relatedNodes = relatedNodesPath.Path.map((node) => node.id);
-            
+
             // TODO: One thing we dont have here is PREVENTING FRAGMENTS FROM OVERLAPPING
 
             const angleStep = (direction_mult * 2 * Math.PI) / relatedNodes.length;
@@ -665,7 +663,7 @@ export class LayoutInstance {
     }
 
 
-    private getAllPaths(nextNodeMap: Map<LayoutNode, LayoutNode[]>):LayoutNodePath[] {
+    private getAllPaths(nextNodeMap: Map<LayoutNode, LayoutNode[]>): LayoutNodePath[] {
 
         const allPaths: LayoutNodePath[] = [];
 
@@ -703,30 +701,30 @@ export class LayoutInstance {
     }
 
     private getFragmentsToConstrain(nextNodeMap: Map<LayoutNode, LayoutNode[]>): LayoutNodePath[] {
-        const allPaths : LayoutNodePath[] = this.getAllPaths(nextNodeMap);
+        const allPaths: LayoutNodePath[] = this.getAllPaths(nextNodeMap);
 
 
         function expandPath(p: LayoutNodePath, repeat: number): string[] {
             const ids = p.Path.map(n => n.id);
-        
+
             if (!p.LoopsTo) return ids;
-        
+
             const loopStart = ids.findIndex(id => id === p.LoopsTo!.id);
             if (loopStart === -1) {
                 return ids; // fallback to base path
             }
-        
+
             const prefix = ids.slice(0, loopStart);
             const loop = ids.slice(loopStart);
-        
+
             return prefix.concat(...Array(repeat).fill(loop));
         }
 
         function isSubpath(longer: LayoutNodePath, shorter: LayoutNodePath): boolean {
-            
+
             let longerUnrolled = expandPath(longer, 3);
             let shorterUnrolled = expandPath(shorter, 3);
-            
+
             // If shorterUnrolled is longer than longerUnrolled, it cannot be a sub-array
             if (shorterUnrolled.length > longerUnrolled.length) {
                 return false;
@@ -739,7 +737,7 @@ export class LayoutInstance {
                     return true;
                 }
             }
-        
+
             return false;
         }
 
@@ -769,57 +767,53 @@ export class LayoutInstance {
      */
     applyRelatativeOrientationConstraints(layoutNodes: LayoutNode[]): LayoutConstraint[] {
 
-        let constraints : LayoutConstraint[] = [];
+        let constraints: LayoutConstraint[] = [];
         let relativeOrientationConstraints = this._layoutSpec.constraints.orientation.relative;
 
-        relativeOrientationConstraints.forEach((c : RelativeOrientationConstraint) => {
+        relativeOrientationConstraints.forEach((c: RelativeOrientationConstraint) => {
 
             let directions = c.directions;
-            let appliesTo = c.appliesTo || DEFAULT_APPLIES_TO;
+            let selector = c.selector;
 
-            for (var srcNode of layoutNodes) {
-                let sourceNodeId = srcNode.id;
-                for(var targetNode of layoutNodes) {
-                    let targetNodeId = targetNode.id;
-                    let appliesToExpr = this.replaceInExpr(appliesTo, sourceNodeId, targetNodeId);
-                    let shouldApplyConstraint = this.evaluator.evaluate(appliesToExpr, this.instanceNum).appliesTo();
+            let selectorRes = this.evaluator.evaluate(selector, this.instanceNum);
+            let selectedTuples: string[][] = selectorRes.selectedTwoples();
 
-                    if (shouldApplyConstraint)
-                    {
-                        directions.forEach((direction) => {
-                            if (direction == "left") {
-                                constraints.push(this.leftConstraint(targetNodeId, sourceNodeId, this.minSepWidth, layoutNodes));
-                            }
-                            else if (direction == "above") {
-                                constraints.push(this.topConstraint(targetNodeId, sourceNodeId, this.minSepHeight, layoutNodes));
-                            }
-                            else if (direction == "right") {
-                                constraints.push(this.leftConstraint(sourceNodeId, targetNodeId, this.minSepWidth, layoutNodes));
-                            }
-                            else if (direction == "below") {
-                                constraints.push(this.topConstraint(sourceNodeId, targetNodeId, this.minSepHeight, layoutNodes));
-                            }
-                            else if (direction == "directlyLeft") {
-                                constraints.push(this.leftConstraint(targetNodeId, sourceNodeId, this.minSepWidth, layoutNodes));
-                                constraints.push(this.ensureSameYConstraint(targetNodeId, sourceNodeId, layoutNodes));
-                            }
-                            else if (direction == "directlyAbove") {
-                                constraints.push(this.topConstraint(targetNodeId, sourceNodeId, this.minSepHeight, layoutNodes));
-                                constraints.push(this.ensureSameXConstraint(targetNodeId, sourceNodeId, layoutNodes));
-                            }
-                            else if (direction == "directlyRight") {
-                                constraints.push(this.leftConstraint(sourceNodeId, targetNodeId, this.minSepWidth, layoutNodes));
-                                constraints.push(this.ensureSameYConstraint(targetNodeId, sourceNodeId, layoutNodes));
-                            }
-                            else if (direction == "directlyBelow") {
-                                constraints.push(this.topConstraint(sourceNodeId, targetNodeId, this.minSepHeight, layoutNodes));
-                                constraints.push(this.ensureSameXConstraint(targetNodeId, sourceNodeId, layoutNodes));
-                            }
-                        });
+            // For each tuple, we need to apply the constraints
+            selectedTuples.forEach((tuple) => {
+                let sourceNodeId = tuple[0];
+                let targetNodeId = tuple[1];
 
+                directions.forEach((direction) => {
+                    if (direction == "left") {
+                        constraints.push(this.leftConstraint(targetNodeId, sourceNodeId, this.minSepWidth, layoutNodes));
                     }
-                }
-            }
+                    else if (direction == "above") {
+                        constraints.push(this.topConstraint(targetNodeId, sourceNodeId, this.minSepHeight, layoutNodes));
+                    }
+                    else if (direction == "right") {
+                        constraints.push(this.leftConstraint(sourceNodeId, targetNodeId, this.minSepWidth, layoutNodes));
+                    }
+                    else if (direction == "below") {
+                        constraints.push(this.topConstraint(sourceNodeId, targetNodeId, this.minSepHeight, layoutNodes));
+                    }
+                    else if (direction == "directlyLeft") {
+                        constraints.push(this.leftConstraint(targetNodeId, sourceNodeId, this.minSepWidth, layoutNodes));
+                        constraints.push(this.ensureSameYConstraint(targetNodeId, sourceNodeId, layoutNodes));
+                    }
+                    else if (direction == "directlyAbove") {
+                        constraints.push(this.topConstraint(targetNodeId, sourceNodeId, this.minSepHeight, layoutNodes));
+                        constraints.push(this.ensureSameXConstraint(targetNodeId, sourceNodeId, layoutNodes));
+                    }
+                    else if (direction == "directlyRight") {
+                        constraints.push(this.leftConstraint(sourceNodeId, targetNodeId, this.minSepWidth, layoutNodes));
+                        constraints.push(this.ensureSameYConstraint(targetNodeId, sourceNodeId, layoutNodes));
+                    }
+                    else if (direction == "directlyBelow") {
+                        constraints.push(this.topConstraint(sourceNodeId, targetNodeId, this.minSepHeight, layoutNodes));
+                        constraints.push(this.ensureSameXConstraint(targetNodeId, sourceNodeId, layoutNodes));
+                    }
+                });
+            });
         });
 
         return constraints;
@@ -829,146 +823,146 @@ export class LayoutInstance {
 
 
     private getDisconnectedNodes(g: Graph): string[] {
-        let inNodes = g.edges().map(edge => edge.w);
-        let outNodes = g.edges().map(edge => edge.v);
+            let inNodes = g.edges().map(edge => edge.w);
+            let outNodes = g.edges().map(edge => edge.v);
 
-        // All nodes in the graph
-        let allNodes = new Set(g.nodes());
-        let allConnectedNodes = new Set([...inNodes, ...outNodes]);
-        let disconnectedNodes = [...allNodes].filter(node => !allConnectedNodes.has(node));
-        return disconnectedNodes;
-    }
+            // All nodes in the graph
+            let allNodes = new Set(g.nodes());
+            let allConnectedNodes = new Set([...inNodes, ...outNodes]);
+            let disconnectedNodes =[...allNodes].filter(node => !allConnectedNodes.has(node));
+            return disconnectedNodes;
+        }
 
 
 
     private leftConstraint(leftId: string, rightId: string, minDistance: number, layoutNodes: LayoutNode[]): LeftConstraint {
 
-        let left = layoutNodes.find((node) => node.id === leftId);
-        let right = layoutNodes.find((node) => node.id === rightId);
+            let left = layoutNodes.find((node) => node.id === leftId);
+            let right = layoutNodes.find((node) => node.id === rightId);
 
-        return { left: left, right: right, minDistance: minDistance };
-    }
+            return { left: left, right: right, minDistance: minDistance };
+        }
 
     private topConstraint(topId: string, bottomId: string, minDistance: number, layoutNodes: LayoutNode[]): TopConstraint {
 
-        let top = layoutNodes.find((node) => node.id === topId);
-        let bottom = layoutNodes.find((node) => node.id === bottomId);
+            let top = layoutNodes.find((node) => node.id === topId);
+            let bottom = layoutNodes.find((node) => node.id === bottomId);
 
-        return { top: top, bottom: bottom, minDistance: minDistance };
-    }
+            return { top: top, bottom: bottom, minDistance: minDistance };
+        }
 
     private ensureSameYConstraint(node1Id: string, node2Id: string, layoutNodes: LayoutNode[]): AlignmentConstraint {
 
-        let node1 = layoutNodes.find((node) => node.id === node1Id);
-        let node2 = layoutNodes.find((node) => node.id === node2Id);
+            let node1 = layoutNodes.find((node) => node.id === node1Id);
+            let node2 = layoutNodes.find((node) => node.id === node2Id);
 
-        return { axis: "y", node1: node1, node2: node2 };
-    }
+            return { axis: "y", node1: node1, node2: node2 };
+        }
 
     private ensureSameXConstraint(node1Id: string, node2Id: string, layoutNodes: LayoutNode[]): AlignmentConstraint {
 
-        let node1 = layoutNodes.find((node) => node.id === node1Id);
-        let node2 = layoutNodes.find((node) => node.id === node2Id);
+            let node1 = layoutNodes.find((node) => node.id === node1Id);
+            let node2 = layoutNodes.find((node) => node.id === node2Id);
 
-        return { axis: "x", node1: node1, node2: node2 };
-    }
+            return { axis: "x", node1: node1, node2: node2 };
+        }
 
     private singletonGroup(nodeId: string): LayoutGroup {
 
-        let groupName = `${LayoutInstance.DISCONNECTED_PREFIX}${nodeId}`;
+            let groupName = `${LayoutInstance.DISCONNECTED_PREFIX}${nodeId}`;
 
-        return {
-            name: groupName,
-            nodeIds: [nodeId],
-            keyNodeId: nodeId,
-            showLabel: false
+            return {
+                name: groupName,
+                nodeIds: [nodeId],
+                keyNodeId: nodeId,
+                showLabel: false
+            }
         }
-    }
 
 
     private replaceInExpr(selector: string, src: string, tgt: string): string {
-        // Replace all instances of TEMPLATE_VAR_SRC and TEMPLATE_VAR_TGT in the selector
-        let replaced = selector
-            .replace(new RegExp(TEMPLATE_VAR_SRC, 'g'), src)
-            .replace(new RegExp(TEMPLATE_VAR_TGT, 'g'), tgt);
+            // Replace all instances of TEMPLATE_VAR_SRC and TEMPLATE_VAR_TGT in the selector
+            let replaced = selector
+                .replace(new RegExp(TEMPLATE_VAR_SRC, 'g'), src)
+                .replace(new RegExp(TEMPLATE_VAR_TGT, 'g'), tgt);
 
-        return replaced;
-    }
+            return replaced;
+        }
 
 
 
     private getNodeColor(nodeId: string, a : AlloyInstance, defaultSigColors : Record<string, string>): string {
-        
-        
-        let t = this.getMostSpecificType(nodeId, a);
-        let nodeColor = defaultSigColors[t] || "transparent";
 
 
-        let colorDirecives = this._layoutSpec.directives.colors;
+            let t = this.getMostSpecificType(nodeId, a);
+            let nodeColor = defaultSigColors[t] || "transparent";
 
 
-        for (let colorDirective of colorDirecives) {
-            let appliesTo = colorDirective.appliesTo;
-            let color = colorDirective.color;
+            let colorDirecives = this._layoutSpec.directives.colors;
 
-            let appliesToExpr = this.replaceInExpr(appliesTo, nodeId, nodeId);
-            let res = this.evaluator.evaluate(appliesToExpr, this.instanceNum).appliesTo();
-            if (res) {
-                nodeColor = color;
-                break;
+
+            for(let colorDirective of colorDirecives) {
+                let appliesTo = colorDirective.appliesTo;
+                let color = colorDirective.color;
+
+                let appliesToExpr = this.replaceInExpr(appliesTo, nodeId, nodeId);
+                let res = this.evaluator.evaluate(appliesToExpr, this.instanceNum).appliesTo();
+                if (res) {
+                    nodeColor = color;
+                    break;
+                }
             }
-        }
 
         return nodeColor;
-    }
+        }
 
     private getNodeSize(nodeId: string): { width: number, height: number } {
 
-        let nodeSize = { width: this.DEFAULT_NODE_WIDTH, height: this.DEFAULT_NODE_HEIGHT };
+            let nodeSize = { width: this.DEFAULT_NODE_WIDTH, height: this.DEFAULT_NODE_HEIGHT };
 
-        let sizeDirectives = this._layoutSpec.directives.sizes;
-        for (let sizeDirective of sizeDirectives) {
-            let appliesTo = sizeDirective.appliesTo;
-            let width = sizeDirective.width;
-            let height = sizeDirective.height;
+            let sizeDirectives = this._layoutSpec.directives.sizes;
+            for(let sizeDirective of sizeDirectives) {
+                let appliesTo = sizeDirective.appliesTo;
+                let width = sizeDirective.width;
+                let height = sizeDirective.height;
 
-            let appliesToExpr = this.replaceInExpr(appliesTo, nodeId, nodeId);
-            let res = this.evaluator.evaluate(appliesToExpr, this.instanceNum).appliesTo();
-            if (res) {
-                nodeSize.width = width;
-                nodeSize.height = height;
-                break;
+                let appliesToExpr = this.replaceInExpr(appliesTo, nodeId, nodeId);
+                let res = this.evaluator.evaluate(appliesToExpr, this.instanceNum).appliesTo();
+                if (res) {
+                    nodeSize.width = width;
+                    nodeSize.height = height;
+                    break;
+                }
             }
-        }
         return nodeSize;
-    }
+        }
 
     private getNodeIcon(nodeId : string) : string {
-        let iconPath = this.DEFAULT_NODE_ICON_PATH;
-        let iconDirectives = this._layoutSpec.directives.icons;
-        for (let iconDirective of iconDirectives) {
-            let appliesTo = iconDirective.appliesTo;
-            let path = iconDirective.path;
+            let iconPath = this.DEFAULT_NODE_ICON_PATH;
+            let iconDirectives = this._layoutSpec.directives.icons;
+            for(let iconDirective of iconDirectives) {
+                let appliesTo = iconDirective.appliesTo;
+                let path = iconDirective.path;
 
-            let appliesToExpr = this.replaceInExpr(appliesTo, nodeId, nodeId);
-            let res = this.evaluator.evaluate(appliesToExpr, this.instanceNum).appliesTo();
-            if (res) {
-                iconPath = path;
-                break;
+                let appliesToExpr = this.replaceInExpr(appliesTo, nodeId, nodeId);
+                let res = this.evaluator.evaluate(appliesToExpr, this.instanceNum).appliesTo();
+                if (res) {
+                    iconPath = path;
+                    break;
+                }
             }
-        }
         return iconPath;
-    }
+        }
 
 
-    private getSigColors(ai : AlloyInstance) : Record<string, string> {
-        let sigColors = {};
-        
-        let types = getInstanceTypes(ai);
-        let colorPicker = new ColorPicker(types.length);
-        types.forEach((type) => {
-            sigColors[type.id] = colorPicker.getNextColor();
-        });
-        return sigColors;
-    }
+    private getSigColors(ai : AlloyInstance) : Record < string, string > {
+            let sigColors = {};
+
+            let types = getInstanceTypes(ai);
+            let colorPicker = new ColorPicker(types.length);
+            types.forEach((type) => {
+                sigColors[type.id] = colorPicker.getNextColor();
+            });
+            return sigColors;
+        }
 }
