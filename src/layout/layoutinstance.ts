@@ -403,7 +403,6 @@ export class LayoutInstance {
 
     public generateLayout(a: AlloyInstance, projections: Record<string, string>): { layout: InstanceLayout, projectionData: { type: string, projectedAtom: string, atoms: string[] }[] } {
 
-        let defaultSigColors = this.getSigColors(a);
         let projectionResult = this.applyLayoutProjections(a, projections);
         let ai = projectionResult.projectedInstance;
         let projectionData = projectionResult.finalProjectionChoices;
@@ -413,6 +412,11 @@ export class LayoutInstance {
         const attributes = this.generateAttributes(g);
 
 
+        let nodeIconMap = this.getNodeIconMap(g);
+        let nodeColorMap = this.getNodeColorMap(g, ai);
+        let nodeSizeMap = this.getNodeSizeMap(g);
+
+
         /// Groups have to happen here ///
         let groups = this.generateGroups(g);
         this.ensureNoExtraNodes(g, a);
@@ -420,9 +424,10 @@ export class LayoutInstance {
 
         let layoutNodes: LayoutNode[] = g.nodes().map((nodeId) => {
 
-            let color = this.getNodeColor(nodeId, a, defaultSigColors);
-            let iconPath = this.getNodeIcon(nodeId);
-            let { height, width } = this.getNodeSize(nodeId);
+            let color = nodeColorMap[nodeId] || "black";
+            let iconPath = nodeIconMap[nodeId] || this.DEFAULT_NODE_ICON_PATH;
+            let { height, width } = nodeSizeMap[nodeId] || { height: this.DEFAULT_NODE_HEIGHT, width: this.DEFAULT_NODE_WIDTH };
+            
             const mostSpecificType = this.getMostSpecificType(nodeId, a);
             const allTypes = this.getNodeTypes(nodeId, a);
 
@@ -878,79 +883,81 @@ export class LayoutInstance {
         }
 
 
-    private replaceInExpr(selector: string, src: string, tgt: string): string {
-            // Replace all instances of TEMPLATE_VAR_SRC and TEMPLATE_VAR_TGT in the selector
-            let replaced = selector
-                .replace(new RegExp(TEMPLATE_VAR_SRC, 'g'), src)
-                .replace(new RegExp(TEMPLATE_VAR_TGT, 'g'), tgt);
 
-            return replaced;
+    private getNodeSizeMap(g : Graph) : Record < string, { width: number, height: number } > {
+        let nodeSizeMap = {};
+
+
+        const DEFAULT_SIZE = { width: this.DEFAULT_NODE_WIDTH, height: this.DEFAULT_NODE_HEIGHT };
+
+        let graphNodes = [...g.nodes()];
+        graphNodes.forEach((nodeId) => {
+            nodeSizeMap[nodeId] = DEFAULT_SIZE;
+        });
+
+
+        let sizeDirectives = this._layoutSpec.directives.sizes;
+        for(let sizeDirective of sizeDirectives) {
+            let selectedNodes = this.evaluator.evaluate(sizeDirective.selector, this.instanceNum).selectedAtoms();
+            let width = sizeDirective.width;
+            let height = sizeDirective.height;
+            selectedNodes.forEach((nodeId) => {
+                nodeSizeMap[nodeId] = { width: width, height: height };
+            });
         }
 
+        return nodeSizeMap;
+    }
 
 
-    private getNodeColor(nodeId: string, a : AlloyInstance, defaultSigColors : Record<string, string>): string {
+    private getNodeColorMap(g : Graph, a : AlloyInstance) : Record < string, string > {
 
+        // Start by getting the default sig colors
+        let sgMap = this.getSigColors(a);
 
-            let t = this.getMostSpecificType(nodeId, a);
-            let nodeColor = defaultSigColors[t] || "transparent";
+        let ncMap = {};
 
+        // Now for each graph node, determine its color.
+        
+        let graphNodes = [...g.nodes()];
+        graphNodes.forEach((nodeId) => {
+            
+            let mostSpecificType = this.getMostSpecificType(nodeId, a);
+            let color = sgMap[mostSpecificType];
+            ncMap[nodeId] = color;
+        });
 
-            let colorDirecives = this._layoutSpec.directives.colors;
+        // Now we evaluate the color directives
+        let colorDirectives = this._layoutSpec.directives.colors;
+        colorDirectives.forEach((colorDirective) => {
+            let selected = this.evaluator.evaluate(colorDirective.selector, this.instanceNum).selectedAtoms();
+            let color = colorDirective.color;
 
+            selected.forEach((nodeId) => {
+                ncMap[nodeId] = color;
+            });
+        });
+        return ncMap;
+    }
 
-            for(let colorDirective of colorDirecives) {
-                let appliesTo = colorDirective.appliesTo;
-                let color = colorDirective.color;
-
-                let appliesToExpr = this.replaceInExpr(appliesTo, nodeId, nodeId);
-                let res = this.evaluator.evaluate(appliesToExpr, this.instanceNum).appliesTo();
-                if (res) {
-                    nodeColor = color;
-                    break;
-                }
-            }
-
-        return nodeColor;
+    private getNodeIconMap(g : Graph) : Record < string, string > {
+        let nodeIconMap = {};
+        const DEFAULT_ICON = this.DEFAULT_NODE_ICON_PATH;
+        let graphNodes = [...g.nodes()];
+        graphNodes.forEach((nodeId) => {
+            nodeIconMap[nodeId] = DEFAULT_ICON;
         }
-
-    private getNodeSize(nodeId: string): { width: number, height: number } {
-
-            let nodeSize = { width: this.DEFAULT_NODE_WIDTH, height: this.DEFAULT_NODE_HEIGHT };
-
-            let sizeDirectives = this._layoutSpec.directives.sizes;
-            for(let sizeDirective of sizeDirectives) {
-                let appliesTo = sizeDirective.appliesTo;
-                let width = sizeDirective.width;
-                let height = sizeDirective.height;
-
-                let appliesToExpr = this.replaceInExpr(appliesTo, nodeId, nodeId);
-                let res = this.evaluator.evaluate(appliesToExpr, this.instanceNum).appliesTo();
-                if (res) {
-                    nodeSize.width = width;
-                    nodeSize.height = height;
-                    break;
-                }
-            }
-        return nodeSize;
-        }
-
-    private getNodeIcon(nodeId : string) : string {
-            let iconPath = this.DEFAULT_NODE_ICON_PATH;
-            let iconDirectives = this._layoutSpec.directives.icons;
-            for(let iconDirective of iconDirectives) {
-                let appliesTo = iconDirective.appliesTo;
-                let path = iconDirective.path;
-
-                let appliesToExpr = this.replaceInExpr(appliesTo, nodeId, nodeId);
-                let res = this.evaluator.evaluate(appliesToExpr, this.instanceNum).appliesTo();
-                if (res) {
-                    iconPath = path;
-                    break;
-                }
-            }
-        return iconPath;
-        }
+        );
+        let iconDirectives = this._layoutSpec.directives.icons;
+        iconDirectives.forEach((iconDirective) => {
+            let selected = this.evaluator.evaluate(iconDirective.selector, this.instanceNum).selectedAtoms();
+            let iconPath = iconDirective.path;
+            selected.forEach((nodeId) => {
+                nodeIconMap[nodeId] = iconPath;
+            });
+        });
+        return nodeIconMap;
+    }
 
 
     private getSigColors(ai : AlloyInstance) : Record < string, string > {
