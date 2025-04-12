@@ -533,7 +533,7 @@ export class LayoutInstance {
     }
 
     applyCyclicConstraint(c: CyclicOrientationConstraint, layoutNodes: LayoutNode[], layoutWithoutCyclicConstraints: InstanceLayout): LayoutConstraint[] {
-        //let relName = c.fieldName;
+
         let direction = c.direction;
         let direction_mult: number = 0;
         if (direction === "clockwise") {
@@ -543,27 +543,25 @@ export class LayoutInstance {
             direction_mult = -1;
         }
 
-        let appliesTo = c.appliesTo || DEFAULT_APPLIES_TO;
-
-
-        // Next Node 
+        let selectedTuples: string[][] = this.evaluator.evaluate(c.selector, this.instanceNum).selectedTwoples();
         let nextNodeMap: Map<LayoutNode, LayoutNode[]> = new Map<LayoutNode, LayoutNode[]>();
-        for (let i = 0; i < layoutNodes.length; i++) {
-            let srcN = layoutNodes[i];
 
 
-            nextNodeMap.set(srcN, []);
-            for (let j = 0; j < layoutNodes.length; j++) {
-                let tgtN = layoutNodes[j];
+        // For each tuple, add to the nextNodeMap
+        selectedTuples.forEach((tuple) => {
+            let sourceNodeId = tuple[0];
+            let targetNodeId = tuple[1];
 
-                // Now we do an APPLIES TO HERE
-                let appliesToExpr = this.replaceInExpr(appliesTo, srcN.id, tgtN.id);
-                let addToFragment = this.evaluator.evaluate(appliesToExpr, this.instanceNum).appliesTo();
-                if (addToFragment) {
-                    nextNodeMap.get(srcN).push(tgtN);
-                }
+            let srcN = layoutNodes.find((node) => node.id === sourceNodeId);
+            let tgtN = layoutNodes.find((node) => node.id === targetNodeId);
+
+            if (nextNodeMap.has(srcN)) {
+                nextNodeMap.get(srcN).push(tgtN);
             }
-        }
+            else {
+                nextNodeMap.set(srcN, [tgtN]);
+            }
+        });
 
         let relatedNodeFragments = this.getFragmentsToConstrain(nextNodeMap);
 
