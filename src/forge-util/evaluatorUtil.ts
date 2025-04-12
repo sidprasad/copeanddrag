@@ -169,7 +169,6 @@ export class EvalResult {
 
     /* 
         Specifically returns the elements IF a set.
-        TODO: For grouping, we *will* have to figure out how to determine the correct node.
     */
     public selected(): string[][] {
         if (typeof this.result === 'string') {
@@ -178,6 +177,51 @@ export class EvalResult {
         return this.result;
     }
 
+
+    // Lets write selected of 1
+    public selectedAtoms(): string[] {
+
+        if (typeof this.result === 'string') {
+            return [];
+        }
+        let selectedElements = this.result.filter((element) => element.length > 0);
+        if (selectedElements.length === 0) {
+            return [];
+        }
+
+        // Flatten the selected elements
+        let flattened = selectedElements.flat();
+        // Now dedupe the elements
+        let uniqueElements = Array.from(new Set(flattened));
+        return uniqueElements;
+    }
+
+
+    /*
+        Returns the selected tuples.
+        By default returns the first and last elements of the selected elements.
+    */
+    public selectedTwoples(): string[][] {
+
+        if (typeof this.result === 'string') {
+            return [];
+        }
+
+        // NO ATOMS
+        let selectedElements = this.result.filter((element) => element.length > 1);
+        if (selectedElements.length === 0) {
+            return [];
+        }
+
+
+        // Now get the FIRST AND LAST elements of the selected elements
+        let selectedTuples = selectedElements.map((element) => {
+            return [element[0], element[element.length - 1]];
+        }
+        );
+        return selectedTuples;
+
+    }
 }
 
 export class WrappedForgeEvaluator {

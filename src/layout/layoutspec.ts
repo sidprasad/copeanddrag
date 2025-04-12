@@ -5,11 +5,25 @@ export type RotationDirection = "clockwise" | "counterclockwise";
 export type ClusterTarget = "domain" | "range";
 
 
-//// THESE ONLY APPLY IN PREDICATE TYPE THINGS ///
-export const DEFAULT_APPLIES_TO = "#t";
-export const TEMPLATE_VAR_SRC = "<<SRC>>";
-export const TEMPLATE_VAR_TGT = "<<TGT>>";
+//// No more templates ///
 
+
+
+export const DEFAULT_APPLIES_TO = "#t";
+//export const TEMPLATE_VAR_SRC = "<<SRC>>";
+//export const TEMPLATE_VAR_TGT = "<<TGT>>";
+
+
+
+/// TODO!!!
+
+/*
+
+    appliesTo should be a selector, not a predicate.
+    SO SET COMPREHENSION!
+
+
+*/
 
 function randidentifier(len: number = 6): string {
     const characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -22,15 +36,6 @@ function randidentifier(len: number = 6): string {
 }
 
 
-/// TODO!!!
-
-/*
-
-    Perhaps appliesTo should be a selector, not a predicate.
-    SO SET COMPREHENSION!
-
-
-*/
 
 
 
@@ -40,9 +45,9 @@ export interface Operation {}
 
 
 class ConstraintOperation implements Operation {
-    appliesTo: string;
-    constructor(appliesTo: string) {
-        this.appliesTo = appliesTo;
+    selector: string;
+    constructor(selector: string) {
+        this.selector = selector;
     }
     isInternallyConsistent(): boolean {
         // Default implementation, can be overridden by subclasses
@@ -50,7 +55,7 @@ class ConstraintOperation implements Operation {
     }
 
     inconsistencyMessage(): string {
-        return `Inconsistent Constraint Operation: ${this.appliesTo}`;  
+        return `Inconsistent Constraint Operation: ${this.selector}`;  
     }
 }
 
@@ -61,8 +66,8 @@ class ConstraintOperation implements Operation {
 export class RelativeOrientationConstraint extends ConstraintOperation {
     directions : RelativeDirection[];
 
-    constructor(directions: RelativeDirection[], appliesTo: string) {
-        super(appliesTo);
+    constructor(directions: RelativeDirection[], selector: string) {
+        super(selector);
         this.directions = directions;
     }
     
@@ -115,17 +120,26 @@ export class RelativeOrientationConstraint extends ConstraintOperation {
 
     override inconsistencyMessage(): string {
         let dirStr : string = this.directions.join(", ");
-        return `Inconsistent Relative Orientation Constraint: Directions [${dirStr}] applied to: ${this.appliesTo}.`;  
+        return `Inconsistent Relative Orientation Constraint: Directions [${dirStr}] applied to: ${this.selector}.`;  
     }
 }
 
 
-export interface GroupBySelector {
-    groupElementSelector : string;
+export class GroupBySelector extends ConstraintOperation{
     name: string;
+
+    constructor(selector : string, name: string) {
+        super(selector);
+        this.name = name;
+    }
 }
 
+/*
 
+    TODO: Could this be written with selectors (X, Y) and name --> edge name would have to be well 
+    generated.
+
+*/
 export interface GroupByField  {
     // And applies to selects the thing to group ON
     field : string;
@@ -141,24 +155,23 @@ export interface GroupByField  {
 export class CyclicOrientationConstraint extends ConstraintOperation {
     direction : RotationDirection;
 
-    constructor(direction: RotationDirection, appliesTo: string) {
-        super(appliesTo);
+    constructor(direction: RotationDirection, selector: string) {
+        super(selector);
         this.direction = direction;
     }
 
     override inconsistencyMessage(): string {
-        return `Inconsistent Cyclic Orientation Constraint: Direction ${this.direction} applied to: ${this.appliesTo}.`;  
+        return `Inconsistent Cyclic Orientation Constraint: Direction ${this.direction} applied to: ${this.selector}.`;  
     }
 }
 
 
-// And directive operations
-
+// And directive operations (TODO: THESE ALSO NEED TO BE SELECTORS!)
 
 export interface DirectiveOperation extends Operation {}
 
 export interface VisualManipulation extends Operation {
-    appliesTo? : string;
+    selector : string;
 }
 
 export interface AtomColorDirective extends VisualManipulation {
@@ -181,9 +194,7 @@ export interface HidingDirective extends Operation {}
 
 
 export interface AttributeDirective extends HidingDirective {
-
     field: string;
-
 }
 export interface ProjectionDirective extends HidingDirective {
     sig : string;
@@ -249,19 +260,8 @@ const DEFAULT_LAYOUT : LayoutSpec = {
 /////////// Now we also define some convenient SUGAR /////////
 
 
-/* TODO: THis is wrong! */
+// TODO: Lets ignore sugar for now.
 
-
-
-
-function fieldToPredicate(fieldName : string) : string {
-    // I *think* this works because we always ONLY show the source and target in ...
-    // This *may* be wrong. Need to think this through with a complex example and weirdly typed fields.
-    
-    // Assumption: This doesn't clash with the field name, the source node id or the target node id.
-    let rid = randidentifier(6);
-    return `some ${rid} : ${fieldName} | ((some ${TEMPLATE_VAR_SRC}.${rid}) and (some ${rid}.${TEMPLATE_VAR_TGT}))`;     
-}
 
 
 
@@ -269,10 +269,11 @@ function fieldToPredicate(fieldName : string) : string {
 class FieldDirections extends RelativeOrientationConstraint {
 
     fieldName : string;
+    arity : number;
 
     constructor(fieldName: string, directions: RelativeDirection[]) {
 
-        let appliesTo = fieldToPredicate(fieldName);
+        let appliesTo = selectorForField(fieldName, arity);
         super(directions, appliesTo);
         this.fieldName = fieldName;       
 
@@ -280,7 +281,7 @@ class FieldDirections extends RelativeOrientationConstraint {
 
     override inconsistencyMessage(): string {
         let dirStr : string = this.directions.join(", ");
-        return `Field ${this.fieldName} cannot be laid out in directions [${dirStr}].`;  
+        return `Field ${this.fieldName} of arity ${arity} cannot be laid out in directions [${dirStr}].`;  
     }
 
     static isFieldDirections(f: any): f is FieldDirections {
@@ -303,8 +304,9 @@ class FieldDirections extends RelativeOrientationConstraint {
         }
         let fieldName = c.orientation.field;
         let directions = c.orientation.directions;
+        let arity = c.orientation.arity;
 
-        return new FieldDirections(fieldName, directions);
+        return new FieldDirections(fieldName, directions, arity);
     }
 
 }
