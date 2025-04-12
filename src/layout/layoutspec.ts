@@ -1,4 +1,3 @@
-import { all } from 'axios';
 import * as yaml from 'js-yaml';
 
 export type RelativeDirection = "above" | "below" | "left" | "right" | "directlyAbove" | "directlyBelow" | "directlyLeft" | "directlyRight";
@@ -23,7 +22,15 @@ function randidentifier(len: number = 6): string {
 }
 
 
+/// TODO!!!
 
+/*
+
+    Perhaps appliesTo should be a selector, not a predicate.
+    SO SET COMPREHENSION!
+
+
+*/
 
 
 
@@ -240,6 +247,11 @@ const DEFAULT_LAYOUT : LayoutSpec = {
 
 
 /////////// Now we also define some convenient SUGAR /////////
+
+
+/* TODO: THis is wrong! */
+
+
 
 
 function fieldToPredicate(fieldName : string) : string {
