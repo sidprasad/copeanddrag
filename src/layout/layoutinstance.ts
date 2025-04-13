@@ -765,23 +765,6 @@ export class LayoutInstance {
             });
             return !isSubsumed;
         });
-
-        // // First add all unique 
-        // for (let i = 0; i < nonEquivalentPaths.length; i++) {
-        //     let isSubsumed = nonEquivalentPaths.some((p, j) => {
-        //         return i !== j && isSubpath(p, nonEquivalentPaths[i]);
-        //     });
-
-
-
-        //     if (!isSubsumed) {
-        //         nonSubsumedPaths.push(allPaths[i]);
-        //     }
-
-        // }
-
-        // 
-
         return nonSubsumedPaths;
     }
 
