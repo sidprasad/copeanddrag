@@ -1,22 +1,3 @@
-/*
-
-    TODO: A rewrite:
-
-        - Need to 
-
-
-*/
-
-
-
-
-
-
-
-
-
-
-
 
 
 const CONSTRAINT_SELECT = `
@@ -27,8 +8,8 @@ const CONSTRAINT_SELECT = `
             <select onchange="updateFields(this)">
                 <option value="cyclic">Cyclic</option>
                 <option value="orientation">Orientation</option>
-                <option value="group-by-field">Grouping by Field</option>
-                <option value="group-by-selector">Grouping by selector</option>
+                <option value="groupfield">Grouping by Field</option>
+                <option value="groupselector">Grouping by selector</option>
 
             </select>
         </label>
@@ -191,19 +172,16 @@ function removeDirective(button) {
 }
 
 
-// TODO: Change
+
 function toYamlConstraintType(t) {
 
     if (t === "cyclic") {
         return "cyclic";
     }
-    if (t === "orientation-field") {
+    if (t === "orientation") {
         return "orientation";
     }
-    if (t === "orientation-sig") {
-        return "orientation";
-    }
-    if (t === "group") {
+    if (t === "groupfield" || t === "groupselector") {
         return "group";
     }
     return "unknown";
@@ -220,7 +198,7 @@ function resolveColorValue(color) {
 
 // TODO: Change
 function writeToYAMLEditor() {
-    console.log("Writing to YAML editor");
+
     const constraints = [];
     const directives = [];
 
@@ -229,26 +207,11 @@ function writeToYAMLEditor() {
         const type = div.querySelector("select").value;
         const params = {};
 
-        if (type === "orientation-sig") {
-            params['sigs'] = [];
-        } else if (type === "orientation-field" || type === "cyclic") {
-            params['appliesTo'] = [];
-        }
-
-
 
 
         div.querySelectorAll("input, select").forEach(input => {
             if (input.multiple) {
                 params[input.name] = Array.from(input.selectedOptions).map(option => option.value);
-            } else if (input.name === "sourceType") {
-                params['appliesTo'][0] = input.value;
-            } else if (input.name === "targetType") {
-                params['appliesTo'][1] = input.value;
-            } else if (input.name === "sig1") {
-                params['sigs'][0] = input.value;
-            } else if (input.name === "sig2") {
-                params['sigs'][1] = input.value;
             } else if (input.name.length > 0) {
                 params[input.name] = input.value;
             }
@@ -258,33 +221,18 @@ function writeToYAMLEditor() {
     });
 
 
-    console.log("Now directives");
-
     document.querySelectorAll(".directive").forEach(div => {
         const type = div.querySelector("select").value;
-
         let params = {};
-        const isIcon = type === "icon";
         const isFlag = type === "flag";
 
-        if (isIcon) {
-            params['icon'] = {};
-        }
-
-
-
         div.querySelectorAll("input, select").forEach(input => {
-
-
             let key = input.name;
             let value = input.value;
 
 
             if (key.length > 0) {
-                // Hacky special case
-                if (isIcon && (key === "height" || key === "width" || key === "path")) {
-                    params['icon'][key] = value;
-                } else if (input.multiple) {
+                if (input.multiple) {
                     params[key] = Array.from(input.selectedOptions).map(option => option.value);
                 }
                 else if (isFlag) {
@@ -312,11 +260,9 @@ function writeToYAMLEditor() {
 
     let yamlStr = "";
 
-    if(Object.keys(combinedSpec).length > 0) {
+    if (Object.keys(combinedSpec).length > 0) {
         yamlStr = jsyaml.dump(combinedSpec);
     }
-
-    // const yamlStr = jsyaml.dump(combinedSpec);
 
     if (window.editor) {
         window.editor.setValue(yamlStr);
@@ -326,30 +272,24 @@ function writeToYAMLEditor() {
     }
 }
 
-// TODO: Change
+
 function get_constraint_type_from_yaml(constraint) {
 
     const type = Object.keys(constraint)[0]; // Get the constraint type
     const params = constraint[type]; // Get the parameters for the constraint
 
-    if (type == "cyclic") {
-        return "cyclic";
+    if (type === "cyclic" || type === "orientation") {
+        return type;
     }
-    if (type == "orientation") {
-        if (params["sigs"]) {
-            return "orientation-sig";
+    if (type === "group") {
+        if (params["selector"]) {
+            return "groupselector";
         }
         if (params["field"]) {
-            return "orientation-field";
+            return "groupfield";
         }
     }
-
-    if (type == "group") {
-        return "group";
-    }
     return "unknown";
-
-
 }
 
 
@@ -400,45 +340,19 @@ function populateStructuredEditor() {
 
                 // Fill in the values for the generated fields
                 Object.keys(params).forEach(key => {
-
-                    // sigs and appliesTo are special cases
-                    if (key == "sigs") {
-
-                        let input1 = paramsDiv.querySelector(`[name="sig1"]`);
-                        let input2 = paramsDiv.querySelector(`[name="sig2"]`);
-                        if (input1) {
-                            input1.value = params["sigs"][0];
-                        }
-                        if (input2) {
-                            input2.value = params["sigs"][1];
-                        }
-                    }
-                    else if (key == "appliesTo") {
-                        let input1 = paramsDiv.querySelector(`[name="sourceType"]`);
-                        let input2 = paramsDiv.querySelector(`[name="targetType"]`);
-                        if (input1) {
-                            input1.value = params["appliesTo"][0];
-                        }
-                        if (input2) {
-                            input2.value = params["appliesTo"][1];
+                    let input = paramsDiv.querySelector(`[name="${key}"]`);
+                    if (input) {
+                        if (input.multiple && Array.isArray(params[key])) {
+                            // Handle multi-select fields
+                            Array.from(input.options).forEach(option => {
+                                option.selected = params[key].includes(option.value);
+                            });
+                        } else {
+                            // Handle single-value fields
+                            input.value = params[key];
                         }
                     }
-                    else {
 
-
-                        let input = paramsDiv.querySelector(`[name="${key}"]`);
-                        if (input) {
-                            if (input.multiple && Array.isArray(params[key])) {
-                                // Handle multi-select fields
-                                Array.from(input.options).forEach(option => {
-                                    option.selected = params[key].includes(option.value);
-                                });
-                            } else {
-                                // Handle single-value fields
-                                input.value = params[key];
-                            }
-                        }
-                    }
                 });
             });
         }
@@ -469,48 +383,32 @@ function populateStructuredEditor() {
                 // This is for simple flag select style scenarios.
                 if (typeof params === "string") {
                     let singleInput = paramsDiv.querySelector(`[name="${type}"]`);
-                        if (singleInput) {
-                            singleInput.value = params;
-                        }
+                    if (singleInput) {
+                        singleInput.value = params;
+                    }
                 }
                 else if (typeof params === "object") {
                     // Fill in the values for the generated fields
                     Object.keys(params).forEach(key => {
+                        let input = paramsDiv.querySelector(`[name="${key}"]`);
+                        if (input) {
 
 
-                        if (key == "icon") {
-                            Object.keys(params[key]).forEach(iconKey => {
-                                let iconInput = paramsDiv.querySelector(`[name="${iconKey}"]`);
-                                if (iconInput) {
-                                    iconInput.value = params[key][iconKey];
-                                }
-                            });
-                        }
-                        else {
-
-
-                            let input = paramsDiv.querySelector(`[name="${key}"]`);
-                            if (input) {
-
-
-                                if (input.multiple && Array.isArray(params[key])) {
-                                    // Handle multi-select fields
-                                    Array.from(input.options).forEach(option => {
-                                        option.selected = params[key].includes(option.value);
-                                    });
-                                } else if (input.type === "color") {
-                                    // Handle color fields
-                                    input.value = resolveColorValue(params[key]);
-                                }
-                                else {
-                                    console.log("Setting value for " + key + " to " + params[key]);
-                                    // Handle single-value fields
-                                    input.value = params[key];
-                                }
+                            if (input.multiple && Array.isArray(params[key])) {
+                                // Handle multi-select fields
+                                Array.from(input.options).forEach(option => {
+                                    option.selected = params[key].includes(option.value);
+                                });
+                            } else if (input.type === "color") {
+                                // Handle color fields
+                                input.value = resolveColorValue(params[key]);
+                            }
+                            else {
+                                console.log("Setting value for " + key + " to " + params[key]);
+                                // Handle single-value fields
+                                input.value = params[key];
                             }
                         }
-
-
                     });
                 }
             });
