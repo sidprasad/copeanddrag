@@ -13,4 +13,3 @@ effective diagramming.
 
 
 
-- Grouping by groupElements needs set comprehension to be implemented.
