@@ -749,9 +749,6 @@ export class LayoutInstance {
         }
 
 
-
-
-
         // First dedup allPaths
         let nonEquivalentPaths: LayoutNodePath[] = allPaths.filter((p, i) => {
             // Check if there is any earlier path in the array that is equivalent to the current path
