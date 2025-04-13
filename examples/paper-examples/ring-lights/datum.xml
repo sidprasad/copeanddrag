@@ -1,10 +1,11 @@
-<alloy builddate="Wednesday, November 13th, 2024">
-<instance bitwidth="4" maxseq="-1" command="temporary-name_source_1" filename="/no-name.rkt" version="3.5" prefixLength="6" loop="5" >
+<alloy builddate="Sunday, April 13th, 2025">
+<instance bitwidth="4" maxseq="-1" command="temporary-name_source_1" filename="/Users/siddharthaprasad/Desktop/copeanddrag/examples/paper-examples/ring-lights/source.frg" version="4.1" prefixLength="6" loop="5" >
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>
 
 <sig label="Int" ID="1" parentID="2" builtin="yes">
+
 </sig>
 
 <sig label="univ" ID="2" builtin="yes">
@@ -48,12 +49,13 @@
 
 
 </instance>
-<instance bitwidth="4" maxseq="-1" command="temporary-name_source_1" filename="/no-name.rkt" version="3.5" prefixLength="6" loop="5" >
+<instance bitwidth="4" maxseq="-1" command="temporary-name_source_1" filename="/Users/siddharthaprasad/Desktop/copeanddrag/examples/paper-examples/ring-lights/source.frg" version="4.1" prefixLength="6" loop="5" >
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>
 
 <sig label="Int" ID="1" parentID="2" builtin="yes">
+
 </sig>
 
 <sig label="univ" ID="2" builtin="yes">
@@ -97,12 +99,13 @@
 
 
 </instance>
-<instance bitwidth="4" maxseq="-1" command="temporary-name_source_1" filename="/no-name.rkt" version="3.5" prefixLength="6" loop="5" >
+<instance bitwidth="4" maxseq="-1" command="temporary-name_source_1" filename="/Users/siddharthaprasad/Desktop/copeanddrag/examples/paper-examples/ring-lights/source.frg" version="4.1" prefixLength="6" loop="5" >
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>
 
 <sig label="Int" ID="1" parentID="2" builtin="yes">
+
 </sig>
 
 <sig label="univ" ID="2" builtin="yes">
@@ -117,11 +120,11 @@
 </sig>
 
 <sig label="Unlit" ID="5" parentID="4">
-<atom label="Light0"/>
+<atom label="Light0"/><atom label="Light2"/><atom label="Light3"/>
 </sig>
 
 <sig label="Lit" ID="6" parentID="4">
-<atom label="Light1"/><atom label="Light2"/><atom label="Light3"/><atom label="Light4"/>
+<atom label="Light1"/><atom label="Light4"/>
 </sig>
 
 <field label="left" ID="7" parentID="4">
@@ -146,12 +149,13 @@
 
 
 </instance>
-<instance bitwidth="4" maxseq="-1" command="temporary-name_source_1" filename="/no-name.rkt" version="3.5" prefixLength="6" loop="5" >
+<instance bitwidth="4" maxseq="-1" command="temporary-name_source_1" filename="/Users/siddharthaprasad/Desktop/copeanddrag/examples/paper-examples/ring-lights/source.frg" version="4.1" prefixLength="6" loop="5" >
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>
 
 <sig label="Int" ID="1" parentID="2" builtin="yes">
+
 </sig>
 
 <sig label="univ" ID="2" builtin="yes">
@@ -166,11 +170,11 @@
 </sig>
 
 <sig label="Unlit" ID="5" parentID="4">
-<atom label="Light0"/><atom label="Light1"/><atom label="Light2"/><atom label="Light4"/>
+<atom label="Light0"/><atom label="Light1"/><atom label="Light3"/><atom label="Light4"/>
 </sig>
 
 <sig label="Lit" ID="6" parentID="4">
-<atom label="Light3"/>
+<atom label="Light2"/>
 </sig>
 
 <field label="left" ID="7" parentID="4">
@@ -195,12 +199,13 @@
 
 
 </instance>
-<instance bitwidth="4" maxseq="-1" command="temporary-name_source_1" filename="/no-name.rkt" version="3.5" prefixLength="6" loop="5" >
+<instance bitwidth="4" maxseq="-1" command="temporary-name_source_1" filename="/Users/siddharthaprasad/Desktop/copeanddrag/examples/paper-examples/ring-lights/source.frg" version="4.1" prefixLength="6" loop="5" >
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>
 
 <sig label="Int" ID="1" parentID="2" builtin="yes">
+
 </sig>
 
 <sig label="univ" ID="2" builtin="yes">
@@ -215,11 +220,11 @@
 </sig>
 
 <sig label="Unlit" ID="5" parentID="4">
-<atom label="Light0"/><atom label="Light3"/><atom label="Light4"/>
+<atom label="Light0"/><atom label="Light2"/><atom label="Light4"/>
 </sig>
 
 <sig label="Lit" ID="6" parentID="4">
-<atom label="Light1"/><atom label="Light2"/>
+<atom label="Light1"/><atom label="Light3"/>
 </sig>
 
 <field label="left" ID="7" parentID="4">
@@ -244,12 +249,13 @@
 
 
 </instance>
-<instance bitwidth="4" maxseq="-1" command="temporary-name_source_1" filename="/no-name.rkt" version="3.5" prefixLength="6" loop="5" >
+<instance bitwidth="4" maxseq="-1" command="temporary-name_source_1" filename="/Users/siddharthaprasad/Desktop/copeanddrag/examples/paper-examples/ring-lights/source.frg" version="4.1" prefixLength="6" loop="5" >
 
 <sig label="seq/Int" ID="0" parentID="1" builtin="yes">
 </sig>
 
 <sig label="Int" ID="1" parentID="2" builtin="yes">
+
 </sig>
 
 <sig label="univ" ID="2" builtin="yes">
@@ -294,5 +300,77 @@
 
 </instance>
 
-<source filename="/no-name.rkt" content="// Couldn't open source file (/no-name.rkt) (info: (2 . posix)). Is the file saved?"></source>
+<source filename="/Users/siddharthaprasad/Desktop/copeanddrag/examples/paper-examples/ring-lights/source.frg" content="#lang forge/temporal
+&#xA;
+&#xA;/*
+&#xA;  When using the custom vis script, remember to click &amp;quot;Run&amp;quot; after
+&#xA;  asking for a new trace or config! (the script doesn't re-run automatically)
+&#xA;*/
+&#xA;
+&#xA;------------------------
+&#xA;-- Puzzle infrastructure
+&#xA;------------------------
+&#xA;abstract sig Light {
+&#xA;  left: one Light,  -- neighbor to left
+&#xA;  right: one Light  -- neighbor to right
+&#xA;}
+&#xA;var sig Lit, Unlit extends Light {}
+&#xA;
+&#xA;pred ring {
+&#xA;  -- Connected
+&#xA;  all x1, x2: Light | x2 in x1.^left and x2 in x1.^right
+&#xA;  -- Opposites
+&#xA;  left = ~right
+&#xA;}
+&#xA;
+&#xA;pred solved {
+&#xA;  Lit = Light
+&#xA;}
+&#xA;pred init {
+&#xA;    -- ONE specific init state, so we can sketch how to exclude loopback 
+&#xA;    --   to the very beginning
+&#xA;    no Lit
+&#xA;    Unlit = Light
+&#xA;}
+&#xA;
+&#xA;pred flip[switch: Light] {
+&#xA;  -- Flip the switch for &amp;lt;switch&amp;gt;, which also flips the neighbors
+&#xA;  Lit' = Lit - {x: switch+switch.left+switch.right | x in Lit}
+&#xA;             + {x: switch+switch.left+switch.right | x not in Lit}
+&#xA;}
+&#xA;
+&#xA;// Look for a solution to the puzzle that involves at *least* 5 states (4 transitions)
+&#xA;option min_tracelength 5
+&#xA;// We need more than 5 states to find a solution
+&#xA;option max_tracelength 10 
+&#xA;
+&#xA;// option verbose 5
+&#xA;run {
+&#xA;    -- well-formedness constraints
+&#xA;    ring
+&#xA;    -- start in an initial state
+&#xA;    init 
+&#xA;
+&#xA;    -- transition predicate: either flip a single light, or we're done
+&#xA;    always {        
+&#xA;        -- Do nothing for a solved board. Otherwise, flip a switch
+&#xA;        {            
+&#xA;            solved -- guard
+&#xA;            Lit = Lit' -- action
+&#xA;        } or {
+&#xA;            not solved -- guard
+&#xA;            one l: Light | flip[l] -- action
+&#xA;        }        
+&#xA;    }
+&#xA;
+&#xA;    -- find a trace that leads to a solved state
+&#xA;    eventually solved
+&#xA;
+&#xA;    -- If we wanted, we could exclude some unproductive behavior by adding, e.g.:
+&#xA;    -- Loopback can't be to the beginning
+&#xA;    --next_state { always { some Lit }}    
+&#xA;    
+&#xA;} 
+&#xA;for exactly 5 Light, 5 Lit, 5 Unlit
+&#xA;"></source>
 </alloy>

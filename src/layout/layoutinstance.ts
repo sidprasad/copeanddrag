@@ -701,6 +701,7 @@ export class LayoutInstance {
         return allPaths;
     }
 
+    // TODO: This doesn't deal with rotations :(
     private getFragmentsToConstrain(nextNodeMap: Map<LayoutNode, LayoutNode[]>): LayoutNodePath[] {
         const allPaths: LayoutNodePath[] = this.getAllPaths(nextNodeMap);
 
@@ -723,8 +724,8 @@ export class LayoutInstance {
 
         function isSubpath(longer: LayoutNodePath, shorter: LayoutNodePath): boolean {
 
-            let longerUnrolled = expandPath(longer, 3);
-            let shorterUnrolled = expandPath(shorter, 3);
+            let longerUnrolled = expandPath(longer, 2);
+            let shorterUnrolled = expandPath(shorter, 1);
 
             // If shorterUnrolled is longer than longerUnrolled, it cannot be a sub-array
             if (shorterUnrolled.length > longerUnrolled.length) {
@@ -742,21 +743,45 @@ export class LayoutInstance {
             return false;
         }
 
-        // Remove subpaths from allPaths
-        let nonSubsumedPaths: LayoutNodePath[] = [];
 
-        for (let i = 0; i < allPaths.length; i++) {
-            let isSubsumed = false;
-            for (let j = 0; j < allPaths.length; j++) {
-                if (i !== j && isSubpath(allPaths[i], allPaths[j])) {
-                    isSubsumed = true;
-                    break;
-                }
-            }
-            if (!isSubsumed) {
-                nonSubsumedPaths.push(allPaths[i]);
-            }
+        function equivalentPaths(p1: LayoutNodePath, p2: LayoutNodePath): boolean {
+            return isSubpath(p1, p2) && isSubpath(p2, p1);
         }
+
+
+
+
+
+        // First dedup allPaths
+        let nonEquivalentPaths: LayoutNodePath[] = allPaths.filter((p, i) => {
+            // Check if there is any earlier path in the array that is equivalent to the current path
+            return !allPaths.some((p2, j) => j < i && equivalentPaths(p, p2));
+        });
+
+        let nonSubsumedPaths: LayoutNodePath[] = nonEquivalentPaths.filter((p, i) => {
+            let isSubsumed = nonEquivalentPaths.some((p2, j) => {
+                
+                return i !== j && isSubpath(p2, p);
+            });
+            return !isSubsumed;
+        });
+
+        // // First add all unique 
+        // for (let i = 0; i < nonEquivalentPaths.length; i++) {
+        //     let isSubsumed = nonEquivalentPaths.some((p, j) => {
+        //         return i !== j && isSubpath(p, nonEquivalentPaths[i]);
+        //     });
+
+
+
+        //     if (!isSubsumed) {
+        //         nonSubsumedPaths.push(allPaths[i]);
+        //     }
+
+        // }
+
+        // 
+
         return nonSubsumedPaths;
     }
 
