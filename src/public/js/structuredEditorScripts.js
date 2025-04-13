@@ -1,3 +1,22 @@
+/*
+
+    TODO: A rewrite:
+
+        - Need to 
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
 
 
 const CONSTRAINT_SELECT = `
@@ -7,50 +26,29 @@ const CONSTRAINT_SELECT = `
         <label>Type:
             <select onchange="updateFields(this)">
                 <option value="cyclic">Cyclic</option>
-                <option value="orientation-field">Orientation (Field)</option>
-                <option value="orientation-sig">Orientation (Sig)</option>
-                <option value="group">Grouping</option>
+                <option value="orientation">Orientation</option>
+                <option value="group-by-field">Grouping by Field</option>
+                <option value="group-by-selector">Grouping by selector</option>
+
             </select>
         </label>
         <div class="params"></div>
     `;
 
 const CYCLIC_SELECTOR = `
-        <label>Field: <input type="text" name="field" required></label>
+        <label>Selector: <input type="text" name="selector" required></label>
         <label>Direction:
             <select name="direction">
                 <option value="clockwise">Clockwise</option>
                 <option value="counterclockwise">Counterclockwise</option>
             </select>
         </label>
-        <label>Applies To:
-            <input type="text" name="sourceType" value="univ" placeholder="DEFAULT">
-            <input type="text" name="targetType" value="univ" placeholder="DEFAULT">
-        </label>
     `;
 
-const ORIENTATION_SIG_SELECTOR = `
-    <label>Sigs:</label>
-    <div style="display: flex; gap: 10px; align-items: center;">
-        <input type="text" name="sig1" class="form-control form-control-sm" placeholder="Sig 1" required>
-        <input type="text" name="sig2" class="form-control form-control-sm" placeholder="Sig 2" required>
-    </div>
-    <label>Directions:            </label>
-        <select name="directions" class="form-control" multiple>
-            <option value="left">Left</option>
-            <option value="right">Right</option>
-            <option value="above">Above</option>
-            <option value="below">Below</option>
-            <option value="directlyLeft">Directly Left</option>
-            <option value="directlyRight">Directly Right</option>
-            <option value="directlyAbove">Directly Above</option>
-            <option value="directlyBelow">Directly Below</option>
-        </select>
 
-        `;
 
 const ORIENTATION_FIELD_SELECTOR = `
-    <label>Field:</label> <input type="text" class="form-control" name="field" required>
+    <label>Selector:</label> <input type="text" class="form-control" name="selector" required>
     <label>Directions:            </label>
         <select name="directions" class="form-control" multiple>
             <option value="left">Left</option>
@@ -62,22 +60,19 @@ const ORIENTATION_FIELD_SELECTOR = `
             <option value="directlyAbove">Directly Above</option>
             <option value="directlyBelow">Directly Below</option>
         </select>
-    <label>Applies To:</label>
-    <div style="display: flex; gap: 10px; align-items: center;">
-        <input type="text" class="form-control form-control-sm" name="sourceType" value="univ" placeholder="Source Type">
-        <input type="text" class="form-control form-control-sm" name="targetType" value="univ" placeholder="Target Type">
-    </div>
-
 `;
 
-const GROUP_SELECTOR = `
+const GROUP_BY_FIELD_SELECTOR = `
     <label>Field: <input type="text" name="field" required></label>
-    <label>Target:
-        <select name="target">
-            <option value="range">range</option>
-            <option value="domain">domain</option>
-        </select>
-    </label>
+    <label>Group On: <input type="number" name="groupOn" required></label>
+    <label> Add to Group: <input type="number" name="addToGroup" required></label>
+`;
+
+
+
+const GROUP_BY_SELECTOR_SELECTOR = `
+    <label>Selector: <input type="text" name="selector" required></label>
+    <label>Group Name: <input type="text" name="name" required></label>
 `;
 
 
@@ -90,6 +85,7 @@ const DIRECTIVE_SELECT = `
             <option value="attribute">Attribute</option>
             <option value="icon">Icon</option>
             <option value="color">Color</option>
+            <option value="size">Size</option>
             <option value="projection">Projection</option>
             <option value="flag">Visibility Flag</option>
         </select>
@@ -107,15 +103,19 @@ const PROJECTION_SELECTOR = `
 `;
 
 const COLOR_SELECTOR = `
-<label>Sig:</label> <input type="text" name="sig" class="form-control" required>
+<label>Selector: <input type="text" name="selector" required></label>
 <label>Color:</label> <input type="color" name="value" class="form-control" required>
 `;
 
 const ICON_SELECTOR = `
-    <label>Sig:</label> <input type="text" name="sig" class="form-control" required placeholder="Sig name">
+    <label>Selector: <input type="text" name="selector" required></label>
     <label>Path:</label> <input type="text" name="path" class="form-control" required placeholder="/path/to/icon.png">
-    <label>Height:</label> <input type="number" class="form-control" name="height" value="50">
-    <label>Width:</label> <input type="number"class="form-control"  name="width" value="70">
+`;
+
+const SIZE_SELECTOR = `
+<label>Selector: <input type="text" name="selector" required></label>
+<label>Width:</label> <input type="number" name="width" class="form-control" required>
+<label>Height:</label> <input type="number" name="height" class="form-control" required>
 `;
 
 const FLAG_SELECTOR = `
@@ -148,6 +148,7 @@ function addDirective() {
 }
 
 
+// TODO: This has to change
 function updateFields(select) {
     const paramsDiv = select.parentElement.nextElementSibling;
     paramsDiv.innerHTML = "";
@@ -189,6 +190,8 @@ function removeDirective(button) {
     button.parentElement.remove();
 }
 
+
+// TODO: Change
 function toYamlConstraintType(t) {
 
     if (t === "cyclic") {
@@ -215,6 +218,7 @@ function resolveColorValue(color) {
     return "#000000"; // Default to black if the color is invalid
 }
 
+// TODO: Change
 function writeToYAMLEditor() {
     console.log("Writing to YAML editor");
     const constraints = [];
@@ -322,7 +326,7 @@ function writeToYAMLEditor() {
     }
 }
 
-
+// TODO: Change
 function get_constraint_type_from_yaml(constraint) {
 
     const type = Object.keys(constraint)[0]; // Get the constraint type
@@ -349,6 +353,7 @@ function get_constraint_type_from_yaml(constraint) {
 }
 
 
+// TODO: Change
 function populateStructuredEditor() {
 
     if (!window.editor) {
