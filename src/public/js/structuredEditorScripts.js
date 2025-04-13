@@ -28,7 +28,7 @@ const CYCLIC_SELECTOR = `
 
 
 
-const ORIENTATION_FIELD_SELECTOR = `
+const ORIENTATION_SELECTOR = `
     <label>Selector:</label> <input type="text" class="form-control" name="selector" required>
     <label>Directions:            </label>
         <select name="directions" class="form-control" multiple>
@@ -139,12 +139,12 @@ function updateFields(select) {
     // Constraint Fields
     if (type === "cyclic") {
         paramsDiv.innerHTML = CYCLIC_SELECTOR;
-    } else if (type === "orientation-sig") {
-        paramsDiv.innerHTML = ORIENTATION_SIG_SELECTOR;
-    } else if (type === "orientation-field") {
-        paramsDiv.innerHTML = ORIENTATION_FIELD_SELECTOR;
-    } else if (type === "group") {
-        paramsDiv.innerHTML = GROUP_SELECTOR;
+    } else if (type === "orientation") {
+        paramsDiv.innerHTML = ORIENTATION_SELECTOR;
+    } else if (type === "groupfield") {
+        paramsDiv.innerHTML = GROUP_BY_FIELD_SELECTOR;
+    } else if (type === "groupselector") {
+        paramsDiv.innerHTML = GROUP_BY_SELECTOR_SELECTOR;
     }
 
 
@@ -156,7 +156,11 @@ function updateFields(select) {
         paramsDiv.innerHTML = ICON_SELECTOR;
     } else if (type === "color") {
         paramsDiv.innerHTML = COLOR_SELECTOR;
-    } else if (type === "projection") {
+    } 
+    else if (type === "size") { 
+        paramsDiv.innerHTML = SIZE_SELECTOR;
+    }
+    else if (type === "projection") {
         paramsDiv.innerHTML = PROJECTION_SELECTOR;
     } else if (type === "flag") {
         paramsDiv.innerHTML = FLAG_SELECTOR;
