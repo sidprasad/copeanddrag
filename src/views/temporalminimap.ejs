@@ -4,9 +4,8 @@
 <% if (num_instances > 1) { %>
     <div class="row">
         <div class="col">
-            <h3 class="justify-content lead">Temporal Mini-Map </h3>
-            <p class="text-muted"> Click on any trace state to see its diagram.</p>
-            <div class="mermaid">
+            <h3 class="justify-content lead" title="Click on any trace state to see its graph.">Temporal Trace Map </h3>
+            <div class="mermaid" title="Click on any trace state to see its graph.">
                 graph LR;
                 <% for (var i = 0; i < num_instances; i++) { %>
                     <% if (i === instanceNumber) { %>
