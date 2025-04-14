@@ -278,6 +278,12 @@ export class WrappedForgeEvaluator {
 
     public evaluate(expr: string, instanceIndex?: number): EvalResult {
 
+        if (!this.sourceCode) {
+            // This is a problem.
+            // What if there is no source code?
+        }
+
+
         let result = this.evaluator.evaluateExpression(expr, instanceIndex);
         return new EvalResult(result);
     }

@@ -1,5 +1,9 @@
 
 
+const TUPLE_SELECTOR_TEXT = `Forge expression yielding tuples (arity ≥ 2); constraint applies from first to last element.`;
+const UNARY_SELECTOR_TEXT = `Forge expression yielding singletons.`;
+
+
 const CONSTRAINT_SELECT = `
  <button class="close" title="Remove constraint" type="button" onclick="removeConstraint(this)">
     <span aria-hidden="true">&times;</span>
@@ -17,20 +21,21 @@ const CONSTRAINT_SELECT = `
     `;
 
 const CYCLIC_SELECTOR = `
-        <label>Selector: <input type="text" name="selector" required></label>
-        <label>Direction:
+        <label title="${TUPLE_SELECTOR_TEXT}">Selector:</label>  <input type="text" name="selector" required>
+        <label>Direction:        </label>
             <select name="direction">
                 <option value="clockwise">Clockwise</option>
                 <option value="counterclockwise">Counterclockwise</option>
             </select>
-        </label>
+
     `;
 
 
 
 const ORIENTATION_SELECTOR = `
-    <label>Selector:</label> <input type="text" class="form-control" name="selector" required>
-    <label>Directions:            </label>
+    <label title="${TUPLE_SELECTOR_TEXT}">Selector:</label> 
+    <input type="text" class="form-control" name="selector" required>
+    <label>Directions: </label>
         <select name="directions" class="form-control" multiple>
             <option value="left">Left</option>
             <option value="right">Right</option>
@@ -52,7 +57,7 @@ const GROUP_BY_FIELD_SELECTOR = `
 
 
 const GROUP_BY_SELECTOR_SELECTOR = `
-    <label>Selector: <input type="text" name="selector" required></label>
+    <label title="${UNARY_SELECTOR_TEXT}">Selector: <input type="text" name="selector" required></label>
     <label>Group Name: <input type="text" name="name" required></label>
 `;
 
@@ -84,17 +89,17 @@ const PROJECTION_SELECTOR = `
 `;
 
 const COLOR_SELECTOR = `
-<label>Selector: <input type="text" name="selector" required></label>
+<label title="${UNARY_SELECTOR_TEXT}">Selector: <input type="text" name="selector" required></label>
 <label>Color:</label> <input type="color" name="value" class="form-control" required>
 `;
 
 const ICON_SELECTOR = `
-    <label>Selector: <input type="text" name="selector" required></label>
+    <label title="${UNARY_SELECTOR_TEXT}">Selector: <input type="text" name="selector" required></label>
     <label>Path:</label> <input type="text" name="path" class="form-control" required placeholder="/path/to/icon.png">
 `;
 
 const SIZE_SELECTOR = `
-<label>Selector: <input type="text" name="selector" required></label>
+<label title="${UNARY_SELECTOR_TEXT}">Selector: <input type="text" name="selector" required></label>
 <label>Width:</label> <input type="number" name="width" class="form-control" required>
 <label>Height:</label> <input type="number" name="height" class="form-control" required>
 `;

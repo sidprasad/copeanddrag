@@ -12,7 +12,3 @@ and is grounded in the cognitive science literature on
 effective diagramming.
 
 
-
-### ISSUES
-
-- Circular layout is broken
