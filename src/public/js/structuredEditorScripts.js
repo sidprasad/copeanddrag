@@ -5,38 +5,55 @@ const UNARY_SELECTOR_TEXT = `Forge expression yielding singletons.`;
 
 
 const CONSTRAINT_SELECT = `
- <button class="close" title="Remove constraint" type="button" onclick="removeConstraint(this)">
-    <span aria-hidden="true">&times;</span>
- </button>
-        <label>Type:
+        <button class="close" title="Remove constraint" type="button" onclick="removeConstraint(this)">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <div class="input-group"> 
+            <div class="input-group-prepend">
+                <span class="input-group-text">Constraint</span>
+            </div>
             <select onchange="updateFields(this)">
                 <option value="cyclic">Cyclic</option>
                 <option value="orientation">Orientation</option>
-                <option value="groupfield">Grouping by Field</option>
-                <option value="groupselector">Grouping by selector</option>
-
+                <option value="groupfield">Group by field</option>
+                <option value="groupselector">Group by selector</option>
             </select>
-        </label>
+        </div>
         <div class="params"></div>
     `;
 
 const CYCLIC_SELECTOR = `
-        <label title="${TUPLE_SELECTOR_TEXT}">Selector:</label>  <input type="text" name="selector" required>
-        <label>Direction:        </label>
-            <select name="direction">
-                <option value="clockwise">Clockwise</option>
-                <option value="counterclockwise">Counterclockwise</option>
-            </select>
-
+<div class="input-group">
+    <div class="input-group-prepend">
+        <span class="input-group-text infolabel" title="${TUPLE_SELECTOR_TEXT}">Selector</span>
+    </div>
+    <input type="text" name="selector" required>
+</div>
+<div class="input-group">
+    <div class="input-group-prepend">
+        <span class="input-group-text">Direction</span>
+    </div>
+    <select name="direction">
+        <option value="clockwise">Clockwise</option>
+        <option value="counterclockwise">Counterclockwise</option>
+    </select>
+</div>
     `;
 
 
 
 const ORIENTATION_SELECTOR = `
-    <label title="${TUPLE_SELECTOR_TEXT}">Selector:</label> 
-    <input type="text" class="form-control" name="selector" required>
-    <label>Directions: </label>
-        <select name="directions" class="form-control" multiple>
+<div class="input-group">
+    <div class="input-group-prepend">
+        <span class="input-group-text infolabel" title="${TUPLE_SELECTOR_TEXT}">Selector</span>
+    </div>
+    <input type="text" name="selector" required>
+</div>
+<div class="input-group">
+    <div class="input-group-prepend">
+        <span class="input-group-text">Directions</span>
+    </div>
+    <select name="directions" class="form-control" multiple>
             <option value="left">Left</option>
             <option value="right">Right</option>
             <option value="above">Above</option>
@@ -45,20 +62,39 @@ const ORIENTATION_SELECTOR = `
             <option value="directlyRight">Directly Right</option>
             <option value="directlyAbove">Directly Above</option>
             <option value="directlyBelow">Directly Below</option>
-        </select>
+    </select>
+</div>       
 `;
 
 const GROUP_BY_FIELD_SELECTOR = `
-    <label>Field: <input type="text" name="field" required></label>
-    <label>Group On: <input type="number" name="groupOn" required></label>
-    <label> Add to Group: <input type="number" name="addToGroup" required></label>
+<div class="input-group">
+    <div class="input-group-prepend"> <span class="input-group-text">Field</span> </div>
+    <input type="text" name="field" required>
+</div>
+<div class="input-group">
+    <div class="input-group-prepend"> <span class="input-group-text infolabel" title="Which 0-indexed element of the field to use as the group key."> Group On </span> </div>
+    <input type="number" name="groupOn" required>
+</div>
+<div class="input-group">
+    <div class="input-group-prepend"> <span class="input-group-text infolabel" title="Which 0-indexed element of the field are group members."> Add to Group </span> </div>
+    <input type="number" name="addToGroup" required>
+</div>
 `;
 
 
 
 const GROUP_BY_SELECTOR_SELECTOR = `
-    <label title="${UNARY_SELECTOR_TEXT}">Selector: <input type="text" name="selector" required></label>
-    <label>Group Name: <input type="text" name="name" required></label>
+
+<div class="input-group">
+    <div class="input-group-prepend">
+        <span class="input-group-text infolabel" title="${UNARY_SELECTOR_TEXT}">Selector</span>
+    </div>
+    <input type="text" name="selector" required>
+</div>
+<div class="input-group">
+    <div class="input-group-prepend">  <span class="input-group-text">Group Name</span> </div>
+    <input type="text" name="name" required>
+</div>
 `;
 
 
@@ -66,7 +102,10 @@ const DIRECTIVE_SELECT = `
     <button class="close" title="Remove directive" type="button" onclick="removeDirective(this)">
         <span aria-hidden="true">&times;</span>
     </button>
-    <label>Type:
+    <div class="input-group">
+        <div class="input-group-prepend">
+            <span class="input-group-text">Directive</span>
+        </div>
         <select onchange="updateFields(this)">
             <option value="attribute">Attribute</option>
             <option value="icon">Icon</option>
@@ -75,41 +114,70 @@ const DIRECTIVE_SELECT = `
             <option value="projection">Projection</option>
             <option value="flag">Visibility Flag</option>
         </select>
-    </label>
+    </div>
     <div class="params"></div>
 `;
 
 
 const ATTRIBUTE_SELECTOR = `
-<label>Field:</label> <input type="text" name="field" class="form-control" required>
-`;
+<div class="input-group">
+    <div class="input-group-prepend"> <span class="input-group-text">Field</span></div>
+    <input type="text" name="field" class="form-control" required>
+</div>`;
 
 const PROJECTION_SELECTOR = `
-<label>Sig:</label> <input type="text" class="form-control" name="sig" required>
+<div class="input-group">
+    <div class="input-group-prepend"><span class="input-group-text">Sig</span></div>
+    <input type="text" class="form-control" name="sig" required>
+</div>
 `;
 
 const COLOR_SELECTOR = `
-<label title="${UNARY_SELECTOR_TEXT}">Selector: <input type="text" name="selector" required></label>
-<label>Color:</label> <input type="color" name="value" class="form-control" required>
+<div class="input-group">
+    <div class="input-group-prepend">
+        <span class="input-group-text infolabel" title="${UNARY_SELECTOR_TEXT}">Selector</span>
+    </div>
+    <input type="text" name="selector" required>
+</div>
+<div class="input-group">
+    <div class="input-group-prepend"><span class="input-group-text">Color</span></div>
+    <input type="color" name="value" class="form-control" required>
+</div>
 `;
 
 const ICON_SELECTOR = `
-    <label title="${UNARY_SELECTOR_TEXT}">Selector: <input type="text" name="selector" required></label>
-    <label>Path:</label> <input type="text" name="path" class="form-control" required placeholder="/path/to/icon.png">
+<div class="input-group">
+    <div class="input-group-prepend">
+        <span class="input-group-text infolabel" title="${UNARY_SELECTOR_TEXT}">Selector</span>
+    </div>
+    <input type="text" name="selector" required>
+</div>
+<div class="input-group">
+    <div class="input-group-prepend"><span class="input-group-text">Path</span></div>
+    <input type="text" name="path" class="form-control" required placeholder="/path/to/icon.png">
+</div>
 `;
 
 const SIZE_SELECTOR = `
-<label title="${UNARY_SELECTOR_TEXT}">Selector: <input type="text" name="selector" required></label>
-<label>Width:</label> <input type="number" name="width" class="form-control" required>
-<label>Height:</label> <input type="number" name="height" class="form-control" required>
+<div class="input-group">
+    <div class="input-group-prepend">
+        <span class="input-group-text infolabel" title="${UNARY_SELECTOR_TEXT}">Selector</span>
+    </div>
+    <input type="text" name="selector" required>
+</div>
+<div class="input-group">
+    <label><span class="input-group-text">Width</span></label> <input type="number" name="width" class="form-control" required>
+     <label><span class="input-group-text">Height</span></label> <input type="number" name="height" class="form-control" required>
+</div>
 `;
 
 const FLAG_SELECTOR = `
-<label>Target:</label>
-<select name="flag" class="form-control">
-    <option value="hideDisconnectedBuiltIns">Hide disconnected built ins.</option>
-    <option value="hideDisconnected">Hide all disconnected.</option>
-</select>
+<div class="input-group">
+    <select name="flag" class="form-control">
+        <option value="hideDisconnectedBuiltIns">Hide disconnected built ins.</option>
+        <option value="hideDisconnected">Hide all disconnected.</option>
+    </select>
+</div>
 `;
 
 function addConstraint() {
