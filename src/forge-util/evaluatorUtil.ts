@@ -283,9 +283,17 @@ export class WrappedForgeEvaluator {
             // What if there is no source code?
         }
 
-
-        let result = this.evaluator.evaluateExpression(expr, instanceIndex);
-        return new EvalResult(result);
+        try {
+            let result = this.evaluator.evaluateExpression(expr, instanceIndex);
+            return new EvalResult(result);
+        }
+        catch (e) {
+            // HACKY
+            let innerMessage = e.message;
+            let err = new Error("Error evaluating Forge expression: <pre>" + expr + "</pre> <br>" + e);
+            (err as any).evaluatorError = innerMessage;
+            throw err;
+        }
     }
 
 }

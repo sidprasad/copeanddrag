@@ -259,12 +259,27 @@ app.post('/evaluator', (req, res) => {
     const expr : string = req.body.expression;
     const instanceNumber = parseInt(req.body.instancenumber) || 0;
     // And evaluate
+
+    let resultString = "SOMETHING WENT WRONG";
+
+    try {
     let evaluator = new WrappedForgeEvaluator(alloyDatum);
     let result : EvalResult = evaluator.evaluate(expr, instanceNumber);
 
 
     // result needs to be converted to a string
-    let resultString = result.prettyPrint();
+    resultString = result.prettyPrint();
+    }
+    catch (e) {
+
+        // If e has the evaluatorError property, use that as the message
+        if (e.evaluatorError) {
+            resultString = e.evaluatorError;
+        }
+        else {
+            resultString = e.message;
+        }
+    }
 
     // Finally, respond with the result
     res.json({ result: resultString });

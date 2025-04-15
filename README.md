@@ -12,3 +12,6 @@ and is grounded in the cognitive science literature on
 effective diagramming.
 
 
+## TODO:
+
+- Ensure that Selector errors are made obvious (that they have to do with a selector)
