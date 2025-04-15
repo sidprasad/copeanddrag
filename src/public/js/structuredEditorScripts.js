@@ -3,6 +3,11 @@
 const TUPLE_SELECTOR_TEXT = `Forge expression yielding tuples (arity ≥ 2); constraint applies from first to last element.`;
 const UNARY_SELECTOR_TEXT = `Forge expression yielding singletons.`;
 
+const CYCLIC_DESCRIPTION = "Arrange elements along the perimeter of a circle."
+const ORIENTATION_DESCRIPTION = "Specify the relative positioning of elements."
+const GROUPING_SELECTOR_DESCRIPTION = "Group elements based on a selector."
+const GROUPING_FIELD_DESCRIPTION = "Group elements based on a field."
+
 
 const CONSTRAINT_SELECT = `
         <button class="close" title="Remove constraint" type="button" onclick="removeConstraint(this)">
@@ -10,13 +15,13 @@ const CONSTRAINT_SELECT = `
         </button>
         <div class="input-group"> 
             <div class="input-group-prepend">
-                <span class="input-group-text">Constraint</span>
+                <span class="input-group-text" title="Choose constraint type">Constraint</span>
             </div>
             <select onchange="updateFields(this)">
-                <option value="cyclic">Cyclic</option>
-                <option value="orientation">Orientation</option>
-                <option value="groupfield">Group by field</option>
-                <option value="groupselector">Group by selector</option>
+                <option value="orientation" title=${ORIENTATION_DESCRIPTION}>Orientation</option>
+                <option value="cyclic" title=${CYCLIC_DESCRIPTION}>Cyclic</option>
+                <option value="groupfield" title=${GROUPING_FIELD_DESCRIPTION}>Group by field</option>
+                <option value="groupselector"  title=${GROUPING_SELECTOR_DESCRIPTION}>Group by selector</option>
             </select>
         </div>
         <div class="params"></div>
