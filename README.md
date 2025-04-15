@@ -11,3 +11,6 @@ The language is based on a small number of orthogonal primitives,
 and is grounded in the cognitive science literature on 
 effective diagramming.
 
+## TODO:
+
+Diagram compactness has been broken somewhere :(
