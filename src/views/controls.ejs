@@ -21,7 +21,7 @@
         <%- include('structuredEditor') %>
     </div>
 
-    <!-- And here, we are in actual constrols terroir. -->
+    <!-- And here, we are in actual controls terroir. -->
 
 
     <br>
@@ -32,48 +32,19 @@
             style="display: none;"><%= alloyDatum ? alloyDatum : '' %></textarea>
     </div>
     <br>
-    <div class="form-group" id="loggingControlSection">
-        <div class="d-flex justify-content-between align-items-center">
-            <label for="loggingEnabled" class="form-check-label">Logging</label>
-            <select class="form-control" id="loggingEnabled" name="loggingEnabled">
-                <option value="enabled" <%= typeof loggingEnabled === 'undefined' || loggingEnabled ? 'selected' : '' %>>Enabled</option>
-                <option value="disabled" <%= typeof loggingEnabled !== 'undefined' && !loggingEnabled ? 'selected' : '' %>>Disabled</option>
-            </select>
-            <button type="button" class="btn btn-sm btn-outline-info float-right" data-toggle="modal" data-target="#loggingInfoModal" id="loggingmoreinfo">?</button>
-        </div>
-    </div>
+    
     <div class="form-group d-none" id="temporalInstanceNumberControl">
         <label for="instancenumber">Temporal Instance Number</label>
         <input type="number" class="form-control" id="instancenumber" name="instancenumber"
             value="<%- instanceNumber %>">
     </div>
-    <div id="compactnessControl">
-        <label for="scaleFactor">Diagram Compactness</label>
-        <input type="range" class="form-control-range" id="scaleFactor" name="scaleFactor" min="0.5" max="10" step="0.5" value="5">
-    </div>
+
 
     <!-- Here, projections is a list of type { type : string, projectedAtom : string, atoms : string[]} 
      If projections is non-empty, then show each type as a form input  and projectedAtom as the selected element of atoms
     -->
 
-    <% if (projectionData && projectionData.length> 0) { %>
-        <h4>Projections</h4>
-        <p> For each projected type, choose the atom to project over.</p>
-        <% projectionData.forEach(function(projection) { %>
-            <div class="form-group">
-                <label for="<%= projection.type %>_projection">
-                    <%= projection.type %>
-                </label>
-                <select class="form-control" id="<%= projection.type %>_projection"
-                    name="<%= projection.type %>_projection">
-                    <% projection.atoms.forEach(function(atom) { %>
-                        <option value="<%= atom %>" <%= projection.projectedAtom===atom ? 'selected' : '' %>> <%= atom %>
-                        </option>
-                        <% }); %>
-                </select>
-            </div>
-        <% }); %>
-    <% } %>
+
 
     </form>
 
@@ -181,16 +152,43 @@
 
         const form = document.getElementById('controlsForm');
         const submitButton = document.getElementById('cola');
+        const loggingEnabled = document.getElementById('loggingEnabled'); // Reference the loggingEnabled element
 
         // Add a submit event listener to the form
         form.addEventListener('submit', function (event) {
             event.preventDefault(); // Prevent the default form submission
-            // Check if the structured editor is in view.
+
+            // Find all form controls with IDs ending in "_projection"
+            const projectionControls = document.querySelectorAll('[id$="_projection"]');
+
+            // Add each projection control's value as a hidden input to the form
+            projectionControls.forEach(control => {
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = control.name; // Use the control's name as the input name
+                hiddenInput.value = control.value; // Use the control's value as the input value
+                form.appendChild(hiddenInput);
+            });
+
+            // Add the loggingEnabled value to the logging object
+            const loggingObject = {
+                loggingEnabled: loggingEnabled.value // Get the value of the loggingEnabled select element
+            };
+
+            form.appendChild(loggingEnabled); // Append the loggingEnabled element to the form
+           
+
+            // Check if the structured editor is in view
+            const structuredEditorControls = document.getElementById('structuredEditorControls');
             if (structuredEditorControls.style.display === 'block') {
-                writeToYAMLEditor();
+                writeToYAMLEditor(); // Sync structured editor data to YAML editor
             }
+
             form.submit(); // Submit the form
         });
+
+
+
 
     });
 </script>
