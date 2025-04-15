@@ -154,6 +154,18 @@ export class LayoutInstance {
         graphEdges.forEach((edge) => {
             const edgeId = edge.name;
             const relName = this.getRelationName(g, edge);
+
+            // TODO: This should NOT be from the in-between label things.
+            // We should get the TUPLE from the Alloy Instance.
+            // 
+                // <field label="setting" ID="5" parentID="4">
+                // <tuple> <atom label="Table$1"/> <atom label="P$7"/> <atom label="Fork$4"/> </tuple>
+                // <tuple> <atom label="Table$2"/> <atom label="P$7"/> <atom label="Fork$0"/> </tuple>
+
+                // The issue is we may not have the LABEL, so we will have to keep some record OF the transform?
+                // OR can we do this independent?
+                // OH, we could just do this via a single evaluator equry OF the field name!
+            //
             let edgeTuples = this.getEdgeAsTuple(g, edge);
             let edgeLabel = this.getEdgeLabel(g, edge);
 

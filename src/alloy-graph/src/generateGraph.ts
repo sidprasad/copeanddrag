@@ -16,7 +16,18 @@ import { Graph, Edge } from 'graphlib';
 
 
 
-///*** Copied in from Sterling. Can improve this  **/
+///*** 
+// 
+// TODO[Views]: This is where we could supply some very simple VIEW operators.
+//
+// ONE that you might want is : Modifying how things are shown (e.g. Node->Node->Weight to Node->Weight->Node)
+// Another is label transformations: 
+// Another way to think about this is PROJECTIONS.
+// (A, B, C) -> (D,E, F) // WITH SELECTORS.
+// HOWEVER, your selectors NOW need to work with projectors.
+// IF WE we implement this, we need to change how we do groupOn (with 0,1)
+// 
+//   **/
 
 export function getRelationSTIndexes(
   relation: string, 
@@ -98,6 +109,23 @@ export function generateGraph(
 
 
         // TODO: This is tricky, what should we do here?
+        // TODO[VIEWS]: This is where we could implement a VIEW selector.
+        /*
+
+          Views could be:
+
+          - Default View:
+          - Hide relations by NAME
+          - ADD relation by selector (e.g. add relation if {})
+          - For each relation -- you could specify EDGES by selector.
+          -
+
+          - ...?
+
+
+        */
+
+
 
         if (source && target && edgeIds.has(edgeId)) {
 
