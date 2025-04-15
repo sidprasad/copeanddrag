@@ -11,3 +11,15 @@ The language is based on a small number of orthogonal primitives,
 and is grounded in the cognitive science literature on 
 effective diagramming.
 
+## TODO:
+
+The home page should have 3 Columns
+
+|Explore the Current Instance    |  Diagram     |     Layout Spec   |
+---------------------------------------------------------------------
+| Temporal Mini Map              |  Graph       |  Controls         |
+| Projection Sig Controls        | or Table     |                   |
+| Hover on field                 |or Forge inst |                   |
+| Evaluator                      |              |                   |
+
+(and perhaps the left col is in something)
