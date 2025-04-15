@@ -185,40 +185,29 @@
                             class="btn btn-outline-secondary">Docs</button></a>
         </div>
     </nav>
-    <% if (errors && errors.trim().length> 0) { %>
+    <%- include ('errorMessages') %>
 
-        <div id="error_messages" class="alert alert-danger">
-            <h4>CnD Error</h4>
-            <%- errors %>
-        </div>
-        <% } %>
+    <div class="container-fluid">
 
-            <div id="runtime_messages" class="container">
+        <%- include('temporalminimap') %>
 
+            <div class="row">
+                <div class="col" id="exploreCol">
+                    <%- include('relationTable') %>
+                </div>
+
+                <div class="col">
+                    <%- include('diagramsvg') %>
+                </div>
+
+                <div class="col" id="controlsCol">
+                    <%- include('controls') %>
+                </div>
+            </div>
+            <div class="row">
 
             </div>
-
-            <div class="container-fluid">
-
-                <%- include('temporalminimap') %>
-
-                    <div class="row">
-                        <div class="col" id="exploreCol">
-                            <%- include('relationTable') %>
-                        </div>
-
-                        <div class="col">
-                            <%- include('diagramsvg') %>
-                        </div>
-
-                        <div class="col" id="controlsCol">
-                            <%- include('controls') %>
-                        </div>
-                    </div>
-                    <div class="row">
-
-                    </div>
-            </div>
+    </div>
 
 </body>
 

@@ -270,5 +270,33 @@ app.post('/evaluator', (req, res) => {
     res.json({ result: resultString });
 });
 
+
+
+app.post('/feedback', (req, res) => {
+
+
+
+    /*
+        req.body.alloydatum
+        req.body.cope
+        req.body.feedback
+        req.body.error
+        req.body.instanceNumber
+    */
+
+    let payload = {
+        "alloyDatum": req.body.alloydatum,
+        "cnd": req.body.cnd,
+        "feedback": req.body.feedback,
+        "error": req.body.error,
+        "instanceNumber": req.body.instanceNumber
+    }
+
+
+    logger.log_payload(payload, LogLevel.INFO, Event.ERROR_FEEDBACK);
+    res.json({ message: 'Thank you for your feedback.' });
+
+});
+
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);

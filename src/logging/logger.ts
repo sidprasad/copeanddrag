@@ -1,7 +1,5 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, doc, setDoc } from 'firebase/firestore/lite';
-const execSync = require('child_process').execSync;
-
 
 // Enum for log levels
 export enum LogLevel {
@@ -11,16 +9,9 @@ export enum LogLevel {
     ERROR = "error"
 }
 
-// Add this to the logging
+
 export enum Event {
-    ASSISTANCE_REQUEST = "assistance_request",
-    CONCEPTUAL_MUTANT = "conceptual_mutant",
-    THOROUGHNESS_MUTANT = "thoroughness_mutant",
-    HALP_RESULT = "halp_result",
-    FORGE_RUN_RESULT = "forge_run_result",
-    FORGE_RUN = "forge_run",
-    FILE_DOWNLOAD = "file_download",
-    AMBIGUOUS_TEST =   "ambiguous_test",
+    ERROR_FEEDBACK = "error_feedback",
     CND_RUN = "cnd_run"
 }
 
