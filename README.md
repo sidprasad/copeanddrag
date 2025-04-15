@@ -23,3 +23,17 @@ The home page should have 3 Columns
 | Evaluator                      |              |                   |
 
 (and perhaps the left col is in something)
+
+
+-----
+
+
+## TODO:
+
+CnD should have a 3rd section for (~ arrangement ~)
+1. Projection
+2. Permutation along fields (e.g. Node->Node->Weight to Node->Weight->Node)
+3. Hiding Flags (hide disconnected built ins, hide disconnected)
+
+
+OR should these stay within directives.
