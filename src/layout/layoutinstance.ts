@@ -155,7 +155,9 @@ export class LayoutInstance {
         function getFieldTuples(fieldName: string): string[][] {
 
 
-            let field = a.relations[fieldName];
+            let field = Object.values(a.relations).find((rel) => rel.name === fieldName);
+
+
             if (!field) {
                 return [];
             }
@@ -194,7 +196,7 @@ export class LayoutInstance {
                 // TODO: THIS WILL HAVE TO CHANGE ONCE WE HAVE VIEWS
                 let thisTuple = edgeTuples.find((tuple) => {
                     let l = tuple.length;
-                    tuple[0] === edge.v && tuple[l - 1] === edge.w;
+                    return tuple[0] === edge.v && tuple[l - 1] === edge.w;
                 });
 
                 let arity = thisTuple?.length || 0;
