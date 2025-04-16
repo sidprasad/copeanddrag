@@ -2,6 +2,56 @@
 <div id="reltable-container">
 
     <div class="row">
+        <div class="form-group" id="loggingControlSection">
+            <div class="d-flex justify-content-between align-items-center">
+                <label for="loggingEnabled" class="form-check-label">Logging</label>
+                <select class="form-control" id="loggingEnabled" name="loggingEnabled">
+                    <option value="enabled" <%= typeof loggingEnabled === 'undefined' || loggingEnabled ? 'selected' : '' %>>Enabled</option>
+                    <option value="disabled" <%= typeof loggingEnabled !== 'undefined' && !loggingEnabled ? 'selected' : '' %>>Disabled</option>
+                </select>
+                <button type="button" class="btn btn-sm btn-outline-info float-right" data-toggle="modal" data-target="#loggingInfoModal" id="loggingmoreinfo">?</button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <%- include('temporalminimap') %>
+
+    </div>
+
+    <div class="row">
+        <div id="compactnessControl">
+            <label for="scaleFactor">Diagram Compactness</label>
+            <input type="range" class="form-control-range" id="scaleFactor" name="scaleFactor" min="0.5" max="10" step="0.5" value="5">
+        </div>
+    </div>
+
+    <!-- Here, projections is a list of type { type : string, projectedAtom : string, atoms : string[]} 
+     If projections is non-empty, then show each type as a form input  and projectedAtom as the selected element of atoms
+    -->
+
+    <% if (projectionData && projectionData.length> 0) { %>
+    <div class="row container" id="projectionsSection">
+        <h4>Projections</h4>
+        <p> For each projected type, choose the atom to project over.</p>
+        <% projectionData.forEach(function(projection) { %>
+            <div class="form-group">
+                <label for="<%= projection.type %>_projection">
+                    <%= projection.type %>
+                </label>
+                <select class="form-control" id="<%= projection.type %>_projection"
+                    name="<%= projection.type %>_projection">
+                    <% projection.atoms.forEach(function(atom) { %>
+                        <option value="<%= atom %>" <%= projection.projectedAtom===atom ? 'selected' : '' %>> <%= atom %>
+                        </option>
+                        <% }); %>
+                </select>
+            </div>
+        <% }); %>
+    </div>
+    <% } %>
+
+
+    <div class="row">
         <div class="container" id="relationcard" style="display: none;">
 
                 <h4 class="card-title" title="Hover over a field name <br> to highlight it in the diagram.">Relations</h4>

@@ -1,0 +1,7 @@
+<div class="container-fluid">
+    <% if (instAsString) { %>
+        <code style="white-space: pre-wrap;"><%- JSON.stringify(instAsString).trim().replace(/^"|"$/g, '').replace(/\\n/g, '\n') %></code>
+    <% } else { %>
+        <p> Instance Not Available </p>
+    <% } %>
+</div>

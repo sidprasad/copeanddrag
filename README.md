@@ -11,6 +11,18 @@ The language is based on a small number of orthogonal primitives,
 and is grounded in the cognitive science literature on 
 effective diagramming.
 
+
+
+
 ## TODO:
 
+CnD should have a 3rd section for (~ arrangement ~)
+1. Projection
+2. Permutation along fields (e.g. Node->Node->Weight to Node->Weight->Node)
+3. Hiding Flags (hide disconnected built ins, hide disconnected)
+
+OR should these stay within directives.
+
+## TODO:
 Diagram compactness has been broken somewhere :(
+

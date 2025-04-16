@@ -8,7 +8,7 @@ import { WebColaLayout } from './webcola-gen/graphtowebcola';
 import { ConstraintValidator } from './layout/constraint-validator';
 import { InstanceLayout } from './layout/interfaces';
 import { LayoutSpec, parseLayoutSpec } from './layout/layoutspec';
-import { instanceToInst } from './forge-util/instanceToInst';
+import { instanceToInst, instanceToTables } from './forge-util/instanceToInst';
 import { Event, Logger, LogLevel } from './logging/logger';
 import * as os from 'os';
 import * as crypto from 'crypto'; 
@@ -113,6 +113,16 @@ function getFormContents(req: any) {
 
 // On a GET request, return the start CnD page.
 app.get('/', (req, res) => {
+
+
+    const instanceToTables : {
+        atoms: Record<string, string[]>,
+        relations: Record<string, string[][]>
+    } = {
+        atoms: {},
+        relations: {}
+    }
+
     res.render('diagram', {
         'height': 0,
         'width': 0,
@@ -125,10 +135,11 @@ app.get('/', (req, res) => {
         alloyDatum: "",
         cope: "",
         projectionData: [],
-        source_content: "", //HACK
-        sourceFileName: "",
+        // source_content: "", //HACK
+        // sourceFileName: "",
         instAsString: "",
-        errors: ""
+        errors: "",
+        tables: instanceToTables
     });
 });
 
@@ -197,6 +208,8 @@ app.post('/', (req, res) => {
         }
     }
 
+    let tables = instanceToTables(instances[instanceNumber]);
+
     res.render('diagram', {
         'height': height !== undefined ? height : 0,
         'width': width !== undefined ? width : 0,
@@ -210,11 +223,10 @@ app.post('/', (req, res) => {
         loopBack,
         cope,
         projectionData,
-        source_content: "", //HACK
-        sourceFileName: "",
         instAsString,
         errors: error.replace(/\n/g, "<br>"),
-        loggingEnabled
+        loggingEnabled,
+        tables : tables
     });
 });
 
