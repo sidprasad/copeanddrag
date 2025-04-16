@@ -91,9 +91,10 @@ export class LayoutInstance {
     /**
      * Generates groups based on the specified graph.
      * @param g - The graph, which will be modified to remove the edges that are used to generate groups.
+     * @param a - The ORIGINAL (pre-projection) Alloy instance.
      * @returns A record of groups.
      */
-    private generateGroups(g: Graph): LayoutGroup[] {
+    private generateGroups(g: Graph, a : AlloyInstance): LayoutGroup[] {
 
         //let groupingConstraints : GroupingConstraint[] = this._layoutSpec.constraints.grouping;
 
@@ -151,6 +152,23 @@ export class LayoutInstance {
             return fieldConstraints;
         }
 
+        function getFieldTuples(fieldName: string): string[][] {
+
+
+            let field = a.relations[fieldName];
+            if (!field) {
+                return [];
+            }
+
+            let fieldTuples = field.tuples.map((tuple) => {
+                return tuple.atoms;
+            });
+            return fieldTuples;
+        }
+        
+
+
+
         graphEdges.forEach((edge) => {
             const edgeId = edge.name;
             const relName = this.getRelationName(g, edge);
@@ -166,7 +184,7 @@ export class LayoutInstance {
                 // OR can we do this independent?
                 // OH, we could just do this via a single evaluator equry OF the field name!
             //
-            let edgeTuples = this.getEdgeAsTuple(g, edge);
+            let edgeTuples =  getFieldTuples(relName); //this.getEdgeAsTuple(g, edge);
             let edgeLabel = this.getEdgeLabel(g, edge);
 
             let relatedConstraints = getConstraintsRelatedToField(relName);
@@ -428,7 +446,7 @@ export class LayoutInstance {
 
 
         /// Groups have to happen here ///
-        let groups = this.generateGroups(g);
+        let groups = this.generateGroups(g, a);
         this.ensureNoExtraNodes(g, a);
         let dcN = this.getDisconnectedNodes(g);
 
