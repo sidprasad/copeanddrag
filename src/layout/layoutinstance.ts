@@ -173,19 +173,6 @@ export class LayoutInstance {
             const edgeId = edge.name;
             const relName = this.getRelationName(g, edge);
 
-            // TODO: This should NOT be from the in-between label things.
-            // We should get the TUPLE from the Alloy Instance.
-            // 
-                // <field label="setting" ID="5" parentID="4">
-                // <tuple> <atom label="Table$1"/> <atom label="P$7"/> <atom label="Fork$4"/> </tuple>
-                // <tuple> <atom label="Table$2"/> <atom label="P$7"/> <atom label="Fork$0"/> </tuple>
-
-                // The issue is we may not have the LABEL, so we will have to keep some record OF the transform?
-                // OR can we do this independent?
-                // OH, we could just do this via a single evaluator equry OF the field name!
-            //
-            let edgeTuples =  getFieldTuples(relName); //this.getEdgeAsTuple(g, edge);
-            let edgeLabel = this.getEdgeLabel(g, edge);
 
             let relatedConstraints = getConstraintsRelatedToField(relName);
 
@@ -193,18 +180,35 @@ export class LayoutInstance {
                 return;
             }
 
+            let edgeLabel = this.getEdgeLabel(g, edge);
+
+
             relatedConstraints.forEach((c) => {
 
                 const groupOn = c.groupOn; // This is the part of the relation tuple that is the key.
                 const addToGroup = c.addToGroup; // This is the part of the relation tuple that is IN the group.
 
+                // This is *all* the tuples in the relation.
+                let edgeTuples : string[][]=  getFieldTuples(relName);
 
-                let arity = edgeTuples.length;
+                // TODO: THIS WILL HAVE TO CHANGE ONCE WE HAVE VIEWS
+                let thisTuple = edgeTuples.find((tuple) => {
+                    let l = tuple.length;
+                    tuple[0] === edge.v && tuple[l - 1] === edge.w;
+                });
 
-                let sourceInGraph = edgeTuples[0];
-                let targetInGraph = edgeTuples[arity - 1];
-                let key = edgeTuples[groupOn];
-                let toAdd = edgeTuples[addToGroup];
+                let arity = thisTuple?.length || 0;
+                if (arity < 2 || (groupOn < 0 || groupOn >= arity) || (addToGroup < 0 || addToGroup >= arity)) {
+                    return ;
+                }
+                // Now get the element of edge
+                
+                
+                let sourceInGraph = thisTuple[0];
+                let targetInGraph = thisTuple[arity - 1];
+
+                let key = thisTuple[groupOn];
+                let toAdd = thisTuple[addToGroup];
 
                 // AND KEY is what you REALLY group on.
 
