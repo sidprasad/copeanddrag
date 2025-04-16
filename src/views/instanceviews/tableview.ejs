@@ -1,1 +1,51 @@
-<h3>NOT IMPLEMENTED YET </h3>
+<div class="container-fluid" id="tablescontainer">
+    <% if (tables) { %>
+        <!-- Atoms Section -->
+        <% Object.keys(tables.atoms).forEach(atomType => { %>
+
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th><%= atomType %></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% tables.atoms[atomType].forEach(atom => { %>
+                        <tr>
+                            <td><%= atom %></td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        <% }); %>
+
+        <!-- Relations Section -->
+        <% Object.keys(tables.relations).forEach(relationType => { %>
+            <% if (tables.relations[relationType] && tables.relations[relationType].length > 0) { %>
+                <h4><%= relationType %></h4>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <% for (let i = 0; i < tables.relations[relationType][0].length; i++) { %>
+                                <th>Column <%= i + 1 %></th>
+                            <% } %>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% tables.relations[relationType].forEach(tuple => { %>
+                            <tr>
+                                <% tuple.forEach(value => { %>
+                                    <td><%= value %></td>
+                                <% }); %>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            <% } else { %>
+                <p><%= relationType %></p>
+            <% } %>
+        <% }); %>
+    <% } else { %>
+        <p>Nothing to show</p>
+    <% } %>
+</div>

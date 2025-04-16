@@ -121,19 +121,6 @@
             });
 
 
-            // Instance download button.
-            var openInstBtn = document.getElementById('instButton');
-            var sourceContent = <%- JSON.stringify(instAsString) %>;
-            var sourceFileName = "<%= sourceFileName %>";
-            var blob = new Blob([sourceContent], { type: 'text/plain' });
-            var url = URL.createObjectURL(blob);
-
-            if (openInstBtn) {
-                openInstBtn.addEventListener('click', function () {
-                    window.open(url, '_blank');
-                });
-            }
-
 
 
 
@@ -176,9 +163,6 @@
             <br>
             <button id="diagramDownloadButton" class="btn btn-outline-secondary"
                 onclick="downloadHighResPNG(5);">Download Diagram</button>
-            <% if (instAsString) { %>
-                <button id="instButton" class="btn btn-outline-secondary">As Forge Instance</button>
-                <% } %>
 
                     <br>
                     <a href="https://sidprasad.github.io/copeanddrag/" target="_blank"><button
