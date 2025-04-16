@@ -26,3 +26,6 @@ OR should these stay within directives.
 ## TODO:
 Diagram compactness has been broken somewhere :(
 
+## TODO
+
+Change HOW we compute tuples for groupOn
