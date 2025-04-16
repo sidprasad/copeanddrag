@@ -349,29 +349,6 @@ export class LayoutInstance {
         return g.edge(edge.v, edge.w, edge.name);
     }
 
-    private getEdgeAsTuple(g: Graph, edge: Edge): string[] {
-
-        let nodeIds: string[] = [];
-        // The 0th element is the edge source
-
-        // The middle elements are in a list [] embedded in the label
-        // The last element is the edge target
-
-        let edgeLabel = this.getEdgeLabel(g, edge);
-
-        nodeIds.push(edge.v);
-
-        let middle: string[] = [];
-        if (edgeLabel.includes("[") && edgeLabel.includes("]")) {
-            middle = edgeLabel.split("[")[1].split("]")[0].split(",").map((x) => x.trim());
-        }
-        nodeIds = nodeIds.concat(middle);
-        nodeIds.push(edge.w);
-
-        return nodeIds;
-    }
-
-
 
     private applyLayoutProjections(ai: AlloyInstance, projections: Record<string, string>): { projectedInstance: AlloyInstance, finalProjectionChoices: { type: string, projectedAtom: string, atoms: string[] }[] } {
 
