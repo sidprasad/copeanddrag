@@ -139,19 +139,41 @@
 
 <body>
     <nav class="navbar navbar-light bg-light">
-        <h4 class="navbar-brand">Cope and Drag</h4>
 
-        <div class="btn-group" role="group">
-            <button id="toggleExploreCol" class="btn btn-outline-secondary">Hide Explore</button>
-            <button id="toggleControlsCol" class="btn btn-outline-secondary">Hide Controls</button>
 
-            <br>
-            <button id="diagramDownloadButton" class="btn btn-outline-secondary"
-                onclick="downloadHighResPNG(5);">Download Diagram</button>
+        <div class="row w-100">
+            <div class="col">
+                <h4 class="navbar-brand">Cope and Drag</h4>
+            </div>
+            <div class="col-auto">
+                <!-- Logging Control Section -->
+                <div class="input-group" id="loggingControlSection">
+                    <div class="input-group-prepend">
+                        <label for="loggingEnabled" class="form-check-label">
+                            <span class="input-group-text">Logging</span>
+                        </label>
+                    </div>
+                    <select class="form-control" id="loggingEnabled" name="loggingEnabled">
+                        <option value="enabled" <%= typeof loggingEnabled === 'undefined' || loggingEnabled ? 'selected' : '' %>>Enabled</option>
+                        <option value="disabled" <%= typeof loggingEnabled !== 'undefined' && !loggingEnabled ? 'selected' : '' %>>Disabled</option>
+                    </select>
+                    <div class="input-group-append">
+                        <button type="button" class="btn btn-sm btn-outline-info float-right" data-toggle="modal" data-target="#loggingInfoModal" id="loggingmoreinfo">?</button>
+                    </div>
+                </div>
+            </div>
 
-                    <br>
-                    <a href="https://sidprasad.github.io/copeanddrag/" target="_blank"><button
-                            class="btn btn-outline-secondary">Docs</button></a>
+            <div class="col">
+                <!-- Button Group -->
+                <div class="btn-group" role="group">
+                    <button id="toggleExploreCol" class="btn btn-outline-secondary">Hide Explore</button>
+                    <button id="toggleControlsCol" class="btn btn-outline-secondary">Hide Controls</button>
+                    <button id="diagramDownloadButton" class="btn btn-outline-secondary" onclick="downloadHighResPNG(5);">Download Diagram</button>
+                    <a href="https://sidprasad.github.io/copeanddrag/" target="_blank">
+                        <button class="btn btn-outline-secondary">Docs</button>
+                    </a>
+                </div>
+            </div>
         </div>
     </nav>
     <%- include ('errorMessages') %>
