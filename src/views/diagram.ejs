@@ -14,10 +14,6 @@
     <link rel="icon" type="image/svg+xml" href="/img/logo.svg">
     <link rel="stylesheet" href="/css/diagramstyle.css">
 
-    <!-- Primary CDN -->
-    <script src="https://marvl.infotech.monash.edu/webcola/extern/graphlib-dot.min.js" onerror="loadLocalGraphlib()"></script>
-    <script src="https://cdn.jsdelivr.net/gh/tgdwyer/WebCola/WebCola/cola.min.js" onerror="loadLocalCola()"></script>
-
     <script>
         function loadLocalGraphlib() {
             console.warn("CDN for graphlib-dot.min.js failed. Loading local copy...");
@@ -33,6 +29,11 @@
             document.head.appendChild(script);
         }
     </script>
+    <!-- Primary CDN -->
+    <script src="https://marvl.infotech.monash.edu/webcola/extern/graphlib-dot.min.js" onerror="loadLocalGraphlib()"></script>
+    <script src="https://cdn.jsdelivr.net/gh/tgdwyer/WebCola/WebCola/cola.min.js" onerror="loadLocalCola()"></script>
+
+
 
     <!-- Include d3 here -->
     <script src="https://d3js.org/d3.v4.min.js"></script>
