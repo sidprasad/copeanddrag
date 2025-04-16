@@ -91,9 +91,10 @@ export class LayoutInstance {
     /**
      * Generates groups based on the specified graph.
      * @param g - The graph, which will be modified to remove the edges that are used to generate groups.
+     * @param a - The ORIGINAL (pre-projection) Alloy instance.
      * @returns A record of groups.
      */
-    private generateGroups(g: Graph): LayoutGroup[] {
+    private generateGroups(g: Graph, a : AlloyInstance): LayoutGroup[] {
 
         //let groupingConstraints : GroupingConstraint[] = this._layoutSpec.constraints.grouping;
 
@@ -151,23 +152,29 @@ export class LayoutInstance {
             return fieldConstraints;
         }
 
+        function getFieldTuples(fieldName: string): string[][] {
+
+
+            let field = Object.values(a.relations).find((rel) => rel.name === fieldName);
+
+
+            if (!field) {
+                return [];
+            }
+
+            let fieldTuples = field.tuples.map((tuple) => {
+                return tuple.atoms;
+            });
+            return fieldTuples;
+        }
+        
+
+
+
         graphEdges.forEach((edge) => {
             const edgeId = edge.name;
             const relName = this.getRelationName(g, edge);
 
-            // TODO: This should NOT be from the in-between label things.
-            // We should get the TUPLE from the Alloy Instance.
-            // 
-                // <field label="setting" ID="5" parentID="4">
-                // <tuple> <atom label="Table$1"/> <atom label="P$7"/> <atom label="Fork$4"/> </tuple>
-                // <tuple> <atom label="Table$2"/> <atom label="P$7"/> <atom label="Fork$0"/> </tuple>
-
-                // The issue is we may not have the LABEL, so we will have to keep some record OF the transform?
-                // OR can we do this independent?
-                // OH, we could just do this via a single evaluator equry OF the field name!
-            //
-            let edgeTuples = this.getEdgeAsTuple(g, edge);
-            let edgeLabel = this.getEdgeLabel(g, edge);
 
             let relatedConstraints = getConstraintsRelatedToField(relName);
 
@@ -175,18 +182,35 @@ export class LayoutInstance {
                 return;
             }
 
+            let edgeLabel = this.getEdgeLabel(g, edge);
+
+
             relatedConstraints.forEach((c) => {
 
                 const groupOn = c.groupOn; // This is the part of the relation tuple that is the key.
                 const addToGroup = c.addToGroup; // This is the part of the relation tuple that is IN the group.
 
+                // This is *all* the tuples in the relation.
+                let edgeTuples : string[][]=  getFieldTuples(relName);
 
-                let arity = edgeTuples.length;
+                // TODO: THIS WILL HAVE TO CHANGE ONCE WE HAVE VIEWS
+                let thisTuple = edgeTuples.find((tuple) => {
+                    let l = tuple.length;
+                    return tuple[0] === edge.v && tuple[l - 1] === edge.w;
+                });
 
-                let sourceInGraph = edgeTuples[0];
-                let targetInGraph = edgeTuples[arity - 1];
-                let key = edgeTuples[groupOn];
-                let toAdd = edgeTuples[addToGroup];
+                let arity = thisTuple?.length || 0;
+                if (arity < 2 || (groupOn < 0 || groupOn >= arity) || (addToGroup < 0 || addToGroup >= arity)) {
+                    return ;
+                }
+                // Now get the element of edge
+                
+                
+                let sourceInGraph = thisTuple[0];
+                let targetInGraph = thisTuple[arity - 1];
+
+                let key = thisTuple[groupOn];
+                let toAdd = thisTuple[addToGroup];
 
                 // AND KEY is what you REALLY group on.
 
@@ -331,29 +355,6 @@ export class LayoutInstance {
         return g.edge(edge.v, edge.w, edge.name);
     }
 
-    private getEdgeAsTuple(g: Graph, edge: Edge): string[] {
-
-        let nodeIds: string[] = [];
-        // The 0th element is the edge source
-
-        // The middle elements are in a list [] embedded in the label
-        // The last element is the edge target
-
-        let edgeLabel = this.getEdgeLabel(g, edge);
-
-        nodeIds.push(edge.v);
-
-        let middle: string[] = [];
-        if (edgeLabel.includes("[") && edgeLabel.includes("]")) {
-            middle = edgeLabel.split("[")[1].split("]")[0].split(",").map((x) => x.trim());
-        }
-        nodeIds = nodeIds.concat(middle);
-        nodeIds.push(edge.w);
-
-        return nodeIds;
-    }
-
-
 
     private applyLayoutProjections(ai: AlloyInstance, projections: Record<string, string>): { projectedInstance: AlloyInstance, finalProjectionChoices: { type: string, projectedAtom: string, atoms: string[] }[] } {
 
@@ -428,7 +429,7 @@ export class LayoutInstance {
 
 
         /// Groups have to happen here ///
-        let groups = this.generateGroups(g);
+        let groups = this.generateGroups(g, a);
         this.ensureNoExtraNodes(g, a);
         let dcN = this.getDisconnectedNodes(g);
 
