@@ -127,22 +127,7 @@
         });
     </script>
 
-    <script type="module">
-        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-        const config = {
-            startOnLoad: true,
-            flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'cardinal' },
-            securityLevel: 'loose',
-        };
-        mermaid.initialize(config);
 
-        window.stateclick = function (i) {
-            // First, set the instance number's value to i
-            document.getElementById('instancenumber').value = i;
-            // Now submit the form
-            document.getElementById('controlsForm').submit();
-        };
-    </script>
     <style>
         /* Hide elements with the hidden class */
         .hidden {
