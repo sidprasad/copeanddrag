@@ -1,22 +1,26 @@
 <div class="container-fluid" id="tablescontainer">
+
     <% if (tables) { %>
         <!-- Atoms Section -->
         <% Object.keys(tables.atoms).forEach(atomType => { %>
-
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th><%= atomType %></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% tables.atoms[atomType].forEach(atom => { %>
+            <% if (Array.isArray(tables.atoms[atomType])) { %>
+                <table class="table table-bordered">
+                    <thead>
                         <tr>
-                            <td><%= atom %></td>
+                            <th><%= atomType %></th>
                         </tr>
-                    <% }); %>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <% tables.atoms[atomType].forEach(atom => { %>
+                            <tr>
+                                <td><%= atom %></td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            <% } else { %>
+                <p>No data available for atom type: <%= atomType %></p>
+            <% } %>
         <% }); %>
 
         <!-- Relations Section -->
@@ -42,7 +46,7 @@
                     </tbody>
                 </table>
             <% } else { %>
-                <p><%= relationType %></p>
+                <p>No data available for relation: <%= relationType %></p>
             <% } %>
         <% }); %>
     <% } else { %>

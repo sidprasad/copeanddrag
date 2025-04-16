@@ -80,8 +80,16 @@ export function instanceToTables(instance: AlloyInstance) : {
     for (let typeId in instanceTypes) {
         let type = instanceTypes[typeId];
         let atoms = type.atoms;
-        atomsTable[typeId] = atoms.map(atom => atom.id);
+
+        let atomsAsString = atoms.map(atom => atom.id);
+        if (atomsAsString.length > 0) {
+            atomsTable[typeId] = atomsAsString;
+        }
+
+        //atomsTable[typeId] = atoms.map(atom => atom.id);
     }
+
+
 
 
     let relationTable : Record<string, string[][]> = {};
@@ -96,7 +104,10 @@ export function instanceToTables(instance: AlloyInstance) : {
             return tuple.atoms;
         });
 
-        relationTable[relName] = tuplesAsArrays;
+
+        if (tuplesAsArrays.length > 0) {
+            relationTable[relName] = tuplesAsArrays;
+        }
     }
 
 
