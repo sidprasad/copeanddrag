@@ -201,7 +201,7 @@ export class LayoutInstance {
 
                 let arity = thisTuple?.length || 0;
                 if (arity < 2 || (groupOn < 0 || groupOn >= arity) || (addToGroup < 0 || addToGroup >= arity)) {
-                    throw new Error(`Invalid group by field constraint. ${relName} has arity ${arity}, but groupOn and addToGroup are ${groupOn} and ${addToGroup}. These must be between 0 and ${arity - 1}.`);
+                    throw new Error(`Invalid grouping. groupOn=${groupOn} and addToGroup=${addToGroup} for ${arity}-ary relation ${relName}. These must be between 0 and ${arity - 1}.`);
                 }
                 // Now get the element of edge
                 
