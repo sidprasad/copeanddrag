@@ -21,11 +21,10 @@ CnD should have a 3rd section for (~ arrangement ~)
 2. Permutation along fields (e.g. Node->Node->Weight to Node->Weight->Node)
 3. Hiding Flags (hide disconnected built ins, hide disconnected)
 
-OR should these stay within directives.
+OR should these stay within directives. 
+
+We would have to change HOW we compute tuples for groupOn if we implement arrangement.
 
 ## TODO:
 Diagram compactness has been broken somewhere :(
 
-## TODO
-
-Change HOW we compute tuples for groupOn
