@@ -232,7 +232,7 @@ export class LayoutInstance {
                         const groupEdgePrefix = "_g_"
                         const newId = groupEdgePrefix + edgeId;
                         g.removeEdge(edge.v, edge.w, edgeId);
-                        g.setEdge(edge.v, edge.w, edgeLabel, newId);
+                        g.setEdge(edge.v, edge.w, groupName, newId);
                     }
                 }
             });
