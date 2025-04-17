@@ -262,7 +262,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     let sourceGroup = potentialSourceGroups.find(group => group.keyNode === targetIndex);
 
                     if (targetGroup && sourceGroup) {
-                        alert('Something is very wrong!');
+                        console.error('We got a target AND a source group', targetGroup, sourceGroup);
                     }
 
 

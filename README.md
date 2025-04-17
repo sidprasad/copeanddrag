@@ -31,3 +31,5 @@ We would have to change HOW we compute tuples for groupOn if we implement arrang
 ## TODO:
 Diagram compactness has been broken somewhere :(
 
+## TODO:
+- Write an n-ary group example
