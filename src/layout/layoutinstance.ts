@@ -197,9 +197,19 @@ export class LayoutInstance {
                     let toAdd = thisTuple[addToGroup];
 
                     // AND KEY is what you REALLY group on.
+                    // BUT NOW I"m CONFUSED. WHERE IS KEY? IS IT JUST IN THE GROUP NAME IDENTIFIER?
+
+                    let labelString = thisTuple.map((s, idx) => {
+                        if (idx === groupOn) {
+                            return s;
+                        }
+                        else return "_";
+                    }).join(",");
 
                     //let groupName = key + ":" + edgeLabel;
-                    let groupName = `${key}:${relName}`; // TODO: THis?
+                    let groupName = `${relName}[${labelString}]`; // TODO: THis?
+
+                    
 
 
                     // Check if the group already exists

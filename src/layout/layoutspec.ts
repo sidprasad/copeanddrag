@@ -140,7 +140,7 @@ export class GroupBySelector extends ConstraintOperation{
     generated.
 
 */
-export interface GroupByField  {
+export class GroupByField  {
     // And applies to selects the thing to group ON
     field : string;
 
@@ -149,6 +149,11 @@ export interface GroupByField  {
 
     // And this is what gets grouped
     addToGroup : number;
+    constructor(field: string, groupOn: number, addToGroup: number) {
+        this.field = field;
+        this.groupOn = groupOn;
+        this.addToGroup = addToGroup;
+    }
 }
 
 
@@ -395,11 +400,18 @@ function parseConstraints(constraints: any[]):   ConstraintsBlock
                 throw new Error("Grouping constraint must specify addToGroup");
             }
 
-            return {
-                groupOn: c.group.groupOn,
-                field: c.group.field,
-                addToGroup: c.group.addToGroup,
-            }
+
+            return new GroupByField(
+                c.group.field,
+                c.group.groupOn,
+                c.group.addToGroup
+            );
+
+            // return {
+            //     groupOn: c.group.groupOn,
+            //     field: c.group.field,
+            //     addToGroup: c.group.addToGroup,
+            // }
         });
 
     let byselector: GroupBySelector[] = constraints.filter(c => c.group)
