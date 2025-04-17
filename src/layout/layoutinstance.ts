@@ -152,22 +152,7 @@ export class LayoutInstance {
             return fieldConstraints;
         }
 
-        function getFieldTuples(fieldName: string): string[][] {
-
-
-            let field = Object.values(a.relations).find((rel) => rel.name === fieldName);
-
-
-            if (!field) {
-                return [];
-            }
-
-            let fieldTuples = field.tuples.map((tuple) => {
-                return tuple.atoms;
-            });
-            return fieldTuples;
-        }
-        
+      
 
 
 
@@ -190,63 +175,62 @@ export class LayoutInstance {
                 const groupOn = c.groupOn; // This is the part of the relation tuple that is the key.
                 const addToGroup = c.addToGroup; // This is the part of the relation tuple that is IN the group.
 
-                // This is *all* the tuples in the relation.
-                let edgeTuples : string[][]=  getFieldTuples(relName);
 
-                // TODO: THIS WILL HAVE TO CHANGE ONCE WE HAVE VIEWS
-                let thisTuple = edgeTuples.find((tuple) => {
-                    let l = tuple.length;
-                    return tuple[0] === edge.v && tuple[l - 1] === edge.w;
-                });
-
-                let arity = thisTuple?.length || 0;
-                if (arity < 2 || (groupOn < 0 || groupOn >= arity) || (addToGroup < 0 || addToGroup >= arity)) {
-                    throw new Error(`Invalid grouping. groupOn=${groupOn} and addToGroup=${addToGroup} for ${arity}-ary relation ${relName}. These must be between 0 and ${arity - 1}.`);
+                const potentialTuples = this.getFieldTuplesForSourceAndTarget(a, relName, edge.v, edge.w);
+                if(!potentialTuples || potentialTuples.length === 0) {
+                    return;
                 }
-                // Now get the element of edge
+                
+  
+                for (var thisTuple of potentialTuples) {
+                    let arity = thisTuple?.length || 0;
+                    if (arity < 2 || (groupOn < 0 || groupOn >= arity) || (addToGroup < 0 || addToGroup >= arity)) {
+                        throw new Error(`Invalid grouping. groupOn=${groupOn} and addToGroup=${addToGroup} for ${arity}-ary relation ${relName}. These must be between 0 and ${arity - 1}.`);
+                    }
+                    // Now get the element of edge
                 
                 
-                let sourceInGraph = thisTuple[0];
-                let targetInGraph = thisTuple[arity - 1];
+                    let sourceInGraph = thisTuple[0];
+                    let targetInGraph = thisTuple[arity - 1];
 
-                let key = thisTuple[groupOn];
-                let toAdd = thisTuple[addToGroup];
+                    let key = thisTuple[groupOn];
+                    let toAdd = thisTuple[addToGroup];
 
-                // AND KEY is what you REALLY group on.
+                    // AND KEY is what you REALLY group on.
 
-                let groupName = key + ":" + edgeLabel;
+                    let groupName = key + ":" + edgeLabel;
 
-                // Check if the group already exists
-                let existingGroup: LayoutGroup = groups.find((group) => group.name === groupName);
+                    // Check if the group already exists
+                    let existingGroup: LayoutGroup = groups.find((group) => group.name === groupName);
 
-                if (existingGroup) {
-                    existingGroup.nodeIds.push(toAdd);
-                    // But also remove this edge from the graph.
-                    g.removeEdge(edge.v, edge.w, edgeId);
-                    // Remove the edge and then add it again.
-                    /// This is specifically so that other orientation properties hold.
-                    /// Ideally, this HACK would be removed.
-                    const newId = this.hideThisEdge + edgeId;
-                    g.removeEdge(edge.v, edge.w, edgeId);
-                    g.setEdge(edge.v, edge.w, edgeLabel, newId);
+                    if (existingGroup) {
+                        existingGroup.nodeIds.push(toAdd);
+                        // But also remove this edge from the graph.
+                        g.removeEdge(edge.v, edge.w, edgeId);
+                        // Remove the edge and then add it again.
+                        /// This is specifically so that other orientation properties hold.
+                        /// Ideally, this HACK would be removed.
+                        const newId = this.hideThisEdge + edgeId;
+                        g.removeEdge(edge.v, edge.w, edgeId);
+                        g.setEdge(edge.v, edge.w, edgeLabel, newId);
+                    }
+                    else {
+
+                        let newGroup: LayoutGroup =
+                        {
+                            name: groupName,
+                            nodeIds: [toAdd],
+                            keyNodeId: key,
+                            showLabel: true // For now
+                        };
+                        groups.push(newGroup);
+                        // HACK: Don't remove the FIRST edge connecting node to group, we can respect SOME spatiality?
+                        const groupEdgePrefix = "_g_"
+                        const newId = groupEdgePrefix + edgeId;
+                        g.removeEdge(edge.v, edge.w, edgeId);
+                        g.setEdge(edge.v, edge.w, edgeLabel, newId);
+                    }
                 }
-                else {
-
-                    let newGroup: LayoutGroup =
-                    {
-                        name: groupName,
-                        nodeIds: [toAdd],
-                        keyNodeId: key,
-                        showLabel: true // For now
-                    };
-                    groups.push(newGroup);
-                    // HACK: Don't remove the FIRST edge connecting node to group, we can respect SOME spatiality?
-                    const groupEdgePrefix = "_g_"
-                    const newId = groupEdgePrefix + edgeId;
-                    g.removeEdge(edge.v, edge.w, edgeId);
-                    g.setEdge(edge.v, edge.w, edgeLabel, newId);
-                }
-
             });
         });
         return groups;
@@ -469,6 +453,10 @@ export class LayoutInstance {
             let source = layoutNodes.find((node) => node.id === edge.v);
             let target = layoutNodes.find((node) => node.id === edge.w);
             let relName = this.getRelationName(g, edge);
+
+            let relTuples = this.getFieldTuplesForSourceAndTarget(a, relName, edge.v, edge.w);
+            // But what if there are multiple tuples?
+
 
             let e: LayoutEdge = {
                 source: source,
@@ -986,4 +974,35 @@ export class LayoutInstance {
             });
             return sigColors;
         }
+
+    private getFieldTuples(a : AlloyInstance, fieldName: string): string[][] {
+
+
+        let field = Object.values(a.relations).find((rel) => rel.name === fieldName);
+
+
+        if (!field) {
+            return [];
+        }
+
+        let fieldTuples = field.tuples.map((tuple) => {
+            return tuple.atoms;
+        });
+        return fieldTuples;
+    }
+
+    private getFieldTuplesForSourceAndTarget(a : AlloyInstance, fieldName: string, src : string, tgt : string): string[][] {
+
+        let fieldTuples = this.getFieldTuples(a, fieldName);
+        let filteredTuples = fieldTuples.filter((tuple) => {
+            let arity = tuple.length;
+            if (arity < 1) {
+                return false;
+            }
+            return tuple[0] === src && tuple[arity-1] === tgt;
+        });
+
+        return filteredTuples;
+
+    }
 }
