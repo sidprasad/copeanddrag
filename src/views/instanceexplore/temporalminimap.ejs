@@ -1,25 +1,47 @@
 <% if (num_instances > 1) { %>
-    <script type="module">
-        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-        const config = {
-            startOnLoad: true,
-            flowchart: { useMaxWidth: false, htmlLabels: true, curve: 'cardinal' }, /* Disable shrinking */
-            securityLevel: 'loose',
-        };
-        mermaid.initialize(config);
+<script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    const config = {
+        startOnLoad: true,
+        flowchart: { useMaxWidth: false, htmlLabels: true, curve: 'cardinal' }, /* Disable shrinking */
+        securityLevel: 'loose',
+    };
+    mermaid.initialize(config);
 
-        window.stateclick = function (i) {
-            // First, set the instance number's value to i
-            document.getElementById('instancenumber').value = i;
-            // Now submit the form
-            document.getElementById('controlsForm').submit();
-        };
-    </script>
+    window.stateclick = function (i) {
+        // First, set the instance number's value to i
+        document.getElementById('instancenumber').value = i;
+        // Now submit the form
+        document.getElementById('controlsForm').submit();
+    };
+</script>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggleDrawerButton = document.getElementById('toggleDrawer');
+        const closeDrawerButton = document.getElementById('closeDrawer');
+        const drawer = document.getElementById('mermaidDrawer');
+
+        // Open the drawer
+        toggleDrawerButton.addEventListener('click', function () {
+            drawer.classList.add('open'); // Add the "open" class to slide the drawer in
+        });
+
+        // Close the drawer
+        closeDrawerButton.addEventListener('click', function () {
+            drawer.classList.remove('open'); // Remove the "open" class to slide the drawer out
+        });
+    });
+</script>
+
+
+<div class="container">
     <div class="row">
         <div class="col">
             <h3 class="justify-content lead">
-                <button class="btn btn-outline-primary" type="button" id="toggleDrawer">
-                    View Temporal Map
+                <button class="btn btn-outline-dark" type="button" id="toggleDrawer">
+                    Temporal Map
                 </button>
             </h3>
         </div>
@@ -28,10 +50,11 @@
     <!-- Sliding Drawer -->
     <div id="mermaidDrawer" class="drawer">
         <div class="drawer-header">
+
             <button class="btn btn-sm btn-outline-danger" id="closeDrawer">Close</button>
         </div>
-        <h3> Temporal Trace Map </h3>
-        <p class="text-muted">Click on any trace state to see its graph.</p>
+        <h4> Temporal Trace Map </h4>
+        <p class="text-muted">Click on any trace state to view it.</p>
         <div class="drawer-content">
             <div class="mermaid-container">
                 <div class="mermaid" title="Click on any trace state to see its graph.">
@@ -55,6 +78,7 @@
             </div>
         </div>
     </div>
+</div>
 <% } %>
 
 <style>
@@ -105,20 +129,4 @@
     }
 </style>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const toggleDrawerButton = document.getElementById('toggleDrawer');
-        const closeDrawerButton = document.getElementById('closeDrawer');
-        const drawer = document.getElementById('mermaidDrawer');
 
-        // Open the drawer
-        toggleDrawerButton.addEventListener('click', function () {
-            drawer.classList.add('open'); // Add the "open" class to slide the drawer in
-        });
-
-        // Close the drawer
-        closeDrawerButton.addEventListener('click', function () {
-            drawer.classList.remove('open'); // Remove the "open" class to slide the drawer out
-        });
-    });
-</script>
