@@ -25,13 +25,13 @@
         function loadLocalCola() {
             console.warn("CDN for cola.min.js failed. Loading local copy...");
             const script = document.createElement("script");
-            script.src = "/js/libs/cola.min.js"; // Path to your local copy
+            script.src = "/js/libs/cola.js"; // Path to your local copy
             document.head.appendChild(script);
         }
     </script>
     <!-- Primary CDN -->
     <script src="https://marvl.infotech.monash.edu/webcola/extern/graphlib-dot.min.js" onerror="loadLocalGraphlib()"></script>
-    <script src="https://cdn.jsdelivr.net/gh/tgdwyer/WebCola/WebCola/cola.min.js" onerror="loadLocalCola()"></script>
+    <script src="https://ialab.it.monash.edu/webcola/cola.js" onerror="loadLocalCola()"></script>
 
 
 

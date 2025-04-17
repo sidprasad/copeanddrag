@@ -198,7 +198,9 @@ export class LayoutInstance {
 
                     // AND KEY is what you REALLY group on.
 
-                    let groupName = key + ":" + edgeLabel;
+                    //let groupName = key + ":" + edgeLabel;
+                    let groupName = `${key}:${relName}`; // TODO: THis?
+
 
                     // Check if the group already exists
                     let existingGroup: LayoutGroup = groups.find((group) => group.name === groupName);
@@ -210,9 +212,11 @@ export class LayoutInstance {
                         // Remove the edge and then add it again.
                         /// This is specifically so that other orientation properties hold.
                         /// Ideally, this HACK would be removed.
-                        const newId = this.hideThisEdge + edgeId;
+
+
+                       // const newId = this.hideThisEdge + edgeId;
                         g.removeEdge(edge.v, edge.w, edgeId);
-                        g.setEdge(edge.v, edge.w, edgeLabel, newId);
+                        //g.setEdge(edge.v, edge.w, edgeLabel, newId);
                     }
                     else {
 
@@ -220,7 +224,7 @@ export class LayoutInstance {
                         {
                             name: groupName,
                             nodeIds: [toAdd],
-                            keyNodeId: key,
+                            keyNodeId: sourceInGraph, //key, // This needs to not be the KEY but the source in the graph.
                             showLabel: true // For now
                         };
                         groups.push(newGroup);
