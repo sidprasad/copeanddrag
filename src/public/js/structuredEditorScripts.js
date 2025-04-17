@@ -1,5 +1,3 @@
-
-
 const TUPLE_SELECTOR_TEXT = `Forge expression yielding tuples (arity ≥ 2); constraint applies from first to last element.`;
 const UNARY_SELECTOR_TEXT = `Forge expression yielding singletons.`;
 
@@ -278,30 +276,29 @@ function resolveColorValue(color) {
     return "#000000"; // Default to black if the color is invalid
 }
 
-// TODO: Change
 function writeToYAMLEditor() {
-
     const constraints = [];
     const directives = [];
-
 
     document.querySelectorAll(".constraint").forEach(div => {
         const type = div.querySelector("select").value;
         const params = {};
 
-
-
         div.querySelectorAll("input, select").forEach(input => {
             if (input.multiple) {
                 params[input.name] = Array.from(input.selectedOptions).map(option => option.value);
             } else if (input.name.length > 0) {
-                params[input.name] = input.value;
+                if (input.type === "number") {
+                    // Convert to number if the input type is number
+                    params[input.name] = parseFloat(input.value);
+                } else {
+                    params[input.name] = input.value;
+                }
             }
         });
 
         constraints.push({ [toYamlConstraintType(type)]: params });
     });
-
 
     document.querySelectorAll(".directive").forEach(div => {
         const type = div.querySelector("select").value;
@@ -312,26 +309,25 @@ function writeToYAMLEditor() {
             let key = input.name;
             let value = input.value;
 
-
             if (key.length > 0) {
                 if (input.multiple) {
                     params[key] = Array.from(input.selectedOptions).map(option => option.value);
-                }
-                else if (isFlag) {
-                    // HACKY!!!
+                } else if (isFlag) {
+                    // Handle flag directives
                     params = value;
-                }
-                else {
+                } else if (input.type === "number") {
+                    // Convert to number if the input type is number
+                    params[key] = parseFloat(value);
+                } else {
                     params[key] = value;
                 }
             }
         });
-        directives.push({ [type]: params });
 
+        directives.push({ [type]: params });
     });
 
-
-    // Hacky but need to do this for defaults (esp. directives)
+    // Combine constraints and directives into a single YAML object
     let combinedSpec = {};
     if (constraints.length > 0) {
         combinedSpec.constraints = constraints;
@@ -348,12 +344,10 @@ function writeToYAMLEditor() {
 
     if (window.editor) {
         window.editor.setValue(yamlStr);
-    }
-    else {
+    } else {
         alert("Window editor not found");
     }
 }
-
 
 function get_constraint_type_from_yaml(constraint) {
 
@@ -375,7 +369,7 @@ function get_constraint_type_from_yaml(constraint) {
 }
 
 
-// TODO: Change
+
 function populateStructuredEditor() {
 
     if (!window.editor) {
