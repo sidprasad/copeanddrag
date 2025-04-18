@@ -111,6 +111,21 @@ function getFormContents(req: any) {
     return { instances, li, instanceNumber, loopBack, projections };
 }
 
+function getTableFromRequest(req: any) {
+    const alloyDatum = req.body.alloydatum;
+    const instanceNumber = parseInt(req.body.instancenumber) || 0;
+    try {
+        var ad: AlloyDatum = parseAlloyXML(alloyDatum);
+    }
+    catch (e) {
+        throw new Error("Error parsing Forge instance. May be malformed." + e.message);
+    }
+
+    let tables = instanceToTables(ad.instances[instanceNumber]);
+    return tables;
+}
+
+
 // On a GET request, return the start CnD page.
 app.get('/', (req, res) => {
 
@@ -155,7 +170,7 @@ app.post('/', (req, res) => {
     const startTime = performance.now();
 
     try {
-
+        var tables = getTableFromRequest(req) || {};
         var { instances, li, instanceNumber, loopBack, projections } = getFormContents(req);
         var num_instances = instances.length;
 
@@ -183,8 +198,7 @@ app.post('/', (req, res) => {
         var height = cl.FIG_HEIGHT;
         var width = cl.FIG_WIDTH;
 
-        // This is the issue
-        var tables = instanceToTables(instances[instanceNumber]) || {};
+       
     }
     catch (e) {
         
