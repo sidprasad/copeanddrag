@@ -182,8 +182,12 @@ app.post('/', (req, res) => {
         var colaGroups = cl.groupDefinitions;
         var height = cl.FIG_HEIGHT;
         var width = cl.FIG_WIDTH;
+
+        // This is the issue
+        var tables = instanceToTables(instances[instanceNumber]) || {};
     }
     catch (e) {
+        
         error = e.message;
         // If there is an error, we should not show the diagram.
         height = 0;
@@ -208,7 +212,7 @@ app.post('/', (req, res) => {
         }
     }
 
-    let tables = instanceToTables(instances[instanceNumber]);
+
 
     res.render('diagram', {
         'height': height !== undefined ? height : 0,

@@ -33,3 +33,7 @@ Diagram compactness has been broken somewhere :(
 
 ## TODO:
 - Write an n-ary group example
+
+## TODO:
+- Error catching fails 
+- 
