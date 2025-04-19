@@ -46,7 +46,7 @@
         const output = data.result || 'No result';
 
         replOutput.textContent = `> ${expression}\n${output}\n\n` + replOutput.textContent;
-        replOutput.scrollTop = replOutput.scrollHeight;
+        replOutput.scrollTop = 0; //replOutput.scrollHeight;
       } catch (err) {
         replOutput.textContent += `> ${expression}\n[error: ${err.message}]\n\n`;
       }
