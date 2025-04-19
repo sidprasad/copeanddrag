@@ -256,7 +256,7 @@ const DEFAULT_LAYOUT : LayoutSpec = {
         projections: [],
         attributes: [],
         hideDisconnected: false,
-        hideDisconnectedBuiltIns: true
+        hideDisconnectedBuiltIns: false
     }
 };
 

@@ -25,6 +25,7 @@ import { generateGraph } from '../alloy-graph';
 import { WrappedForgeEvaluator } from '../forge-util/evaluatorUtil';
 import { ColorPicker } from './colorpicker';
 import { ConstraintValidator } from './constraint-validator';
+import { SingleValue } from 'forge-expr-evaluator/dist/ForgeExprEvaluator';
 
 const UNIVERSAL_TYPE = "univ";
 
@@ -856,34 +857,42 @@ export class LayoutInstance {
 
 
 
+    private getNodeFromId(nodeId: string, layoutNodes: LayoutNode[]): LayoutNode {
+            let node = layoutNodes.find((node) => node.id === nodeId);
+            if (!node) {
+                throw new Error(`Node ${nodeId} not found in graph. Did you hide it? If this is a built-in type, try removing any visibility flags.`);
+            }
+            return node;
+    }
+
+
     private leftConstraint(leftId: string, rightId: string, minDistance: number, layoutNodes: LayoutNode[]): LeftConstraint {
 
-            let left = layoutNodes.find((node) => node.id === leftId);
-            let right = layoutNodes.find((node) => node.id === rightId);
-
+            let left = this.getNodeFromId(leftId, layoutNodes);
+            let right = this.getNodeFromId(rightId, layoutNodes);
             return { left: left, right: right, minDistance: minDistance };
         }
 
     private topConstraint(topId: string, bottomId: string, minDistance: number, layoutNodes: LayoutNode[]): TopConstraint {
 
-            let top = layoutNodes.find((node) => node.id === topId);
-            let bottom = layoutNodes.find((node) => node.id === bottomId);
+            let top = this.getNodeFromId(topId, layoutNodes);
+            let bottom = this.getNodeFromId(bottomId, layoutNodes);
 
             return { top: top, bottom: bottom, minDistance: minDistance };
         }
 
     private ensureSameYConstraint(node1Id: string, node2Id: string, layoutNodes: LayoutNode[]): AlignmentConstraint {
 
-            let node1 = layoutNodes.find((node) => node.id === node1Id);
-            let node2 = layoutNodes.find((node) => node.id === node2Id);
+            let node1 = this.getNodeFromId(node1Id, layoutNodes);
+            let node2 = this.getNodeFromId(node2Id, layoutNodes);
 
             return { axis: "y", node1: node1, node2: node2 };
         }
 
     private ensureSameXConstraint(node1Id: string, node2Id: string, layoutNodes: LayoutNode[]): AlignmentConstraint {
 
-            let node1 = layoutNodes.find((node) => node.id === node1Id);
-            let node2 = layoutNodes.find((node) => node.id === node2Id);
+        let node1 = this.getNodeFromId(node1Id, layoutNodes);
+        let node2 = this.getNodeFromId(node2Id, layoutNodes);
 
             return { axis: "x", node1: node1, node2: node2 };
         }

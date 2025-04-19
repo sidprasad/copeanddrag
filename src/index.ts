@@ -13,7 +13,7 @@ import { Event, Logger, LogLevel } from './logging/logger';
 import * as os from 'os';
 import * as crypto from 'crypto'; 
 
-import { EvalResult, WrappedForgeEvaluator } from './forge-util/evaluatorUtil';
+import { WrappedEvalResult, WrappedForgeEvaluator } from './forge-util/evaluatorUtil';
 
 const express = require('express');
 const path = require('path');
@@ -294,7 +294,7 @@ app.post('/evaluator', (req, res) => {
 
     try {
     let evaluator = new WrappedForgeEvaluator(alloyDatum);
-    let result : EvalResult = evaluator.evaluate(expr, instanceNumber);
+    let result : WrappedEvalResult = evaluator.evaluate(expr, instanceNumber);
 
 
     // result needs to be converted to a string

@@ -1,9 +1,9 @@
 import { DOMParser } from '@xmldom/xmldom';
 
-import { ForgeExprEvaluatorUtil } from 'forge-expr-evaluator';
+import { ForgeExprEvaluatorUtil, EvaluationResult, ErrorResult } from 'forge-expr-evaluator';
 import { AlloyDatum, AlloyRelation, parseAlloyXML, AlloyTuple, AlloyInstance, AlloyType } from '../alloy-instance';
 import { DatumParsed, ParsedValue, Relation, Sig, InstanceData, ForgeTuple, BuiltinType } from 'forge-expr-evaluator/dist/types';
-
+import {EvalResult, SingleValue, Tuple} from 'forge-expr-evaluator/dist/ForgeExprEvaluator';
 
 
 
@@ -127,24 +127,70 @@ function alloyXMLToDatumParsed(datum: string): DatumParsed {
     };
 }
 
+function isErrorResult(result: EvaluationResult): result is ErrorResult {
+    return (result as ErrorResult).error !== undefined;
+}
+
+// export type SingleValue = string | number | boolean;
+// export type Tuple = SingleValue[];
+// export type EvalResult = SingleValue | Tuple[];
+function isSingleValue(value: unknown): value is SingleValue {
+    return typeof value === "string" || typeof value === "number" || typeof value === "boolean";
+}
 
 
-export class EvalResult {
+function singleValueToString(value: SingleValue): string {
+    if (typeof value === "string") {
+        return value;
+    } else if (typeof value === "number") {
+        return value.toString();
+    } else if (typeof value === "boolean") {
+        return value ? "true" : "false";
+    }
+    throw new Error("Invalid SingleValue type");
+}
 
+export class WrappedEvalResult {
 
-    private result: string | string[][];
+    private result: EvaluationResult;
+    private isError: boolean = false;
+    private isSingleton: boolean = false;
+    private expr: string;
 
-    constructor(result: string | string[][]) {
+    constructor(result: EvaluationResult, expr: string) {
         this.result = result;
+        this.expr = expr;
+        this.isError = isErrorResult(result);
+        this.isSingleton = isSingleValue(result);
     }
 
+
+
+
+
     public prettyPrint(): string {
+
+
         if (typeof this.result === 'string') {
             return this.result;
-        } else {
+        } 
+        else if (typeof this.result === 'number') {
+            return this.result.toString();
+        }
+        else if (typeof this.result === 'boolean') {
+            return this.result ? "true" : "false";
+        }
+        else if (this.isError) {
+            let errorResult = this.result as ErrorResult;
+            return `Error: ${errorResult.error.message}`;
+        }
+        else {
             let tupleStringArray: string[] = [];
+            let asTuple = this.result as Tuple[];
+
+
             // For each tuple in the result, join the elements with a ->
-            for (let i = 0; i < this.result.length; i++) {
+            for (let i = 0; i < asTuple.length; i++) {
                 let tuple: string[] = this.result[i];
                 let tupleString = tuple.join("->");
                 tupleStringArray.push(tupleString);
@@ -155,42 +201,43 @@ export class EvalResult {
         }
     }
 
-    /*
-        Only true if the result is #t
-    */
-    public appliesTo(): boolean {
-        // If the result is a string, it is not selected.
-        if (typeof this.result === 'string') {
-            return this.result === "#t";
+
+    public singleResult(): SingleValue {
+        if (!this.isSingleton) {
+            let pp = this.prettyPrint();
+            throw new Error(`Expected selector ${this.expr} to evaluate to a single value. Instead:${pp}`);
         }
-        return false;
+        return this.result as SingleValue;
     }
-
-
-    /* 
-        Specifically returns the elements IF a set.
-    */
-    public selected(): string[][] {
-        if (typeof this.result === 'string') {
-            return [];
-        }
-        return this.result;
-    }
-
 
     // Lets write selected of 1
     public selectedAtoms(): string[] {
 
-        if (typeof this.result === 'string') {
-            return [];
+        /*
+
+            TODO: Need to ACTUALLY check the arity.
+
+        */
+
+
+
+        if (this.isSingleton || this.isError) {
+            let pp = this.prettyPrint();
+            throw new Error(`Expected selector ${this.expr} to evaluate to values of arity 1. Instead: ${pp}`);   
         }
-        let selectedElements = this.result.filter((element) => element.length > 0);
+
+        let asTuple = this.result as Tuple[];
+
+
+        let selectedElements = asTuple.filter((element) => element.length > 0);
         if (selectedElements.length === 0) {
             return [];
         }
 
         // Flatten the selected elements
-        let flattened = selectedElements.flat();
+        let flattened = selectedElements.flat().map((element) => singleValueToString(element));;
+
+
         // Now dedupe the elements
         let uniqueElements = Array.from(new Set(flattened));
         return uniqueElements;
@@ -203,12 +250,15 @@ export class EvalResult {
     */
     public selectedTwoples(): string[][] {
 
-        if (typeof this.result === 'string') {
-            return [];
+        if (this.isSingleton || this.isError) {
+            let pp = this.prettyPrint();
+            throw new Error(`Expected selector ${this.expr} to evaluate to values of arity 2. Instead:${pp}`);   
         }
 
         // NO ATOMS
-        let selectedElements = this.result.filter((element) => element.length > 1);
+        let asTuple = this.result as Tuple[];
+
+        let selectedElements = asTuple.filter((element) => element.length > 1);
         if (selectedElements.length === 0) {
             return [];
         }
@@ -217,8 +267,9 @@ export class EvalResult {
         // Now get the FIRST AND LAST elements of the selected elements
         let selectedTuples = selectedElements.map((element) => {
             return [element[0], element[element.length - 1]];
-        }
-        );
+        }).map((element) => {
+            return element.map((e) => singleValueToString(e));
+        });
         return selectedTuples;
 
     }
@@ -276,7 +327,7 @@ export class WrappedForgeEvaluator {
     }
 
 
-    public evaluate(expr: string, instanceIndex?: number): EvalResult {
+    public evaluate(expr: string, instanceIndex?: number): WrappedEvalResult {
 
         if (!this.sourceCode) {
             // This is a problem.
@@ -284,8 +335,8 @@ export class WrappedForgeEvaluator {
         }
 
         try {
-            let result = this.evaluator.evaluateExpression(expr, instanceIndex);
-            return new EvalResult(result);
+            let result : EvaluationResult = this.evaluator.evaluateExpression(expr, instanceIndex);
+            return new WrappedEvalResult(result, expr);
         }
         catch (e) {
             // HACKY

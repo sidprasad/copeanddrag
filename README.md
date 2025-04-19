@@ -35,5 +35,4 @@ Diagram compactness has been broken somewhere :(
 - Write an n-ary group example
 
 ## TODO:
-- Error catching fails 
-- 
+- Hide disconnected builtins needs some help.
