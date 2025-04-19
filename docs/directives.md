@@ -15,6 +15,25 @@ directives:
 - `field` : Name of the field in the source specification upon which the constraint acts.
 
 
+### Size Directives
+
+Assign a size to all atoms that meet a certain selector.
+
+```yaml
+directives:
+  - size:
+      selector: "Person"
+      height: 20
+      width: 20
+```
+
+#### Parameters
+
+- `selector` : A Forge expression that determines which elements upon which the constraint acts. This expression must return a set of singletons.
+- `height` : Height with which the node should be displayed.
+- `width` : Width with which the node should be displayed.
+
+
 
 ### **Pictorial Directives**
 Assign an icon to all atoms of a certain sig.
@@ -22,38 +41,30 @@ Assign an icon to all atoms of a certain sig.
 ```yaml
 directives:
   - icon:
-      sig: Person
-      icon:
-        path: /path/to/person.png
-        height: 20
-        width: 20
+      selector: Person
+      path: /path/to/person.png
 ```
 
 #### Parameters
 
-- `sig` : Sig name in the source specification.
-- `icon` : Object describing how the icon should be displayed.
-  - `path` : Path to the icon image (`png` and `jpg` supported).
-  - `height` : Height with which the icon should be displayed.
-  - `width` : Width with which the icon should be displayed.
-
-
+- `selector` : A Forge expression that determines which elements upon which the constraint acts. This expression must return a set of singletons.
+- `path` : Path to the icon image (`png` and `jpg` supported).
 
 
 ### **Color Directives**
 
-Allow specific hex-colors (or simple color names) to be associated with `sigs`.
+Allow specific hex-colors (or simple color names) to be associated with selected atoms.
 
 ```
 directives:
     - color:
-        sig: Apple
+        selector: "Apple"
         value: "red"
 ```
 
 #### Parameters
 
-- `sig` : Sig name in the source specification.
+- `selector` : A Forge expression that determines which elements upon which the constraint acts. This expression must return a set of singletons.
 - `value` : Hex (or simple english) description of the color to be applied.
 
 

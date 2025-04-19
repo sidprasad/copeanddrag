@@ -1,0 +1,93 @@
+<div class="container-fluid" id="error_container" style="display: none;">
+    <% if (errors && errors.length > 0) { %>
+        <div id="error_messages" class="alert alert-danger text-monospace">
+            <h4>Error</h4>
+            <%- errors %>
+        </div>
+    <% } %>
+
+    <div id="runtime_messages" class="container"></div>
+
+    <!-- Feedback Form in Dismissible Alert -->
+    <div class="alert alert-secondary alert-dismissible fade show" role="alert" id="feedbackAlert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <form id="feedbackForm" onsubmit="return false;">
+            <div class="form-group">
+                <label for="feedback"><strong>Confused by this error message?</strong></label>
+                <textarea id="feedback" name="feedback" class="form-control" rows="3" placeholder="Let us know what’s unclear or how we could improve it..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-block btn-dark">Submit Feedback</button>
+        </form>
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const errorContainer = document.getElementById('error_container');
+        const errorMessages = document.getElementById('error_messages');
+        const runtimeMessages = document.getElementById('runtime_messages');
+
+        // Show the error container if error_messages exists
+        if (errorMessages) {
+            errorContainer.style.display = 'block';
+        }
+
+        // Observe changes to runtime_messages
+        const observer = new MutationObserver(() => {
+            if (runtimeMessages.innerHTML.trim().length > 0) {
+                errorContainer.style.display = 'block';
+            }
+        });
+
+        observer.observe(runtimeMessages, { childList: true, subtree: true });
+
+        const feedbackForm = document.getElementById('feedbackForm');
+
+        feedbackForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevent form from reloading the page
+
+            let errorContent = "";
+
+            if (document.getElementById('error_messages')) {
+                errorContent = document.getElementById('error_messages').innerHTML;
+            }
+            // Check if there are any runtime errors
+            let runTimeErrors = document.getElementById('runtime_messages').innerHTML;
+            if (runTimeErrors && runTimeErrors.trim().length > 0) {
+                errorContent += "<br>" + runTimeErrors;
+            }
+
+            let instanceNumber = document.getElementById('instancenumber').value;
+            let alloyDatum = document.getElementById('alloydatum').value;
+            let cnd = window.editor.getValue() || "";
+            // Construct the request body
+            const body = {
+                alloydatum: alloyDatum, 
+                cnd: cnd, 
+                feedback: document.getElementById('feedback').value,
+                error: errorContent,
+                instanceNumber: instanceNumber
+            };
+
+            try {
+                // Send POST request to /feedback
+                const response = await fetch('/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                if (response.ok) {
+                    document.getElementById('feedback').style.border = '2px solid green';
+                } else {
+                    alert('An error occurred while submitting feedback.');
+                }
+            } catch (err) {
+                alert('An error occurred while submitting feedback.');
+            }
+        });
+    });
+</script>

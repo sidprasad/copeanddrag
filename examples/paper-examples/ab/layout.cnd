@@ -1,2 +1,5 @@
 constraints:
-    - orientation: {sigs : [B, A], directions: [left]}
+  - orientation:
+      directions:
+        - left
+      selector: '{ a : A, b : B | a in A }'

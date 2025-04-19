@@ -1,0 +1,86 @@
+<!-- TODO: Improve UI HERE -->
+<div id="reltable-container" class="ml-3">
+
+
+    <div class="row mt-1">
+        <%- include('temporalminimap') %>
+    </div>
+
+    <div class="row mt-1 ">
+        <div id="compactnessControl" class="container">
+            <input title="Diagram Compactness" type="range" class="form-control-range" id="scaleFactor" name="scaleFactor" min="0.5" max="10" step="0.5" value="5">
+        </div>
+        <hr>
+    </div>
+
+    <!-- Here, projections is a list of type { type : string, projectedAtom : string, atoms : string[]} 
+     If projections is non-empty, then show each type as a form input  and projectedAtom as the selected element of atoms
+    -->
+
+    <% if (projectionData && projectionData.length> 0) { %>
+    <div class="row container mt-1" id="projectionsSection">
+        <h4>Projections</h4>
+        <p> For each projected type, choose the atom to project over.</p>
+        <% projectionData.forEach(function(projection) { %>
+            <div class="form-group">
+                <label for="<%= projection.type %>_projection">
+                    <%= projection.type %>
+                </label>
+                <select class="form-control" id="<%= projection.type %>_projection"
+                    name="<%= projection.type %>_projection">
+                    <% projection.atoms.forEach(function(atom) { %>
+                        <option value="<%= atom %>" <%= projection.projectedAtom===atom ? 'selected' : '' %>> <%= atom %>
+                        </option>
+                        <% }); %>
+                </select>
+            </div>
+        <% }); %>
+    </div>
+    <% } %>
+
+    <style>
+        .chevron-icon {
+            transition: transform 0.3s ease; /* Smooth rotation animation */
+        }
+
+        #toggleRelationCard {
+            cursor: pointer; /* Make the header look clickable */
+        }
+    </style>
+    <div class="row mt-1 bg-light">
+        <div class="container">
+            <!-- Collapsible Header -->
+            <p class="text-center text-bold" id="toggleRelationCard" style="cursor: pointer;">
+                <i class="chevron-icon fas fa-chevron-right"></i> <!-- Start with chevron pointing right -->
+                Fields 
+            </p>
+        </div>
+
+        <!-- Collapsible Relation Card -->
+        <div class="container" id="relationcard" style="display: none;">
+            <p class="text-muted text-small">Hover over a field name to highlight it.</p>
+            <ul class="list-group list-group-sm" id="relationList">
+            </ul>
+        </div>
+        <hr>
+    </div>
+    <script>
+        document.getElementById('toggleRelationCard').addEventListener('click', function () {
+            const relationCard = document.getElementById('relationcard');
+            const chevronIcon = this.querySelector('.chevron-icon');
+
+            if (relationCard.style.display === 'none' || relationCard.style.display === '') {
+                relationCard.style.display = 'block'; // Show the relation card
+                chevronIcon.classList.remove('fa-chevron-right'); // Remove right-pointing chevron
+                chevronIcon.classList.add('fa-chevron-down'); // Add down-pointing chevron
+            } else {
+                relationCard.style.display = 'none'; // Hide the relation card
+                chevronIcon.classList.remove('fa-chevron-down'); // Remove down-pointing chevron
+                chevronIcon.classList.add('fa-chevron-right'); // Add right-pointing chevron
+            }
+        });
+    </script>
+    <div class="row mt-1">
+        <%- include('evaluator') %>
+    </div>
+</div>

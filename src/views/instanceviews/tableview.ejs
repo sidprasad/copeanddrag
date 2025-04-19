@@ -1,0 +1,93 @@
+<div class="container-fluid" id="tablescontainer">
+    <% if (tables) { %>
+        <!-- Atoms Section -->
+        <div class="d-flex flex-wrap">
+            <% Object.keys(tables.atoms).forEach(atomType => { %>
+                <% if (Array.isArray(tables.atoms[atomType])) { %>
+                    <div class="table-wrapper">
+                        <table class="table table-bordered table-sm compact-table">
+                            <thead>
+                                <tr>
+                                    <th><%= atomType %></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% tables.atoms[atomType].forEach(atom => { %>
+                                    <tr>
+                                        <td><%= atom %></td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% } else { %>
+                    <p>No data available for atom type: <%= atomType %></p>
+                <% } %>
+            <% }); %>
+        </div>
+
+        <!-- Relations Section -->
+        <div class="d-flex flex-wrap">
+            <% Object.keys(tables.relations).forEach(relationType => { %>
+                <% if (tables.relations[relationType] && tables.relations[relationType].length > 0) { %>
+                    <div class="table-wrapper">
+                        <table class="table table-bordered table-sm compact-table">
+                            <thead>
+                                <tr>
+                                    <th><%= relationType %></th>
+                                    <% for (let i = 1; i < tables.relations[relationType][0].length; i++) { %>
+                                        <th></th>
+                                    <% } %>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% tables.relations[relationType].forEach(tuple => { %>
+                                    <tr>
+                                        <% tuple.forEach(value => { %>
+                                            <td><%= value %></td>
+                                        <% }); %>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% } else { %>
+                    <p>No data available for relation: <%= relationType %></p>
+                <% } %>
+            <% }); %>
+        </div>
+    <% } else { %>
+        <p>Nothing to show</p>
+    <% } %>
+</div>
+
+<style>
+    /* Flexbox for compact layout */
+    .d-flex {
+        display: flex;
+        flex-wrap: wrap; /* Allow wrapping to the next line if tables don't fit */
+        gap: 1rem; /* Add spacing between tables */
+    }
+
+    .table-wrapper {
+        flex: 1 1 auto; /* Allow tables to shrink and grow as needed */
+        max-width: 300px; /* Optional: Set a max width for each table */
+    }
+
+    /* Compact table styling */
+    .compact-table th,
+    .compact-table td {
+        padding: 0.25rem; /* Reduce padding inside cells */
+        font-size: 0.9rem; /* Slightly smaller font size */
+    }
+
+    .compact-table {
+        margin-bottom: 0.5rem; /* Reduce space between tables */
+        border-collapse: collapse;
+    }
+
+    .compact-table th,
+    .compact-table td {
+        border: 1px solid #ddd; /* Light border for better readability */
+    }
+</style>

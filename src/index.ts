@@ -7,12 +7,13 @@ import { LayoutInstance } from './layout/layoutinstance';
 import { WebColaLayout } from './webcola-gen/graphtowebcola';
 import { ConstraintValidator } from './layout/constraint-validator';
 import { InstanceLayout } from './layout/interfaces';
-import { copeToLayoutSpec } from './cope-lang/cope-parser';
-import { parseLayoutSpec } from './layout/layoutspec';
-import { instanceToInst } from './forge-util/instanceToInst';
+import { LayoutSpec, parseLayoutSpec } from './layout/layoutspec';
+import { instanceToInst, instanceToTables } from './forge-util/instanceToInst';
 import { Event, Logger, LogLevel } from './logging/logger';
 import * as os from 'os';
 import * as crypto from 'crypto'; 
+
+import { WrappedEvalResult, WrappedForgeEvaluator } from './forge-util/evaluatorUtil';
 
 const express = require('express');
 const path = require('path');
@@ -33,7 +34,7 @@ app.use(express.json({ limit: '50mb' }));
 
 // This is a hack. I'm not sure
 // how to encode the version number.
-const version = "2.2.4";
+const version = "3.0.0";
 
 const secretKey = "cope-and-drag-logging-key";
 
@@ -53,6 +54,10 @@ function getPersistentUserId(): string {
 
 const userId = getPersistentUserId();
 const logger = new Logger(userId, version);
+
+
+
+
 
 
 function getFormContents(req: any) {
@@ -95,18 +100,44 @@ function getFormContents(req: any) {
     }
     let instances = ad.instances;
     let loopBack = ad.loopBack || -1;
+    let evaluator = new WrappedForgeEvaluator(alloyDatum);
 
-    let coopeNonEmpty = cope && cope.length > 0;
 
-    let layoutSpec = coopeNonEmpty ? copeToLayoutSpec(cope) : parseLayoutSpec("");
-    let li = new LayoutInstance(layoutSpec);
+    // Internal consistency checks happen here.
+    let layoutSpec : LayoutSpec = parseLayoutSpec(cope);
+    
+    
+    let li = new LayoutInstance(layoutSpec,  evaluator , instanceNumber);
     return { instances, li, instanceNumber, loopBack, projections };
-
-
 }
+
+function getTableFromRequest(req: any) {
+    const alloyDatum = req.body.alloydatum;
+    const instanceNumber = parseInt(req.body.instancenumber) || 0;
+    try {
+        var ad: AlloyDatum = parseAlloyXML(alloyDatum);
+    }
+    catch (e) {
+        throw new Error("Error parsing Forge instance. May be malformed." + e.message);
+    }
+
+    let tables = instanceToTables(ad.instances[instanceNumber]);
+    return tables;
+}
+
 
 // On a GET request, return the start CnD page.
 app.get('/', (req, res) => {
+
+
+    const instanceToTables : {
+        atoms: Record<string, string[]>,
+        relations: Record<string, string[][]>
+    } = {
+        atoms: {},
+        relations: {}
+    }
+
     res.render('diagram', {
         'height': 0,
         'width': 0,
@@ -119,10 +150,11 @@ app.get('/', (req, res) => {
         alloyDatum: "",
         cope: "",
         projectionData: [],
-        source_content: "", //HACK
-        sourceFileName: "",
+        // source_content: "", //HACK
+        // sourceFileName: "",
         instAsString: "",
-        errors: ""
+        errors: "",
+        tables: instanceToTables
     });
 });
 
@@ -138,7 +170,7 @@ app.post('/', (req, res) => {
     const startTime = performance.now();
 
     try {
-
+        var tables = getTableFromRequest(req) || {};
         var { instances, li, instanceNumber, loopBack, projections } = getFormContents(req);
         var num_instances = instances.length;
 
@@ -148,10 +180,7 @@ app.post('/', (req, res) => {
             loopBack = 0;
         }
 
-        var internal_inconsistency = li.checkConstraintConsistency();
-        if (!internal_inconsistency.consistent) {
-            throw new Error(internal_inconsistency.error);
-        }
+
 
         var instAsString = instanceToInst(instances[instanceNumber]);
         try{
@@ -168,8 +197,11 @@ app.post('/', (req, res) => {
         var colaGroups = cl.groupDefinitions;
         var height = cl.FIG_HEIGHT;
         var width = cl.FIG_WIDTH;
+
+       
     }
     catch (e) {
+        
         error = e.message;
         // If there is an error, we should not show the diagram.
         height = 0;
@@ -194,6 +226,8 @@ app.post('/', (req, res) => {
         }
     }
 
+
+
     res.render('diagram', {
         'height': height !== undefined ? height : 0,
         'width': width !== undefined ? width : 0,
@@ -207,136 +241,16 @@ app.post('/', (req, res) => {
         loopBack,
         cope,
         projectionData,
-        source_content: "", //HACK
-        sourceFileName: "",
         instAsString,
         errors: error.replace(/\n/g, "<br>"),
-        loggingEnabled
+        loggingEnabled,
+        tables : tables
     });
 });
 
 
 
-app.get('/example', (req, res) => {
 
-    const examplesDir = path.join(path.join(__dirname, '..', 'examples'), 'paper-examples');
-
-    // Get the names of all the directories in examplesDir
-    let exampleNames = fs.readdirSync(examplesDir, { withFileTypes: true })
-        .filter(dirent => dirent.isDirectory())
-        .map(dirent => dirent.name);
-
-    res.render('examplehome', { exampleNames });
-});
-
-
-// Need to do this better, but for now, 
-// reuse code.
-app.get('/example/:name', (req, res) => {
-    // Get the example name
-    let exampleName = req.params.name;
-
-    // Define the path to the /examples directory
-    const examplesDir = path.join(
-        path.join(
-            path.join(__dirname, '..', 'examples'),
-            'paper-examples'),
-        exampleName);
-
-    // Check if the directory exists
-    if (!fs.existsSync(examplesDir)) {
-        res.status(404).send('Example not found');
-        return;
-    }
-
-
-    const datumFile = path.join(examplesDir, 'datum.xml');
-    const cndFile = path.join(examplesDir, 'layout.cnd');
-
-    // Ensure the files exist
-    if (!fs.existsSync(datumFile) || !fs.existsSync(cndFile)) {
-        res.status(404).send('Example not found');
-        return;
-    }
-
-    var source_content = "";
-    var sourceFileName = "";
-
-
-
-    let sourceAlloyPath = path.join(examplesDir, 'source.als');
-    let sourceFrgPath = path.join(examplesDir, 'source.frg');
-
-
-    let srcAlloy = fs.existsSync(sourceAlloyPath) ? fs.readFileSync(sourceAlloyPath, 'utf8') : "";
-    let srcFrg = fs.existsSync(sourceFrgPath) ? fs.readFileSync(sourceFrgPath, 'utf8') : "";
-
-
-    if (srcAlloy.length > 0) {
-        source_content = srcAlloy;
-        sourceFileName = `${exampleName}.als`;
-    }
-    else if (srcFrg.length > 0) {
-        source_content = srcFrg;
-        sourceFileName = `${exampleName}.frg`;
-    }
-
-    // Read the files
-    const alloyDatum = fs.readFileSync(datumFile, 'utf8');
-    const cope = fs.readFileSync(cndFile, 'utf8');
-
-    // Eventually, read these from the displayConfig file
-    const instanceNumber = 0;
-    const projections: Record<string, string> = {};
-
-    let ad: AlloyDatum = parseAlloyXML(alloyDatum);
-    let instances = ad.instances;
-    let num_instances = instances.length;
-    let loopBack = ad.loopBack || -1;
-    let layoutSpec = copeToLayoutSpec(cope);
-    let li = new LayoutInstance(layoutSpec);
-
-
-    try{
-        var { layout, projectionData } = li.generateLayout(instances[instanceNumber], projections);
-    }
-    catch(e){
-        throw new Error("The instance being visualized is inconsistent with layout constraints.<br><br> " + e.message);
-    }
-
-    var instAsString = instanceToInst(instances[instanceNumber]);
-    let cl = new WebColaLayout(layout);
-    let colaConstraints = cl.colaConstraints;
-    let colaNodes = cl.colaNodes;
-    let colaEdges = cl.colaEdges;
-    let colaGroups = cl.groupDefinitions;
-
-    let height = cl.FIG_HEIGHT;
-    let width = cl.FIG_WIDTH;
-
-    res.render('diagram', {
-        'height': height,
-        'width': width,
-        'colaNodes': colaNodes,
-        'colaEdges': colaEdges,
-        'colaConstraints': colaConstraints,
-        'colaGroups': colaGroups,
-        instanceNumber,
-        num_instances,
-        layoutAnnotation: "",
-        alloyDatum,
-        loopBack,
-        cope,
-        projectionData,
-        source_content,
-        sourceFileName,
-        instAsString,
-        errors: "",
-        loggingEnabled: true
-    });
-
-
-});
 
 const server = http.createServer(app);
 
@@ -366,6 +280,67 @@ app.post('/timing', (req, res) => {
 
     console.log(`Client time: ${clientTime} ms`);
     res.json({ message: 'Client time received successfully' });
+});
+
+
+app.post('/evaluator', (req, res) => {
+
+    const alloyDatum : string = req.body.alloydatum;
+    const expr : string = req.body.expression;
+    const instanceNumber = parseInt(req.body.instancenumber) || 0;
+    // And evaluate
+
+    let resultString = "SOMETHING WENT WRONG";
+
+    try {
+    let evaluator = new WrappedForgeEvaluator(alloyDatum);
+    let result : WrappedEvalResult = evaluator.evaluate(expr, instanceNumber);
+
+
+    // result needs to be converted to a string
+    resultString = result.prettyPrint();
+    }
+    catch (e) {
+
+        // If e has the evaluatorError property, use that as the message
+        if (e.evaluatorError) {
+            resultString = e.evaluatorError;
+        }
+        else {
+            resultString = e.message;
+        }
+    }
+
+    // Finally, respond with the result
+    res.json({ result: resultString });
+});
+
+
+
+app.post('/feedback', (req, res) => {
+
+
+
+    /*
+        req.body.alloydatum
+        req.body.cope
+        req.body.feedback
+        req.body.error
+        req.body.instanceNumber
+    */
+
+    let payload = {
+        "alloyDatum": req.body.alloydatum,
+        "cnd": req.body.cnd,
+        "feedback": req.body.feedback,
+        "error": req.body.error,
+        "instanceNumber": req.body.instanceNumber
+    }
+
+
+    logger.log_payload(payload, LogLevel.INFO, Event.ERROR_FEEDBACK);
+    res.json({ message: 'Thank you for your feedback.' });
+
 });
 
 process.on('SIGINT', shutdown);

@@ -6,6 +6,9 @@
     <meta charset="utf-8" />
     <title>Cope and Drag</title>
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
     <!-- Include Bootstrap CSS, JQuery, etc -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -25,87 +28,31 @@
         function loadLocalCola() {
             console.warn("CDN for cola.min.js failed. Loading local copy...");
             const script = document.createElement("script");
-            script.src = "/js/libs/cola.min.js"; // Path to your local copy
+            script.src = "/js/libs/cola.js"; // Path to your local copy
             document.head.appendChild(script);
         }
     </script>
     <!-- Primary CDN -->
     <script src="https://marvl.infotech.monash.edu/webcola/extern/graphlib-dot.min.js" onerror="loadLocalGraphlib()"></script>
-    <script src="https://cdn.jsdelivr.net/gh/tgdwyer/WebCola/WebCola/cola.min.js" onerror="loadLocalCola()"></script>
-
-
+    <script src="https://ialab.it.monash.edu/webcola/cola.js" onerror="loadLocalCola()"></script>
 
     <!-- Include d3 here -->
     <script src="https://d3js.org/d3.v4.min.js"></script>
 
     <!-- Include your custom JavaScript file -->
     <script src="/js/renderer.js" defer></script>
+    <script src="/js/imgdownload.js" defer></script>
+
+    <!-- Include Split.js -->
+    <script src="https://cdn.jsdelivr.net/npm/split.js/dist/split.min.js"></script>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
 
-        function downloadHighResPNG(scaleFactor = 3) {
-            const svg = document.getElementById("svg");
-            const serializer = new XMLSerializer();
-            let source = serializer.serializeToString(svg);
-
-            // Ensure proper XML declaration
-            source = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n' + source;
-
-            // Get the CSS styles
-            const styleSheets = Array.from(document.styleSheets).reduce((acc, styleSheet) => {
-                try {
-                    return acc + Array.from(styleSheet.cssRules).reduce((css, rule) => css + rule.cssText, '');
-                } catch (e) {
-                    console.warn('Could not load stylesheet:', styleSheet.href);
-                    return acc;
-                }
-            }, '');
-
-            // Embed the CSS styles into the SVG
-            const styleElement = `<style type="text/css"><![CDATA[${styleSheets}]]></style>`;
-            source = source.replace('</svg>', `${styleElement}</svg>`);
-
-            // Convert SVG string to a data URL
-            const svgBlob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
-            const url = URL.createObjectURL(svgBlob);
-
-            const img = new Image();
-            img.onload = function () {
-                // Create a canvas with increased resolution
-                const canvas = document.createElement("canvas");
-                const ctx = canvas.getContext("2d");
-
-                const width = svg.getBoundingClientRect().width * scaleFactor;
-                const height = svg.getBoundingClientRect().height * scaleFactor;
-
-                canvas.width = width;
-                canvas.height = height;
-
-                // Fill the canvas with a white background
-                ctx.fillStyle = "white";
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                // Scale up the drawing for better quality
-                ctx.scale(scaleFactor, scaleFactor);
-                ctx.drawImage(img, 0, 0, width / scaleFactor, height / scaleFactor);
-
-                // Convert to PNG and trigger download
-                const pngUrl = canvas.toDataURL("image/png");
-                const a = document.createElement("a");
-                a.href = pngUrl;
-                a.download = "cnd.png";
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            };
-
-            img.src = url;
-        }
-
+            Split(['#exploreCol', '#instanceCol', '#controlsCol']);
+        });
 
         window.addEventListener('load', function () {
-
             var width = <%- width %>, height = <%- height %>;
             var nodes = <%- JSON.stringify(colaNodes) %>;
             var edges = <%- JSON.stringify(colaEdges) %>;
@@ -118,128 +65,83 @@
                 console.error('Missing required data for layout');
             }
         });
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const toggleExploreColButton = document.getElementById('toggleExploreCol');
-            const toggleControlsColButton = document.getElementById('toggleControlsCol');
-            const exploreCol = document.getElementById('exploreCol');
-            const controlsCol = document.getElementById('controlsCol');
-
-            // Toggle Explore Column
-            toggleExploreColButton.addEventListener('click', function () {
-                exploreCol.classList.toggle('hidden');
-                toggleExploreColButton.textContent = exploreCol.classList.contains('hidden') ? 'Show Explore' : 'Hide Explore';
-            });
-
-            // Toggle Controls Column
-            toggleControlsColButton.addEventListener('click', function () {
-                controlsCol.classList.toggle('hidden');
-                toggleControlsColButton.textContent = controlsCol.classList.contains('hidden') ? 'Show Controls' : 'Hide Controls';
-            });
-
-
-            // Instance download button.
-            var openInstBtn = document.getElementById('instButton');
-            var sourceContent = <%- JSON.stringify(instAsString) %>;
-            var sourceFileName = "<%= sourceFileName %>";
-            var blob = new Blob([sourceContent], { type: 'text/plain' });
-            var url = URL.createObjectURL(blob);
-
-            if (openInstBtn) {
-                openInstBtn.addEventListener('click', function () {
-                    window.open(url, '_blank');
-                });
-            }
-
-
-
-
-        });
     </script>
 
-    <script type="module">
-        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-        const config = {
-            startOnLoad: true,
-            flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'cardinal' },
-            securityLevel: 'loose',
-        };
-        mermaid.initialize(config);
-
-        window.stateclick = function (i) {
-            // First, set the instance number's value to i
-            document.getElementById('instancenumber').value = i;
-            // Now submit the form
-            document.getElementById('controlsForm').submit();
-        };
-    </script>
     <style>
         /* Hide elements with the hidden class */
         .hidden {
             display: none !important;
         }
-    </style>
 
+
+        .split {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .gutter {
+            background-color: #eee;
+            background-repeat: no-repeat;
+            background-position: 50%;
+
+        }
+
+        .gutter.gutter-horizontal {
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+            cursor: col-resize;
+        }
+    </style>
 </head>
 
 <body>
     <nav class="navbar navbar-light bg-light">
-        <h4 class="navbar-brand">Cope and Drag</h4>
+        <div class="row w-100">
+            <div class="col">
+                <h4 class="navbar-brand">Cope and Drag</h4>
+            </div>
+            <div class="col-auto">
+                <!-- Logging Control Section -->
+                <div class="input-group" id="loggingControlSection">
+                    <div class="input-group-prepend">
+                        <label for="loggingEnabled" class="form-check-label">
+                            <span class="input-group-text">Logging</span>
+                        </label>
+                    </div>
+                    <select class="form-control" id="loggingEnabled" name="loggingEnabled">
+                        <option value="enabled" <%= typeof loggingEnabled === 'undefined' || loggingEnabled ? 'selected' : '' %>>Enabled</option>
+                        <option value="disabled" <%= typeof loggingEnabled !== 'undefined' && !loggingEnabled ? 'selected' : '' %>>Disabled</option>
+                    </select>
+                    <div class="input-group-append">
+                        <button type="button" class="btn btn-sm btn-outline-info float-right" data-toggle="modal" data-target="#loggingInfoModal" id="loggingmoreinfo">?</button>
+                    </div>
+                </div>
+            </div>
 
-        <div class="btn-group" role="group">
-            <button id="toggleExploreCol" class="btn btn-outline-secondary">Hide Explore</button>
-            <button id="toggleControlsCol" class="btn btn-outline-secondary">Hide Controls</button>
-
-            <br>
-            <button id="diagramDownloadButton" class="btn btn-outline-secondary"
-                onclick="downloadHighResPNG(5);">Download Diagram</button>
-            <% if (instAsString) { %>
-                <button id="instButton" class="btn btn-outline-secondary">As Forge Instance</button>
-                <% } %>
-
-                    <br>
-                    <a href="https://sidprasad.github.io/copeanddrag/" target="_blank"><button
-                            class="btn btn-outline-secondary">Docs</button></a>
+            <div class="col">
+                <!-- Button Group -->
+                <div class="btn-group" role="group">
+                    <button id="diagramDownloadButton" class="btn btn-outline-secondary" onclick="downloadHighResPNG(5);">Download Diagram</button>
+                    <a href="https://sidprasad.github.io/copeanddrag/" target="_blank">
+                        <button class="btn btn-outline-secondary">Docs</button>
+                    </a>
+                </div>
+            </div>
         </div>
     </nav>
-    <% if (errors && errors.trim().length> 0) { %>
+    <%- include ('errorMessages') %>
 
-        <div id="error_messages" class="alert alert-danger">
-            <h4>CnD Error</h4>
-            <%- errors %>
+    <div class="split" id="contentcontainer">
+        <!-- Columns for Split.js -->
+        <div id="exploreCol">
+            <%- include('instanceexplore/explore') %>
         </div>
-        <% } %>
-
-            <div id="runtime_messages" class="container">
-
-
-            </div>
-
-            <div class="container-fluid">
-
-                <%- include('temporalminimap') %>
-
-                    <div class="row">
-                        <div class="col-sm-2" id="exploreCol">
-                            <%- include('relationTable') %>
-                        </div>
-
-                        <div class="col">
-                            <%- include('diagramsvg') %>
-                        </div>
-
-                        <div class="col" id="controlsCol">
-                            <%- include('controls') %>
-                        </div>
-                    </div>
-                    <div class="row">
-
-                    </div>
-            </div>
-
+        <div id="instanceCol">
+            <%- include('instanceviews/instance') %>
+        </div>
+        <div id="controlsCol">
+            <%- include('layoutcontrols/controls') %>
+        </div>
+    </div>
 </body>
-
-
-
 
 </html>

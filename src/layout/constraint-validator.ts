@@ -1,7 +1,6 @@
 import { SimplexSolver, Variable, Expression, Strength, Inequality, LEQ, GEQ, LE } from 'cassowary';
 import { intersection } from 'lodash';
 import { InstanceLayout, LayoutNode, LayoutEdge, LayoutGroup, LayoutConstraint, isLeftConstraint, isTopConstraint, isAlignmentConstraint, TopConstraint, LeftConstraint, AlignmentConstraint } from './interfaces';
-import { min } from 'd3';
 
 
 class ConstraintValidator {
@@ -50,7 +49,7 @@ class ConstraintValidator {
         });
 
         for (let i = 0; i < this.orientationConstraints.length; i++) {
-            let constraint = this.orientationConstraints[i];
+            let constraint = this.orientationConstraints[i]; // TODO: This changes?
             this.constraintToCassowary(constraint);
             if (this.error) {
                 return this.error;
@@ -132,6 +131,7 @@ class ConstraintValidator {
         }
         return `ENSURE: Unknown constraint type: ${constraint}`;
     }
+
 
     private constraintToCassowary(constraint: LayoutConstraint) {
         try {

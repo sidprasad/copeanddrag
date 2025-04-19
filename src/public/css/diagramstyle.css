@@ -1,10 +1,4 @@
- #svg-container {
-    /*display: flex;*/
-    /*justify-content: center;*/
-    /*align-items: center;*/
-    /*height: 100vh;*/
 
-} 
 
 #svg {
     width: 100%; /* SVG takes full width of its container */
@@ -14,12 +8,10 @@
     min-height: 80vh; /* Set minimum height to 80% of the viewport height */
     max-height: 95vh; /* Set maximum height to 90% of the viewport height */
 
-    border: 1px solid #ccc; /* Optional: Add a border for clarity */
+
 }
 
-.svg-border {
-    border: 2px solid black;
-}
+
 
 
 .node {
@@ -100,10 +92,7 @@
     flex-direction: row;
 }
 
-/* #svg-container {
-    flex: 1;
-    order: 1;
-} */
+
 
 #controls {
     /* flex: 0 0 300px; 
