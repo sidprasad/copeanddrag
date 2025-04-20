@@ -183,27 +183,30 @@ const FLAG_SELECTOR = `
 </div>
 `;
 
-function addConstraint() {
-    const container = document.getElementById("constraintContainer"); // Use the div instead of a form
-    const div = document.createElement("div");
-    div.classList.add("constraint");
-    div.innerHTML = CONSTRAINT_SELECT;
 
-    container.appendChild(div);
+function addElement(containerId, className, template) {
+    const container = document.getElementById(containerId);
+    const div = document.createElement("div");
+    div.classList.add(className);
+    div.innerHTML = template;
+
+    container.prepend(div); // Add the new element to the top
     updateFields(div.querySelector("select"));
+
+    // Add a highlight effect
+    div.classList.add("highlight");
+    setTimeout(() => {
+        div.classList.remove("highlight");
+    }, 1000); // Remove the highlight after 1 second
 }
 
+function addConstraint() {
+    addElement("constraintContainer", "constraint", CONSTRAINT_SELECT);
+}
 
 function addDirective() {
-    const container = document.getElementById("directiveContainer");
-    const div = document.createElement("div");
-    div.classList.add("directive");
-    div.innerHTML = DIRECTIVE_SELECT;
-
-    container.appendChild(div);
-    updateFields(div.querySelector("select"));
+    addElement("directiveContainer", "directive", DIRECTIVE_SELECT);
 }
-
 
 // TODO: This has to change
 function updateFields(select) {
