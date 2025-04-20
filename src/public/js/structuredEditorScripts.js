@@ -30,7 +30,7 @@ const CYCLIC_SELECTOR = `
     <div class="input-group-prepend">
         <span class="input-group-text infolabel" title="${TUPLE_SELECTOR_TEXT}">Selector</span>
     </div>
-    <input type="text" name="selector" required>
+    <input type="text" name="selector" class="form-control" required>
 </div>
 <div class="input-group">
     <div class="input-group-prepend">
@@ -50,7 +50,7 @@ const ORIENTATION_SELECTOR = `
     <div class="input-group-prepend">
         <span class="input-group-text infolabel" title="${TUPLE_SELECTOR_TEXT}">Selector</span>
     </div>
-    <input type="text" name="selector" required>
+    <input type="text" name="selector" class="form-control" required>
 </div>
 <div class="input-group">
     <div class="input-group-prepend">
@@ -92,7 +92,7 @@ const GROUP_BY_SELECTOR_SELECTOR = `
     <div class="input-group-prepend">
         <span class="input-group-text infolabel" title="${UNARY_SELECTOR_TEXT}">Selector</span>
     </div>
-    <input type="text" name="selector" required>
+    <input type="text" name="selector" class="form-control" required>
 </div>
 <div class="input-group">
     <div class="input-group-prepend">  <span class="input-group-text">Group Name</span> </div>
@@ -140,7 +140,7 @@ const COLOR_SELECTOR = `
     <div class="input-group-prepend">
         <span class="input-group-text infolabel" title="${UNARY_SELECTOR_TEXT}">Selector</span>
     </div>
-    <input type="text" name="selector" required>
+    <input type="text" name="selector" class="form-control" required>
 </div>
 <div class="input-group">
     <div class="input-group-prepend"><span class="input-group-text">Color</span></div>
@@ -153,7 +153,7 @@ const ICON_SELECTOR = `
     <div class="input-group-prepend">
         <span class="input-group-text infolabel" title="${UNARY_SELECTOR_TEXT}">Selector</span>
     </div>
-    <input type="text" name="selector" required>
+    <input type="text" name="selector" class="form-control" required>
 </div>
 <div class="input-group">
     <div class="input-group-prepend"><span class="input-group-text">Path</span></div>
@@ -166,7 +166,7 @@ const SIZE_SELECTOR = `
     <div class="input-group-prepend">
         <span class="input-group-text infolabel" title="${UNARY_SELECTOR_TEXT}">Selector</span>
     </div>
-    <input type="text" name="selector" required>
+    <input type="text" name="selector" class="form-control" required>
 </div>
 <div class="input-group">
     <label><span class="input-group-text">Width</span></label> <input type="number" name="width" class="form-control" required>
