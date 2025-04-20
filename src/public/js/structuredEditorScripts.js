@@ -30,7 +30,7 @@ const CYCLIC_SELECTOR = `
     <div class="input-group-prepend">
         <span class="input-group-text infolabel" title="${TUPLE_SELECTOR_TEXT}">Selector</span>
     </div>
-    <input type="text" name="selector" required>
+    <input type="text" name="selector" class="form-control" required>
 </div>
 <div class="input-group">
     <div class="input-group-prepend">
@@ -50,7 +50,7 @@ const ORIENTATION_SELECTOR = `
     <div class="input-group-prepend">
         <span class="input-group-text infolabel" title="${TUPLE_SELECTOR_TEXT}">Selector</span>
     </div>
-    <input type="text" name="selector" required>
+    <input type="text" name="selector" class="form-control" required>
 </div>
 <div class="input-group">
     <div class="input-group-prepend">
@@ -92,7 +92,7 @@ const GROUP_BY_SELECTOR_SELECTOR = `
     <div class="input-group-prepend">
         <span class="input-group-text infolabel" title="${UNARY_SELECTOR_TEXT}">Selector</span>
     </div>
-    <input type="text" name="selector" required>
+    <input type="text" name="selector" class="form-control" required>
 </div>
 <div class="input-group">
     <div class="input-group-prepend">  <span class="input-group-text">Group Name</span> </div>
@@ -140,7 +140,7 @@ const COLOR_SELECTOR = `
     <div class="input-group-prepend">
         <span class="input-group-text infolabel" title="${UNARY_SELECTOR_TEXT}">Selector</span>
     </div>
-    <input type="text" name="selector" required>
+    <input type="text" name="selector" class="form-control" required>
 </div>
 <div class="input-group">
     <div class="input-group-prepend"><span class="input-group-text">Color</span></div>
@@ -153,7 +153,7 @@ const ICON_SELECTOR = `
     <div class="input-group-prepend">
         <span class="input-group-text infolabel" title="${UNARY_SELECTOR_TEXT}">Selector</span>
     </div>
-    <input type="text" name="selector" required>
+    <input type="text" name="selector" class="form-control" required>
 </div>
 <div class="input-group">
     <div class="input-group-prepend"><span class="input-group-text">Path</span></div>
@@ -166,7 +166,7 @@ const SIZE_SELECTOR = `
     <div class="input-group-prepend">
         <span class="input-group-text infolabel" title="${UNARY_SELECTOR_TEXT}">Selector</span>
     </div>
-    <input type="text" name="selector" required>
+    <input type="text" name="selector" class="form-control" required>
 </div>
 <div class="input-group">
     <label><span class="input-group-text">Width</span></label> <input type="number" name="width" class="form-control" required>
@@ -183,27 +183,30 @@ const FLAG_SELECTOR = `
 </div>
 `;
 
-function addConstraint() {
-    const container = document.getElementById("constraintContainer"); // Use the div instead of a form
-    const div = document.createElement("div");
-    div.classList.add("constraint");
-    div.innerHTML = CONSTRAINT_SELECT;
 
-    container.appendChild(div);
+function addElement(containerId, className, template) {
+    const container = document.getElementById(containerId);
+    const div = document.createElement("div");
+    div.classList.add(className);
+    div.innerHTML = template;
+
+    container.prepend(div); // Add the new element to the top
     updateFields(div.querySelector("select"));
+
+    // Add a highlight effect
+    div.classList.add("highlight");
+    setTimeout(() => {
+        div.classList.remove("highlight");
+    }, 1000); // Remove the highlight after 1 second
 }
 
+function addConstraint() {
+    addElement("constraintContainer", "constraint", CONSTRAINT_SELECT);
+}
 
 function addDirective() {
-    const container = document.getElementById("directiveContainer");
-    const div = document.createElement("div");
-    div.classList.add("directive");
-    div.innerHTML = DIRECTIVE_SELECT;
-
-    container.appendChild(div);
-    updateFields(div.querySelector("select"));
+    addElement("directiveContainer", "directive", DIRECTIVE_SELECT);
 }
-
 
 // TODO: This has to change
 function updateFields(select) {
