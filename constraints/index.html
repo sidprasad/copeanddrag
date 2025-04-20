@@ -420,30 +420,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#orientation-for-sigs" class="md-nav__link">
-    <span class="md-ellipsis">
-      Orientation for Sigs
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Orientation for Sigs">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#parameters_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      Parameters
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -460,9 +436,18 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#parameters_3" class="md-nav__link">
+  <a href="#grouping-by-selector-parameters" class="md-nav__link">
     <span class="md-ellipsis">
-      Parameters
+      Grouping by Selector Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#grouping-by-field-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Grouping by Field Parameters
     </span>
   </a>
   
@@ -607,30 +592,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#orientation-for-sigs" class="md-nav__link">
-    <span class="md-ellipsis">
-      Orientation for Sigs
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Orientation for Sigs">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#parameters_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      Parameters
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -647,9 +608,18 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#parameters_3" class="md-nav__link">
+  <a href="#grouping-by-selector-parameters" class="md-nav__link">
     <span class="md-ellipsis">
-      Parameters
+      Grouping by Selector Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#grouping-by-field-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Grouping by Field Parameters
     </span>
   </a>
   
@@ -682,7 +652,8 @@
 <h1 id="constraints">Constraints</h1>
 <p>Constraints define spatial relationships between elements in the diagram. Each constraint consists of a <strong>type</strong> and associated <strong>parameters</strong>.</p>
 <h2 id="cyclic-constraints"><strong>Cyclic Constraints</strong></h2>
-<p>Cyclic constraints arranges elements related by a field in a circular layout. For example, the constraint below converts the image on the left to that on the right.</p>
+<p>Cyclic constraints arranges related elements in a circular layout.<br />
+For example, the constraint below converts the image on the left to that on the right.</p>
 <div style="display: table; width: 100%; text-align: left;">
 
   <!-- Left Image -->
@@ -695,9 +666,8 @@
 <pre><code>
 constraints:
   - cyclic:
-      field: left
+      selector: "left"
       direction: clockwise  
-      appliesTo: [Node, Node]
     </code></pre>
   </div>
 
@@ -710,9 +680,8 @@ constraints:
 
 <h4 id="parameters">Parameters</h4>
 <ul>
-<li><code>field</code> : Name of the field in the source specification upon which the constraint acts</li>
+<li><code>selector</code> : A Forge expression that determines which elements upon which the constraint acts. This expression must return a set of elements of arity &gt;= 2, and the first and last of each tuple will be used.</li>
 <li><code>direction</code> : [Optional] Direction in which elements will be laid out. One of <code>clockwise</code> or <code>counterclockwise</code>. Defaults to <code>clockwise</code></li>
-<li><code>appliesTo</code> : [Optional] List of the form [<code>sourceSig</code>, <code>targetSig</code>] , describing output graph edges to which this constraint applies. Defaults to [<code>univ</code>, <code>univ</code>] (that is, all types).</li>
 </ul>
 <h2 id="orientation-constraints"><strong>Orientation Constraints</strong></h2>
 <p>Specify the relative positioning of elements.</p>
@@ -731,11 +700,11 @@ and elements related by the field named <code>right</code> to be directly right 
 <pre><code>
 constraints:
   - orientation:
-      field: down
+      selector: "down"
       directions:
         - directlyBelow
   - orientation:
-      field: right
+      selector: "right"
       directions:
         - directlyRight
     </code></pre>
@@ -750,38 +719,29 @@ constraints:
 
 <h4 id="parameters_1">Parameters</h4>
 <ul>
-<li><code>field</code> : Name of the field in the source specification upon which the constraint acts.</li>
-<li>
-<p><code>directions</code> : Directions in which elements will be laid out. List of directions, which can be
-                <code>left</code>, <code>right</code>, <code>above</code>, <code>below</code>, <code>directlyAbove</code>, <code>directlyBelow</code>, <code>directlyLeft</code>, <code>directlyRight</code>.</p>
-</li>
-<li>
-<p><code>appliesTo</code> : [Optional] List of the form [<code>sourceSig</code>, <code>targetSig</code>] , describing output graph edges to which this constraint applies. Defaults to [<code>univ</code>, <code>univ</code>] (that is, all types).</p>
-</li>
-</ul>
-<h3 id="orientation-for-sigs">Orientation for Sigs</h3>
-<p>Alternatively, orientation can apply to entire sigs, defining constraints between all atoms of certain sig types.</p>
-<pre><code class="language-yaml">constraints:
-  - orientation:
-      sigs: [A, B]
-      directions: [above, left]
-</code></pre>
-<h4 id="parameters_2">Parameters</h4>
-<ul>
-<li><code>sigs</code> : List of sig names the source specification upon which the constraint acts. This list can have exactly 2 elements.</li>
+<li><code>selector</code> : A Forge expression that determines which elements upon which the constraint acts. This expression must return a set of elements of arity &gt;= 2, and the first and last of each tuple will be used.</li>
 <li><code>directions</code> : Directions in which elements will be laid out. List of directions, which can be
                 <code>left</code>, <code>right</code>, <code>above</code>, <code>below</code>, <code>directlyAbove</code>, <code>directlyBelow</code>, <code>directlyLeft</code>, <code>directlyRight</code>.</li>
 </ul>
 <h2 id="grouping-constraints"><strong>Grouping Constraints</strong></h2>
-<p>Group elements together based on a field. The constraint below groups elements on the <code>domain</code> of the <code>animal</code> field. This transforms the Sterling output on the left to the output on the right.</p>
-<p>Grouping removes multiple edges between the group source(s) and target(s), and replaces them with the lowest number of arrows between group and element. Groups <strong>cannot</strong> intersect unless one is subsumed by another.</p>
-<!-- ```yaml
-constraints:
-    - group: 
-        field: animals
-        target: domain
-``` -->
-
+<p>Group elements together based on either a <strong>selector</strong> OR a <strong>field</strong>. Groups <strong>cannot</strong> intersect unless one is subsumed by another.</p>
+<p>Grouping by field removes multiple edges between the group source(s) and target(s), and replaces them with the lowest number of arrows between group and element. </p>
+<h4 id="grouping-by-selector-parameters">Grouping by Selector Parameters</h4>
+<ul>
+<li><code>selector</code> : A Forge expression that determines which elements upon which the constraint acts. This expression must return a set of singletons.</li>
+<li><code>name</code> : Name of the group to be displayed.</li>
+</ul>
+<h4 id="grouping-by-field-parameters">Grouping by Field Parameters</h4>
+<ul>
+<li><code>field</code> : Name of the field in the source specification upon which the constraint acts.</li>
+<li><code>groupOn</code> : The 0 indexed element of the field that is used to group elements.</li>
+<li><code>addToGroup</code>: The 0 indexed element of the field which should be added to the group.</li>
+</ul>
+<p>The constraints below:</p>
+<ul>
+<li>Group elements on the domain of the <code>animals</code> field by grouping on the 0th element of the animals  field and adding the 1st element of the field to the group.</li>
+<li>Grouping all the Wolves on the far side by selector, and naming the group <code>farwolves</code>.</li>
+</ul>
 <div style="display: table; width: 100%; text-align: left;">
 
   <!-- Left Image -->
@@ -793,9 +753,13 @@ constraints:
   <div style="display: table-cell; width: 33%; vertical-align: middle; padding: 0 10px;">
 <pre><code>
 constraints:
-    - group: 
-        field: animals
-        target: domain
+  - group:
+      field: animals
+      groupOn: '0'
+      addToGroup: '1'
+  - group:
+      selector: '{ w : Wolf | w in Far.animals }'
+      name: farwolves
     </code></pre>
   </div>
 
@@ -806,34 +770,15 @@ constraints:
 
 </div>
 
-<h4 id="parameters_3">Parameters</h4>
-<ul>
-<li><code>field</code> : Name of the field in the source specification upon which the constraint acts.</li>
-<li><code>target</code> : [Optional] Which part of the field relation is grouped <em>upon</em>. Can be <code>range</code>  or <code>domain</code>. Default is <code>range</code>.</li>
-</ul>
 <h1 id="when-constraints-cannot-be-satisfied">When Constraints Cannot Be Satisfied</h1>
 <p>All CnD constraints are <strong>hard constraints</strong>, and thus must be satisfied for a diagram to be produced. Constraints might not be satisfied for one of two reasons:</p>
 <p><strong>A single CnD constraint definition could be inherently unsatisfiable.</strong> For example, a constraint on the <code>next</code> field that requires the same field to be laid out both leftwards and rightwards:</p>
 <pre><code class="language-yaml">- orientation:
-    field: next
+    selector: next
     directions: [right, left]
 </code></pre>
-<p>This represents a bug in the CnD spec, and can be identified statically. In this case, CnD produces an error message in terms of the constraints that could not be satisfied:</p>
-<pre><code>Error: Inconsistent orientation constraint:
-Field `next` cannot be laid out with directions: right, left.
-</code></pre>
-<p><strong>Some constraints may be individually satisfiable, but become contradictory when laying out a specific instance.</strong> This is akin to a dynamic error, as it depends on the structure of the instance being visualized. For example, consider the constraints:</p>
-<pre><code class="language-yaml">- orientation:
-    sigs: [X, Y]
-    directions: [below]
-- orientation:
-    sigs: [Y, Z]
-    directions: [below]
-- orientation:
-    sigs: [Z, X]
-    directions: [below]
-</code></pre>
-<p>If an instance’s elements form a cyclic dependency, the constraints become unsatisfiable. However, an instance may lack atoms of, say, <code>Z</code>, in which case the constraints are satisfiable.</p>
+<p>This represents a bug in the CnD spec, and can be identified statically. In this case, CnD produces an error message in terms of the constraints that could not be satisfied.</p>
+<p><strong>Some constraints may be individually satisfiable, but become contradictory when laying out a specific instance.</strong> This is akin to a dynamic error, as it depends on the structure of the instance being visualized. </p>
 <p>In both these cases, CnD <strong>does not produce a diagram</strong>. Instead, it provides an error message explaining that the constraints could not be met. </p>
 
 
