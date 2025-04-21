@@ -238,27 +238,31 @@ export interface LayoutSpec {
     }
 }
 
-const DEFAULT_LAYOUT : LayoutSpec = {
-    constraints: {
-        orientation : {
-            relative: [] as RelativeOrientationConstraint[],
-            cyclic: [] as CyclicOrientationConstraint[]
+function DEFAULT_LAYOUT() : LayoutSpec 
+{
+
+    return {
+        constraints: {
+            orientation : {
+                relative: [] as RelativeOrientationConstraint[],
+                cyclic: [] as CyclicOrientationConstraint[]
+            },
+            grouping : {
+                byfield : [] as GroupByField[],
+                byselector : [] as GroupBySelector[]
+            }
         },
-        grouping : {
-            byfield : [] as GroupByField[],
-            byselector : [] as GroupBySelector[]
+        directives: {
+            colors: [],
+            sizes: [],
+            icons: [],
+            projections: [],
+            attributes: [],
+            hideDisconnected: false,
+            hideDisconnectedBuiltIns: false
         }
-    },
-    directives: {
-        colors: [],
-        sizes: [],
-        icons: [],
-        projections: [],
-        attributes: [],
-        hideDisconnected: false,
-        hideDisconnectedBuiltIns: false
-    }
-};
+    };
+}
 
 
 
@@ -277,7 +281,7 @@ const DEFAULT_LAYOUT : LayoutSpec = {
 export function parseLayoutSpec(s: string): LayoutSpec {
 
     if (!s) {
-        return DEFAULT_LAYOUT;
+        return DEFAULT_LAYOUT();
     }
 
 
@@ -291,7 +295,7 @@ export function parseLayoutSpec(s: string): LayoutSpec {
 
 
 
-    let layoutSpec: LayoutSpec = DEFAULT_LAYOUT;
+    let layoutSpec: LayoutSpec = DEFAULT_LAYOUT();
 
     // Now we go through the constraints and directives and extract them
 
