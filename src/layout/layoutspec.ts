@@ -456,14 +456,14 @@ function parseDirectives(directives: any[]): {
                 .map(d => {
 
                     return {
-                        path: d.path,
+                        path: d.icon.path,
                         selector: d.icon.selector
                     }
                 });
     let colors : AtomColorDirective[] = directives.filter(d => d.color)
                 .map(d => {
                     return {
-                        color: d.color.color,
+                        color: d.color.value,
                         selector: d.color.selector
                     }
                 });
