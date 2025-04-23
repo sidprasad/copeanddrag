@@ -158,7 +158,7 @@ export class LayoutInstance {
             let direction = closure.direction;
 
             if (fieldToFlow[fieldName] && fieldToFlow[fieldName] !== direction) {
-                return { consistent: false, error: `Inconsistent cyclic constraints: Field ${fieldName} cannot be laid out ${direction} and ${fieldToFlow[direction]}.` };
+                return { consistent: false, error: `Inconsistent cyclic constraints: Field ${fieldName} cannot be laid out ${direction} and ${fieldToFlow[fieldName]}.` };
             }
             fieldToFlow[fieldName] = direction;
         }
