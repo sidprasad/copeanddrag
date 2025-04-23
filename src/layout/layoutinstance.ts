@@ -654,6 +654,14 @@ export class LayoutInstance {
         constraints = constraints.concat(closureConstraints);
 
 
+        // AND NOW HAVE TO VALIDATE AGAIN RIGHT?
+        const validator = new ConstraintValidator({ nodes: layoutNodes, edges: layoutEdges, constraints: constraints, groups: groups });
+        const layoutError = validator.validateConstraints();
+        if (layoutError) {
+            throw new Error(layoutError);
+        }
+
+
         // Filter out all edges that are hidden
         layoutEdges = layoutEdges.filter((edge) => !edge.id.startsWith(this.hideThisEdge));
 
