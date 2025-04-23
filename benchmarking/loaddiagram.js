@@ -1,7 +1,7 @@
 import { chromium } from 'playwright';
 
 function delay(time) {
-    return new Promise(function(resolve) { 
+    return new Promise(function (resolve) {
         setTimeout(resolve, time);
     });
 }
@@ -39,19 +39,17 @@ async function loadDiagram(copespec, alloydatum, numloads = 1) {
 }
 
 async function loadExample(exampleName, numloads = 1) {
-
     const browser = await chromium.launch({ headless: true });
     const page = await browser.newPage();
 
-    const url = `http://localhost:3000/example/${exampleName}`; 
+    const url = `http://localhost:3000/example/${exampleName}`;
     await page.goto(url);
 
     for (let i = 0; i < numloads; i++) {
-
         await delay(1000);
 
         const buttonExists = await page.$('#cola') !== null;
-        
+
         if (!buttonExists) {
             console.error('Button not found');
             break;
@@ -62,12 +60,21 @@ async function loadExample(exampleName, numloads = 1) {
             page.click('#cola')
         ]);
         console.log(`Clicked the button ${i + 1} times`);
-
     }
     await delay(3000);
     await browser.close();
 }
 
-const TIMES = 50;
+// Parse command-line arguments
+const args = process.argv.slice(2);
+const exampleName = args[0]; // First argument: example name
+const times = parseInt(args[1], 10) || 1; // Second argument: number of times (default to 1)
 
-await loadExample("chord", TIMES).catch(console.error);
+// Validate arguments
+if (!exampleName) {
+    console.error("Error: Example name is required.");
+    process.exit(1);
+}
+
+// Run loadExample with the provided arguments
+await loadExample(exampleName, times).catch(console.error);
