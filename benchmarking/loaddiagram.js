@@ -46,22 +46,34 @@ async function loadExample(exampleName, numloads = 1) {
     await page.goto(url);
 
     for (let i = 0; i < numloads; i++) {
-        await delay(3500); // Large outer bound
+        // Wait for a delay to ensure the page is ready for interaction
+        await delay(3500);
 
+        // Check if the button exists
         const buttonExists = await page.$('#cola') !== null;
-
         if (!buttonExists) {
             console.error('Button not found');
             break;
         }
 
+        // Click the button and wait for the page to reload
         await Promise.all([
-            page.waitForNavigation(),
-            page.click('#cola')
+            page.click('#cola'), // Click the button
+            page.waitForNavigation({ waitUntil: 'domcontentloaded' }) // Wait for the page to reload
         ]);
+
+        // Wait for a specific element that indicates D3 has fully loaded
+        try {
+            await page.waitForSelector('svg', { timeout: 5000 }); // Adjust the selector to match your D3 element
+            //console.log(`D3 content loaded for the ${i + 1} time`);
+        } catch (err) {
+            console.error(`D3 content did not load within the timeout for the ${i + 1} time`);
+        }
+
         console.log(`Loading for the ${i + 1} time`);
     }
-    await delay(3000);
+
+    await delay(3000); // Optional delay after the last load
     await browser.close();
 }
 

@@ -25,23 +25,24 @@ FROM mcr.microsoft.com/playwright:v1.52.0-noble
 # Set the working directory
 WORKDIR /app
 
-
 # Copy only the necessary files from the build stage
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/package*.json ./
 
 # Install only production dependencies
-#RUN npm install --only=production
+RUN npm install --only=production
 
-# # INstall Playwright and its dependencies
-# RUN npm install playwright && \
-#     npx playwright install --with-deps
-
+# Copy benchmarking scripts
 COPY benchmarking ./benchmarking
 
+# Copy the entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+
+# Make the entrypoint script executable
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Expose the port the app runs on
 EXPOSE 3000
 
-# Command to run the application
-CMD ["node", "dist/index.js"]
+# Set the entrypoint
+ENTRYPOINT ["docker-entrypoint.sh"]
