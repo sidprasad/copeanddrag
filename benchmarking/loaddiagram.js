@@ -46,7 +46,7 @@ async function loadExample(exampleName, numloads = 1) {
     await page.goto(url);
 
     for (let i = 0; i < numloads; i++) {
-        await delay(1000);
+        await delay(3500); // Large outer bound
 
         const buttonExists = await page.$('#cola') !== null;
 
@@ -59,7 +59,7 @@ async function loadExample(exampleName, numloads = 1) {
             page.waitForNavigation(),
             page.click('#cola')
         ]);
-        console.log(`Clicked the button ${i + 1} times`);
+        console.log(`Loading for the ${i + 1} time`);
     }
     await delay(3000);
     await browser.close();
