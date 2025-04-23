@@ -27,12 +27,3 @@ We would have to change HOW we compute tuples for groupOn if we implement arrang
 
 [ OR, could we do the permutations RIGHT at the end? No I think they sort of break "GROUP BY FIELD" OR CAN we somehow do GROUPBYFIELD differently?]
 
-
-## TODO:
-Diagram compactness has been broken somewhere :(
-
-## TODO:
-- Write an n-ary group example
-
-## TODO:
-- Hide disconnected builtins needs some help.
