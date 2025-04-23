@@ -14,16 +14,3 @@ effective diagramming.
 
 
 
-## TODO:
-
-CnD should have a 3rd section for (~ arrangement ~)
-1. Projection
-2. Permutation along fields (e.g. Node->Node->Weight to Node->Weight->Node)
-3. Hiding Flags (hide disconnected built ins, hide disconnected)
-
-OR should these stay within directives. 
-
-We would have to change HOW we compute tuples for groupOn if we implement arrangement.
-
-[ OR, could we do the permutations RIGHT at the end? No I think they sort of break "GROUP BY FIELD" OR CAN we somehow do GROUPBYFIELD differently?]
-
