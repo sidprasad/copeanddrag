@@ -1,4 +1,4 @@
-import { chromium } from 'playwright';
+const { chromium } = require('playwright');
 
 function delay(time) {
     return new Promise(function (resolve) {
@@ -46,14 +46,12 @@ async function loadExample(exampleName, numloads = 1) {
     await page.goto(url);
 
     for (let i = 0; i < numloads; i++) {
-        // Wait for a delay to ensure the page is ready for interaction
-        await delay(3500);
-
-        // Check if the button exists
-        const buttonExists = await page.$('#cola') !== null;
-        if (!buttonExists) {
-            console.error('Button not found');
-            break;
+        // Wait for the #cola button to load
+        try {
+            await page.waitForSelector('#cola', { timeout: 5000 }); // Adjust the timeout as needed
+        } catch (err) {
+            console.error('The page did not load within the timeout. Something may be wrong with the browser.');
+            continue;
         }
 
         // Click the button and wait for the page to reload
@@ -65,7 +63,7 @@ async function loadExample(exampleName, numloads = 1) {
         // Wait for a specific element that indicates D3 has fully loaded
         try {
             await page.waitForSelector('svg', { timeout: 5000 }); // Adjust the selector to match your D3 element
-            //console.log(`D3 content loaded for the ${i + 1} time`);
+            console.log(`D3 content loaded for the ${i + 1} time`);
         } catch (err) {
             console.error(`D3 content did not load within the timeout for the ${i + 1} time`);
         }
@@ -73,7 +71,6 @@ async function loadExample(exampleName, numloads = 1) {
         console.log(`Loading for the ${i + 1} time`);
     }
 
-    await delay(3000); // Optional delay after the last load
     await browser.close();
 }
 
@@ -89,4 +86,4 @@ if (!exampleName) {
 }
 
 // Run loadExample with the provided arguments
-await loadExample(exampleName, times).catch(console.error);
+loadExample(exampleName, times).catch(console.error);
