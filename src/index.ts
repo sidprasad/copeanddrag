@@ -343,5 +343,9 @@ app.post('/feedback', (req, res) => {
 
 });
 
+app.get('/version', (req, res) => {
+    res.json({ version: version });
+});
+
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
