@@ -6,38 +6,6 @@ function delay(time) {
     });
 }
 
-async function loadDiagram(copespec, alloydatum, numloads = 1) {
-    const browser = await chromium.launch({ headless: true });
-    const page = await browser.newPage();
-
-    const url = 'http://localhost:3000';
-    const formData = {
-        cope: copespec,
-        alloydatum: alloydatum,
-        loggingEnabled: "disabled",
-        instancenumber: 0
-    };
-
-    await page.goto(url);
-    await page.fill('#cope', formData.cope);
-    await page.fill('#alloydatum', formData.alloydatum);
-    await page.selectOption('#loggingEnabled', formData.loggingEnabled);
-    await page.fill('#instancenumber', formData.instancenumber.toString());
-    await page.click('#controlsForm button[type="submit"]');
-
-    await page.waitForNavigation();
-
-    console.log('Page loaded for the first time. Clicking the button...');
-
-    for (let i = 0; i < numloads; i++) {
-        await page.click('#cola');
-        await page.waitForNavigation();
-        console.log(`Clicked the button ${i + 1} times`);
-    }
-
-    await browser.close();
-}
-
 async function loadExample(exampleName, numloads = 1) {
     const browser = await chromium.launch({ headless: true });
     const page = await browser.newPage();
@@ -45,12 +13,19 @@ async function loadExample(exampleName, numloads = 1) {
     const url = `http://localhost:3000/example/${exampleName}`;
     await page.goto(url);
 
+
     for (let i = 0; i < numloads; i++) {
+
+        await delay(4000); // Wait for 4 seconds before clicking the button
+
+
+        console.log(`Loading for the ${i + 1} time`);
+        //const buttonExists = await page.$('#cola') !== null;
         // Wait for the #cola button to load
         try {
             await page.waitForSelector('#cola', { timeout: 5000 }); // Adjust the timeout as needed
         } catch (err) {
-            console.error('The page did not load within the timeout. Something may be wrong with the browser.');
+            console.error('The page did not load within the timeout. Something may be wrong with the browser.', err);
             continue;
         }
 
@@ -63,12 +38,11 @@ async function loadExample(exampleName, numloads = 1) {
         // Wait for a specific element that indicates D3 has fully loaded
         try {
             await page.waitForSelector('svg', { timeout: 5000 }); // Adjust the selector to match your D3 element
-            console.log(`D3 content loaded for the ${i + 1} time`);
+            //console.log(`D3 content loaded for the ${i + 1} time`);
         } catch (err) {
             console.error(`D3 content did not load within the timeout for the ${i + 1} time`);
         }
 
-        console.log(`Loading for the ${i + 1} time`);
     }
 
     await browser.close();

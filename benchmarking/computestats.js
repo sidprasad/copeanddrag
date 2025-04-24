@@ -53,6 +53,11 @@ function computeStats(times) {
     return { count, average, stdDev };
 }
 
+// Helper function to safely format numbers or return a fallback value
+function safeToFixed(value, decimals = 2, fallback = "N/A") {
+    return value !== null ? value.toFixed(decimals) : fallback;
+}
+
 // Calculate stats
 const clientStats = computeStats(clientMatches);
 const serverStats = computeStats(serverMatches);
@@ -70,22 +75,21 @@ const tableData = clientMatches.map((clientTime, idx) => ({
     "Total Time": totalTimes[idx]
 }));
 
+// Add standard deviation row
 tableData.unshift({
     Index: "Std Dev",
-    "Constraint Solving Time": serverStats.stdDev.toFixed(2),
-    "Graph Layout Time": clientStats.stdDev.toFixed(2),
-    "Total Time": totalStats.stdDev.toFixed(2)
+    "Constraint Solving Time": safeToFixed(serverStats.stdDev),
+    "Graph Layout Time": safeToFixed(clientStats.stdDev),
+    "Total Time": safeToFixed(totalStats.stdDev)
 });
 
-// Add a special header row for averages and standard deviations
+// Add average row
 tableData.unshift({
     Index: "Average",
-    "Constraint Solving Time": serverStats.average.toFixed(2),
-    "Graph Layout Time": clientStats.average.toFixed(2),
-    "Total Time": totalStats.average.toFixed(2)
+    "Constraint Solving Time": safeToFixed(serverStats.average),
+    "Graph Layout Time": safeToFixed(clientStats.average),
+    "Total Time": safeToFixed(totalStats.average)
 });
-
-
 
 console.log(`\n Ran example ${fileNameWithoutExt} , ${clientStats.count} time(s).\n`);
 console.table(tableData);

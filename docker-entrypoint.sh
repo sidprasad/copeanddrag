@@ -36,7 +36,7 @@ if [ "$1" == "--benchmark" ]; then
 
         # Run the loaddiagram.js script with the provided arguments
         echo "Running benchmark for $example_name, over $TIMES runs."
-        node benchmarking/loaddiagram.js "$example_name" "$TIMES"
+        node --input-type=commonjs benchmarking/loaddiagram.js "$example_name" "$TIMES"
 
         # Kill the web server
         echo "Stopping the web server for $example_name..."
