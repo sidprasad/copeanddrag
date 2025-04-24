@@ -20,17 +20,20 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Run
-FROM mcr.microsoft.com/playwright:v1.52.0-noble
+FROM mcr.microsoft.com/playwright:v1.52.0-jammy
 
 # Set the working directory
 WORKDIR /app
 
-# Copy only the necessary files from the build stage
+# Copy only the necessary files from the build stage_
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/package*.json ./
 
 # Install only production dependencies
-RUN npm install --only=production
+#RUN npm install --only=production
+RUN npm install iconv-lite
+
+#https://playwright.dev/docs/docker
 
 # Copy benchmarking scripts
 COPY benchmarking ./benchmarking
