@@ -1,0 +1,89 @@
+name: Release Workflow
+
+permissions:
+  contents: write
+
+on:
+  push:
+    tags:
+      - 'ecoop*' # Trigger on tags starting with 'v', e.g., v1.0.0
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18 # Use the Node.js version compatible with your project
+          cache: 'npm'
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Step 4: Build the project
+      - name: Build the project
+        run: npm run build
+
+      # Step 5: Generate a unique tag (if needed)
+      - name: Generate Unique Tag
+        id: generate_tag
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "TAG_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
+          else
+            UNIQUE_TAG="v$(date +'%Y%m%d%H%M%S')"
+            echo "TAG_NAME=$UNIQUE_TAG" >> $GITHUB_ENV
+          fi
+
+      # Step 6: Create a release
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          release_name: Release ${{ env.TAG_NAME }}
+          draft: false
+          prerelease: false
+
+      # Step 7: Zip the build artifacts
+      - name: Zip Build Artifacts
+        run: zip -r cnd.zip dist/
+
+      # Step 8: Upload artifacts to release
+      - name: Upload Release Assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: cnd.zip
+          asset_name: cnd.zip
+          asset_content_type: application/zip
+
+      # Step 9: Log in to Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Step 10: Build and tag the Docker image
+      - name: Build Docker Image
+        run: |
+          docker build -t sidprasad/cnd:ecoop-25 .
+
+      # Step 11: Push the Docker image to Docker Hub
+      - name: Push Docker Image
+        run: |
+          docker push sidprasad/cnd:ecoop-25
