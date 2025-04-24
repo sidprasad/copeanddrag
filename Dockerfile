@@ -20,7 +20,7 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Run
-FROM mcr.microsoft.com/playwright:v1.52.0-jammy
+FROM mcr.microsoft.com/playwright:v1.52.0-noble
 
 # Set the working directory
 WORKDIR /app
