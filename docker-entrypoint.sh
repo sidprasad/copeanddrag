@@ -72,10 +72,17 @@ run_benchmark() {
             exit 1
         fi
 
-        # Iterate over all directories in /dist/paper-examples/
+    # Iterate over all directories in /dist/paper-examples/
         for example_dir in "$EXAMPLES_DIR"/*; do
             if [ -d "$example_dir" ]; then
                 example_name=$(basename "$example_dir")
+                
+                # Skip the "bt-dag" example
+                if [ "$example_name" == "bt-dag" ]; then
+                    echo "Skipping bt-dag example..."
+                    continue
+                fi
+
                 run_benchmark "$example_name"
             fi
         done
