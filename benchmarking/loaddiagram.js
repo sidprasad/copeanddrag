@@ -6,9 +6,20 @@ function delay(time) {
     });
 }
 
+
 async function loadExample(exampleName, numloads = 1) {
-    const browser = await chromium.launch({ headless: true });
+    const browser = await chromium.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
     const page = await browser.newPage();
+
+
+
+    const startupURL = 'http://localhost:3000/examples';
+    await page.goto(startupURL);
+
+
 
     const url = `http://localhost:3000/example/${exampleName}`;
     await page.goto(url);
@@ -26,6 +37,10 @@ async function loadExample(exampleName, numloads = 1) {
             await page.waitForSelector('#cola', { timeout: 5000 }); // Adjust the timeout as needed
         } catch (err) {
             console.error('The page did not load within the timeout. Something may be wrong with the browser.', err);
+            
+            await browser.close();
+            process.exit(1);
+
             continue;
         }
 
