@@ -77,12 +77,6 @@ run_benchmark() {
             if [ -d "$example_dir" ]; then
                 example_name=$(basename "$example_dir")
                 
-                # Skip the "bt-dag" example
-                if [ "$example_name" == "bt-dag" ]; then
-                    echo "Skipping bt-dag example..."
-                    continue
-                fi
-
                 run_benchmark "$example_name"
             fi
         done
