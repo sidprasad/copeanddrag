@@ -920,78 +920,102 @@ export class LayoutInstance {
 
 
 
-    private getNodeSizeMap(g : Graph) : Record < string, { width: number, height: number } > {
-        let nodeSizeMap = {};
-
-
+    private getNodeSizeMap(g: Graph): Record<string, { width: number; height: number }> {
+        let nodeSizeMap: Record<string, { width: number; height: number }> = {};
         const DEFAULT_SIZE = { width: this.DEFAULT_NODE_WIDTH, height: this.DEFAULT_NODE_HEIGHT };
-
-        let graphNodes = [...g.nodes()];
-        graphNodes.forEach((nodeId) => {
-            nodeSizeMap[nodeId] = DEFAULT_SIZE;
-        });
-
-
+    
+        // Apply size directives first
         let sizeDirectives = this._layoutSpec.directives.sizes;
-        for(let sizeDirective of sizeDirectives) {
+        sizeDirectives.forEach((sizeDirective) => {
             let selectedNodes = this.evaluator.evaluate(sizeDirective.selector, this.instanceNum).selectedAtoms();
             let width = sizeDirective.width;
             let height = sizeDirective.height;
+    
             selectedNodes.forEach((nodeId) => {
+
+                if (nodeSizeMap[nodeId]) {
+
+                    let oldSizeStr = JSON.stringify(nodeSizeMap[nodeId]);
+                    let newSizeStr = JSON.stringify({ width: width, height: height });
+
+
+                    throw new Error(`Size Conflict: "${nodeId}" cannot have multiple sizes: ${oldSizeStr}, ${newSizeStr}.`);
+                }
+
                 nodeSizeMap[nodeId] = { width: width, height: height };
             });
-        }
-
+        });
+    
+        // Set default sizes for nodes that do not have a size set
+        let graphNodes = [...g.nodes()];
+        graphNodes.forEach((nodeId) => {
+            if (!nodeSizeMap[nodeId]) {
+                nodeSizeMap[nodeId] = DEFAULT_SIZE;
+            }
+        });
+    
         return nodeSizeMap;
     }
 
 
-    private getNodeColorMap(g : Graph, a : AlloyInstance) : Record < string, string > {
-
-        // Start by getting the default sig colors
-        let sgMap = this.getSigColors(a);
-
-        let ncMap = {};
-
-        // Now for each graph node, determine its color.
-        
-        let graphNodes = [...g.nodes()];
-        graphNodes.forEach((nodeId) => {
-            
-            let mostSpecificType = this.getMostSpecificType(nodeId, a);
-            let color = sgMap[mostSpecificType];
-            ncMap[nodeId] = color;
-        });
-
-        // Now we evaluate the color directives
+    private getNodeColorMap(g: Graph, a: AlloyInstance): Record<string, string> {
+        let nodeColorMap: Record<string, string> = {};
+    
+        // Start by getting the default signature colors
+        let sigColors = this.getSigColors(a);
+    
+        // Apply color directives first
         let colorDirectives = this._layoutSpec.directives.colors;
         colorDirectives.forEach((colorDirective) => {
             let selected = this.evaluator.evaluate(colorDirective.selector, this.instanceNum).selectedAtoms();
             let color = colorDirective.color;
-
+    
             selected.forEach((nodeId) => {
-                ncMap[nodeId] = color;
+                if (nodeColorMap[nodeId]) {
+                    throw new Error(`Color Conflict: "${nodeId}" cannot have multiple colors:  ${nodeColorMap[nodeId]}, ${color}.`);
+                }
+                nodeColorMap[nodeId] = color;
             });
         });
-        return ncMap;
-    }
-
-    private getNodeIconMap(g : Graph) : Record < string, string > {
-        let nodeIconMap = {};
-        const DEFAULT_ICON = this.DEFAULT_NODE_ICON_PATH;
+    
+        // Set default colors for nodes that do not have a color set
         let graphNodes = [...g.nodes()];
         graphNodes.forEach((nodeId) => {
-            nodeIconMap[nodeId] = DEFAULT_ICON;
-        }
-        );
+            if (!nodeColorMap[nodeId]) {
+                let mostSpecificType = this.getMostSpecificType(nodeId, a);
+                nodeColorMap[nodeId] = sigColors[mostSpecificType];
+            }
+        });
+    
+        return nodeColorMap;
+    }
+
+    private getNodeIconMap(g: Graph): Record<string, string> {
+        let nodeIconMap: Record<string, string> = {};
+        const DEFAULT_ICON = this.DEFAULT_NODE_ICON_PATH;
+
+        // Apply icon directives first
         let iconDirectives = this._layoutSpec.directives.icons;
         iconDirectives.forEach((iconDirective) => {
             let selected = this.evaluator.evaluate(iconDirective.selector, this.instanceNum).selectedAtoms();
             let iconPath = iconDirective.path;
+
             selected.forEach((nodeId) => {
+                if (nodeIconMap[nodeId]) {
+                    throw new Error(`Icon Conflict: "${nodeId}" cannot have multiple icons:  ${nodeIconMap[nodeId]}, ${iconPath}.`);
+                }
                 nodeIconMap[nodeId] = iconPath;
             });
         });
+
+        // Set default icons for nodes that do not have an icon set
+        let graphNodes = [...g.nodes()];
+        graphNodes.forEach((nodeId) => {
+            if (!nodeIconMap[nodeId]) {
+                nodeIconMap[nodeId] = DEFAULT_ICON;
+            }
+        });
+
         return nodeIconMap;
     }
 

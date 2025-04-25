@@ -158,6 +158,12 @@
         form.addEventListener('submit', function (event) {
             event.preventDefault(); // Prevent the default form submission
 
+            // Set the class of the button to spinner
+            submitButton.classList.add('spinner-border', 'spinner-border-sm');
+            submitButton.setAttribute('disabled', 'disabled'); // Disable the button
+
+
+
             // Find all form controls with IDs ending in "_projection"
             const projectionControls = document.querySelectorAll('[id$="_projection"]');
 
