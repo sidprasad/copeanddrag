@@ -233,97 +233,114 @@ app.get('/example', (req, res) => {
 // Need to do this better, but for now, 
 // reuse code.
 app.get('/example/:name', (req, res) => {
-    // Get the example name
-    let exampleName = req.params.name;
+    const startTime = performance.now(); // Start timing
+    const exampleName = req.params.name;
 
     // Define the path to the /examples directory
     const examplesDir = path.join(
         path.join(
             path.join(__dirname, '..', 'examples'),
             'paper-examples'),
-        exampleName);
+        exampleName
+    );
 
     // Check if the directory exists
     if (!fs.existsSync(examplesDir)) {
-        res.status(404).send('Example not found');
+        const error = 'Example not found';
+        console.error(error);
+        res.status(404).send(error);
         return;
     }
-
 
     const datumFile = path.join(examplesDir, 'datum.xml');
     const cndFile = path.join(examplesDir, 'layout.cnd');
 
     // Ensure the files exist
     if (!fs.existsSync(datumFile) || !fs.existsSync(cndFile)) {
-        res.status(404).send('Example not found');
+        const error = 'Required files not found';
+        console.error(error);
+        res.status(404).send(error);
         return;
     }
 
-    var source_content = "";
-    var sourceFileName = "";
+    let source_content = '';
+    let sourceFileName = '';
 
+    const sourceAlloyPath = path.join(examplesDir, 'source.als');
+    const sourceFrgPath = path.join(examplesDir, 'source.frg');
 
-
-    let sourceAlloyPath = path.join(examplesDir, 'source.als');
-    let sourceFrgPath = path.join(examplesDir, 'source.frg');
-
-
-    let srcAlloy = fs.existsSync(sourceAlloyPath) ? fs.readFileSync(sourceAlloyPath, 'utf8') : "";
-    let srcFrg = fs.existsSync(sourceFrgPath) ? fs.readFileSync(sourceFrgPath, 'utf8') : "";
-
+    const srcAlloy = fs.existsSync(sourceAlloyPath) ? fs.readFileSync(sourceAlloyPath, 'utf8') : '';
+    const srcFrg = fs.existsSync(sourceFrgPath) ? fs.readFileSync(sourceFrgPath, 'utf8') : '';
 
     if (srcAlloy.length > 0) {
         source_content = srcAlloy;
         sourceFileName = `${exampleName}.als`;
-    }
-    else if (srcFrg.length > 0) {
+    } else if (srcFrg.length > 0) {
         source_content = srcFrg;
         sourceFileName = `${exampleName}.frg`;
     }
 
-    // Read the files
     const alloyDatum = fs.readFileSync(datumFile, 'utf8');
     const cope = fs.readFileSync(cndFile, 'utf8');
 
-    // Eventually, read these from the displayConfig file
     const instanceNumber = 0;
     const projections: Record<string, string> = {};
 
-    let ad: AlloyDatum = parseAlloyXML(alloyDatum);
-    let instances = ad.instances;
-    let num_instances = instances.length;
-    let loopBack = ad.loopBack || -1;
-    let layoutSpec = copeToLayoutSpec(cope);
-    let li = new LayoutInstance(layoutSpec);
+    let error = '';
+    let height = 0;
+    let width = 0;
+    let colaNodes: any[] = [];
+    let colaEdges: any[] = [];
+    let colaConstraints: any[] = [];
+    let colaGroups: any[] = [];
+    let instAsString = '';
+    let num_instances = 0;
+    let loopBack = -1;
+    let projectionData: any = {};
 
+    try {
+        const ad: AlloyDatum = parseAlloyXML(alloyDatum);
+        const instances = ad.instances;
+        num_instances = instances.length;
+        loopBack = ad.loopBack || -1;
 
-    try{
-        var { layout, projectionData } = li.generateLayout(instances[instanceNumber], projections);
+        const layoutSpec = copeToLayoutSpec(cope);
+        const li = new LayoutInstance(layoutSpec);
+
+        if (instanceNumber >= num_instances) {
+            throw new Error(`Temporal instance ${instanceNumber} number out of range. The temporal trace has only ${num_instances} states.`);
+        }
+
+        const { layout, projectionData: projData } = li.generateLayout(instances[instanceNumber], projections);
+        projectionData = projData;
+
+        instAsString = instanceToInst(instances[instanceNumber]);
+
+        const cl = new WebColaLayout(layout);
+        colaConstraints = cl.colaConstraints;
+        colaNodes = cl.colaNodes;
+        colaEdges = cl.colaEdges;
+        colaGroups = cl.groupDefinitions;
+        height = cl.FIG_HEIGHT;
+        width = cl.FIG_WIDTH;
+    } catch (e) {
+        error = e.message;
+        //console.error(`Error processing example ${exampleName}: ${error}`);
+    } finally {
+        const endTime = performance.now();
+        const serverTime = endTime - startTime;
+        console.log(`Server time: ${serverTime} ms`);
     }
-    catch(e){
-        throw new Error("The instance being visualized is inconsistent with layout constraints.<br><br> " + e.message);
-    }
-
-    var instAsString = instanceToInst(instances[instanceNumber]);
-    let cl = new WebColaLayout(layout);
-    let colaConstraints = cl.colaConstraints;
-    let colaNodes = cl.colaNodes;
-    let colaEdges = cl.colaEdges;
-    let colaGroups = cl.groupDefinitions;
-
-    let height = cl.FIG_HEIGHT;
-    let width = cl.FIG_WIDTH;
 
     res.render('diagram', {
-        'height': height,
-        'width': width,
-        'colaNodes': colaNodes,
-        'colaEdges': colaEdges,
-        'colaConstraints': colaConstraints,
-        'colaGroups': colaGroups,
+        height,
+        width,
+        colaNodes,
+        colaEdges,
+        colaConstraints,
+        colaGroups,
         instanceNumber,
         num_instances,
-        layoutAnnotation: "",
         alloyDatum,
         loopBack,
         cope,
@@ -331,11 +348,9 @@ app.get('/example/:name', (req, res) => {
         source_content,
         sourceFileName,
         instAsString,
-        errors: "",
-        loggingEnabled: true
+        errors: error.replace(/\n/g, '<br>'),
+        loggingEnabled: false // Disable logging for example pages,
     });
-
-
 });
 
 const server = http.createServer(app);
