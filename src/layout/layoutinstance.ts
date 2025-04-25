@@ -934,7 +934,12 @@ export class LayoutInstance {
             selectedNodes.forEach((nodeId) => {
 
                 if (nodeSizeMap[nodeId]) {
-                    throw new Error(`Size Conflict: ${nodeId} cannot have multiple sizes: ${nodeSizeMap[nodeId]}, ${{ width: width, height: height }}.`);
+
+                    let oldSizeStr = JSON.stringify(nodeSizeMap[nodeId]);
+                    let newSizeStr = JSON.stringify({ width: width, height: height });
+
+
+                    throw new Error(`Size Conflict: "${nodeId}" cannot have multiple sizes: ${oldSizeStr}, ${newSizeStr}.`);
                 }
 
                 nodeSizeMap[nodeId] = { width: width, height: height };
@@ -967,7 +972,7 @@ export class LayoutInstance {
     
             selected.forEach((nodeId) => {
                 if (nodeColorMap[nodeId]) {
-                    throw new Error(`Color Conflict: ${nodeId} cannot have multiple colors:  ${nodeColorMap[nodeId]}, ${color}.`);
+                    throw new Error(`Color Conflict: "${nodeId}" cannot have multiple colors:  ${nodeColorMap[nodeId]}, ${color}.`);
                 }
                 nodeColorMap[nodeId] = color;
             });
@@ -997,7 +1002,7 @@ export class LayoutInstance {
 
             selected.forEach((nodeId) => {
                 if (nodeIconMap[nodeId]) {
-                    throw new Error(`Icon Conflict: ${nodeId} cannot have multiple icons:  ${nodeIconMap[nodeId]}, ${iconPath}.`);
+                    throw new Error(`Icon Conflict: "${nodeId}" cannot have multiple icons:  ${nodeIconMap[nodeId]}, ${iconPath}.`);
                 }
                 nodeIconMap[nodeId] = iconPath;
             });
