@@ -34,7 +34,7 @@ app.use(express.json({ limit: '50mb' }));
 
 // This is a hack. I'm not sure
 // how to encode the version number.
-const version = "3.0.2";
+const version = "3.0.3";
 
 const secretKey = "cope-and-drag-logging-key";
 
@@ -341,6 +341,10 @@ app.post('/feedback', (req, res) => {
     logger.log_payload(payload, LogLevel.INFO, Event.ERROR_FEEDBACK);
     res.json({ message: 'Thank you for your feedback.' });
 
+});
+
+app.get('/version', (req, res) => {
+    res.json({ version: version });
 });
 
 process.on('SIGINT', shutdown);

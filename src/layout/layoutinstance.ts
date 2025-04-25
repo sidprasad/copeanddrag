@@ -520,6 +520,8 @@ export class LayoutInstance {
         /////// END HACK //////////
 
 
+
+
         // Filter out all edges that are hidden
         layoutEdges = layoutEdges.filter((edge) => !edge.id.startsWith(this.hideThisEdge));
 
@@ -533,6 +535,13 @@ export class LayoutInstance {
 
 
         let layout = { nodes: layoutNodes, edges: layoutEdges, constraints: constraints, groups: groups };
+
+        let finalConstraintValidator = new ConstraintValidator(layout);
+        let finalLayoutError = finalConstraintValidator.validateConstraints();
+        if (finalLayoutError) {
+            throw new Error(finalLayoutError);
+        }
+
         return { layout, projectionData };
     }
 
