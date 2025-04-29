@@ -435,7 +435,12 @@ export class LayoutInstance {
         let layoutNodes: LayoutNode[] = g.nodes().map((nodeId) => {
 
             let color = nodeColorMap[nodeId] || "black";
-            let iconPath = nodeIconMap[nodeId] || this.DEFAULT_NODE_ICON_PATH;
+
+
+            let iconDetails = nodeIconMap[nodeId];
+            let iconPath = iconDetails.path;
+            let showLabels = iconDetails.showLabels;
+
             let { height, width } = nodeSizeMap[nodeId] || { height: this.DEFAULT_NODE_HEIGHT, width: this.DEFAULT_NODE_WIDTH };
             
             const mostSpecificType = this.getMostSpecificType(nodeId, a);
@@ -445,6 +450,8 @@ export class LayoutInstance {
                 .filter((group) => group.nodeIds.includes(nodeId))
                 .map((group) => group.name);
             let nodeAttributes = attributes[nodeId] || {};
+
+
             return {
                 id: nodeId,
                 color: color,
@@ -454,7 +461,8 @@ export class LayoutInstance {
                 height: height,
                 width: width,
                 mostSpecificType: mostSpecificType,
-                types: allTypes
+                types: allTypes,
+                showLabels: showLabels
             };
         });
 
@@ -990,8 +998,8 @@ export class LayoutInstance {
         return nodeColorMap;
     }
 
-    private getNodeIconMap(g: Graph): Record<string, string> {
-        let nodeIconMap: Record<string, string> = {};
+    private getNodeIconMap(g: Graph): Record<string, { path : string, showLabels : boolean }> {
+        let nodeIconMap: Record<string, { path : string, showLabels : boolean }> = {};
         const DEFAULT_ICON = this.DEFAULT_NODE_ICON_PATH;
 
         // Apply icon directives first
@@ -1004,7 +1012,7 @@ export class LayoutInstance {
                 if (nodeIconMap[nodeId]) {
                     throw new Error(`Icon Conflict: "${nodeId}" cannot have multiple icons:  ${nodeIconMap[nodeId]}, ${iconPath}.`);
                 }
-                nodeIconMap[nodeId] = iconPath;
+                nodeIconMap[nodeId] = { path: iconPath, showLabels: iconDirective.showLabels };
             });
         });
 
@@ -1012,7 +1020,7 @@ export class LayoutInstance {
         let graphNodes = [...g.nodes()];
         graphNodes.forEach((nodeId) => {
             if (!nodeIconMap[nodeId]) {
-                nodeIconMap[nodeId] = DEFAULT_ICON;
+                nodeIconMap[nodeId] = { path: DEFAULT_ICON, showLabels: true };
             }
         });
 

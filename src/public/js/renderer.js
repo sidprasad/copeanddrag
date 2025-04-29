@@ -1,5 +1,3 @@
-
-
 /** COnstants */
 const initialUnconstrainedIterations = 10; //unconstrained initial layout iterations
 const initialUserConstraintIterations = 100; // initial layout iterations with user-specified constraints
@@ -591,20 +589,49 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             return f;
         });
 
+    const SMALL_IMG_SCALE_FACTOR = 0.3;
+
+    
+
     node.filter(d => d.icon) // Filter nodes that have an icon
         .append("image")
         .attr("xlink:href", d => d.icon)
-        .attr("width", function (d) { return d.width; }) // Scale down the icon to fit inside the rectangle
-        .attr("height", function (d) { return d.height; }) // Scale down the icon to fit inside the rectangle
-        .attr("x", function (d) { return -d.width * 0.5; }) // Center the icon horizontally
-        .attr("y", function (d) { return -d.height * 0.5; }) // Center the icon vertically
-        // I want to show some text on hover
+        .attr("width", function (d) { 
+            if (d.showLabels) {
+                return d.width * SMALL_IMG_SCALE_FACTOR; 
+            }
+            return d.width; 
+        }) // Scale down the icon to fit inside the rectangle
+        .attr("height", function (d) { 
+            if (d.showLabels) {
+                return d.height * SMALL_IMG_SCALE_FACTOR; 
+            }
+            return d.height; 
+        }) // Scale down the icon to fit inside the rectangle
+        .attr("x", function (d) { 
+            if (d.showLabels) {
+                // Move to the top-right corner
+                return d.x + d.width - (d.width * SMALL_IMG_SCALE_FACTOR); 
+            }
+            // Center the icon horizontally
+            return d.x - d.width / 2; 
+        })
+        .attr("y", function (d) { 
+            if (d.showLabels) {
+                // Align with the top edge
+                return d.y - d.height / 2; 
+            }
+            // Center the icon vertically
+            return d.y - d.height / 2; 
+        })
         .append("title")
         .text(function (d) { return d.name; })
         .on("error", function (d) {
             d3.select(this).attr("xlink:href", "img/default.png"); // Replace with a default icon
             console.error(`Failed to load icon for node ${d.id}: ${d.icon}`);
         });
+
+
 
 
     // Add most specific type label
@@ -626,7 +653,9 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     return;
                 }
 
-                let displayLabel = d.icon ? "" : d.name;
+
+                let shouldShowLabels = d.showLabels;
+                let displayLabel = shouldShowLabels ? d.name : "";
 
 
                 // Append tspan for d.name
@@ -636,15 +665,17 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     .style("font-weight", "bold")
                     .text(displayLabel);
 
-                var y = 1; // Start from the next line for attributes
+                if (shouldShowLabels) {
+                    var y = 1; // Start from the next line for attributes
 
-                // Append tspans for each attribute
-                for (let key in d.attributes) {
-                    d3.select(this).append("tspan")
-                        .attr("x", 0) // Align with the parent text element
-                        .attr("dy", `${y}em`) // Move each attribute to a new line
-                        .text(key + ": " + d.attributes[key]);
-                    y += 1; // Increment for the next line
+                    // Append tspans for each attribute
+                    for (let key in d.attributes) {
+                        d3.select(this).append("tspan")
+                            .attr("x", 0) // Align with the parent text element
+                            .attr("dy", `${y}em`) // Move each attribute to a new line
+                            .text(key + ": " + d.attributes[key]);
+                        y += 1; // Increment for the next line
+                    }
                 }
             })
             .call(colaLayout.drag);
@@ -736,8 +767,24 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             .attr("height", function (d) { return d.bounds.height(); });
 
         node.select("image")
-            .attr("x", function (d) { return d.bounds.x; })
-            .attr("y", function (d) { return d.bounds.y; });
+        .attr("x", function (d) {
+            if (d.showLabels) {
+                // Move to the top-right corner
+                return d.x + (d.width/2) - (d.width * SMALL_IMG_SCALE_FACTOR);
+            } else {
+                // Align with d.bounds.x
+                return d.bounds.x;
+            }
+        })
+        .attr("y", function (d) {
+            if (d.showLabels) {
+                // Align with the top edge
+                return d.y - d.height / 2;
+            } else {
+                // Align with d.bounds.y
+                return d.bounds.y;
+            }
+        })
 
         mostSpecificTypeLabel
             .attr("x", function (d) { return d.x - d.width / 2 + 5; })
