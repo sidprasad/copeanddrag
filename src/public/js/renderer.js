@@ -589,7 +589,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             return f;
         });
 
-    const SMALL_IMG_SCALE_FACTOR = 0.4;
+    const SMALL_IMG_SCALE_FACTOR = 0.3;
 
     
 
