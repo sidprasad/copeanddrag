@@ -607,6 +607,36 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         });
 
 
+        node.on("dblclick", function (d, _) {
+            //const d = d3.select(this);
+            // Select the image element within the node
+            const icon = d3.select(this).select("image");
+            if (icon.empty()) return; // Exit if no icon is found
+
+            d3.event.stopPropagation(); // Prevent the default double-click behavior
+            d3.event.preventDefault(); // Prevent the default double-click behavior
+     
+            const isTopRight = icon.classed("top-right");
+        
+
+            if (isTopRight) {
+                // Restore the icon to its original position and size
+                icon.classed("top-right", false)
+                    .attr("x", d.bounds.x + (d.bounds.width() / 2) - d.width / 2) // Center horizontally
+                    .attr("y", d.bounds.y + (d.bounds.height() / 2) - d.height / 2) // Center vertically
+                    .attr("width", d.width) // Restore original width
+                    .attr("height", d.height); // Restore original height
+            } else {
+                // Move the icon to the top-right corner and make it smaller
+                icon.classed("top-right", true)
+                    .attr("x", d.bounds.x + d.bounds.width() - (d.width * 0.3)) // Top-right corner
+                    .attr("y", d.bounds.y) // Align with the top edge
+                    .attr("width", d.width * 0.3) // Reduce size
+                    .attr("height", d.height * 0.3); // Reduce size
+            }
+        });
+     
+
     // Add most specific type label
     var mostSpecificTypeLabel = node.append("text")
         .attr("class", "mostSpecificTypeLabel")
@@ -736,8 +766,26 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             .attr("height", function (d) { return d.bounds.height(); });
 
         node.select("image")
-            .attr("x", function (d) { return d.bounds.x; })
-            .attr("y", function (d) { return d.bounds.y; });
+            .attr("x", function (d) {
+                const icon = d3.select(this);
+                if (icon.classed("top-right")) {
+                    // If the icon is in the top-right corner
+                    return d.bounds.x + d.bounds.width() - (d.width * 0.3);
+                } else {
+                    // If the icon is in its original position
+                    return d.bounds.x + (d.bounds.width() / 2) - (d.width / 2);
+                }
+            })
+            .attr("y", function (d) {
+                const icon = d3.select(this);
+                if (icon.classed("top-right")) {
+                    // If the icon is in the top-right corner
+                    return d.bounds.y;
+                } else {
+                    // If the icon is in its original position
+                    return d.bounds.y + (d.bounds.height() / 2) - (d.height / 2);
+                }
+            });
 
         mostSpecificTypeLabel
             .attr("x", function (d) { return d.x - d.width / 2 + 5; })
