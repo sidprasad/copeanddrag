@@ -159,6 +159,12 @@ const ICON_SELECTOR = `
     <div class="input-group-prepend"><span class="input-group-text">Path</span></div>
     <input type="text" name="path" class="form-control" required placeholder="/path/to/icon.png">
 </div>
+<div class="input-group">
+    <div class="input-group-prepend"><span class="input-group-text">Show Labels</span></div>
+    <div class=" form-check ml-3">
+        <input class="form-check-input" type="checkbox" value="" name="showLabels" >
+    </div>
+</div>
 `;
 
 const SIZE_SELECTOR = `
@@ -321,7 +327,12 @@ function writeToYAMLEditor() {
                 } else if (input.type === "number") {
                     // Convert to number if the input type is number
                     params[key] = parseFloat(value);
-                } else {
+                }  
+                else if (input.type === "checkbox") {
+                    // Handle checkbox inputs
+                    params[key] = input.checked; // Add true or false based on the checkbox state
+                }
+                else {
                     params[key] = value;
                 }
             }
@@ -440,7 +451,6 @@ function populateStructuredEditor() {
         // Populate the structured editor with directives from the YAML
         if (directives) {
             directives.forEach(directive => {
-
                 const type = Object.keys(directive)[0];
                 const params = directive[type];
 
@@ -456,24 +466,21 @@ function populateStructuredEditor() {
                 updateFields(sel); // Dynamically generate the fields
                 const paramsDiv = div.querySelector(".params");
 
-
                 // Check if params is an object or a string
-
-                // This is for simple flag select style scenarios.
                 if (typeof params === "string") {
                     let singleInput = paramsDiv.querySelector(`[name="${type}"]`);
                     if (singleInput) {
                         singleInput.value = params;
                     }
-                }
-                else if (typeof params === "object") {
+                } else if (typeof params === "object") {
                     // Fill in the values for the generated fields
                     Object.keys(params).forEach(key => {
                         let input = paramsDiv.querySelector(`[name="${key}"]`);
                         if (input) {
-
-
-                            if (input.multiple && Array.isArray(params[key])) {
+                            if (input.type === "checkbox") {
+                                // Handle checkbox fields
+                                input.checked = params[key] === true; // Set checked if true
+                            } else if (input.multiple && Array.isArray(params[key])) {
                                 // Handle multi-select fields
                                 Array.from(input.options).forEach(option => {
                                     option.selected = params[key].includes(option.value);
@@ -481,9 +488,7 @@ function populateStructuredEditor() {
                             } else if (input.type === "color") {
                                 // Handle color fields
                                 input.value = resolveColorValue(params[key]);
-                            }
-                            else {
-                                console.log("Setting value for " + key + " to " + params[key]);
+                            } else {
                                 // Handle single-value fields
                                 input.value = params[key];
                             }

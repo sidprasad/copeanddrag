@@ -25,6 +25,7 @@ interface LayoutNode {
     height : number;
     mostSpecificType : string;
     types : string[];
+    showLabels : boolean;
 }
 
 

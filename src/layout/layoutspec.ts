@@ -190,6 +190,7 @@ export interface AtomSizeDirective extends VisualManipulation {
 
 export interface AtomIconDirective extends VisualManipulation {
     path : string;
+    showLabels : boolean;
 }
 
 
@@ -461,7 +462,8 @@ function parseDirectives(directives: any[]): {
 
                     return {
                         path: d.icon.path,
-                        selector: d.icon.selector
+                        selector: d.icon.selector,
+                        showLabels: d.icon.showLabels || false 
                     }
                 });
     let colors : AtomColorDirective[] = directives.filter(d => d.color)
