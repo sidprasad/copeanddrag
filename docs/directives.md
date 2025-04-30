@@ -48,7 +48,8 @@ directives:
 #### Parameters
 
 - `selector` : A Forge expression that determines which elements upon which the constraint acts. This expression must return a set of singletons.
-- `path` : Path to the icon image (`png` and `jpg` supported).
+- `path` : Path to the icon image (`png` and `jpg` supported). This path must be a publicly accessible URI.
+- `showLabels` : [Optional, default `false`] Should atom labels (e.g., atom name, attributes) be shown in addition to icons. If `true`, the icon is made smaller to prevent overlap with label text. 
 
 
 ### **Color Directives**
