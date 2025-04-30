@@ -51,6 +51,21 @@ directives:
 - `path` : Path to the icon image (`png` and `jpg` supported). This path must be a publicly accessible URI.
 - `showLabels` : [Optional, default `false`] Should atom labels (e.g., atom name, attributes) be shown in addition to icons. If `true`, the icon is made smaller to prevent overlap with label text. 
 
+#### Built In Icons
+Cope and Drag bundles in the following built-in icons:
+- img/apple.png
+- img/eye.png  
+- img/fork.png 
+- img/nose.png 
+- img/wolf.png
+- img/banana.png
+- img/eyebrow.png
+- img/goat.png 
+- img/pear.png
+- img/default.png 
+- img/mouth.png
+- img/person.png
+- img/fish.png 
 
 ### **Color Directives**
 
