@@ -53,6 +53,7 @@ directives:
 
 #### Built In Icons
 Cope and Drag bundles in the following built-in icons:
+
 - img/apple.png
 - img/eye.png  
 - img/fork.png 
