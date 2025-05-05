@@ -256,8 +256,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     let potentialSourceGroups = getContainingGroups(groups, source);
 
 
-                    let targetGroup = potentialTargetGroups.find(group => group.keyNode === sourceIndex);
-                    let sourceGroup = potentialSourceGroups.find(group => group.keyNode === targetIndex);
+                    let targetGroup = potentialTargetGroups.find(group => group.keyNode === targetIndex);
+                    let sourceGroup = potentialSourceGroups.find(group => group.keyNode === sourceIndex);
 
                     if (targetGroup && sourceGroup) {
                         console.error('We got a target AND a source group', targetGroup, sourceGroup);
@@ -823,8 +823,9 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     let potentialTargetGroups = getContainingGroups(groups, target);
                     let potentialSourceGroups = getContainingGroups(groups, source);
 
-                    let targetGroup = potentialTargetGroups.find(group => group.keyNode === sourceIndex);
-                    let sourceGroup = potentialSourceGroups.find(group => group.keyNode === targetIndex);
+
+                    let targetGroup = potentialTargetGroups.find(group => group.keyNode === targetIndex);
+                    let sourceGroup = potentialSourceGroups.find(group => group.keyNode === sourceIndex);
 
                     if (sourceGroup) {
                         source = sourceGroup;

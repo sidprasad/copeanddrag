@@ -226,7 +226,7 @@ export class LayoutInstance {
 
 
                        // const newId = this.hideThisEdge + edgeId;
-                        g.removeEdge(edge.v, edge.w, edgeId);
+                        //g.removeEdge(edge.v, edge.w, edgeId);
                         //g.setEdge(edge.v, edge.w, edgeLabel, newId);
                     }
                     else {
@@ -469,8 +469,11 @@ export class LayoutInstance {
         ///////////// CONSTRAINTS ////////////
         let constraints: LayoutConstraint[] = this.applyRelatativeOrientationConstraints(layoutNodes);
 
-
         let layoutEdges: LayoutEdge[] = g.edges().map((edge) => {
+
+            // No edge starting with _g_ is here!
+
+
             const edgeId = edge.name;
             const edgeLabel: string = g.edge(edge.v, edge.w, edgeId);
             let source = layoutNodes.find((node) => node.id === edge.v);
