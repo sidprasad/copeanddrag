@@ -109,12 +109,7 @@ export class LayoutInstance {
         }
 
         let groups: LayoutGroup[] = [];
-        // Should we also remove the groups from the graph?
-
-
         // First we go through the group by selector constraints.
-
-
         for (var gc of groupBySelectorConstraints) {
 
             let selector = gc.selector;
@@ -197,8 +192,6 @@ export class LayoutInstance {
                     let key = thisTuple[groupOn];
                     let toAdd = thisTuple[addToGroup];
 
-                    // AND KEY is what you REALLY group on.
-                    // BUT NOW I"m CONFUSED. WHERE IS KEY? IS IT JUST IN THE GROUP NAME IDENTIFIER?
 
                     let labelString = thisTuple.map((s, idx) => {
                         if (idx === groupOn) {
@@ -220,14 +213,6 @@ export class LayoutInstance {
                         existingGroup.nodeIds.push(toAdd);
                         // But also remove this edge from the graph.
                         g.removeEdge(edge.v, edge.w, edgeId);
-                        // Remove the edge and then add it again.
-                        /// This is specifically so that other orientation properties hold.
-                        /// Ideally, this HACK would be removed.
-
-
-                       // const newId = this.hideThisEdge + edgeId;
-                        //g.removeEdge(edge.v, edge.w, edgeId);
-                        //g.setEdge(edge.v, edge.w, edgeLabel, newId);
                     }
                     else {
 
@@ -239,8 +224,8 @@ export class LayoutInstance {
                             showLabel: true // For now
                         };
                         groups.push(newGroup);
-                        // HACK: Don't remove the FIRST edge connecting node to group, we can respect SOME spatiality?
-                        const groupEdgePrefix = "_g_"
+
+                        const groupEdgePrefix = `_g_${groupOn}_${addToGroup}_`;
                         const newId = groupEdgePrefix + edgeId;
                         g.removeEdge(edge.v, edge.w, edgeId);
                         g.setEdge(edge.v, edge.w, groupName, newId);
@@ -470,9 +455,6 @@ export class LayoutInstance {
         let constraints: LayoutConstraint[] = this.applyRelatativeOrientationConstraints(layoutNodes);
 
         let layoutEdges: LayoutEdge[] = g.edges().map((edge) => {
-
-            // No edge starting with _g_ is here!
-
 
             const edgeId = edge.name;
             const edgeLabel: string = g.edge(edge.v, edge.w, edgeId);
