@@ -306,7 +306,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     if (addTargetToGroup) {
 
                         let potentialGroups = getContainingGroups(groups, target);
-                        let targetGroup = potentialGroups.find(group => group.keyNode === targetIndex);
+                        let targetGroup = potentialGroups.find(group => group.keyNode === sourceIndex);
                         if (targetGroup) {
                             let newTargetCoords = closestPointOnRect(targetGroup.bounds, route[0]);
                             let currentTarget = route[route.length - 1];
@@ -315,13 +315,13 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                             route[route.length - 1] = currentTarget;
                         }
                         else {
-                            console.log("Target group not found", potentialGroups, targetIndex);
+                            console.log("Target group not found", potentialGroups, targetIndex, n);
                         }
                     }
                     else if (addSourceToGroup) {
 
                         let potentialGroups = getContainingGroups(groups, source);
-                        let sourceGroup = potentialGroups.find(group => group.keyNode === sourceIndex);
+                        let sourceGroup = potentialGroups.find(group => group.keyNode === targetIndex);
                         if (sourceGroup) {
                             let newSourceCoords = closestPointOnRect(sourceGroup.bounds.inflate(-1), route[route.length - 1]);
                             let currentSource = route[0];
@@ -330,7 +330,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                             route[0] = currentSource;
                         }
                         else {
-                            console.log("Source group not found", potentialGroups, sourceIndex);
+                            console.log("Source group not found", potentialGroups, sourceIndex, targetIndex, n );
                         }
 
                     }
@@ -844,17 +844,11 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     let addSourceToGroup = groupOnIndex >= addToGroupIndex;
                     let addTargetToGroup = groupOnIndex < addToGroupIndex;
 
-                    // let potentialTargetGroups = getContainingGroups(groups, target);
-                    // let potentialSourceGroups = getContainingGroups(groups, source);
-
-
-                    // let targetGroup = potentialTargetGroups.find(group => group.keyNode === targetIndex);
-                    // let sourceGroup = potentialSourceGroups.find(group => group.keyNode === sourceIndex);
 
                     if (addTargetToGroup) {
 
                         let potentialGroups = getContainingGroups(groups, target);
-                        let targetGroup = potentialGroups.find(group => group.keyNode === targetIndex);
+                        let targetGroup = potentialGroups.find(group => group.keyNode === sourceIndex);
                         if (targetGroup) {
                             target = targetGroup;
                             target.innerBounds = targetGroup.bounds.inflate(-1 * targetGroup.padding);
@@ -866,7 +860,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     else if (addSourceToGroup) {
 
                         let potentialGroups = getContainingGroups(groups, source);
-                        let sourceGroup = potentialGroups.find(group => group.keyNode === sourceIndex);
+                        let sourceGroup = potentialGroups.find(group => group.keyNode === targetIndex);
                         if (sourceGroup) {
                             source = sourceGroup;
                             source.innerBounds = sourceGroup.bounds.inflate(-1 * sourceGroup.padding);
