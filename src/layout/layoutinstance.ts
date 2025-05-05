@@ -216,8 +216,7 @@ export class LayoutInstance {
                         {
                             name: groupName,
                             nodeIds: [toAdd],
-                            // ISSUE:  //key, // This needs to not be the KEY but the source in the graph. NO, not the source in the graph, but the element in the groupOn place.
-                            keyNodeId: key,
+                            keyNodeId: key, // What if the key is in the graph?
                             showLabel: true // For now
                         };
                         groups.push(newGroup);
