@@ -200,11 +200,7 @@ export class LayoutInstance {
                         else return "_";
                     }).join(",");
 
-                    //let groupName = key + ":" + edgeLabel;
                     let groupName = `${relName}[${labelString}]`; // TODO: THis?
-
-                    
-
 
                     // Check if the group already exists
                     let existingGroup: LayoutGroup = groups.find((group) => group.name === groupName);
@@ -221,7 +217,7 @@ export class LayoutInstance {
                             name: groupName,
                             nodeIds: [toAdd],
                             // ISSUE:  //key, // This needs to not be the KEY but the source in the graph. NO, not the source in the graph, but the element in the groupOn place.
-                            keyNodeId: sourceInGraph,
+                            keyNodeId: key,
                             showLabel: true // For now
                         };
                         groups.push(newGroup);
