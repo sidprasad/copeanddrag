@@ -374,44 +374,29 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#installing-cnd" class="md-nav__link">
-    <span class="md-ellipsis">
-      Installing CnD
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#what-do-cnd-specs-look-like" class="md-nav__link">
     <span class="md-ellipsis">
       What do CnD specs look like?
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="What do CnD specs look like?">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#yaml-syntax" class="md-nav__link">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-do-cnd-specs-look-like_1" class="md-nav__link">
     <span class="md-ellipsis">
-      YAML Syntax
+      What do CnD specs look like?
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#no-code-interface" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#installing-cnd" class="md-nav__link">
     <span class="md-ellipsis">
-      No Code Interface
+      Installing CnD
     </span>
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -555,44 +540,29 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#installing-cnd" class="md-nav__link">
-    <span class="md-ellipsis">
-      Installing CnD
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#what-do-cnd-specs-look-like" class="md-nav__link">
     <span class="md-ellipsis">
       What do CnD specs look like?
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="What do CnD specs look like?">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#yaml-syntax" class="md-nav__link">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-do-cnd-specs-look-like_1" class="md-nav__link">
     <span class="md-ellipsis">
-      YAML Syntax
+      What do CnD specs look like?
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#no-code-interface" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#installing-cnd" class="md-nav__link">
     <span class="md-ellipsis">
-      No Code Interface
+      Installing CnD
     </span>
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -616,41 +586,46 @@
 
 
 <h1 id="cope-and-drag">Cope and Drag</h1>
-<p>CnD is a lightweight diagramming language designed for use with Alloy-like languages.</p>
-<p>Diagrams are built by refining default Alloy output, rather than requiring users to build 
-visualizations from scratch. 
-This approach lets you get started quickly! Every well formed CnD spec
+<p>CnD is a lightweight diagramming language designed for use with <a href="https://forge-fm.org/">Forge</a> lightweight formal-methods tool.
+Diagrams are built by refining default Forge output, rather than requiring users to build 
+visualizations from scratch. This approach lets you get started quickly! Every well formed CnD spec
 (<em>even an empty spec</em>) produces a diagram.</p>
-<h2 id="installing-cnd">Installing CnD</h2>
-<p><code>CnD</code> is packaged as an easy to install webserver! Download <code>CnD</code> from <a href="https://github.com/sidprasad/copeanddrag/releases">Releases</a>,
-and launch it by running <code>node index.js</code>. This will make the <code>CnD</code> server available on <code>localhost:3000</code>.</p>
 <h2 id="what-do-cnd-specs-look-like">What do CnD specs look like?</h2>
 <p>A CnD specification consists of two primary components:</p>
 <ul>
 <li><strong><a href="constraints/">Constraints</a></strong> that define spatial relationships between elements.</li>
 <li><strong><a href="directives/">Directives</a></strong> that Control visual styling and representation.</li>
 </ul>
-<p>These can be expressed both via YAML and a structured, no code interface. </p>
-<h3 id="yaml-syntax">YAML Syntax</h3>
-<p>CnD code is written in a YAML-like syntax. These are combined to form a full CnD spec:</p>
-<pre><code class="language-yaml">constraints:
-  - &lt;constraint-type&gt;: &lt;parameters&gt;
-  - &lt;constraint-type&gt;: &lt;parameters&gt;
-  .
-  .
-  .
-directives:
-  - &lt;directive-type&gt;: &lt;parameters&gt;
-  - &lt;directive-type&gt;: &lt;parameters&gt;
-  .
-  .
-  .
-</code></pre>
+<p>These can be expressed both via YAML and a structured, no code interface. CnD automatically translates
+specifications between these two representations.</p>
+<h2 id="what-do-cnd-specs-look-like_1">What do CnD specs look like?</h2>
+<p>A CnD specification consists of two primary components:</p>
+<ul>
+<li><strong><a href="constraints/">Constraints</a></strong> that define spatial relationships between elements.</li>
+<li><strong><a href="directives/">Directives</a></strong> that control visual styling and representation.</li>
+</ul>
+<p>These can be expressed both via YAML and a structured, no-code interface. <code>CnD</code> automatically translates
+specifications between these two representations.</p>
+<figure>
+    <img src="img/code.png" alt="No Code Interface Screenshot" style="max-height: 500px; width: auto; border: 1px solid #ccc; padding: 5px;">
+    <figcaption style="text-align: center; margin-top: 5px;">YAML Interface for Authoring Diagrams</figcaption>
+</figure>
+
+<figure>
+    <img src="img/nocode.png" alt="No Code Interface Screenshot" style="max-height: 500px; width: auto; border: 1px solid #ccc; padding: 5px;">
+    <figcaption style="text-align: center; margin-top: 5px;">No Code Interface for Authoring Diagrams</figcaption>
+</figure>
+
 <hr />
-<h3 id="no-code-interface">No Code Interface</h3>
-<p>The structured view provides a no code interface for authoring CnD specifications.</p>
-<p><img alt="No Code Interface Screenshot" src="img/nocode.png" /></p>
-<hr />
+<h2 id="installing-cnd">Installing CnD</h2>
+<ul>
+<li>
+<p><code>CnD</code> is built as an easy to install webserver! Download <code>CnD</code> from <a href="https://github.com/sidprasad/copeanddrag/releases">Releases</a>, and launch it by running <code>node index.js</code>. This will make the <code>CnD</code> server available on <code>localhost:3000</code>.</p>
+</li>
+<li>
+<p><code>CnD</code> is also bundled with the <a href="https://marketplace.visualstudio.com/items?itemName=SiddharthaPrasad.forge-language-server">Forge VS Code Extension</a></p>
+</li>
+</ul>
 
 
 
