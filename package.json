@@ -25,7 +25,8 @@
     "copy-files": "cpx \"views/**/*\" dist/views && cpx \"public/**/*\" dist/public",
     "start": "node dist/index.js",
     "prepublishOnly": "npm run build",
-    "publish-docs": "mkdocs gh-deploy"
+    "publish-docs": "mkdocs gh-deploy",
+    "docs-local": "mkdocs serve"
   },
   "dependencies": {
     "@types/d3": "^7.4.3",
