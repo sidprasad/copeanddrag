@@ -1,6 +1,6 @@
 {
   "name": "cope-and-drag",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "description": "A web application for lightweight diagramming for Alloy/Forge.",
   "main": "dist/index.js",
   "keywords": [],
@@ -41,7 +41,7 @@
     "ejs": "^3.1.10",
     "express": "^4.18.2",
     "firebase": "^11.2.0",
-    "forge-expr-evaluator": "github:karankashyap04/forge-expr-evaluator#fd707d4bcb17bb479ded8cee80eeefb626443962",
+    "forge-expr-evaluator": "github:karankashyap04/forge-expr-evaluator#d8e80ed51f9de2e927bc27c37d4d3e1e01e5a7c2",
     "graphlib": "^2.1.8",
     "i": "^0.3.7",
     "js-yaml": "^4.1.0",
