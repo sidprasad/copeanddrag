@@ -44,6 +44,15 @@
     marker-end: url(#end-arrow);
 }
 
+.helperLink {
+    stroke: #666666; /* Slightly lighter color than the link (#333330) */
+    fill: none;
+    stroke-width: 1px;
+    stroke-opacity: 0.8; /* Slightly transparent */
+    stroke-dasharray: 4, 2; /* Dashed stroke: 4px dash, 2px gap */
+    marker-end: url(#end-arrow); /* Optional: Add an arrow marker if needed */
+}
+
 .linkoutline {
     stroke: white;
     stroke-width: 4px;

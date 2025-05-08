@@ -1,6 +1,4 @@
-
-
-/** COnstants */
+/** Constants */
 const initialUnconstrainedIterations = 10; //unconstrained initial layout iterations
 const initialUserConstraintIterations = 100; // initial layout iterations with user-specified constraints
 const initialAllConstraintsIterations = 1000; // initial layout iterations with all constraints including non-overlap
@@ -8,6 +6,12 @@ const gridSnapIterations = 5; // iterations of "grid snap", which pulls nodes to
 const margin = 10;
 const dy_for_linespacing = 5; // Adjust for spacing between lines
 //////////
+
+function isHelperEdge(edge) {
+
+    const helperPrefix = "_helper_";
+    return edge.id.startsWith(helperPrefix);
+}
 
 
 function getGroupOnAndAddToGroupIndices(edgeId) {
@@ -610,7 +614,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .attr("class", "link-group");
 
     const link = linkGroups.append("path")
-        .attr("class", "link")
+        .attr("class", d => isHelperEdge(d) ? "helperLink" : "link") // Dynamically assign class
         .attr("data-link-id", d => d.id);
 
     linkGroups.append("text")
