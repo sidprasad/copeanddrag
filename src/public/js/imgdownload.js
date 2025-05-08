@@ -80,7 +80,7 @@ async function downloadBundle() {
 
     // 2. Add the .cnd file (YAML content)
     const yamlContent = window.editor.getValue();
-    zip.file("spec.cnd", yamlContent);
+    zip.file("layout.cnd", yamlContent);
 
     // 3. Add the datum.xml file
     const datumElement = document.getElementById("alloydatum");
@@ -92,7 +92,7 @@ async function downloadBundle() {
         const a = document.createElement("a");
         const url = URL.createObjectURL(content);
         a.href = url;
-        a.download = "bundle.zip";
+        a.download = "cnddiagram.zip";
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
