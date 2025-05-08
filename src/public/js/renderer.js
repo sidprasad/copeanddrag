@@ -285,7 +285,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     let dismissableAlert = document.createElement("div");
                     dismissableAlert.className = "alert alert-danger alert-dismissible fade show";
                     dismissableAlert.setAttribute("role", "alert");
-                    dismissableAlert.innerHTML = `Runtime (WebCola) error when laying out an edge from ${d.source.id} to ${d.target.id}. You may have to click and drag these nodes slightly nodes to un-stick layout.`;
+                    dismissableAlert.innerHTML = `Runtime (WebCola) error when laying out an edge from ${d.source.id} to ${d.target.id}. You may have to click and drag these nodes slightly to un-stick layout.`;
                     
                     // Make sure we don't have duplicate alerts
                     let existingAlerts = runtimeMessages.querySelectorAll(".alert");
