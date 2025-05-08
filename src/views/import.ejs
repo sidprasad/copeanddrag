@@ -3,15 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Import a CnD Zip</title>
+    <title>Import CnD Diagram</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .drag-drop-area {
+            border: 2px dashed #6c757d;
+            border-radius: 5px;
+            padding: 20px;
+            text-align: center;
+            color: #6c757d;
+            background-color: #f8f9fa;
+            cursor: pointer;
+        }
+        .drag-drop-area.dragging {
+            background-color: #e9ecef;
+            border-color: #007bff;
+            color: #007bff;
+        }
+        .drag-drop-area.selected {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+    </style>
 </head>
-<body>
-    <h1>Import a CnD zip</h1>
+<body class="bg-light">
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Import CnD Diagram</h1>
 
-    <form action="/import" method="POST" enctype="multipart/form-data">
-        <label for="file">Choose a ZIP file:</label>
-        <input type="file" id="file" name="file" accept=".zip" required>
-        <button type="submit">Upload</button>
-    </form>
+        <form id="uploadForm" action="/import" method="POST" enctype="multipart/form-data" class="text-center">
+            <div id="dragDropArea" class="drag-drop-area">
+                <p>Drag and drop your ZIP file here, or click to select a file.</p>
+                <input type="file" id="fileInput" name="file" accept=".zip" class="form-control d-none" required>
+            </div>
+            <button type="submit" id="uploadButton" class="btn btn-primary mt-3" disabled>Upload</button>
+            <button type="button" id="resetButton" class="btn btn-secondary mt-3">Reset</button>
+        </form>
+    </div>
+
+    <!-- Bootstrap JS (Optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const dragDropArea = document.getElementById('dragDropArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadButton = document.getElementById('uploadButton');
+        const resetButton = document.getElementById('resetButton');
+
+        // Handle drag-and-drop events
+        dragDropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dragDropArea.classList.add('dragging');
+        });
+
+        dragDropArea.addEventListener('dragleave', () => {
+            dragDropArea.classList.remove('dragging');
+        });
+
+        dragDropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dragDropArea.classList.remove('dragging');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files; // Assign dropped files to the input
+                updateDragDropArea(files[0].name);
+            }
+        });
+
+        // Handle click to open file dialog
+        dragDropArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Update drag-drop area text when a file is selected
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                updateDragDropArea(fileInput.files[0].name);
+            }
+        });
+
+        // Reset the drag-drop area
+        resetButton.addEventListener('click', () => {
+            fileInput.value = ''; // Clear the file input
+            dragDropArea.innerHTML = `<p>Drag and drop your ZIP file here, or click to select a file.</p>`;
+            dragDropArea.classList.remove('selected');
+            uploadButton.disabled = true; // Disable the upload button
+        });
+
+        // Update the drag-drop area with the selected file name
+        function updateDragDropArea(fileName) {
+            dragDropArea.innerHTML = `<p><strong>Selected file:</strong> ${fileName}</p>`;
+            dragDropArea.classList.add('selected');
+            uploadButton.disabled = false; // Enable the upload button
+        }
+    </script>
 </body>
 </html>
