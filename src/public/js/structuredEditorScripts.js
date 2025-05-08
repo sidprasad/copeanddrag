@@ -502,3 +502,6 @@ function populateStructuredEditor() {
         alert("Invalid YAML format: " + e.message);
     }
 }
+
+
+
