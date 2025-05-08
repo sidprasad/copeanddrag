@@ -22,6 +22,8 @@ import * as fs from 'fs';
 // import axios
 const axios = require('axios');
 
+import multer from 'multer';
+import AdmZip from 'adm-zip';
 
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
@@ -34,7 +36,7 @@ app.use(express.json({ limit: '50mb' }));
 
 // This is a hack. I'm not sure
 // how to encode the version number.
-const version = "3.1.2";
+const version = "3.1.3";
 
 const secretKey = "cope-and-drag-logging-key";
 
@@ -55,10 +57,7 @@ function getPersistentUserId(): string {
 const userId = getPersistentUserId();
 const logger = new Logger(userId, version);
 
-
-
-
-
+const upload = multer({ dest: 'uploads/' });
 
 function getFormContents(req: any) {
 
@@ -126,41 +125,7 @@ function getTableFromRequest(req: any) {
 }
 
 
-// On a GET request, return the start CnD page.
-app.get('/', (req, res) => {
-
-
-    const instanceToTables : {
-        atoms: Record<string, string[]>,
-        relations: Record<string, string[][]>
-    } = {
-        atoms: {},
-        relations: {}
-    }
-
-    res.render('diagram', {
-        'height': 0,
-        'width': 0,
-        'colaNodes': [],
-        'colaEdges': [],
-        'colaConstraints': [],
-        'colaGroups': [],
-        instanceNumber: 0,
-        num_instances: 0,
-        alloyDatum: "",
-        cope: "",
-        projectionData: [],
-        // source_content: "", //HACK
-        // sourceFileName: "",
-        instAsString: "",
-        errors: "",
-        tables: instanceToTables
-    });
-});
-
-
-
-app.post('/', (req, res) => {
+function generateDiagram (req, res)  {
     const alloyDatum = req.body.alloydatum;
     const cope = req.body.cope;
     let error = "";
@@ -246,11 +211,107 @@ app.post('/', (req, res) => {
         loggingEnabled,
         tables : tables
     });
+}
+
+
+
+// On a GET request, return the start CnD page.
+app.get('/', (req, res) => {
+
+
+    const instanceToTables : {
+        atoms: Record<string, string[]>,
+        relations: Record<string, string[][]>
+    } = {
+        atoms: {},
+        relations: {}
+    }
+
+    res.render('diagram', {
+        'height': 0,
+        'width': 0,
+        'colaNodes': [],
+        'colaEdges': [],
+        'colaConstraints': [],
+        'colaGroups': [],
+        instanceNumber: 0,
+        num_instances: 0,
+        alloyDatum: "",
+        cope: "",
+        projectionData: [],
+        // source_content: "", //HACK
+        // sourceFileName: "",
+        instAsString: "",
+        errors: "",
+        tables: instanceToTables
+    });
 });
 
 
 
 
+
+
+app.post('/', generateDiagram);
+
+app.get('/import', (req, res) => {
+    res.render('import', {
+        title: 'Import ZIP File',
+        message: 'Upload a ZIP file containing datum.xml and layout.cnd to import your data.'
+    });
+});
+
+app.post('/import', upload.single('file'), async (req, res) => {
+    try {
+        // Ensure a file was uploaded
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+
+        // Load the uploaded ZIP file
+        const zip = new AdmZip(req.file.path);
+
+        // Extract datum.xml
+        const datumEntry = zip.getEntry('datum.xml');
+        if (!datumEntry) {
+            return res.status(400).json({ error: 'datum.xml not found in the ZIP file' });
+        }
+        const datumContent = datumEntry.getData().toString('utf-8');
+
+        // Ensure datumContent is passed as raw XML
+        if (!datumContent.trim().startsWith('<')) {
+            return res.status(400).json({ error: 'Invalid datum.xml content' });
+        }
+
+        // Extract layout.cnd
+        const layoutEntry = zip.getEntry('layout.cnd');
+        if (!layoutEntry) {
+            return res.status(400).json({ error: 'layout.cnd not found in the ZIP file' });
+        }
+        const layoutContent = layoutEntry.getData().toString('utf-8');
+
+        // Prepare the request body for the POST endpoint
+        req.body = {
+            alloydatum: datumContent,
+            cope: layoutContent,
+            instancenumber: 0, // Default to the first instance
+            loggingEnabled: 'enabled' // Optional: Enable logging
+        };
+
+        // Call the generateDiagram function
+        generateDiagram(req, res);
+    } catch (error) {
+        console.error('Error importing ZIP file:', error);
+        res.status(500).json({ error: 'Failed to import ZIP file' });
+    } finally {
+        // Clean up the uploaded file
+        if (req.file) {
+            fs.unlink(req.file.path, (err) => {
+                if (err) console.error('Failed to delete uploaded file:', err);
+            });
+        }
+    }
+});
 
 const server = http.createServer(app);
 

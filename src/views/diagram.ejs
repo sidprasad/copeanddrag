@@ -46,6 +46,9 @@
     <!-- Include Split.js -->
     <script src="https://cdn.jsdelivr.net/npm/split.js/dist/split.min.js"></script>
 
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
 
@@ -121,7 +124,7 @@
                 <!-- Button Group -->
                 <div class="btn-group mp-2" role="group">
                     <!-- Download Diagram Button -->
-                    <button id="diagramDownloadButton" class="btn btn-outline-secondary" onclick="downloadHighResPNG(5);" title="Download Diagram">
+                    <button id="diagramDownloadButton" class="btn btn-outline-secondary" onclick="downloadBundle();" title="Export Diagram">
                         <i class="fas fa-download"></i>
                     </button>
 
