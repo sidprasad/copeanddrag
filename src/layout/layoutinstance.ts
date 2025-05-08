@@ -111,12 +111,6 @@ export class LayoutInstance {
 
         let groups: LayoutGroup[] = [];
 
-
-
-
-
-
-
         // First we go through the group by selector constraints.
         for (var gc of groupBySelectorConstraints) {
 
@@ -188,16 +182,7 @@ export class LayoutInstance {
                     showLabel: true
                 };
                 groups.push(newGroup);
-            }
-
-            // 
-
-
-           
-
-
-
-            
+            }            
         }
 
 
@@ -213,10 +198,6 @@ export class LayoutInstance {
             });
             return fieldConstraints;
         }
-
-      
-
-
 
         graphEdges.forEach((edge) => {
             const edgeId = edge.name;
@@ -474,9 +455,14 @@ export class LayoutInstance {
         let nodeSizeMap = this.getNodeSizeMap(g);
 
 
+        // This is where we add the helper edges to the graph.
+        this.addHelperEdges(g);
+
+
         /// Groups have to happen here ///
         let groups = this.generateGroups(g, a);
         this.ensureNoExtraNodes(g, a);
+
         let dcN = this.getDisconnectedNodes(g);
 
         let layoutNodes: LayoutNode[] = g.nodes().map((nodeId) => {
@@ -1115,5 +1101,29 @@ export class LayoutInstance {
 
         return filteredTuples;
 
+    }
+
+    // g is an inout parameter. I.E. it will be modified.
+    private addHelperEdges(g: Graph) {
+
+        const helperEdgePrefix = "_helper_";
+        let helperEdges = this._layoutSpec.directives.helperEdges;
+        helperEdges.forEach((he) => {
+
+            let edgeLabel = he.name;
+            let edgeIdPrefix = `${helperEdgePrefix}${edgeLabel}`;
+
+            let res = this.evaluator.evaluate(he.selector, this.instanceNum);
+
+            let selectedTuples: string[][] = res.selectedTwoples();
+
+            selectedTuples.forEach((tuple) => {
+                let sourceNodeId = tuple[0];
+                let targetNodeId = tuple[1];
+
+                let edgeId = `${edgeIdPrefix}<:${sourceNodeId}->${targetNodeId}`;
+                g.setEdge(sourceNodeId, targetNodeId, edgeLabel, edgeId);
+            });
+        });
     }
 }

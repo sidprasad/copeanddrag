@@ -199,6 +199,9 @@ export interface AtomIconDirective extends VisualManipulation {
     showLabels : boolean;
 }
 
+export interface HelperEdgeDirective extends VisualManipulation {
+    name : string;
+}
 
 
 // Right now, we don't support applies To on these.
@@ -240,6 +243,7 @@ export interface LayoutSpec {
         icons: AtomIconDirective[];
         projections: ProjectionDirective[];
         attributes: AttributeDirective[];
+        helperEdges: HelperEdgeDirective[];
         hideDisconnected : boolean;
         hideDisconnectedBuiltIns : boolean;
     }
@@ -265,6 +269,7 @@ function DEFAULT_LAYOUT() : LayoutSpec
             icons: [],
             projections: [],
             attributes: [],
+            helperEdges: [],
             hideDisconnected: false,
             hideDisconnectedBuiltIns: false
         }
@@ -456,6 +461,7 @@ function parseDirectives(directives: any[]): {
                             icons: AtomIconDirective[];
                             projections: ProjectionDirective[];
                             attributes: AttributeDirective[];
+                            helperEdges: HelperEdgeDirective[];
                             hideDisconnected : boolean;
                             hideDisconnectedBuiltIns : boolean;
                         } 
@@ -506,12 +512,20 @@ function parseDirectives(directives: any[]): {
     let hideDisconnected = flags.includes("hideDisconnected");
     let hideDisconnectedBuiltIns = flags.includes("hideDisconnectedBuiltIns");
 
+    let helperEdges : HelperEdgeDirective[] = directives.filter(d => d.helperEdge).map(d => {
+        return {
+            name: d.helperEdge.name,
+            selector: d.helperEdge.selector
+        }
+    });
+
     return {
         colors,
         sizes,
         icons,
         projections,
         attributes,
+        helperEdges,
         hideDisconnected,
         hideDisconnectedBuiltIns
     }
