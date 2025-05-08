@@ -1,3 +1,5 @@
+
+
 /** COnstants */
 const initialUnconstrainedIterations = 10; //unconstrained initial layout iterations
 const initialUserConstraintIterations = 100; // initial layout iterations with user-specified constraints
@@ -232,58 +234,23 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
 
             link.attr("d", function (d, i) {
+
                 let n = d.id;
 
                 try {
                     var route = colaLayout.routeEdge(d);
-
-                    // Handle self-loop (source and target are the same)
-                    if (d.source.id === d.target.id) {
-                        const source = d.source;
-
-                        // Get the bounds of the source/target node
-                        const bounds = source.bounds;
-
-                        // Calculate width and height from bounds
-                        const width = bounds.X - bounds.x;
-                        const height = bounds.Y - bounds.y;
-
-                        // Define two distinct points on the bounds for the start and end of the arc
-                        const startPoint = {
-                            x: bounds.x + width / 2, // Center of the top edge
-                            y: bounds.y
-                        };
-                        const endPoint = {
-                            x: bounds.X, // Center of the right edge
-                            y: bounds.y + height / 2
-                        };
-
-                        // Dynamically calculate the control point for the arc
-                        const selfLoopIndex = d.selfLoopIndex || 0; // Index of the self-loop (if multiple exist)
-                        const curvatureScale = 1 + selfLoopIndex * 0.2; // Scale curvature based on self-loop index
-                        const controlPoint = {
-                            x: bounds.X + width / 2 * curvatureScale, // Offset based on node width and scale
-                            y: bounds.y - height / 2 * curvatureScale // Offset based on node height and scale
-                        };
-
-                        // Create a route with three points: start, control, and end
-                        route = [
-                            startPoint,   // Start point on the bounds
-                            controlPoint, // Control point for the arc
-                            endPoint      // End point on the bounds
-                        ];
-                    }
-
                 } catch (e) {
+
                     console.log("Error routing edge", d.id, `from ${d.source.id} to ${d.target.id}`);
                     console.error(e);
+
 
                     let runtimeMessages = document.getElementById("runtime_messages");
                     let dismissableAlert = document.createElement("div");
                     dismissableAlert.className = "alert alert-danger alert-dismissible fade show";
                     dismissableAlert.setAttribute("role", "alert");
-                    dismissableAlert.innerHTML = `Runtime (WebCola) error when laying out an edge from ${d.source.id} to ${d.target.id}. You may have to click and drag these nodes slightly to un-stick layout.`;
-
+                    dismissableAlert.innerHTML = `Runtime (WebCola) error when laying out an edge from ${d.source.id} to ${d.target.id}. You may have to click and drag these nodes slightly nodes to un-stick layout.`;
+                    
                     // Make sure we don't have duplicate alerts
                     let existingAlerts = runtimeMessages.querySelectorAll(".alert");
                     existingAlerts.forEach(alert => {
@@ -291,7 +258,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                             alert.remove();
                         }
                     });
-
+                    
                     runtimeMessages.appendChild(dismissableAlert);
                     return lineFunction([{ x: d.source.x, y: d.source.y }, { x: d.target.x, y: d.target.y }]);
                 }
@@ -389,11 +356,100 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 // If there are only two points in the route, get the midpoint of the route and add it to the route
                 if (route.length === 2) {
                     const midpoint = {
-                        x: (route[0].x + route[route.length - 1].x) / 2 + 50,
-                        y: (route[0].y + route[route.length - 1].y) / 2 - 50
+                        x: (route[0].x + route[1].x) / 2,
+                        y: (route[0].y + route[1].y) / 2
                     };
-                    route.splice(1, 0, midpoint); // Insert the midpoint
+                    route.splice(1, 0, midpoint);
                 }
+
+
+
+
+                // Determine the direction of the edge
+                var dx = route[1].x - route[0].x;
+                var dy = route[1].y - route[0].y;
+                var angle = Math.atan2(dy, dx);
+                var distance = Math.sqrt(dx * dx + dy * dy);
+
+
+
+                /** Here, we do some point of incidence adjustment IF the number of edges between the same nodes is greater than 1 */
+                if (allEdgesBetweenSourceAndTarget.length > 1) {
+                    const minDistance = 10; // Minimum distance between edges (divided by 2)
+                    const edgeIndex = allEdgesBetweenSourceAndTarget.findIndex(edge => edge.id === d.id);
+
+                    // Start with a small offset and grow it based on the edge index. But start with min offset of 5
+                    const offset = (edgeIndex % 2 === 0 ? 1 : -1) * (Math.floor(edgeIndex / 2) + 1) * minDistance;
+
+                    // Now we should apply the offset to the start and end points of the route, depending on the angle.
+
+                    if (route.length > 1) {
+                        const startIndex = 0;
+                        const endIndex = route.length - 1;
+
+                        /*
+                        
+                        Angle 0: The edge is horizontal and points to the right.
+                        Angle π/2 (90 degrees): The edge is vertical and points upwards.
+                        Angle π (180 degrees): The edge is horizontal and points to the left.
+                        Angle -π/2 (-90 degrees): The edge is vertical and points downwards.
+                        */
+                        function getDominantDirection(angle) {
+                            // Normalize angle between -π and π
+                            angle = ((angle + Math.PI) % (2 * Math.PI)) - Math.PI;
+
+                            if (angle >= -Math.PI / 4 && angle <= Math.PI / 4) {
+                                return 'right'; // Dominant direction is right
+                            } else if (angle > Math.PI / 4 && angle < 3 * Math.PI / 4) {
+                                return 'up'; // Dominant direction is up
+                            } else if (angle >= 3 * Math.PI / 4 || angle <= -3 * Math.PI / 4) {
+                                return 'left'; // Dominant direction is left
+                            } else if (angle > -3 * Math.PI / 4 && angle < -Math.PI / 4) {
+                                return 'down'; // Dominant direction is down
+                            }
+                            return null; // Default to null if something unexpected happens
+                        }
+                        let direction = getDominantDirection(angle);
+
+
+                        // As a result, offset along the y axis.
+                        if (direction === 'right' || direction === 'left') {
+                            route[startIndex].y += offset;
+                            route[endIndex].y += offset;
+                        }
+                        // else if direction is up or down, offset along the x axis
+                        else if (direction === 'up' || direction === 'down') {
+                            route[startIndex].x += offset;
+                            route[endIndex].x += offset;
+                        }
+
+                        // Ignore the other directions, if they do crop up.
+
+                        // And ensure it stays on the rectangle perimeter
+                        console.log("Adjusting points to rectangle perimeter");
+                        route[startIndex] = adjustPointToRectanglePerimeter(route[startIndex], d.source.innerBounds);
+                        route[endIndex] = adjustPointToRectanglePerimeter(route[endIndex], d.target.innerBounds);
+                    }
+
+                }
+
+
+                // Calculate the curvature for the current edge
+                var curvature = calculateCurvature(edges, d.source.id, d.target.id, d.id);
+                //Apply curvature to the control points (but this does not help with the direction)
+                route.forEach(function (point, index) {
+
+
+                    if (index > 0 && index < route.length - 1 && curvature !== 0) {
+
+                        // Adjust the control points based on the direction
+                        var offsetX = curvature * Math.abs(Math.sin(angle)) * distance;
+                        var offsetY = curvature * Math.abs(Math.cos(angle)) * distance;
+
+                        point.x += offsetX;
+                        point.y += offsetY;
+                    }
+                });
 
                 return lineFunction(route);
             });
