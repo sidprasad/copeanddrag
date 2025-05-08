@@ -44,12 +44,13 @@ export class LayoutInstance {
 
     readonly hideThisEdge = "_h_"
     static DISCONNECTED_PREFIX = "_d_"
+
+
     readonly DEFAULT_NODE_ICON_PATH: string = null;
     readonly DEFAULT_NODE_HEIGHT = 60;
     readonly DEFAULT_NODE_WIDTH = 100;
 
     private readonly _layoutSpec: LayoutSpec;
-    readonly DEFAULT_GROUP_ON: string = "range";
 
     public readonly minSepHeight = 15;
     public readonly minSepWidth = 15;
@@ -148,6 +149,9 @@ export class LayoutInstance {
                         existingGroup.nodeIds.push(addToGroup);
                         // TODO: Should we remove the edge from the graph? It's unclear, since we don't know 
                         // anything about the fields. There may be no edge OR there may be multiple edges?
+
+                        // In fact, should we *add* a ghost edge here? One could imagine this now
+                        // *adding* to the graph in any case.
                     }
                     else {
                         let newGroup: LayoutGroup =
