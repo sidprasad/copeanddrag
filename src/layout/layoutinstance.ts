@@ -1110,11 +1110,12 @@ export class LayoutInstance {
         let helperEdges = this._layoutSpec.directives.helperEdges;
         helperEdges.forEach((he) => {
 
-            let edgeIdPrefix = `${helperEdgePrefix}${edgeLabel}`;
+
 
             let res = this.evaluator.evaluate(he.selector, this.instanceNum);
 
             let selectedTuples: string[][] = res.selectedTuplesAll();
+            let edgeIdPrefix = `${helperEdgePrefix}<:${he.name}`;
 
             selectedTuples.forEach((tuple) => {
 
@@ -1131,7 +1132,9 @@ export class LayoutInstance {
                 }
                 // The edge 
 
-                let edgeId = `${edgeIdPrefix}<:${edgeLabel}:${sourceNodeId},${targetNodeId}`;
+                let fullTuple = tuple.join("->");
+
+                let edgeId = `${edgeIdPrefix}<:${fullTuple}`;
                 g.setEdge(sourceNodeId, targetNodeId, edgeLabel, edgeId);
             });
         });

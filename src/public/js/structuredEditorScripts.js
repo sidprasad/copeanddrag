@@ -110,12 +110,13 @@ const DIRECTIVE_SELECT = `
             <span class="input-group-text">Directive</span>
         </div>
         <select onchange="updateFields(this)">
+            <option value="flag">Visibility Flag</option>
             <option value="attribute">Attribute</option>
             <option value="icon">Icon</option>
             <option value="color">Color</option>
             <option value="size">Size</option>
             <option value="projection">Projection</option>
-            <option value="flag">Visibility Flag</option>
+            <option value="helperEdge">Helper Edge</option>
         </select>
     </div>
     <div class="params"></div>
