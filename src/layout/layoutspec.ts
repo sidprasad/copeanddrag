@@ -134,6 +134,7 @@ export class GroupBySelector extends ConstraintOperation{
     }
 }
 
+
 /*
 
     TODO: Could this be written with selectors (X, Y) and name --> edge name would have to be well 
@@ -155,6 +156,11 @@ export class GroupByField  {
         this.addToGroup = addToGroup;
     }
 }
+
+
+
+
+
 
 
 export class CyclicOrientationConstraint extends ConstraintOperation {

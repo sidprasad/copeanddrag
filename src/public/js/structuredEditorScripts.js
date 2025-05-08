@@ -90,7 +90,7 @@ const GROUP_BY_SELECTOR_SELECTOR = `
 
 <div class="input-group">
     <div class="input-group-prepend">
-        <span class="input-group-text infolabel" title="${UNARY_SELECTOR_TEXT}">Selector</span>
+        <span class="input-group-text infolabel" title="${UNARY_SELECTOR_TEXT} or ${TUPLE_SELECTOR_TEXT}">Selector</span>
     </div>
     <input type="text" name="selector" class="form-control" required>
 </div>
