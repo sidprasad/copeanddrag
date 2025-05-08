@@ -239,6 +239,42 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
                 try {
                     var route = colaLayout.routeEdge(d);
+
+                    if (d.source.id === d.target.id) {
+                        const source = d.source;
+
+                        // Get the bounds of the source/target node
+                        const bounds = source.bounds;
+
+                        // Calculate width and height from bounds
+                        const width = bounds.X - bounds.x;
+                        const height = bounds.Y - bounds.y;
+
+                        // Define two distinct points on the bounds for the start and end of the arc
+                        const startPoint = {
+                            x: bounds.x + width / 2, // Center of the top edge
+                            y: bounds.y
+                        };
+                        const endPoint = {
+                            x: bounds.X, // Center of the right edge
+                            y: bounds.y + height / 2
+                        };
+
+                        // Dynamically calculate the control point for the arc
+                        const selfLoopIndex = d.selfLoopIndex || 0; // Index of the self-loop (if multiple exist)
+                        const curvatureScale = 1 + selfLoopIndex * 0.2; // Scale curvature based on self-loop index
+                        const controlPoint = {
+                            x: bounds.X + width / 2 * curvatureScale, // Offset based on node width and scale
+                            y: bounds.y - height / 2 * curvatureScale // Offset based on node height and scale
+                        };
+
+                        // Create a route with three points: start, control, and end
+                        route = [
+                            startPoint,   // Start point on the bounds
+                            controlPoint, // Control point for the arc
+                            endPoint      // End point on the bounds
+                        ];
+                    }
                 } catch (e) {
 
                     console.log("Error routing edge", d.id, `from ${d.source.id} to ${d.target.id}`);
