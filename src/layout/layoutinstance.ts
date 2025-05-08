@@ -152,14 +152,16 @@ export class LayoutInstance {
                         };
                         groups.push(newGroup);
 
+
+                        // TODO: DO WE WANT THIS? ... perhaps not?
                         // Should we add a *helper edge* to the group here? Perhaps - it sort of makes sense.
                         // if so, we need something more sophisticated than prefixing the edge name.
                         // Like _g_ and _helper_ can't clash.
 
                         // Need to add a helper + group edge to the graph.
-                        const edgePrefix = "_g_0_1__helper_"; // Group, group on 0, addToGroup 1, AND make it a helper edge. Crucially the helper edge comes first.
-                        const newId = edgePrefix + gc.name;
-                        g.setEdge(groupOn, addToGroup, groupName, newId);
+                        // const edgePrefix = "_g_0_1__helper_"; // Group, group on 0, addToGroup 1, AND make it a helper edge. Crucially the helper edge comes first.
+                        // const newId = edgePrefix + gc.name;
+                        // g.setEdge(groupOn, addToGroup, groupName, newId);
 
 
                     }
