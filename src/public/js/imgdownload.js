@@ -84,7 +84,7 @@ async function downloadBundle() {
 
     // 3. Add the datum.xml file
     const datumElement = document.getElementById("alloydatum");
-    const datumContent = datumElement ? datumElement.innerHTML : "<empty/>";
+    const datumContent = datumElement ? datumElement.textContent : "<empty/>";
     zip.file("datum.xml", datumContent);
 
     // Generate the ZIP file and trigger download
