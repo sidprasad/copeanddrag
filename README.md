@@ -13,9 +13,4 @@ effective diagramming.
 
 
 
-
-## 2-ary selector for grouping --> more general than 'Group by Field' : We just need to find the egdes (tho group by field does something really nice w/ edges)
-
 ## Ghost edges as a directive? Useful, e.g. to see if a pred holds.
-
-## Issue with how edges load -- too curved now :(

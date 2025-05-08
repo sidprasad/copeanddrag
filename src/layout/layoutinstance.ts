@@ -144,8 +144,7 @@ export class LayoutInstance {
                         // TODO: Should we remove the edge from the graph? It's unclear, since we don't know 
                         // anything about the fields. There may be no edge OR there may be multiple edges?
 
-                        // In fact, should we *add* a ghost edge here? One could imagine this now
-                        // *adding* to the graph in any case.
+
                     }
                     else {
                         let newGroup: LayoutGroup =
@@ -156,6 +155,10 @@ export class LayoutInstance {
                             showLabel: true
                         };
                         groups.push(newGroup);
+
+                        // Should we add a *helper edge* to the group here? Perhaps - it sort of makes sense.
+                        // if so, we need something more sophisticated than prefixing the edge name.
+                        // Like _g_ and _helper_ can't clash.
                     }
                 }
 
