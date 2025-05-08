@@ -1110,18 +1110,28 @@ export class LayoutInstance {
         let helperEdges = this._layoutSpec.directives.helperEdges;
         helperEdges.forEach((he) => {
 
-            let edgeLabel = he.name;
             let edgeIdPrefix = `${helperEdgePrefix}${edgeLabel}`;
 
             let res = this.evaluator.evaluate(he.selector, this.instanceNum);
 
-            let selectedTuples: string[][] = res.selectedTwoples();
+            let selectedTuples: string[][] = res.selectedTuplesAll();
 
             selectedTuples.forEach((tuple) => {
-                let sourceNodeId = tuple[0];
-                let targetNodeId = tuple[1];
 
-                let edgeId = `${edgeIdPrefix}<:${sourceNodeId}->${targetNodeId}`;
+                let n = tuple.length;
+
+                let sourceNodeId = tuple[0];
+                let targetNodeId = tuple[n - 1];
+
+                let edgeLabel = he.name;
+                if (n > 2) {
+                    // Middle nodes
+                    let middleNodeIds = tuple.slice(1, n - 1).join(",");
+                    edgeLabel = `${edgeLabel}[${middleNodeIds}]`;
+                }
+                // The edge 
+
+                let edgeId = `${edgeIdPrefix}<:${edgeLabel}:${sourceNodeId},${targetNodeId}`;
                 g.setEdge(sourceNodeId, targetNodeId, edgeLabel, edgeId);
             });
         });
