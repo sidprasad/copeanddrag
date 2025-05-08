@@ -10,7 +10,15 @@ const dy_for_linespacing = 5; // Adjust for spacing between lines
 function isHelperEdge(edge) {
 
     const helperPrefix = "_helper_";
-    return edge.id.startsWith(helperPrefix);
+
+    // Check if the edge contains the helper prefix
+    return edge.id.includes(helperPrefix);
+
+}
+
+function isGroupEdge(edge) {
+    const groupPrefix = "_g_";
+    return edge.id.startsWith(groupPrefix);
 }
 
 

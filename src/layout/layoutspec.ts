@@ -5,38 +5,6 @@ export type RotationDirection = "clockwise" | "counterclockwise";
 export type ClusterTarget = "domain" | "range";
 
 
-//// No more templates ///
-
-
-
-export const DEFAULT_APPLIES_TO = "#t";
-//export const TEMPLATE_VAR_SRC = "<<SRC>>";
-//export const TEMPLATE_VAR_TGT = "<<TGT>>";
-
-
-
-/// TODO!!!
-
-/*
-
-    appliesTo should be a selector, not a predicate.
-    SO SET COMPREHENSION!
-
-
-*/
-
-function randidentifier(len: number = 6): string {
-    const characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    let result = "";
-    for (let i = 0; i < len; i++) {
-        const randomIndex = Math.floor(Math.random() * characters.length);
-        result += characters[randomIndex];
-    }
-    return result;
-}
-
-
-
 
 
 /////////// COPE AND DRAG CORE ////////////

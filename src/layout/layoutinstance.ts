@@ -134,17 +134,13 @@ export class LayoutInstance {
                     let groupOn = t[0];
                     let addToGroup = t[1];
 
-                    let groupName = `${gc.name}:${groupOn}`;
+                    let groupName = `${gc.name}[${groupOn}]`;
 
                     // Check if the group already exists
                     let existingGroup: LayoutGroup = groups.find((group) => group.name === groupName);
 
                     if (existingGroup) {
                         existingGroup.nodeIds.push(addToGroup);
-                        // TODO: Should we remove the edge from the graph? It's unclear, since we don't know 
-                        // anything about the fields. There may be no edge OR there may be multiple edges?
-
-
                     }
                     else {
                         let newGroup: LayoutGroup =
@@ -159,6 +155,13 @@ export class LayoutInstance {
                         // Should we add a *helper edge* to the group here? Perhaps - it sort of makes sense.
                         // if so, we need something more sophisticated than prefixing the edge name.
                         // Like _g_ and _helper_ can't clash.
+
+                        // Need to add a helper + group edge to the graph.
+                        const edgePrefix = "_g_0_1__helper_"; // Group, group on 0, addToGroup 1, AND make it a helper edge. Crucially the helper edge comes first.
+                        const newId = edgePrefix + gc.name;
+                        g.setEdge(groupOn, addToGroup, groupName, newId);
+
+
                     }
                 }
 
