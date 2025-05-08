@@ -109,29 +109,91 @@ export class LayoutInstance {
         }
 
         let groups: LayoutGroup[] = [];
+
+
+
+
+
+
+
         // First we go through the group by selector constraints.
         for (var gc of groupBySelectorConstraints) {
 
             let selector = gc.selector;
             let selectorRes = this.evaluator.evaluate(selector, this.instanceNum);
-            let selectedElements: string[] = selectorRes.selectedAtoms();
 
-            // Nothing to do if there are no selected elements, or 
-            // if things are typed weirdly.
-            if (selectedElements.length === 0) {
-                continue;
+
+            // Now, we should support both unary and binary selectors.
+
+            // First try binary, if none are selected, then try unary.
+            let selectedTwoples: string[][] = selectorRes.selectedTwoples();
+
+            if (selectedTwoples.length > 0) {
+
+                // The first element of each tuple is the key (i.e. groupOn)
+                // The second element is the element to add to the group (i.e. addToGroup)
+
+                // The name of the group is the relation name ':' the key node.
+
+                for (var t of selectedTwoples) {
+                    let groupOn = t[0];
+                    let addToGroup = t[1];
+
+                    let groupName = `${gc.name}:${groupOn}`;
+
+                    // Check if the group already exists
+                    let existingGroup: LayoutGroup = groups.find((group) => group.name === groupName);
+
+                    if (existingGroup) {
+                        existingGroup.nodeIds.push(addToGroup);
+                        // TODO: Should we remove the edge from the graph? It's unclear, since we don't know 
+                        // anything about the fields. There may be no edge OR there may be multiple edges?
+                    }
+                    else {
+                        let newGroup: LayoutGroup =
+                        {
+                            name: groupName,
+                            nodeIds: [addToGroup],
+                            keyNodeId: groupOn,
+                            showLabel: true
+                        };
+                        groups.push(newGroup);
+                    }
+                }
+
+
+
+
+            }
+            else {
+                let selectedElements: string[] = selectorRes.selectedAtoms();
+                
+                // Nothing to do if there are no selected elements, or 
+                // if things are typed weirdly.
+                if (selectedElements.length === 0) {
+                    continue;
+                }
+
+                let keyNode = selectedElements[0]; // TODO: WAIT, THERE IS NO KEY NODE
+
+                // Question: Does **just** having LayoutGroup work? Like what does a keyNode even mean?
+                let newGroup: LayoutGroup = {
+                    name: gc.name,
+                    nodeIds: selectedElements,
+                    keyNodeId: keyNode, //// TODO: I think introducing this random keynode could be a problem. Not sure why or when though.
+                    showLabel: true
+                };
+                groups.push(newGroup);
             }
 
-            let keyNode = selectedElements[0]; // TODO: WAIT, THERE IS NO KEY NODE
+            // 
 
-            // Question: Does **just** having LayoutGroup work? Like what does a keyNode even mean?
-            let newGroup: LayoutGroup = {
-                name: gc.name,
-                nodeIds: selectedElements,
-                keyNodeId: keyNode,
-                showLabel: true
-            };
-            groups.push(newGroup);
+
+           
+
+
+
+            
         }
 
 

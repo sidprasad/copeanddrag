@@ -213,14 +213,6 @@ export class WrappedEvalResult {
     // Lets write selected of 1
     public selectedAtoms(): string[] {
 
-        /*
-
-            TODO: Need to ACTUALLY check the arity.
-
-        */
-
-
-
         if (this.isSingleton || this.isError) {
             let pp = this.prettyPrint();
             throw new Error(`Expected selector ${this.expr} to evaluate to values of arity 1. Instead: ${pp}`);   
@@ -233,6 +225,10 @@ export class WrappedEvalResult {
         if (selectedElements.length === 0) {
             return [];
         }
+
+        // Now ensure that all selected elements are of arity 1
+        selectedElements = selectedElements.filter((element) => element.length === 1);
+        /// ... ///
 
         // Flatten the selected elements
         let flattened = selectedElements.flat().map((element) => singleValueToString(element));;
