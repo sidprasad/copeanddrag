@@ -154,12 +154,12 @@ export class LayoutInstance {
 
 
                         // TODO: DO WE WANT THIS? ... perhaps not?
-                        // Should we add a *helper edge* to the group here? Perhaps - it sort of makes sense.
+                        // Should we add a *inferred edge* to the group here? Perhaps - it sort of makes sense.
                         // if so, we need something more sophisticated than prefixing the edge name.
                         // Like _g_ and _helper_ can't clash.
 
                         // Need to add a helper + group edge to the graph.
-                        // const edgePrefix = "_g_0_1__helper_"; // Group, group on 0, addToGroup 1, AND make it a helper edge. Crucially the helper edge comes first.
+                        // const edgePrefix = "_g_0_1__helper_"; // Group, group on 0, addToGroup 1, AND make it a inferred edge. Crucially the inferred edge comes first.
                         // const newId = edgePrefix + gc.name;
                         // g.setEdge(groupOn, addToGroup, groupName, newId);
 
@@ -463,8 +463,8 @@ export class LayoutInstance {
         let nodeSizeMap = this.getNodeSizeMap(g);
 
 
-        // This is where we add the helper edges to the graph.
-        this.addHelperEdges(g);
+        // This is where we add the inferred edges to the graph.
+        this.addinferredEdges(g);
 
 
         /// Groups have to happen here ///
@@ -1112,18 +1112,18 @@ export class LayoutInstance {
     }
 
     // g is an inout parameter. I.E. it will be modified.
-    private addHelperEdges(g: Graph) {
+    private addinferredEdges(g: Graph) {
 
-        const helperEdgePrefix = "_helper_";
-        let helperEdges = this._layoutSpec.directives.helperEdges;
-        helperEdges.forEach((he) => {
+        const inferredEdgePrefix = "_helper_";
+        let inferredEdges = this._layoutSpec.directives.inferredEdges;
+        inferredEdges.forEach((he) => {
 
 
 
             let res = this.evaluator.evaluate(he.selector, this.instanceNum);
 
             let selectedTuples: string[][] = res.selectedTuplesAll();
-            let edgeIdPrefix = `${helperEdgePrefix}<:${he.name}`;
+            let edgeIdPrefix = `${inferredEdgePrefix}<:${he.name}`;
 
             selectedTuples.forEach((tuple) => {
 

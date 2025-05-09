@@ -167,7 +167,7 @@ export interface AtomIconDirective extends VisualManipulation {
     showLabels : boolean;
 }
 
-export interface HelperEdgeDirective extends VisualManipulation {
+export interface InferredEdgeDirective extends VisualManipulation {
     name : string;
 }
 
@@ -211,7 +211,7 @@ export interface LayoutSpec {
         icons: AtomIconDirective[];
         projections: ProjectionDirective[];
         attributes: AttributeDirective[];
-        helperEdges: HelperEdgeDirective[];
+        inferredEdges: InferredEdgeDirective[];
         hideDisconnected : boolean;
         hideDisconnectedBuiltIns : boolean;
     }
@@ -237,7 +237,7 @@ function DEFAULT_LAYOUT() : LayoutSpec
             icons: [],
             projections: [],
             attributes: [],
-            helperEdges: [],
+            inferredEdges: [],
             hideDisconnected: false,
             hideDisconnectedBuiltIns: false
         }
@@ -429,7 +429,7 @@ function parseDirectives(directives: any[]): {
                             icons: AtomIconDirective[];
                             projections: ProjectionDirective[];
                             attributes: AttributeDirective[];
-                            helperEdges: HelperEdgeDirective[];
+                            inferredEdges: InferredEdgeDirective[];
                             hideDisconnected : boolean;
                             hideDisconnectedBuiltIns : boolean;
                         } 
@@ -480,10 +480,10 @@ function parseDirectives(directives: any[]): {
     let hideDisconnected = flags.includes("hideDisconnected");
     let hideDisconnectedBuiltIns = flags.includes("hideDisconnectedBuiltIns");
 
-    let helperEdges : HelperEdgeDirective[] = directives.filter(d => d.helperEdge).map(d => {
+    let inferredEdges : InferredEdgeDirective[] = directives.filter(d => d.inferredEdge).map(d => {
         return {
-            name: d.helperEdge.name,
-            selector: d.helperEdge.selector
+            name: d.inferredEdge.name,
+            selector: d.inferredEdge.selector
         }
     });
 
@@ -493,7 +493,7 @@ function parseDirectives(directives: any[]): {
         icons,
         projections,
         attributes,
-        helperEdges,
+        inferredEdges,
         hideDisconnected,
         hideDisconnectedBuiltIns
     }

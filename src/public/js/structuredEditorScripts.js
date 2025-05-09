@@ -116,7 +116,7 @@ const DIRECTIVE_SELECT = `
             <option value="color">Color</option>
             <option value="size">Size</option>
             <option value="projection">Projection</option>
-            <option value="helperEdge">Helper Edge</option>
+            <option value="inferredEdge">Inferred Edge</option>
         </select>
     </div>
     <div class="params"></div>
@@ -265,7 +265,7 @@ function updateFields(select) {
         paramsDiv.innerHTML = PROJECTION_SELECTOR;
     } else if (type === "flag") {
         paramsDiv.innerHTML = FLAG_SELECTOR;
-    } else if (type === "helperEdge") {
+    } else if (type === "inferredEdge") {
         paramsDiv.innerHTML = HELPER_EDGE_SELECTOR;
     }
 }
