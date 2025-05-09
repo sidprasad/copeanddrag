@@ -12,5 +12,3 @@ and is grounded in the cognitive science literature on
 effective diagramming.
 
 
-
-## Ghost edges as a directive? Useful, e.g. to see if a pred holds. -- maybe annotation is the right word (helperEdge is definitely not it)
