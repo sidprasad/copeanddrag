@@ -1,4 +1,4 @@
-# Lightweight Visualizations for Lightweight Formal Methods
+# Lightweight Diagramming for Lightweight Formal Methods
 
 
 ![Latest Release](https://img.shields.io/github/v/release/sidprasad/copeanddrag)
