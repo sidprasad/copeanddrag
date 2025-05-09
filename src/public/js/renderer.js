@@ -7,9 +7,9 @@ const margin = 10;
 const dy_for_linespacing = 5; // Adjust for spacing between lines
 //////////
 
-function isHelperEdge(edge) {
+function isInferredEdge(edge) {
 
-    const helperPrefix = "_helper_";
+    const helperPrefix = "_inferred_";
 
     // Check if the edge contains the helper prefix
     return edge.id.includes(helperPrefix);
@@ -564,6 +564,10 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 d3.selectAll(".link")
                     .filter(link => link.relName === relName)
                     .classed("highlighted", true);
+                
+                d3.selectAll(".inferredLink")
+                    .filter(link => link.relName === relName)
+                    .classed("highlighted", true);
             }
 
             // Get a set of all relNames
@@ -588,6 +592,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 })
                 .on("mouseout", function (event, d) {
                     d3.selectAll(".link")
+                        .classed("highlighted", false);
+                    d3.selectAll(".inferredLink")
                         .classed("highlighted", false);
                     // Also make the text normal
                     d3.select(this).style("font-weight", "normal");
@@ -622,7 +628,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .attr("class", "link-group");
 
     const link = linkGroups.append("path")
-        .attr("class", d => isHelperEdge(d) ? "helperLink" : "link") // Dynamically assign class
+        .attr("class", d => isInferredEdge(d) ? "inferredLink" : "link") // Dynamically assign class
         .attr("data-link-id", d => d.id);
 
     linkGroups.append("text")

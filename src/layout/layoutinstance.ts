@@ -1114,7 +1114,7 @@ export class LayoutInstance {
     // g is an inout parameter. I.E. it will be modified.
     private addinferredEdges(g: Graph) {
 
-        const inferredEdgePrefix = "_helper_";
+        const inferredEdgePrefix = "_inferred_";
         let inferredEdges = this._layoutSpec.directives.inferredEdges;
         inferredEdges.forEach((he) => {
 
