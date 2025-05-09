@@ -5,38 +5,6 @@ export type RotationDirection = "clockwise" | "counterclockwise";
 export type ClusterTarget = "domain" | "range";
 
 
-//// No more templates ///
-
-
-
-export const DEFAULT_APPLIES_TO = "#t";
-//export const TEMPLATE_VAR_SRC = "<<SRC>>";
-//export const TEMPLATE_VAR_TGT = "<<TGT>>";
-
-
-
-/// TODO!!!
-
-/*
-
-    appliesTo should be a selector, not a predicate.
-    SO SET COMPREHENSION!
-
-
-*/
-
-function randidentifier(len: number = 6): string {
-    const characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    let result = "";
-    for (let i = 0; i < len; i++) {
-        const randomIndex = Math.floor(Math.random() * characters.length);
-        result += characters[randomIndex];
-    }
-    return result;
-}
-
-
-
 
 
 /////////// COPE AND DRAG CORE ////////////
@@ -199,6 +167,9 @@ export interface AtomIconDirective extends VisualManipulation {
     showLabels : boolean;
 }
 
+export interface InferredEdgeDirective extends VisualManipulation {
+    name : string;
+}
 
 
 // Right now, we don't support applies To on these.
@@ -240,6 +211,7 @@ export interface LayoutSpec {
         icons: AtomIconDirective[];
         projections: ProjectionDirective[];
         attributes: AttributeDirective[];
+        inferredEdges: InferredEdgeDirective[];
         hideDisconnected : boolean;
         hideDisconnectedBuiltIns : boolean;
     }
@@ -265,6 +237,7 @@ function DEFAULT_LAYOUT() : LayoutSpec
             icons: [],
             projections: [],
             attributes: [],
+            inferredEdges: [],
             hideDisconnected: false,
             hideDisconnectedBuiltIns: false
         }
@@ -456,6 +429,7 @@ function parseDirectives(directives: any[]): {
                             icons: AtomIconDirective[];
                             projections: ProjectionDirective[];
                             attributes: AttributeDirective[];
+                            inferredEdges: InferredEdgeDirective[];
                             hideDisconnected : boolean;
                             hideDisconnectedBuiltIns : boolean;
                         } 
@@ -506,12 +480,20 @@ function parseDirectives(directives: any[]): {
     let hideDisconnected = flags.includes("hideDisconnected");
     let hideDisconnectedBuiltIns = flags.includes("hideDisconnectedBuiltIns");
 
+    let inferredEdges : InferredEdgeDirective[] = directives.filter(d => d.inferredEdge).map(d => {
+        return {
+            name: d.inferredEdge.name,
+            selector: d.inferredEdge.selector
+        }
+    });
+
     return {
         colors,
         sizes,
         icons,
         projections,
         attributes,
+        inferredEdges,
         hideDisconnected,
         hideDisconnectedBuiltIns
     }

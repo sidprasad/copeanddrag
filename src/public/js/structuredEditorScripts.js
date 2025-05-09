@@ -110,12 +110,13 @@ const DIRECTIVE_SELECT = `
             <span class="input-group-text">Directive</span>
         </div>
         <select onchange="updateFields(this)">
+            <option value="flag">Visibility Flag</option>
             <option value="attribute">Attribute</option>
             <option value="icon">Icon</option>
             <option value="color">Color</option>
             <option value="size">Size</option>
             <option value="projection">Projection</option>
-            <option value="flag">Visibility Flag</option>
+            <option value="inferredEdge">Inferred Edge</option>
         </select>
     </div>
     <div class="params"></div>
@@ -189,6 +190,21 @@ const FLAG_SELECTOR = `
 </div>
 `;
 
+const HELPER_EDGE_SELECTOR = `
+<div class="input-group">
+    <div class="input-group-prepend">
+        <span class="input-group-text infolabel" title="${TUPLE_SELECTOR_TEXT}">Selector</span>
+    </div>
+    <input type="text" name="selector" class="form-control" required>
+</div>
+<div class="input-group">
+    <div class="input-group-prepend">  <span class="input-group-text">Edge Name</span> </div>
+    <input type="text" name="name" required>
+</div>
+`;
+
+
+
 
 function addElement(containerId, className, template) {
     const container = document.getElementById(containerId);
@@ -249,6 +265,8 @@ function updateFields(select) {
         paramsDiv.innerHTML = PROJECTION_SELECTOR;
     } else if (type === "flag") {
         paramsDiv.innerHTML = FLAG_SELECTOR;
+    } else if (type === "inferredEdge") {
+        paramsDiv.innerHTML = HELPER_EDGE_SELECTOR;
     }
 }
 

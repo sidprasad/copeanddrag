@@ -269,6 +269,30 @@ export class WrappedEvalResult {
         return selectedTuples;
 
     }
+
+    /*
+        Returns the selected tuples, with all elements.
+    */
+    public selectedTuplesAll(): string[][] {
+
+        if (this.isSingleton || this.isError) {
+            let pp = this.prettyPrint();
+            throw new Error(`Expected selector ${this.expr} to evaluate to values of arity 2. Instead:${pp}`);   
+        }
+
+        // NO ATOMS
+        let asTuple = this.result as Tuple[];
+
+        let selectedElements = asTuple.filter((element) => element.length > 1);
+        if (selectedElements.length === 0) {
+            return [];
+        }
+
+        let selectedTuples = selectedElements.map((element) => {
+            return element.map((e) => singleValueToString(e));
+        });
+        return selectedTuples;
+    }
 }
 
 export class WrappedForgeEvaluator {

@@ -111,12 +111,6 @@ export class LayoutInstance {
 
         let groups: LayoutGroup[] = [];
 
-
-
-
-
-
-
         // First we go through the group by selector constraints.
         for (var gc of groupBySelectorConstraints) {
 
@@ -140,18 +134,13 @@ export class LayoutInstance {
                     let groupOn = t[0];
                     let addToGroup = t[1];
 
-                    let groupName = `${gc.name}:${groupOn}`;
+                    let groupName = `${gc.name}[${groupOn}]`;
 
                     // Check if the group already exists
                     let existingGroup: LayoutGroup = groups.find((group) => group.name === groupName);
 
                     if (existingGroup) {
                         existingGroup.nodeIds.push(addToGroup);
-                        // TODO: Should we remove the edge from the graph? It's unclear, since we don't know 
-                        // anything about the fields. There may be no edge OR there may be multiple edges?
-
-                        // In fact, should we *add* a ghost edge here? One could imagine this now
-                        // *adding* to the graph in any case.
                     }
                     else {
                         let newGroup: LayoutGroup =
@@ -162,6 +151,19 @@ export class LayoutInstance {
                             showLabel: true
                         };
                         groups.push(newGroup);
+
+
+                        // TODO: DO WE WANT THIS? ... perhaps not?
+                        // Should we add a *inferred edge* to the group here? Perhaps - it sort of makes sense.
+                        // if so, we need something more sophisticated than prefixing the edge name.
+                        // Like _g_ and _helper_ can't clash.
+
+                        // Need to add a helper + group edge to the graph.
+                        // const edgePrefix = "_g_0_1__helper_"; // Group, group on 0, addToGroup 1, AND make it a inferred edge. Crucially the inferred edge comes first.
+                        // const newId = edgePrefix + gc.name;
+                        // g.setEdge(groupOn, addToGroup, groupName, newId);
+
+
                     }
                 }
 
@@ -188,16 +190,7 @@ export class LayoutInstance {
                     showLabel: true
                 };
                 groups.push(newGroup);
-            }
-
-            // 
-
-
-           
-
-
-
-            
+            }            
         }
 
 
@@ -213,10 +206,6 @@ export class LayoutInstance {
             });
             return fieldConstraints;
         }
-
-      
-
-
 
         graphEdges.forEach((edge) => {
             const edgeId = edge.name;
@@ -474,9 +463,14 @@ export class LayoutInstance {
         let nodeSizeMap = this.getNodeSizeMap(g);
 
 
+        // This is where we add the inferred edges to the graph.
+        this.addinferredEdges(g);
+
+
         /// Groups have to happen here ///
         let groups = this.generateGroups(g, a);
         this.ensureNoExtraNodes(g, a);
+
         let dcN = this.getDisconnectedNodes(g);
 
         let layoutNodes: LayoutNode[] = g.nodes().map((nodeId) => {
@@ -1115,5 +1109,42 @@ export class LayoutInstance {
 
         return filteredTuples;
 
+    }
+
+    // g is an inout parameter. I.E. it will be modified.
+    private addinferredEdges(g: Graph) {
+
+        const inferredEdgePrefix = "_inferred_";
+        let inferredEdges = this._layoutSpec.directives.inferredEdges;
+        inferredEdges.forEach((he) => {
+
+
+
+            let res = this.evaluator.evaluate(he.selector, this.instanceNum);
+
+            let selectedTuples: string[][] = res.selectedTuplesAll();
+            let edgeIdPrefix = `${inferredEdgePrefix}<:${he.name}`;
+
+            selectedTuples.forEach((tuple) => {
+
+                let n = tuple.length;
+
+                let sourceNodeId = tuple[0];
+                let targetNodeId = tuple[n - 1];
+
+                let edgeLabel = he.name;
+                if (n > 2) {
+                    // Middle nodes
+                    let middleNodeIds = tuple.slice(1, n - 1).join(",");
+                    edgeLabel = `${edgeLabel}[${middleNodeIds}]`;
+                }
+                // The edge 
+
+                let fullTuple = tuple.join("->");
+
+                let edgeId = `${edgeIdPrefix}<:${fullTuple}`;
+                g.setEdge(sourceNodeId, targetNodeId, edgeLabel, edgeId);
+            });
+        });
     }
 }
