@@ -19,6 +19,18 @@ This added expressivity addresses the following limitations of CnD 2:
 
 
 
+## Justification for `inferredEdge` in *Cope and Drag*
+
+*Cope and Drag* builds diagrams *by refinement* from Alloy/Forge models, maintaining structural fidelity. However, true understanding often requires visualizing relationships that are not explicitly present in the model but are essential for mental comprehension.
+
+The `inferredEdge` directive introduces **visually distinct edges** that represent **inferred relationships** — connections the diagrammer wants the viewer to see to better understand the model. These edges are **not part of the model itself** but help the viewer mentally hold and interpret higher-level connections.
+
+This approach is grounded in Barbara Tversky's research on *external representations* and *tools of thought*. Tversky emphasizes that diagrams are more than data representations — they act as cognitive aids, making complex relationships more perceivable and interpretable.
+
+> "External representations enhance cognition by providing an array that can be perceived and interpreted more easily than internal representations alone."  
+> — *Barbara Tversky, 2011*
+
+`inferredEdges` support this principle by enriching diagrams with **semantic scaffolding**, helping users perceive meaningful structure that isn’t explicitly modeled.
 
 
 
