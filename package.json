@@ -43,7 +43,7 @@
     "ejs": "^3.1.10",
     "express": "^4.18.2",
     "firebase": "^11.2.0",
-    "forge-expr-evaluator": "github:karankashyap04/forge-expr-evaluator#d8e80ed51f9de2e927bc27c37d4d3e1e01e5a7c2",
+    "forge-expr-evaluator": "github:karankashyap04/forge-expr-evaluator#ac33c76b52d3e36acc185bd2c29332241950e1d3",
     "graphlib": "^2.1.8",
     "i": "^0.3.7",
     "js-yaml": "^4.1.0",

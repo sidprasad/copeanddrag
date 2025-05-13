@@ -99,3 +99,4 @@ Current flags are:
   - `hideDisconnected`: If true, hide all atoms in the graph that are not referenced by a relation.
   - `hideDisconnectedBuiltIns`: If true, hide all atoms of built-in type (ex. `Int`) that are not referenced by a relation.
 
+
