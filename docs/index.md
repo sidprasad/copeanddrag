@@ -35,19 +35,3 @@ Visual features like color, size, and position are processed by our brains almos
 - [Getting Started](/getting-started.md): Install the tool, view examples, and try your first diagram.
 
 
-
-
-
-
-
-
-## What do CnD specs look like?
-
-A CnD specification consists of two primary components:
-
-- **[Constraints](constraints.md)** that define spatial relationships between elements.
-- **[Directives](directives.md)** that Control visual styling and representation.
-
-These can be expressed both via YAML and a structured, no code interface. CnD automatically translates
-specifications between these two representations.
-
