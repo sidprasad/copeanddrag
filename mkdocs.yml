@@ -19,3 +19,6 @@ markdown_extensions:
       linenums: true
   - pymdownx.highlight
 
+plugins:
+  - search
+  - macros

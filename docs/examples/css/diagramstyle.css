@@ -1,0 +1,119 @@
+#svg {
+    width: 100%; /* SVG takes full width of its container */
+    height: 100%; /* SVG takes full height of its container */
+    min-width: 30vw; /* Set a minimum width for the SVG */
+    max-width: 95vw; /* Set a maximum height for the SVG */
+    min-height: 80vh; /* Set minimum height to 80% of the viewport height */
+    max-height: 95vh; /* Set maximum height to 90% of the viewport height */
+
+
+}
+
+
+
+
+.node {
+    /* stroke: black; */
+    /*fill: white;*/
+    stroke-width: 1.5px;
+    cursor: move;
+}
+
+.group {
+    stroke: black;
+    stroke-width: 1px;
+    cursor: move;
+    opacity: 0.4;
+
+}
+
+
+.disconnectedNode {
+    stroke: transparent;
+    fill: transparent;
+    cursor: move;
+}
+
+.link {
+    stroke: #333330;
+    fill: none;
+    stroke-width: 1px;
+    stroke-opacity: 1;
+    marker-end: url(#end-arrow);
+}
+
+.inferredLink {
+    stroke: #666666; /* Slightly lighter color than the link (#333330) */
+    fill: none;
+    stroke-width: 1px;
+    stroke-opacity: 0.8; /* Slightly transparent */
+    stroke-dasharray: 4, 2; /* Dashed stroke: 4px dash, 2px gap */
+    marker-end: url(#hand-drawn-arrow); /* Use the custom hand-drawn marker */
+}
+
+.linkoutline {
+    stroke: white;
+    stroke-width: 4px;
+    fill: none;
+}
+
+.label {
+    fill: black;
+    font-family: system-ui;
+    font-size: 10px;
+    text-anchor: middle;
+    cursor: move;
+}
+
+.mostSpecificTypeLabel {
+    font-family: system-ui;
+    font-size: 10px;
+    text-anchor: start;
+    cursor: move;
+}
+
+.icon {
+    fill: transparent;
+}
+
+.linklabel {
+    fill: black;
+    font-family: Verdana;
+    font-size: 10px;
+    cursor: move;
+    stroke: white; /* Add white outline */
+    stroke-width: 1px; /* Adjust the width of the outline */
+    paint-order: stroke; /* Ensure the stroke is painted first */
+}
+
+.groupLabel {
+    fill: black;
+    font-family: Verdana;
+    font-size: 10px;
+    text-anchor: middle;
+    cursor: move;
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+}
+
+
+
+#controls {
+    /* flex: 0 0 300px; 
+    order: 2; */
+    margin: 5px; 
+} 
+
+.link.highlighted {
+    stroke: black; /* Change this to your desired highlight color */
+    stroke-width: 3px; /* Change this to your desired highlight width */
+}
+
+.inferredLink.highlighted {
+    stroke:#666666; /* Change this to your desired highlight color */
+    stroke-width: 3px; /* Change this to your desired highlight width */
+}
+
