@@ -1,4 +1,4 @@
-# Common Issues
+# FAQ
 
 This page documents common issues users have faced when using Cope and Drag, as well as work-arounds.
 [We encourage you to file issues here if you see something not addressed below.](https://github.com/sidprasad/copeanddrag/issues)

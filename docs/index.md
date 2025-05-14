@@ -32,6 +32,8 @@ Visual features like color, size, and position are processed by our brains almos
 
 ## Next Steps
 
-- [Getting Started](/getting-started.md): Install the tool, view examples, and try your first diagram.
+- [Getting Started](/getting-started): Install the tool, explore how it interfaces with Forge.
+- [Examples](/examples): Play with some pre-built example diagrams.
+
 
 
