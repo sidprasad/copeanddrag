@@ -52,7 +52,7 @@ directives:
 - `showLabels` : [Optional, default `false`] Should atom labels (e.g., atom name, attributes) be shown in addition to icons. If `true`, the icon is made smaller to prevent overlap with label text. 
 
 #### Built In Icons
-Cope and Drag also includes a selection of [built in icons](bundledicons.md) for ease of use.
+Cope and Drag also includes a selection of [built in icons](/copeanddrag/bundledicons) for ease of use.
 
 
 ### **Color Directives**

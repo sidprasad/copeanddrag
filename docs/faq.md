@@ -24,4 +24,4 @@ If you want a specific image on your local filesystem to be used in an icon dire
     path: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAO8AAAEACAMAAABsy9Fo....
     selector: someselector
 ```
-Cope and Drag also includes a selection of [built in icons](bundledicons.md) for ease of use.
+Cope and Drag also includes a selection of [built in icons](/copeanddrag/bundledicons) for ease of use.

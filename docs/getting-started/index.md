@@ -46,5 +46,5 @@ If you are just starting with `CnD`, we recommend beginning with the No Code int
 
 ## Next Steps
 
-- Read about [Constraints](/constraints)
-- Learn about [Directives](/directives)
+- Read about [Constraints](/copeanddrag/constraints)
+- Learn about [Directives](/copeanddrag/directives)

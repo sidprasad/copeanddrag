@@ -15,7 +15,7 @@ Cope and Drag is informed by findings from cognitive science about how people dr
 
 ### Spatial Relationships Matter
 
-> *“Spatial thinking is the foundation of abstract thought”* - [Barbara Tversky](https://www.hachettebookgroup.com/titles/barbara-tversky/mind-in-motion/9780465093076/?lens=basic-books)
+> *“Spatial thinking is the foundation of abstract thought”* - [Barbara Tversky](https://en.wikipedia.org/wiki/Barbara_Tversky)
 > 
 
 People read meaning into position - above, below, inside. Cope and Drag's **constraints** allow authors to shape diagram layouts to reflect these meaningful relationships. When spatial relationships in a diagram reflect domain relationships, they serve as cognitive aids. For example, placing a parent above its children in a family tree matches conveys a model of generational relationships, while nesting elements inside containers effectively shows membership.
@@ -32,8 +32,8 @@ Visual features like color, size, and position are processed by our brains almos
 
 ## Next Steps
 
-- [Getting Started](/getting-started): Install the tool, explore how it interfaces with Forge.
-- [Examples](/examples): Play with some pre-built example diagrams.
+- [Getting Started](/copeanddrag/getting-started): Install the tool, explore how it interfaces with Forge.
+- [Examples](/copeanddrag/examples): Play with some pre-built example diagrams.
 
 
 
