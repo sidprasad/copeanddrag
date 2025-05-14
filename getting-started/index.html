@@ -5,15 +5,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../img/favicon.ico" />
-    <title>Examples - Cope and Drag Docs</title>
+    <title>Getting Started - Cope and Drag Docs</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Examples";
-        var mkdocs_page_input_path = "examples/index.md";
+        var mkdocs_page_name = "Getting Started";
+        var mkdocs_page_input_path = "getting-started/index.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -43,18 +43,20 @@
                 <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
                 </li>
               </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../getting-started/">Getting Started</a>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Getting Started</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a>
+    </li>
+    </ul>
                 </li>
               </ul>
               <ul>
                 <li class="toctree-l1"><a class="reference internal" href="../faq/">FAQ</a>
                 </li>
               </ul>
-              <ul class="current">
-                <li class="toctree-l1 current"><a class="reference internal current" href="#">Examples</a>
-    <ul class="current">
-    </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../examples/">Examples</a>
                 </li>
               </ul>
               <ul>
@@ -79,9 +81,9 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
-      <li class="breadcrumb-item active">Examples</li>
+      <li class="breadcrumb-item active">Getting Started</li>
     <li class="wy-breadcrumbs-aside">
-          <a href="https://github.com/sidprasad/copeanddrag/edit/master/docs/examples/index.md" class="icon icon-github"> Edit on GitHub</a>
+          <a href="https://github.com/sidprasad/copeanddrag/edit/master/docs/getting-started/index.md" class="icon icon-github"> Edit on GitHub</a>
     </li>
   </ul>
   <hr/>
@@ -89,18 +91,59 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="examples">Examples</h1>
-<p><img alt="Teaser Image" src="img/teaser.png" /></p>
+                <h1 id="getting-started">Getting Started</h1>
+<blockquote>
+<p>This guide assumes you have a basic understanding of the Forge language. If you need an introduction to Forge,
+check out the <a href="https://csci1710.github.io/forge-documentation/getting-started/installation.html">Forge language documentation</a>.</p>
+</blockquote>
 <hr />
-<p><a href="https://github.com/sidprasad/copeanddrag/tree/main/examples">Find some examples here</a></p>
-<hr />
-<p>TODO: Add CnD specs and resultant examples.</p>
+<ol>
+<li>Install the <a href="https://marketplace.visualstudio.com/items?itemName=SiddharthaPrasad.forge-language-server">Forge VS Code Extension</a></li>
+<li>
+<p>The extension will automatically start CnD at <a href="http://localhost:3000"><code>localhost:3000</code></a>. Alternative setup: Download <code>CnD</code> from <a href="https://github.com/sidprasad/copeanddrag/releases">GitHub releases</a> and run <code>node index.js</code></p>
+</li>
+<li>
+<p>Run a Forge specification that includes a <code>run</code> statement (an example is available <a href="https://github.com/tnelson/Forge/blob/main/forge/examples/oopsla24/goat_cabbage_wolf.frg">here</a>).</p>
+</li>
+<li>This will open up Sterling, the default Forge visualizer, in a browser window. 
+Run your command, and then, once Sterling displays a graph, click the <code>Layout</code> drawer.
+ Select <code>Load Layout</code> to lkoad the graph in Cope and Drag. If you already have a Cope and Drag specification, you can 
+paste it in here before clicking load layout.</li>
+</ol>
+<figure>
+    <img src="img/sterling-layout.png" alt="No Code Interface Screenshot" style="max-height: 500px; width: auto; border: 1px solid #ccc; padding: 5px;">
+    <figcaption style="text-align: center; margin-top: 5px;">Click the highlighted button to open the Sterling Layout Drawer</figcaption>
+</figure>
+
+<ol>
+<li>CnD will now open in a different tab. You can now start adding <strong><a href="/constraints">constraints</a></strong> that define spatial relationships between elements and <strong><a href="/directives">directives</a></strong> that control visual styling and representation.
+These can be expressed both via YAML and a structured, no-code interface. 
+If you are just starting with <code>CnD</code>, we recommend beginning with the No Code interface.</li>
+</ol>
+<figure>
+    <img src="img/code.png" alt="YAML Interface Screenshot" style="max-height: 500px; width: auto; border: 1px solid #ccc; padding: 5px;">
+    <figcaption style="text-align: center; margin-top: 5px;">YAML Interface for Authoring Diagrams</figcaption>
+</figure>
+
+<figure>
+    <img src="img/nocode.png" alt="No Code Interface Screenshot" style="max-height: 500px; width: auto; border: 1px solid #ccc; padding: 5px;">
+    <figcaption style="text-align: center; margin-top: 5px;">No Code Interface for Authoring Diagrams</figcaption>
+</figure>
+
+<ol>
+<li>Once you have clicked 'Apply Layout', <code>CnD</code> will apply your specification to generate a new diagram.</li>
+</ol>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li>Read about <a href="/constraints">Constraints</a></li>
+<li>Learn about <a href="/directives">Directives</a></li>
+</ul>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../faq/" class="btn btn-neutral float-left" title="FAQ"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../constraints/" class="btn btn-neutral float-right" title="Constraints">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href=".." class="btn btn-neutral float-left" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../faq/" class="btn btn-neutral float-right" title="FAQ">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -127,10 +170,10 @@
         </span>
     
     
-      <span><a href="../faq/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href=".." style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../constraints/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../faq/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>
