@@ -2,12 +2,13 @@
 
 **Cope and Drag** (or `CnD`) is a lightweight diagramming language designed for use with the [Forge](https://forge-fm.org/) lightweight formal methods tool.
 
-The key idea is that `CnD` starts with a meaningful default visualization. Each operation added refines it. For example, you can **constrain** spatial layout (e.g., child nodes in a binary tree below their parents), **group** elements (e.g., nodes representing related components in a software architecture), or **direct** drawing style (e.g., color nodes in a red-black tree based on their color).
+The key idea is that `CnD` starts with a meaningful default visualization. Each operation added refines it. For example, you can *constrain* spatial layout (e.g., child nodes in a binary tree below their parents), *group* elements (e.g., nodes representing related components in a software architecture), or *direct* drawing style (e.g., color nodes in a red-black tree based on their color).
 
-The goal isn’t to create pretty diagrams but to generate **useful** ones. Diagrams respect the model’s structure and spatial relationships. If the diagram doesn’t match the model, no diagram is generated, and a solver-generated error is produced. This helps identify **bad instances**, where the model doesn’t match the author's intent, making `CnD` a powerful debugging tool.
+The goal isn’t to create pretty diagrams but to generate *useful* ones. Diagrams respect the model’s structure and spatial relationships. If the diagram doesn’t match the model, no diagram is generated, and a solver-generated error is produced. This helps identify *bad instances*, where the model doesn’t match the author's intent, making `CnD` a meaningful debugging tool.
 
-> 🔍 For more, see our upcoming [ECOOP 2025 paper](https://www.siddharthaprasad.com/unpublished/pgnk-lightweight-diagramming.pdf).
-> 
+> 🔍 *See our upcoming [paper in ECOOP 2025](https://www.siddharthaprasad.com/unpublished/pgnk-lightweight-diagramming.pdf).*
+>
+
 
 ## Grounded In Cognitive Science
 
@@ -24,8 +25,8 @@ These spatial choices aren't just aesthetic; they help convey the semantics of t
 
 ### Visual Differences
 
-> 💡 In cognitive psychology, pre-attentive processing refers to how we perceive certain visual features—like color, size, and position—almost instantly, before focused attention.
-> 
+> 💡 *In cognitive psychology, pre-attentive processing refers to how we perceive certain visual features—like color, size, and position—almost instantly, before focused attention.*
+>
 
 Visual features like color, size, and position are processed by our brains almost instantly. Cope and Drag uses these features strategically to make diagrams easier to understand at a glance. Directives allow diagrammers to control *how* elements are displayed (color, shapes, or size), resulting in diagrams that focus the audience on what matters most.
 
@@ -34,6 +35,5 @@ Visual features like color, size, and position are processed by our brains almos
 
 - [Getting Started](/copeanddrag/getting-started): Install the tool, explore how it interfaces with Forge.
 - [Examples](/copeanddrag/examples): Play with some pre-built example diagrams.
-
 
 
