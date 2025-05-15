@@ -90,7 +90,7 @@ directives:
 ### **Visibility Flags**
 Controls which elements are hidden. 
 
-```
+```yaml
 directives:
     - flag: hideDisconnectedBuiltIns
 ```
@@ -100,3 +100,17 @@ Current flags are:
   - `hideDisconnectedBuiltIns`: If true, hide all atoms of built-in type (ex. `Int`) that are not referenced by a relation.
 
 
+### Inferred Edge
+
+The `inferredEdge` directive introduces visually distinct edges that represent inferred relationships — connections the diagrammer wants the viewer to see to better understand the model. These edges are not part of the model itself but help the viewer mentally hold and interpret higher-level connections.
+
+```yaml
+directives:
+  - inferredEdge:
+      selector: '{n1 : Node, i : Int, n2 : Node | n1->n2->i in edges }'
+      name: weight
+```
+
+#### Parameters
+- `selector` : A Forge expression that determines which elements upon which the constraint acts. This expression must return a set of elements of arity >= 2, and the first and last of each tuple will be used.
+- `name` : The label to be given to this edge. Any ''middle'' tuple elements in the selector (i.e. elements that are not first or last in the tuple) are appended to this name to better identify edges.

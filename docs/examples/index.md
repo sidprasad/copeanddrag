@@ -18,18 +18,27 @@
     },
     {
         "id": "fruit",
-        "title": "Fruit in Baskeds",
+        "title": "Fruit in Baskets",
         "description": "Uses grouping constraints to group a set of fruit by the baskets they are in, as well as group all rotten fruit in a basket together. Also uses icons to identify each fruit type.",
         "image": "fruit/icon.png",
         "example_link": "fruit/diag.html",
         "download_link": "fruit/fruit.zip"
-    }
+    },
+    {
+        "id": "ringlights",
+        "title": "Ring Lights",
+        "description": "Uses cyclic constraints to arrange a ring of lights along the boundary of a regular shape.",
+        "image": "ringlights/icon.png",
+        "example_link": "ringlights/diag.html",
+        "download_link": "ringlights/ringlights.zip"
+    },
+
 ] %}
 
 <div class="container">
   <div class="row">
     {% for example in examples %}
-    <div class="col-md-12" style="margin-bottom: 20px;">
+    <div class="col-md-12" style="margin-bottom: 20px;" id="{{example.id}}">
       <div class="card" style="display: flex; flex-direction: row; align-items: center; padding: 15px; border: 1px solid #ddd;">
         <!-- Text Column -->
         <div class="col-md-8">

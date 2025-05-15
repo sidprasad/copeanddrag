@@ -2,82 +2,51 @@
 Constraints define spatial relationships between elements in the diagram. Each constraint consists of a **type** and associated **parameters**.
 
 ## **Cyclic Constraints**
-Cyclic constraints arranges related elements in a circular layout.  
-For example, the constraint below converts the image on the left to that on the right.
-
-
-<div style="display: table; width: 100%; text-align: left;">
-
-  <!-- Left Image -->
-  <div style="display: table-cell; width: 33%; vertical-align: middle;">
-    <img src="../img/ring-lights/asv_state1.png" alt="Default Sterling output of a graph that looks linear." style="max-width: 100%; height: auto;">
-  </div>
-
-  <!-- Code Block -->
-  <div style="display: table-cell; width: 33%; vertical-align: middle; padding: 0 10px;">
-<pre><code>
+Cyclic constraints arrange related elements in a circular layout [^1]. The layout below is used in the [Ring Lights](/copeanddrag/examples#ringlights)
+example to arrange a ring of lights along the boundary of a pentagon.
+```yaml
 constraints:
   - cyclic:
-      selector: "left"
-      direction: clockwise  
-    </code></pre>
-  </div>
+      selector: left
+      direction: clockwise
+directives:
+  - flag: hideDisconnectedBuiltIns
+```
 
-  <!-- Right Image -->
-  <div style="display: table-cell; width: 33%; vertical-align: middle;">
-    <img src="../img/ring-lights/cnd_state1.png" alt="Sterling output refined to circular layout." style="max-width: 100%; height: auto;">
-  </div>
 
-</div>
+[^1]: To be more precise, related elements are laid out roughly as a regular shape of n sides, where there are n related elements in the selector.
 
 
 
 #### Parameters
 
-- `selector` : A Forge expression that determines which elements upon which the constraint acts. This expression must return a set of elements of arity >= 2, and the first and last of each tuple will be used.
+- `selector` : A Forge expression that determines which elements upon which the constraint acts. This expression must return a set of elements of arity >= 2, and the first and last of each tuple will be used. If multiple closed relations are returned, multiple cycles are  generated. For example, a selector evaluating to `{(A, B), (B, C), (C,D), (E,F), (F,E)}` will construct two independent shapes -- one relating `A, B, C` and another relating `E,F`.
 - `direction` : [Optional] Direction in which elements will be laid out. One of `clockwise` or `counterclockwise`. Defaults to `clockwise`
 
 
 
 
 ## **Orientation Constraints**
-Specify the relative positioning of elements.
+Specify the relative positioning of elements in a graph. The layout below is used in the [binary tree example](/copeanddrag/examples/#bt) shows how
+to ensure that a node's right children are laid out below it and to its right, and that its left children are laid out below it and to its left.
 
-### Orientation for Fields
-
-The following orientation constraints lay out elements related by a field named `down` directly below one another,
-and elements related by the field named `right` to be directly right of one another. This transforms the Sterling output on the left to that on the right.
-
-<div style="display: table; width: 100%; text-align: left;">
-
-  <!-- Left Image -->
-  <div style="display: table-cell; width: 33%; vertical-align: middle;">
-    <img src="../img/ttt/sterling.png" alt="Default image of some Sterling output" style="max-width: 100%; height: auto;">
-  </div>
-
-  <!-- Code Block -->
-  <div style="display: table-cell; width: 33%; vertical-align: middle; padding: 0 10px;">
-<pre><code>
+```yaml
 constraints:
   - orientation:
-      selector: "down"
+      selector: right
       directions:
-        - directlyBelow
+        - right
+        - below
   - orientation:
-      selector: "right"
+      selector: left
       directions:
-        - directlyRight
-    </code></pre>
-  </div>
-
-  <!-- Right Image -->
-  <div style="display: table-cell; width: 33%; vertical-align: middle;">
-    <img src="../img/ttt/cnd.png" alt="Sterling output refined to form a grid." style="max-width: 100%; height: auto;">
-  </div>
-
-</div>
-
-
+        - left
+        - below
+directives:
+  - attribute:
+      field: key
+  - flag: hideDisconnectedBuiltIns
+```
 
 #### Parameters
 
@@ -91,61 +60,46 @@ constraints:
 
 Group elements together based on either a **selector** OR a **field**. Groups **cannot** intersect unless one is subsumed by another.
 
-Grouping by field removes multiple edges between the group source(s) and target(s), and replaces them with the lowest number of arrows between group and element. 
+
+### Grouping by Field
+Grouping by field removes multiple edges between the group source(s) and target(s), and replaces them with the lowest number of arrows between group and element. The layout below shows the pertinent part of the [Fruit in Baskets](/copeanddrag/examples/#fruit) example, which uses the 0th element 
+of the `fruit` relation as a key and adds elements in the 1st part of the relation to the associated group.
 
 
-#### Grouping by Selector Parameters
+```yaml
+- group:
+      field: fruit
+      groupOn: 0
+      addToGroup: 1
+```
 
-- `selector` : A Forge expression that determines which elements upon which the constraint acts. This expression must return a set of singletons.
-- `name` : Name of the group to be displayed.
-  
-#### Grouping by Field Parameters
-
+#### Parameters
 - `field` : Name of the field in the source specification upon which the constraint acts.
 - `groupOn` : The 0 indexed element of the field that is used to group elements.
 - `addToGroup`: The 0 indexed element of the field which should be added to the group.
 
+#### Grouping by Selector 
 
 
+Grouping by selector affords a more flexible way to create groups. This operation, however, does not have required context to collapse multiple graph edges. As a result, it **does not remove any edges from the graph**. The layout below shows the pertinent part of the [Fruit in Baskets](/copeanddrag/examples/#fruit) example, which uses a n-ary selector to group rotten fruit that are in the same basket together.
 
-The constraints below:
-
-- Group elements on the domain of the `animals` field by grouping on the 0th element of the animals  field and adding the 1st element of the field to the group.
-- Grouping all the Wolves on the far side by selector, and naming the group `farwolves`.
-
-
-<div style="display: table; width: 100%; text-align: left;">
-
-  <!-- Left Image -->
-  <div style="display: table-cell; width: 33%; vertical-align: middle;">
-    <img src="../img/gw/sterling_inst5.png" alt="Default image of some Sterling output" style="max-width: 100%; height: auto;">
-  </div>
-
-  <!-- Code Block -->
-  <div style="display: table-cell; width: 33%; vertical-align: middle; padding: 0 10px;">
-<pre><code>
-constraints:
+```yaml
   - group:
-      field: animals
-      groupOn: '0'
-      addToGroup: '1'
-  - group:
-      selector: '{ w : Wolf | w in Far.animals }'
-      name: farwolves
-    </code></pre>
-  </div>
+      selector: '{b : Basket, a : Fruit | (a in b.fruit) and a.status = Rotten }'
+      name: rottenFruit
 
-  <!-- Right Image -->
-  <div style="display: table-cell; width: 33%; vertical-align: middle;">
-    <img src="../img/gw/cnd_inst5.png" alt="Sterling output refined with grouping." style="max-width: 100%; height: auto;">
-  </div>
+```
 
-</div>
+- `selector` : A Forge expression that determines which elements upon which the constraint acts.
+    - If the selector evaluates to a set of singletons, all singletons are added to the group.
+    - If the selector evaluates to a set of tuples, the first element of the tuple is used as as a key upon which to group, while the last element of the tuple is added to the group associated with that key. For example, 
+- `name` : Name of the group to be displayed.
+  
 
 
 
 
-# When Constraints Cannot Be Satisfied
+## When Constraints Cannot Be Satisfied
 
 All CnD constraints are **hard constraints**, and thus must be satisfied for a diagram to be produced. Constraints might not be satisfied for one of two reasons:
 
