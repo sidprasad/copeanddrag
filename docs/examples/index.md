@@ -1,9 +1,7 @@
 # Examples
 
 
-- TODO: We detail some examples here.
-- Examples can be downloaded as diagram zps which can be loaded into Cope and Drag at the `/import` endpoint.
-- We also provide interactive client side only versions of the examples -- however, you will not be able to alter the CnD spec.
+These example diagrams demonstrate key features of `CnD`. You can interact with each example directly in your browser using a client-side viewer (note: the Cope and Drag specification cannot be edited in this mode), or download the full example as a `.zip` file for use with Cope and Drag at the `/import` endpoint.
 
 ---
 
@@ -31,6 +29,14 @@
         "image": "ringlights/icon.png",
         "example_link": "ringlights/diag.html",
         "download_link": "ringlights/ringlights.zip"
+    },
+    {
+        "id": "ttt",
+        "title": "Tic Tac Toe",
+        "description": "Uses orientation constraints to arrange a tic tac toe board.",
+        "image": "ttt/icon.png",
+        "example_link": "ttt/diag.html",
+        "download_link": "ttt/ttt.zip"
     },
 
 ] %}
