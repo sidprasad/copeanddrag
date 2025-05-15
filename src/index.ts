@@ -404,7 +404,89 @@ app.post('/feedback', (req, res) => {
 });
 
 app.get('/version', (req, res) => {
-    res.json({ version: version });
+    const endpoints = [
+        {
+            path: '/',
+            method: 'GET',
+            description: 'Returns the main Cope and Drag page with an empty diagram.',
+            requires: 'No input required.'
+        },
+        {
+            path: '/',
+            method: 'POST',
+            description: 'Generates a diagram based on the provided Alloy instance and layout specification.',
+            requires: {
+                body: {
+                    alloydatum: 'The Alloy instance in XML format.',
+                    cope: 'The layout specification in YAML format.',
+                    instancenumber: 'Optional. The temporal instance number (default is 0).',
+                    loggingEnabled: 'Optional. Set to "enabled" or "disabled" (default is "enabled").'
+                }
+            }
+        },
+        {
+            path: '/import',
+            method: 'GET',
+            description: 'Displays a page for uploading a ZIP file containing datum.xml and layout.cnd.',
+            requires: 'No input required.'
+        },
+        {
+            path: '/import',
+            method: 'POST',
+            description: 'Processes the uploaded ZIP file and generates a diagram.',
+            requires: {
+                file: 'A ZIP file containing datum.xml and layout.cnd.'
+            }
+        },
+        {
+            path: '/timing',
+            method: 'POST',
+            description: 'Receives client-side timing data for performance monitoring.',
+            requires: {
+                body: {
+                    clientTime: 'The client-side execution time in milliseconds.'
+                }
+            }
+        },
+        {
+            path: '/evaluator',
+            method: 'POST',
+            description: 'Evaluates a Forge expression against a given Alloy instance and returns the result.',
+            requires: {
+                body: {
+                    alloydatum: 'The Alloy instance in XML format.',
+                    expression: 'The Forge expression to evaluate.',
+                    instancenumber: 'Optional. The temporal instance number (default is 0).'
+                }
+            }
+        },
+        {
+            path: '/feedback',
+            method: 'POST',
+            description: 'Logs user feedback, including Alloy data, layout specification, and errors.',
+            requires: {
+                body: {
+                    alloydatum: 'The Alloy instance in XML format.',
+                    cnd: 'The layout specification in YAML format.',
+                    feedback: 'User feedback text.',
+                    error: 'Error details, if any.',
+                    instanceNumber: 'The temporal instance number.'
+                }
+            }
+        },
+        {
+            path: '/version',
+            method: 'GET',
+            description: 'Returns the current version of the application along with a list of available endpoints.',
+            requires: 'No input required.'
+        }
+    ];
+
+    res.json({
+        version: version,
+        description: 'Cope and Drag API Documentation',
+        endpoints: endpoints
+    });
 });
 
 process.on('SIGINT', shutdown);
