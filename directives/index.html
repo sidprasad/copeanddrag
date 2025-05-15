@@ -96,6 +96,12 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#visibility-flags">Visibility Flags</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#inferred-edge">Inferred Edge</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#parameters_5">Parameters</a>
+    </li>
+        </ul>
+    </li>
     </ul>
                 </li>
               </ul>
@@ -204,13 +210,29 @@
 <h3 id="visibility-flags"><strong>Visibility Flags</strong></h3>
 <p>Controls which elements are hidden. </p>
 <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
-<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code>directives:
-    - flag: hideDisconnectedBuiltIns
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nt">directives</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">flag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hideDisconnectedBuiltIns</span>
 </code></pre></div></td></tr></table></div>
 
 <p>Current flags are:
   - <code>hideDisconnected</code>: If true, hide all atoms in the graph that are not referenced by a relation.
   - <code>hideDisconnectedBuiltIns</code>: If true, hide all atoms of built-in type (ex. <code>Int</code>) that are not referenced by a relation.</p>
+<h3 id="inferred-edge">Inferred Edge</h3>
+<p>The <code>inferredEdge</code> directive introduces visually distinct edges that represent inferred relationships — connections the diagrammer wants the viewer to see to better understand the model. These edges are not part of the model itself but help the viewer mentally hold and interpret higher-level connections.</p>
+<div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nt">directives</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">inferredEdge</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">selector</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{n1</span><span class="nv"> </span><span class="s">:</span><span class="nv"> </span><span class="s">Node,</span><span class="nv"> </span><span class="s">i</span><span class="nv"> </span><span class="s">:</span><span class="nv"> </span><span class="s">Int,</span><span class="nv"> </span><span class="s">n2</span><span class="nv"> </span><span class="s">:</span><span class="nv"> </span><span class="s">Node</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">n1-&gt;n2-&gt;i</span><span class="nv"> </span><span class="s">in</span><span class="nv"> </span><span class="s">edges</span><span class="nv"> </span><span class="s">}&#39;</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">weight</span>
+</code></pre></div></td></tr></table></div>
+
+<h4 id="parameters_5">Parameters</h4>
+<ul>
+<li><code>selector</code> : A Forge expression that determines which elements upon which the constraint acts. This expression must return a set of elements of arity &gt;= 2, and the first and last of each tuple will be used.</li>
+<li><code>name</code> : The label to be given to this edge. Any ''middle'' tuple elements in the selector (i.e. elements that are not first or last in the tuple) are appended to this name to better identify edges.</li>
+</ul>
               
             </div>
           </div><footer>
