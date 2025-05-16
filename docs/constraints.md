@@ -78,7 +78,7 @@ of the `fruit` relation as a key and adds elements in the 1st part of the relati
 - `groupOn` : The 0 indexed element of the field that is used to group elements.
 - `addToGroup`: The 0 indexed element of the field which should be added to the group.
 
-#### Grouping by Selector 
+### Grouping by Selector 
 
 
 Grouping by selector affords a more flexible way to create groups. This operation, however, does not have required context to collapse multiple graph edges. As a result, it **does not remove any edges from the graph**. The layout below shows the pertinent part of the [Fruit in Baskets](/copeanddrag/examples/#fruit) example, which uses a n-ary selector to group rotten fruit that are in the same basket together.
@@ -89,6 +89,8 @@ Grouping by selector affords a more flexible way to create groups. This operatio
       name: rottenFruit
 
 ```
+
+#### Parameters
 
 - `selector` : A Forge expression that determines which elements upon which the constraint acts.
     - If the selector evaluates to a set of singletons, all singletons are added to the group.
