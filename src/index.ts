@@ -25,6 +25,9 @@ const axios = require('axios');
 import multer from 'multer';
 import AdmZip from 'adm-zip';
 
+import swaggerUi from 'swagger-ui-express';
+import swaggerJSDoc from 'swagger-jsdoc';
+
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.join(__dirname, 'views'));
@@ -35,9 +38,25 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.json({ limit: '50mb' }));
 
 // This is a hack. I'm not sure how to encode the version number.
-const version = "3.2.1";
+const version = "3.2.2";
 
 const secretKey = "cope-and-drag-logging-key";
+
+
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Cope and Drag API',
+      version: version,
+      description: 'API documentation for Cope and Drag'
+    }
+  },
+  apis: [__filename], // This file, or use ['./src/*.ts'] for all TS files
+};
+
+const swaggerSpec = swaggerJSDoc(swaggerOptions);
+app.use('/openapi', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Function to get or generate a persistent user ID using HMAC
 function getPersistentUserId(): string {
@@ -214,7 +233,71 @@ function generateDiagram (req, res)  {
 
 
 
-// On a GET request, return the start CnD page.
+const server = http.createServer(app);
+
+const PORT = process.env.PORT || 3000; 
+server.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}/`);
+});
+
+const shutdown = () => {
+    console.log('Received termination signal, shutting down gracefully...');
+    server.close(() => {
+        console.log('Closed out remaining connections.');
+        process.exit(0);
+    });
+
+    // Forcefully shut down after 10 seconds
+    setTimeout(() => {
+        console.error('Could not close connections in time, forcefully shutting down');
+        process.exit(1);
+    }, 10000);
+};
+
+/// And the controller functions go here.
+
+
+/**
+ * @openapi
+ * /:
+ *   get:
+ *     tags:
+ *      - Diagramming
+ *     summary: Empty diagram.
+ *     description: Returns the default Cope and Drag page with an empty diagram, no Alloy instance, and no layout specification.
+ *     responses:
+ *       200:
+ *         description: HTML page with empty diagram
+ *   post:
+ *     summary: Generate diagram
+ *     tags:
+ *      - Diagramming
+ *     description: Generates a diagram based on the provided Alloy instance and layout specification.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               alloydatum:
+ *                 type: string
+ *                 description: The Alloy instance in XML format.
+ *               cope:
+ *                 type: string
+ *                 description: The Cope and Drag specification in YAML format.
+ *               instancenumber:
+ *                 type: integer
+ *                 description: Optional. The temporal instance number (default is 0).
+ *               loggingEnabled:
+ *                 type: string
+ *                 description: Optional. Set to "enabled" or "disabled" (default is "enabled").
+ *     responses:
+ *       200:
+ *         description: HTML page with diagram
+ */
+
+
 app.get('/', (req, res) => {
 
 
@@ -246,13 +329,41 @@ app.get('/', (req, res) => {
     });
 });
 
-
-
-
-
-
 app.post('/', generateDiagram);
 
+
+
+/**
+ * @openapi
+ * /import:
+ *   get:
+ *     summary: Select an exported Cope and Drag diagram to load.
+ *     tags:
+ *       - Load Exported Diagram
+ *     description: Displays a form that allows you to upload exported Cope and Drag diagram.
+ *     responses:
+ *       200:
+ *         description: HTML page for ZIP upload
+ *   post:
+ *     summary: Load an exported Cope and Drag diagram.
+ *     tags:
+ *       - Load Exported Diagram
+ *     description: Loads a provided exported Cope and Drag diagram from a ZIP file.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: A ZIP file containing datum.xml and layout.cnd.
+ *     responses:
+ *       200:
+ *         description: HTML page with diagram or error message
+ */
 app.get('/import', (req, res) => {
     res.render('import', {
         title: 'Import ZIP File',
@@ -312,29 +423,29 @@ app.post('/import', upload.single('file'), async (req, res) => {
     }
 });
 
-const server = http.createServer(app);
 
-const PORT = process.env.PORT || 3000; 
-server.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}/`);
-});
-
-const shutdown = () => {
-    console.log('Received termination signal, shutting down gracefully...');
-    server.close(() => {
-        console.log('Closed out remaining connections.');
-        process.exit(0);
-    });
-
-    // Forcefully shut down after 10 seconds
-    setTimeout(() => {
-        console.error('Could not close connections in time, forcefully shutting down');
-        process.exit(1);
-    }, 10000);
-};
-
-
-
+/**
+ * @openapi
+ * /timing:
+ *   post:
+ *     summary: Submit client timing data
+ *     tags:
+ *      - Telemetry
+ *     description: Receives client-side timing data for performance monitoring.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               clientTime:
+ *                 type: number
+ *                 description: The client-side execution time (a proxy for WebCola execution time) in milliseconds.
+ *     responses:
+ *       200:
+ *         description: Success message
+ */
 app.post('/timing', (req, res) => {
     const clientTime = req.body.clientTime;
 
@@ -343,6 +454,42 @@ app.post('/timing', (req, res) => {
 });
 
 
+/**
+ * @openapi
+ * /evaluator:
+ *   post:
+ *     summary: Evaluate Forge expression
+ *     tags:
+ *      - Diagramming
+ *     description: Evaluates a Forge expression against a given Alloy instance and returns the result.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               alloydatum:
+ *                 type: string
+ *                 description: The Alloy instance in XML format.
+ *               expression:
+ *                 type: string
+ *                 description: The Forge expression to evaluate.
+ *               instancenumber:
+ *                 type: integer
+ *                 description: Optional. The temporal instance number (default is 0).
+ *     responses:
+ *       200:
+ *         description: Evaluation result
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 result:
+ *                   type: string
+ *                   description: The evaluation result or error message.
+ */
 app.post('/evaluator', (req, res) => {
 
     const alloyDatum : string = req.body.alloydatum;
@@ -376,7 +523,47 @@ app.post('/evaluator', (req, res) => {
 });
 
 
-
+/**
+ * @openapi
+ * /feedback:
+ *   post:
+ *     summary: Submit user feedback
+ *     tags:
+ *      - Telemetry
+ *     description: Logs user feedback, including Alloy data, layout specification, and errors.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               alloydatum:
+ *                 type: string
+ *                 description: The Alloy instance in XML format.
+ *               cnd:
+ *                 type: string
+ *                 description: The Cope and Drag specification in YAML format.
+ *               feedback:
+ *                 type: string
+ *                 description: User feedback text.
+ *               error:
+ *                 type: string
+ *                 description: Error details, if any.
+ *               instanceNumber:
+ *                 type: integer
+ *                 description: The temporal instance number.
+ *     responses:
+ *       200:
+ *         description: Acknowledgement message.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
 app.post('/feedback', (req, res) => {
 
 
@@ -401,92 +588,6 @@ app.post('/feedback', (req, res) => {
     logger.log_payload(payload, LogLevel.INFO, Event.ERROR_FEEDBACK);
     res.json({ message: 'Thank you for your feedback.' });
 
-});
-
-app.get('/version', (req, res) => {
-    const endpoints = [
-        {
-            path: '/',
-            method: 'GET',
-            description: 'Returns the main Cope and Drag page with an empty diagram.',
-            requires: 'No input required.'
-        },
-        {
-            path: '/',
-            method: 'POST',
-            description: 'Generates a diagram based on the provided Alloy instance and layout specification.',
-            requires: {
-                body: {
-                    alloydatum: 'The Alloy instance in XML format.',
-                    cope: 'The layout specification in YAML format.',
-                    instancenumber: 'Optional. The temporal instance number (default is 0).',
-                    loggingEnabled: 'Optional. Set to "enabled" or "disabled" (default is "enabled").'
-                }
-            }
-        },
-        {
-            path: '/import',
-            method: 'GET',
-            description: 'Displays a page for uploading a ZIP file containing datum.xml and layout.cnd.',
-            requires: 'No input required.'
-        },
-        {
-            path: '/import',
-            method: 'POST',
-            description: 'Processes the uploaded ZIP file and generates a diagram.',
-            requires: {
-                file: 'A ZIP file containing datum.xml and layout.cnd.'
-            }
-        },
-        {
-            path: '/timing',
-            method: 'POST',
-            description: 'Receives client-side timing data for performance monitoring.',
-            requires: {
-                body: {
-                    clientTime: 'The client-side execution time in milliseconds.'
-                }
-            }
-        },
-        {
-            path: '/evaluator',
-            method: 'POST',
-            description: 'Evaluates a Forge expression against a given Alloy instance and returns the result.',
-            requires: {
-                body: {
-                    alloydatum: 'The Alloy instance in XML format.',
-                    expression: 'The Forge expression to evaluate.',
-                    instancenumber: 'Optional. The temporal instance number (default is 0).'
-                }
-            }
-        },
-        {
-            path: '/feedback',
-            method: 'POST',
-            description: 'Logs user feedback, including Alloy data, layout specification, and errors.',
-            requires: {
-                body: {
-                    alloydatum: 'The Alloy instance in XML format.',
-                    cnd: 'The layout specification in YAML format.',
-                    feedback: 'User feedback text.',
-                    error: 'Error details, if any.',
-                    instanceNumber: 'The temporal instance number.'
-                }
-            }
-        },
-        {
-            path: '/version',
-            method: 'GET',
-            description: 'Returns the current version of the application along with a list of available endpoints.',
-            requires: 'No input required.'
-        }
-    ];
-
-    res.json({
-        version: version,
-        description: 'Cope and Drag API Documentation',
-        endpoints: endpoints
-    });
 });
 
 process.on('SIGINT', shutdown);
