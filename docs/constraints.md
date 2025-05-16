@@ -2,7 +2,9 @@
 Constraints define spatial relationships between elements in the diagram. Each constraint consists of a **type** and associated **parameters**.
 
 ## **Cyclic Constraints**
-Cyclic constraints arrange related elements in a circular layout [^1]. The layout below is used in the [Ring Lights](/copeanddrag/examples#ringlights)
+Cyclic constraints arrange related elements in a circular layout. *To be more precise, related elements are laid out roughly as a regular shape of n sides, where there are n related elements in the selector.*
+
+The layout below is used in the [Ring Lights](/copeanddrag/examples#ringlights)
 example to arrange a ring of lights along the boundary of a pentagon.
 ```yaml
 constraints:
@@ -14,7 +16,6 @@ directives:
 ```
 
 
-[^1]: To be more precise, related elements are laid out roughly as a regular shape of n sides, where there are n related elements in the selector.
 
 
 
