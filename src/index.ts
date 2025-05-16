@@ -56,7 +56,7 @@ const swaggerOptions = {
 };
 
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
-app.use('/version', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/openapi', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Function to get or generate a persistent user ID using HMAC
 function getPersistentUserId(): string {
