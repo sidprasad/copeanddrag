@@ -76,7 +76,11 @@
         <ul>
     <li class="toctree-l4"><a class="reference internal" href="#parameters_2">Parameters</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#grouping-by-selector">Grouping by Selector</a>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#grouping-by-selector">Grouping by Selector</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#parameters_3">Parameters</a>
     </li>
         </ul>
     </li>
@@ -118,7 +122,8 @@
                 <h1 id="constraints">Constraints</h1>
 <p>Constraints define spatial relationships between elements in the diagram. Each constraint consists of a <strong>type</strong> and associated <strong>parameters</strong>.</p>
 <h2 id="cyclic-constraints"><strong>Cyclic Constraints</strong></h2>
-<p>Cyclic constraints arrange related elements in a circular layout [^1]. The layout below is used in the <a href="/copeanddrag/examples#ringlights">Ring Lights</a>
+<p>Cyclic constraints arrange related elements in a circular layout. <em>To be more precise, related elements are laid out roughly as a regular shape of n sides, where there are n related elements in the selector.</em></p>
+<p>The layout below is used in the <a href="/copeanddrag/examples#ringlights">Ring Lights</a>
 example to arrange a ring of lights along the boundary of a pentagon.</p>
 <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
 <span class="normal">2</span>
@@ -133,7 +138,6 @@ example to arrange a ring of lights along the boundary of a pentagon.</p>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">flag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hideDisconnectedBuiltIns</span>
 </code></pre></div></td></tr></table></div>
 
-<p>[^1]: To be more precise, related elements are laid out roughly as a regular shape of n sides, where there are n related elements in the selector.</p>
 <h4 id="parameters">Parameters</h4>
 <ul>
 <li><code>selector</code> : A Forge expression that determines which elements upon which the constraint acts. This expression must return a set of elements of arity &gt;= 2, and the first and last of each tuple will be used. If multiple closed relations are returned, multiple cycles are  generated. For example, a selector evaluating to <code>{(A, B), (B, C), (C,D), (E,F), (F,E)}</code> will construct two independent shapes -- one relating <code>A, B, C</code> and another relating <code>E,F</code>.</li>
@@ -199,7 +203,7 @@ of the <code>fruit</code> relation as a key and adds elements in the 1st part of
 <li><code>groupOn</code> : The 0 indexed element of the field that is used to group elements.</li>
 <li><code>addToGroup</code>: The 0 indexed element of the field which should be added to the group.</li>
 </ul>
-<h4 id="grouping-by-selector">Grouping by Selector</h4>
+<h3 id="grouping-by-selector">Grouping by Selector</h3>
 <p>Grouping by selector affords a more flexible way to create groups. This operation, however, does not have required context to collapse multiple graph edges. As a result, it <strong>does not remove any edges from the graph</strong>. The layout below shows the pertinent part of the <a href="/copeanddrag/examples/#fruit">Fruit in Baskets</a> example, which uses a n-ary selector to group rotten fruit that are in the same basket together.</p>
 <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
 <span class="normal">2</span>
@@ -208,6 +212,7 @@ of the <code>fruit</code> relation as a key and adds elements in the 1st part of
 <span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rottenFruit</span>
 </code></pre></div></td></tr></table></div>
 
+<h4 id="parameters_3">Parameters</h4>
 <ul>
 <li><code>selector</code> : A Forge expression that determines which elements upon which the constraint acts.<ul>
 <li>If the selector evaluates to a set of singletons, all singletons are added to the group.</li>
