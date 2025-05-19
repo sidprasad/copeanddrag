@@ -31,6 +31,7 @@ These spatial choices aren't just aesthetic; they help convey the semantics of t
 Visual features like color, size, and position are processed by our brains almost instantly. Cope and Drag uses these features strategically to make diagrams easier to understand at a glance. Directives allow diagrammers to control *how* elements are displayed (color, shapes, or size), resulting in diagrams that focus the audience on what matters most.
 
 
+
 ## Next Steps
 
 - [Getting Started](/copeanddrag/getting-started): Install the tool, explore how it interfaces with Forge.

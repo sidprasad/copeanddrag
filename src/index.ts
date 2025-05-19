@@ -38,7 +38,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.json({ limit: '50mb' }));
 
 // This is a hack. I'm not sure how to encode the version number.
-const version = "3.2.2";
+const version = "3.2.3";
 
 const secretKey = "cope-and-drag-logging-key";
 
