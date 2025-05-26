@@ -1,5 +1,5 @@
 import { types } from "util";
-
+import { RelativeOrientationConstraint } from "./layoutspec";
 
 export interface LayoutGroup {
     // The name of the group
@@ -39,9 +39,14 @@ interface LayoutEdge {
 
 
 
-export type LayoutConstraint = TopConstraint | LeftConstraint | AlignmentConstraint;
+export interface LayoutConstraint {
+    
+    sourceConstraint: RelativeOrientationConstraint; // This can be any type of constraint, so we use 'any' for now   
+    
+}
+    //= TopConstraint | LeftConstraint | AlignmentConstraint;
 
-export interface TopConstraint {
+export interface TopConstraint extends LayoutConstraint {
     top : LayoutNode;
     bottom : LayoutNode;
     minDistance : number;
@@ -52,7 +57,7 @@ export function isTopConstraint(constraint: LayoutConstraint): constraint is Top
     return (constraint as TopConstraint).top !== undefined;
 }
 
-export interface LeftConstraint {
+export interface LeftConstraint extends LayoutConstraint {
     left : LayoutNode;
     right : LayoutNode;
     minDistance : number;
@@ -63,7 +68,7 @@ export function isLeftConstraint(constraint: LayoutConstraint): constraint is Le
 }
 
 // Same value along axis
-export interface AlignmentConstraint {
+export interface AlignmentConstraint extends LayoutConstraint {
     axis : "x" | "y";
     node1 : LayoutNode;
     node2 : LayoutNode;
