@@ -250,7 +250,8 @@ class ConstraintValidator {
                 let lc : LeftConstraint =  { 
                     left: node1, 
                     right: node2,
-                    minDistance: this.minPadding
+                    minDistance: this.minPadding,
+                    // sourceConstraint is ``implied'' or ``implicit'' here, since it is derived from the alignment order. That's tricky.
                 };
 
                 implicitAlignmentConstraints.push(lc);

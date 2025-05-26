@@ -37,14 +37,19 @@ interface LayoutEdge {
     id : string;
 }
 
+export class ImplicitConstraint {
+    constructor(public source: LayoutNode, public target: LayoutNode, public reason: string) {}
 
-
-export interface LayoutConstraint {
-    
-    sourceConstraint: RelativeOrientationConstraint; // This can be any type of constraint, so we use 'any' for now   
     
 }
-    //= TopConstraint | LeftConstraint | AlignmentConstraint;
+
+export interface LayoutConstraint {
+    sourceConstraint: RelativeOrientationConstraint | ImplicitConstraint; // This can be any type of constraint, so we use 'any' for now   
+}
+
+
+
+
 
 export interface TopConstraint extends LayoutConstraint {
     top : LayoutNode;
