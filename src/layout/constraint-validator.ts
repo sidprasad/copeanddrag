@@ -1,6 +1,7 @@
 import { SimplexSolver, Variable, Expression, Strength, Inequality, LEQ, GEQ, LE } from 'cassowary';
 import { intersection } from 'lodash';
-import { InstanceLayout, LayoutNode, LayoutEdge, LayoutGroup, LayoutConstraint, isLeftConstraint, isTopConstraint, isAlignmentConstraint, TopConstraint, LeftConstraint, AlignmentConstraint } from './interfaces';
+import { InstanceLayout, LayoutNode, LayoutEdge, LayoutGroup, LayoutConstraint, isLeftConstraint, isTopConstraint, isAlignmentConstraint, TopConstraint, LeftConstraint, AlignmentConstraint, ImplicitConstraint } from './interfaces';
+import { RelativeOrientationConstraint } from './layoutspec';
 
 
 class ConstraintValidator {
@@ -247,11 +248,16 @@ class ConstraintValidator {
                 let node1 = alignedLeftToRight[i];
                 let node2 = alignedLeftToRight[i + 1];
 
+
+                let roc : RelativeOrientationConstraint = new RelativeOrientationConstraint(['directlyLeft'], `${node1.id}->${node2.id}`);
+                let sourceConstraint = new ImplicitConstraint(roc, "Preventing Overlap");
+
                 let lc : LeftConstraint =  { 
                     left: node1, 
                     right: node2,
                     minDistance: this.minPadding,
                     // sourceConstraint is ``implied'' or ``implicit'' here, since it is derived from the alignment order. That's tricky.
+                    sourceConstraint: sourceConstraint
                 };
 
                 implicitAlignmentConstraints.push(lc);
@@ -271,10 +277,14 @@ class ConstraintValidator {
                 let node1 = alignedTopToBottom[i];
                 let node2 = alignedTopToBottom[i + 1];
 
+                let roc : RelativeOrientationConstraint = new RelativeOrientationConstraint(['directlyAbove'], `${node1.id}->${node2.id}`);
+                let sourceConstraint = new ImplicitConstraint(roc, "Preventing Overlap");
+
                 let tc : TopConstraint =  { 
                     top: node1, 
                     bottom: node2,
-                    minDistance: this.minPadding
+                    minDistance: this.minPadding,
+                    sourceConstraint: sourceConstraint
                 };
                 implicitAlignmentConstraints.push(tc);
             }

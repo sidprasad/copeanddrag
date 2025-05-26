@@ -1,5 +1,5 @@
 import { types } from "util";
-import { RelativeOrientationConstraint } from "./layoutspec";
+import { RelativeOrientationConstraint, CyclicOrientationConstraint } from "./layoutspec";
 
 export interface LayoutGroup {
     // The name of the group
@@ -38,13 +38,13 @@ interface LayoutEdge {
 }
 
 export class ImplicitConstraint {
-    constructor(public source: LayoutNode, public target: LayoutNode, public reason: string) {}
+    constructor(public c : RelativeOrientationConstraint | CyclicOrientationConstraint, public reason: string) {}
 
     
 }
 
 export interface LayoutConstraint {
-    sourceConstraint: RelativeOrientationConstraint | ImplicitConstraint; // This can be any type of constraint, so we use 'any' for now   
+    sourceConstraint: RelativeOrientationConstraint | CyclicOrientationConstraint | ImplicitConstraint; // Not grouping, and I hate introducing implicit (which should hopefully never show up)
 }
 
 
