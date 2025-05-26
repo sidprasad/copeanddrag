@@ -8,7 +8,8 @@ import { applyProjections } from '../alloy-instance/src/projection';
 
 import {
     LayoutNode, LayoutEdge, LayoutConstraint, InstanceLayout,
-    LeftConstraint, TopConstraint, AlignmentConstraint, LayoutGroup
+    LeftConstraint, TopConstraint, AlignmentConstraint, LayoutGroup,
+    ImplicitConstraint
 } from './interfaces';
 
 import {
@@ -865,32 +866,32 @@ export class LayoutInstance {
 
                 directions.forEach((direction) => {
                     if (direction == "left") {
-                        constraints.push(this.leftConstraint(targetNodeId, sourceNodeId, this.minSepWidth, layoutNodes));
+                        constraints.push(this.leftConstraint(targetNodeId, sourceNodeId, this.minSepWidth, layoutNodes, c));
                     }
                     else if (direction == "above") {
-                        constraints.push(this.topConstraint(targetNodeId, sourceNodeId, this.minSepHeight, layoutNodes));
+                        constraints.push(this.topConstraint(targetNodeId, sourceNodeId, this.minSepHeight, layoutNodes, c));
                     }
                     else if (direction == "right") {
-                        constraints.push(this.leftConstraint(sourceNodeId, targetNodeId, this.minSepWidth, layoutNodes));
+                        constraints.push(this.leftConstraint(sourceNodeId, targetNodeId, this.minSepWidth, layoutNodes, c));
                     }
                     else if (direction == "below") {
-                        constraints.push(this.topConstraint(sourceNodeId, targetNodeId, this.minSepHeight, layoutNodes));
+                        constraints.push(this.topConstraint(sourceNodeId, targetNodeId, this.minSepHeight, layoutNodes, c));
                     }
                     else if (direction == "directlyLeft") {
-                        constraints.push(this.leftConstraint(targetNodeId, sourceNodeId, this.minSepWidth, layoutNodes));
+                        constraints.push(this.leftConstraint(targetNodeId, sourceNodeId, this.minSepWidth, layoutNodes, c));
                         constraints.push(this.ensureSameYConstraint(targetNodeId, sourceNodeId, layoutNodes));
                     }
                     else if (direction == "directlyAbove") {
-                        constraints.push(this.topConstraint(targetNodeId, sourceNodeId, this.minSepHeight, layoutNodes));
-                        constraints.push(this.ensureSameXConstraint(targetNodeId, sourceNodeId, layoutNodes));
+                        constraints.push(this.topConstraint(targetNodeId, sourceNodeId, this.minSepHeight, layoutNodes, c));
+                        constraints.push(this.ensureSameXConstraint(targetNodeId, sourceNodeId, layoutNodes, c));
                     }
                     else if (direction == "directlyRight") {
-                        constraints.push(this.leftConstraint(sourceNodeId, targetNodeId, this.minSepWidth, layoutNodes));
-                        constraints.push(this.ensureSameYConstraint(targetNodeId, sourceNodeId, layoutNodes));
+                        constraints.push(this.leftConstraint(sourceNodeId, targetNodeId, this.minSepWidth, layoutNodes, c));
+                        constraints.push(this.ensureSameYConstraint(targetNodeId, sourceNodeId, layoutNodes, c));
                     }
                     else if (direction == "directlyBelow") {
-                        constraints.push(this.topConstraint(sourceNodeId, targetNodeId, this.minSepHeight, layoutNodes));
-                        constraints.push(this.ensureSameXConstraint(targetNodeId, sourceNodeId, layoutNodes));
+                        constraints.push(this.topConstraint(sourceNodeId, targetNodeId, this.minSepHeight, layoutNodes, c));
+                        constraints.push(this.ensureSameXConstraint(targetNodeId, sourceNodeId, layoutNodes, c));
                     }
                 });
             });
@@ -924,35 +925,35 @@ export class LayoutInstance {
     }
 
 
-    private leftConstraint(leftId: string, rightId: string, minDistance: number, layoutNodes: LayoutNode[]): LeftConstraint {
+    private leftConstraint(leftId: string, rightId: string, minDistance: number, layoutNodes: LayoutNode[], sourceConstraint : RelativeOrientationConstraint | ImplicitConstraint): LeftConstraint {
 
             let left = this.getNodeFromId(leftId, layoutNodes);
             let right = this.getNodeFromId(rightId, layoutNodes);
-            return { left: left, right: right, minDistance: minDistance };
+            return { left: left, right: right, minDistance: minDistance, sourceConstraint: sourceConstraint };
         }
 
-    private topConstraint(topId: string, bottomId: string, minDistance: number, layoutNodes: LayoutNode[]): TopConstraint {
+    private topConstraint(topId: string, bottomId: string, minDistance: number, layoutNodes: LayoutNode[], , sourceConstraint : RelativeOrientationConstraint | ImplicitConstraint): TopConstraint {
 
             let top = this.getNodeFromId(topId, layoutNodes);
             let bottom = this.getNodeFromId(bottomId, layoutNodes);
 
-            return { top: top, bottom: bottom, minDistance: minDistance };
+            return { top: top, bottom: bottom, minDistance: minDistance, sourceConstraint: sourceConstraint };
         }
 
-    private ensureSameYConstraint(node1Id: string, node2Id: string, layoutNodes: LayoutNode[]): AlignmentConstraint {
+    private ensureSameYConstraint(node1Id: string, node2Id: string, layoutNodes: LayoutNode[], sourceConstraint : RelativeOrientationConstraint | ImplicitConstraint): AlignmentConstraint {
 
             let node1 = this.getNodeFromId(node1Id, layoutNodes);
             let node2 = this.getNodeFromId(node2Id, layoutNodes);
 
-            return { axis: "y", node1: node1, node2: node2 };
+            return { axis: "y", node1: node1, node2: node2, sourceConstraint: sourceConstraint };
         }
 
-    private ensureSameXConstraint(node1Id: string, node2Id: string, layoutNodes: LayoutNode[]): AlignmentConstraint {
+    private ensureSameXConstraint(node1Id: string, node2Id: string, layoutNodes: LayoutNode[], sourceConstraint : RelativeOrientationConstraint | ImplicitConstraint): AlignmentConstraint {
 
         let node1 = this.getNodeFromId(node1Id, layoutNodes);
         let node2 = this.getNodeFromId(node2Id, layoutNodes);
 
-            return { axis: "x", node1: node1, node2: node2 };
+            return { axis: "x", node1: node1, node2: node2, sourceConstraint: sourceConstraint };
         }
 
     private singletonGroup(nodeId: string): LayoutGroup {
