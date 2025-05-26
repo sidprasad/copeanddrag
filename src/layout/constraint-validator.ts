@@ -247,7 +247,7 @@ class ConstraintValidator {
                 let node1 = alignedLeftToRight[i];
                 let node2 = alignedLeftToRight[i + 1];
 
-                let lc : LayoutConstraint =  { 
+                let lc : LeftConstraint =  { 
                     left: node1, 
                     right: node2,
                     minDistance: this.minPadding
@@ -270,7 +270,7 @@ class ConstraintValidator {
                 let node1 = alignedTopToBottom[i];
                 let node2 = alignedTopToBottom[i + 1];
 
-                let tc : LayoutConstraint =  { 
+                let tc : TopConstraint =  { 
                     top: node1, 
                     bottom: node2,
                     minDistance: this.minPadding
