@@ -901,8 +901,6 @@ export class LayoutInstance {
     }
 
 
-
-
     private getDisconnectedNodes(g: Graph): string[] {
             let inNodes = g.edges().map(edge => edge.w);
             let outNodes = g.edges().map(edge => edge.v);
