@@ -237,31 +237,26 @@ class ConstraintValidator {
 
             let currentConstraintString = this.orientationConstraintToString(constraint);
             let intermediateReprError = `Constraint:<br> <code>${currentConstraintString}</code><br> conflicts with one (or some) the following constraints:` + previousConstraintString;
-            
+            //Uncaught SyntaxError: Unexpected token ';'
             this.error = `
-  <div style="margin-bottom:1em;">
-    <style>
-      .toggle-constraint-error input { display: none; }
-      .toggle-constraint-error .src-error { display: block; }
-      .toggle-constraint-error .ir-error { display: none; }
-      .toggle-constraint-error input:checked ~ .src-error { display: none; }
-      .toggle-constraint-error input:checked ~ .ir-error { display: block; }
-      .toggle-constraint-error label { 
-        background: #eee; 
-        border: 1px solid #ccc; 
-        padding: 4px 8px; 
-        border-radius: 4px; 
-        cursor: pointer; 
-        font-size: 0.95em;
-        margin-bottom: 8px;
-        display: inline-block;
-      }
-    </style>
-    <div class="toggle-constraint-error">
-      <input type="checkbox" id="toggle-error-view"/>
-      <label for="toggle-error-view">Show Intermediate Representation</label>
-      <div class="src-error" style="margin-top:8px;">${sourceLanguageError}</div>
-      <div class="ir-error" style="margin-top:8px;">${intermediateReprError}</div>
+  <div class="mb-3">
+    <div style="display: flex; gap: 1rem; overflow-x: auto;">
+      <div class="card flex-shrink-0" style="min-width: 320px; max-width: 100%;">
+        <div class="card-header bg-light">
+          <strong>In terms of CnD</strong>
+        </div>
+        <div class="card-body">
+          ${sourceLanguageError}
+        </div>
+      </div>
+      <div class="card flex-shrink-0" style="min-width: 320px; max-width: 100%;">
+        <div class="card-header bg-light">
+          <strong>In terms of diagram elements</strong>
+        </div>
+        <div class="card-body">
+          ${intermediateReprError}
+        </div>
+      </div>
     </div>
   </div>
 `;

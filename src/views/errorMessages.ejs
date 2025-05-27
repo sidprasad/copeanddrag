@@ -2,9 +2,9 @@
  <!-- For example, you should be able to explore errors in terms of the SOURCE LANG, THE INTERMEDIATE REPRESENTATION,
   and eventually counter-factuals? -->
 
-<div class="container-fluid" id="error_container" style="display: none;">
+<div class="container" id="error_container" style="display: none;">
     <% if (errors && errors.length > 0) { %>
-        <div id="error_messages" class="alert alert-danger text-monospace">
+        <div id="error_messages" >
             <h4>Error</h4>
             <%- errors %>
         </div>
@@ -93,5 +93,7 @@
                 alert('An error occurred while submitting feedback.');
             }
         });
+
+        
     });
 </script>

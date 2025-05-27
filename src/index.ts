@@ -170,14 +170,14 @@ function generateDiagram (req, res)  {
             var { layout, projectionData } = li.generateLayout(instances[instanceNumber], projections);
         }
         catch(e){
-            throw new Error("The instance being visualized is inconsistent with layout constraints.<br><br> " + e.message);
+            throw new Error("<p>The instance being visualized is inconsistent with layout constraints.<p> " + e.message);
         }
 
         let cl = new WebColaLayout(layout);
         var colaConstraints = cl.colaConstraints;
         var colaNodes = cl.colaNodes;
         var colaEdges = cl.colaEdges;
-        var colaGroups = cl.groupDefinitions;
+        var colaGroups = cl.groupDefinitions || [];
         var height = cl.FIG_HEIGHT;
         var width = cl.FIG_WIDTH;
 
@@ -216,8 +216,8 @@ function generateDiagram (req, res)  {
         'width': width !== undefined ? width : 0,
         'colaNodes': colaNodes,
         'colaEdges': colaEdges,
-        'colaConstraints': colaConstraints,
-        'colaGroups': colaGroups,
+        'colaConstraints': colaConstraints || [],
+        'colaGroups': colaGroups || [],
         instanceNumber,
         num_instances,
         alloyDatum,

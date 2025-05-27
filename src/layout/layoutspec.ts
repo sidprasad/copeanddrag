@@ -96,8 +96,9 @@ export class RelativeOrientationConstraint extends ConstraintOperation {
     }
 
     override toHTML(): string {
-        return `OrientationConstraint with directions [${this.directions.join(", ")}]
-         and selector <pre>${this.selector}</pre>`;
+
+        let directions = this.directions.join(", ");
+        return `OrientationConstraint with directions [${directions}] and selector <code>${this.selector}</code>`;
     }
 }
 
