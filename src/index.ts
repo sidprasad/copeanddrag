@@ -38,7 +38,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.json({ limit: '50mb' }));
 
 // This is a hack. I'm not sure how to encode the version number.
-const version = "3.2.3";
+const version = "3.3.0";
 
 const secretKey = "cope-and-drag-logging-key";
 
@@ -113,7 +113,7 @@ function getFormContents(req: any) {
         var ad: AlloyDatum = parseAlloyXML(alloyDatum);
     }
     catch (e) {
-        throw new Error("Error parsing Forge instance. May be malformed." + e.message);
+        throw new Error("Error parsing Forge instance. Is it well formed? <br> <pre>" + e.message + "</pre>");
     }
     let instances = ad.instances;
     let loopBack = ad.loopBack || -1;
@@ -135,7 +135,8 @@ function getTableFromRequest(req: any) {
         var ad: AlloyDatum = parseAlloyXML(alloyDatum);
     }
     catch (e) {
-        throw new Error("Error parsing Forge instance. May be malformed." + e.message);
+        throw new Error("Error parsing Forge instance. Is it well formed? <br> <pre>" + e.message + "</pre>");
+
     }
 
     let tables = instanceToTables(ad.instances[instanceNumber]);

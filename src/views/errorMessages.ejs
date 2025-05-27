@@ -2,30 +2,48 @@
  <!-- For example, you should be able to explore errors in terms of the SOURCE LANG, THE INTERMEDIATE REPRESENTATION,
   and eventually counter-factuals? -->
 
-<div class="container m4" id="error_container" >
+<div class="container m4" id="error_container">
     <% if (errors && errors.length > 0) { %>
-        <div id="error_messages" >
+        <div id="error_messages" style="border: 2px solid darkred; padding: 1.5rem; border-radius: 0.5rem;">
             <h4 style="color: darkred">Could not produce a diagram</h4>
             <%- errors %>
         </div>
+        <!-- Feedback Modal Trigger -->
+        <p>
+          <a href="#" data-toggle="modal" data-target="#feedbackModal">
+            <strong>Confused by this error message?</strong>
+          </a>
+        </p>
     <% } %>
 
     <div id="runtime_messages" class="container"></div>
 
-    <!-- Feedback Form in Dismissible Alert -->
-    <div class="alert alert-secondary alert-dismissible fade show" role="alert" id="feedbackAlert">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-        <form id="feedbackForm" onsubmit="return false;">
-            <div class="form-group">
-                <label for="feedback"><strong>Confused by this error message?</strong></label>
-                <textarea id="feedback" name="feedback" class="form-control" rows="3" placeholder="Let us know what’s unclear or how we could improve it..."></textarea>
-            </div>
-            <button type="submit" class="btn btn-block btn-dark">Submit Feedback</button>
-        </form>
+   
+</div>
 
+<!-- Feedback Modal -->
+<div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="feedbackForm" onsubmit="return false;">
+        <div class="modal-header">
+          <h5 class="modal-title" id="feedbackModalLabel">Feedback</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="feedback"><strong>Let us know what’s unclear or how we could improve it:</strong></label>
+            <textarea id="feedback" name="feedback" class="form-control" rows="3" placeholder="Your feedback..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-dark">Submit Feedback</button>
+        </div>
+      </form>
     </div>
+  </div>
 </div>
 
 <script>
@@ -93,7 +111,5 @@
                 alert('An error occurred while submitting feedback.');
             }
         });
-
-        
     });
 </script>
