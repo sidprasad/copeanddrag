@@ -224,19 +224,37 @@ class ConstraintValidator {
             let conflictingSourceConstraintString = conflictingSourceConstraint.toHTML();
 
 
+            let sourceLanguageError = `Constraint:<br> <code>${conflictingSourceConstraintString}</code><br> conflicts with one (or some) the following source constraints: <br>` + previousSourceConstraints.map((c) => `<code>${c.toHTML()}</code>`).join('<br>');
+
+            
+
 
             let previousConstraintList = this.added_constraints.map((c) => this.orientationConstraintToString(c));
             let previousConstraintSet = new Set(previousConstraintList); 
             previousConstraintList = [...previousConstraintSet];
 
-
-
-
             let previousConstraintString = "<br><br>" + previousConstraintList.map((c) => "<code>" + c + "</code>").join('<br>');
 
             let currentConstraintString = this.orientationConstraintToString(constraint);
-            this.error = `Constraint:<br> <code>${currentConstraintString}</code><br> conflicts with one (or some) the following constraints:` + previousConstraintString;
-            console.log(e);
+            let intermediateReprError = `Constraint:<br> <code>${currentConstraintString}</code><br> conflicts with one (or some) the following constraints:` + previousConstraintString;
+            
+            // ...existing code...
+            this.error = `
+            <div>
+                <button onclick="(function(btn){
+                var src = btn.parentNode.querySelector('.src-error');
+                var ir = btn.parentNode.querySelector('.ir-error');
+                if(src.style.display==='none'){ src.style.display='block'; ir.style.display='none'; btn.textContent='Show Intermediate Representation'; }
+                else { src.style.display='none'; ir.style.display='block'; btn.textContent='Show Source Constraint'; }
+                })(this)">Show Intermediate Representation</button>
+                <div class="src-error" style="display:block; margin-top:8px;">${sourceLanguageError}</div>
+                <div class="ir-error" style="display:none; margin-top:8px;">${intermediateReprError}</div>
+            </div>
+            `;
+            // ...existing code...
+
+
+
             return;
         }
     }
