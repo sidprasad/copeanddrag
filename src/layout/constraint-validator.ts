@@ -224,7 +224,7 @@ class ConstraintValidator {
             let conflictingSourceConstraintString = conflictingSourceConstraint.toHTML();
 
 
-            let sourceLanguageError = `Constraint:<br> <code>${conflictingSourceConstraintString}</code><br> conflicts with one (or some) the following source constraints: <br>` + previousSourceConstraints.map((c) => `<code>${c.toHTML()}</code>`).join('<br>');
+            let sourceLanguageError = `Constraint:<br> <code>${conflictingSourceConstraintString}</code><br> conflicts with one (or some) the following source constraints: <br>` + previousSourceConstraints.map((c) => `<code>${c}</code>`).join('<br>');
 
             
 
@@ -238,21 +238,33 @@ class ConstraintValidator {
             let currentConstraintString = this.orientationConstraintToString(constraint);
             let intermediateReprError = `Constraint:<br> <code>${currentConstraintString}</code><br> conflicts with one (or some) the following constraints:` + previousConstraintString;
             
-            // ...existing code...
             this.error = `
-            <div>
-                <button onclick="(function(btn){
-                var src = btn.parentNode.querySelector('.src-error');
-                var ir = btn.parentNode.querySelector('.ir-error');
-                if(src.style.display==='none'){ src.style.display='block'; ir.style.display='none'; btn.textContent='Show Intermediate Representation'; }
-                else { src.style.display='none'; ir.style.display='block'; btn.textContent='Show Source Constraint'; }
-                })(this)">Show Intermediate Representation</button>
-                <div class="src-error" style="display:block; margin-top:8px;">${sourceLanguageError}</div>
-                <div class="ir-error" style="display:none; margin-top:8px;">${intermediateReprError}</div>
-            </div>
-            `;
-            // ...existing code...
-
+  <div style="margin-bottom:1em;">
+    <style>
+      .toggle-constraint-error input { display: none; }
+      .toggle-constraint-error .src-error { display: block; }
+      .toggle-constraint-error .ir-error { display: none; }
+      .toggle-constraint-error input:checked ~ .src-error { display: none; }
+      .toggle-constraint-error input:checked ~ .ir-error { display: block; }
+      .toggle-constraint-error label { 
+        background: #eee; 
+        border: 1px solid #ccc; 
+        padding: 4px 8px; 
+        border-radius: 4px; 
+        cursor: pointer; 
+        font-size: 0.95em;
+        margin-bottom: 8px;
+        display: inline-block;
+      }
+    </style>
+    <div class="toggle-constraint-error">
+      <input type="checkbox" id="toggle-error-view"/>
+      <label for="toggle-error-view">Show Intermediate Representation</label>
+      <div class="src-error" style="margin-top:8px;">${sourceLanguageError}</div>
+      <div class="ir-error" style="margin-top:8px;">${intermediateReprError}</div>
+    </div>
+  </div>
+`;
 
 
             return;

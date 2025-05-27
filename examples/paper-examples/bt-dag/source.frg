@@ -1,5 +1,4 @@
 #lang forge
-option run_sterling "bst.js"
 
 /*
   Model of binary search trees

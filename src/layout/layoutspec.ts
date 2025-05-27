@@ -96,7 +96,8 @@ export class RelativeOrientationConstraint extends ConstraintOperation {
     }
 
     override toHTML(): string {
-        return `OrientationConstraint with directions [${this.directions.join(", ")}] and selector ${this.selector}`;
+        return `OrientationConstraint with directions [${this.directions.join(", ")}]
+         and selector <pre>${this.selector}</pre>`;
     }
 }
 
@@ -112,7 +113,8 @@ export class GroupBySelector extends ConstraintOperation{
     }
 
     override toHTML(): string {
-        return `GroupBySelector with selector <pre>${this.selector}</pre> and name <pre>${this.name}</pre>.`;
+        return `GroupBySelector with selector <pre>${this.selector}</pre> 
+        and name <pre>${this.name}</pre>.`;
     }
 }
 
