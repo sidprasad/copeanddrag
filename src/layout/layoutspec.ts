@@ -25,6 +25,10 @@ class ConstraintOperation implements Operation {
     inconsistencyMessage(): string {
         return `Inconsistent Constraint Operation: ${this.selector}`;  
     }
+
+    toHTML(): string {
+        return `ConstraintOperation with selector <pre>${this.selector} </pre>.`;
+    }
 }
 
 
@@ -90,6 +94,10 @@ export class RelativeOrientationConstraint extends ConstraintOperation {
         let dirStr : string = this.directions.join(", ");
         return `Inconsistent Relative Orientation Constraint: Directions [${dirStr}] applied to: ${this.selector}.`;  
     }
+
+    override toHTML(): string {
+        return `OrientationConstraint with directions [${this.directions.join(", ")}] and selector ${this.selector}`;
+    }
 }
 
 
@@ -101,6 +109,10 @@ export class GroupBySelector extends ConstraintOperation{
     constructor(selector : string, name: string) {
         super(selector);
         this.name = name;
+    }
+
+    override toHTML(): string {
+        return `GroupBySelector with selector <pre>${this.selector}</pre> and name <pre>${this.name}</pre>.`;
     }
 }
 
@@ -143,6 +155,10 @@ export class CyclicOrientationConstraint extends ConstraintOperation {
 
     override inconsistencyMessage(): string {
         return `Inconsistent Cyclic Orientation Constraint: Direction ${this.direction} applied to: ${this.selector}.`;  
+    }
+
+    override toHTML(): string {
+        return `Cyclic Constraint with direction ${this.direction} and selector ${this.selector}`;
     }
 }
 

@@ -40,7 +40,10 @@ interface LayoutEdge {
 export class ImplicitConstraint {
     constructor(public c : RelativeOrientationConstraint | CyclicOrientationConstraint, public reason: string) {}
 
-    
+    toHTML(): string {
+        let origHTML = this.c.toHTML();
+        return `Implicit constraint ${origHTML} because ${this.reason}`;
+    }
 }
 
 export interface LayoutConstraint {

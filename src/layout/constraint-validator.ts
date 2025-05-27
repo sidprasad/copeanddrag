@@ -213,9 +213,24 @@ class ConstraintValidator {
         }
         catch (e) {
                
+
+            // TODO: We can improve this now, with the new attached thing.
+
+            let previousSourceConstraints = this.added_constraints.map((c) => c.sourceConstraint);
+            let previousSourceConstraintSet = new Set(previousSourceConstraints.map((c) => c.toHTML()));
+            previousSourceConstraints = [...previousSourceConstraintSet];
+
+            let conflictingSourceConstraint = constraint.sourceConstraint;
+            let conflictingSourceConstraintString = conflictingSourceConstraint.toHTML();
+
+
+
             let previousConstraintList = this.added_constraints.map((c) => this.orientationConstraintToString(c));
-            let previousConstraintSet = new Set(previousConstraintList);
+            let previousConstraintSet = new Set(previousConstraintList); 
             previousConstraintList = [...previousConstraintSet];
+
+
+
 
             let previousConstraintString = "<br><br>" + previousConstraintList.map((c) => "<code>" + c + "</code>").join('<br>');
 
