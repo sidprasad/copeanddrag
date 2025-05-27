@@ -1,6 +1,7 @@
 import { SimplexSolver, Variable, Expression, Strength, Inequality, LEQ, GEQ, LE } from 'cassowary';
 import { intersection } from 'lodash';
-import { InstanceLayout, LayoutNode, LayoutEdge, LayoutGroup, LayoutConstraint, isLeftConstraint, isTopConstraint, isAlignmentConstraint, TopConstraint, LeftConstraint, AlignmentConstraint } from './interfaces';
+import { InstanceLayout, LayoutNode, LayoutEdge, LayoutGroup, LayoutConstraint, isLeftConstraint, isTopConstraint, isAlignmentConstraint, TopConstraint, LeftConstraint, AlignmentConstraint, ImplicitConstraint } from './interfaces';
+import { RelativeOrientationConstraint } from './layoutspec';
 
 
 class ConstraintValidator {
@@ -212,15 +213,57 @@ class ConstraintValidator {
         }
         catch (e) {
                
+
+            // TODO: We can improve this now, with the new attached thing.
+
+            let previousSourceConstraints = this.added_constraints.map((c) => c.sourceConstraint);
+            let previousSourceConstraintSet = new Set(previousSourceConstraints.map((c) => c.toHTML()));
+            previousSourceConstraints = [...previousSourceConstraintSet];
+
+            let conflictingSourceConstraint = constraint.sourceConstraint;
+            let conflictingSourceConstraintString = conflictingSourceConstraint.toHTML();
+
+
+            let sourceLanguageError = `Constraint:<br> <code>${conflictingSourceConstraintString}</code><br> conflicts with one (or some) the following source constraints: <br>` + previousSourceConstraints.map((c) => `<code>${c}</code>`).join('<br>');
+
+            
+
+
             let previousConstraintList = this.added_constraints.map((c) => this.orientationConstraintToString(c));
-            let previousConstraintSet = new Set(previousConstraintList);
+            let previousConstraintSet = new Set(previousConstraintList); 
             previousConstraintList = [...previousConstraintSet];
 
             let previousConstraintString = "<br><br>" + previousConstraintList.map((c) => "<code>" + c + "</code>").join('<br>');
 
             let currentConstraintString = this.orientationConstraintToString(constraint);
-            this.error = `Constraint:<br> <code>${currentConstraintString}</code><br> conflicts with one (or some) the following constraints:` + previousConstraintString;
-            console.log(e);
+            let intermediateReprError = `Constraint:<br> <code>${currentConstraintString}</code><br> conflicts with one (or some) the following constraints:` + previousConstraintString;
+            //Uncaught SyntaxError: Unexpected token ';'
+            this.error = `
+  <div class="mb-3">
+    <div style="display: flex; gap: 1rem; overflow-x: auto;">
+      <div class="card flex-shrink-0" style="min-width: 320px; max-width: 100%;">
+        <div class="card-header bg-light">
+          <strong>In terms of CnD</strong>
+        </div>
+        <div class="card-body">
+          ${sourceLanguageError}
+        </div>
+      </div>
+      <div class="card flex-shrink-0" style="min-width: 320px; max-width: 100%;">
+        <div class="card-header bg-light">
+          <strong>In terms of diagram elements</strong>
+        </div>
+        <div class="card-body">
+          ${intermediateReprError}
+        </div>
+      </div>
+    </div>
+  </div>
+`;
+
+// MAybe we can do better with the errors here.
+
+
             return;
         }
     }
@@ -247,10 +290,16 @@ class ConstraintValidator {
                 let node1 = alignedLeftToRight[i];
                 let node2 = alignedLeftToRight[i + 1];
 
-                let lc : LayoutConstraint =  { 
+
+                let roc : RelativeOrientationConstraint = new RelativeOrientationConstraint(['directlyLeft'], `${node1.id}->${node2.id}`);
+                let sourceConstraint = new ImplicitConstraint(roc, "Preventing Overlap");
+
+                let lc : LeftConstraint =  { 
                     left: node1, 
                     right: node2,
-                    minDistance: this.minPadding
+                    minDistance: this.minPadding,
+                    // sourceConstraint is ``implied'' or ``implicit'' here, since it is derived from the alignment order. That's tricky.
+                    sourceConstraint: sourceConstraint
                 };
 
                 implicitAlignmentConstraints.push(lc);
@@ -270,10 +319,14 @@ class ConstraintValidator {
                 let node1 = alignedTopToBottom[i];
                 let node2 = alignedTopToBottom[i + 1];
 
-                let tc : LayoutConstraint =  { 
+                let roc : RelativeOrientationConstraint = new RelativeOrientationConstraint(['directlyAbove'], `${node1.id}->${node2.id}`);
+                let sourceConstraint = new ImplicitConstraint(roc, "Preventing Overlap");
+
+                let tc : TopConstraint =  { 
                     top: node1, 
                     bottom: node2,
-                    minDistance: this.minPadding
+                    minDistance: this.minPadding,
+                    sourceConstraint: sourceConstraint
                 };
                 implicitAlignmentConstraints.push(tc);
             }

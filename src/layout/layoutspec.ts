@@ -25,6 +25,10 @@ class ConstraintOperation implements Operation {
     inconsistencyMessage(): string {
         return `Inconsistent Constraint Operation: ${this.selector}`;  
     }
+
+    toHTML(): string {
+        return `ConstraintOperation with selector <code>${this.selector} </code>.`;
+    }
 }
 
 
@@ -88,9 +92,17 @@ export class RelativeOrientationConstraint extends ConstraintOperation {
 
     override inconsistencyMessage(): string {
         let dirStr : string = this.directions.join(", ");
-        return `Inconsistent Relative Orientation Constraint: Directions [${dirStr}] applied to: ${this.selector}.`;  
+        return `Orientation Constraint with directions  <code>[${dirStr}]</code> and selector <code> ${this.selector} </code> is internally inconsistent.`;  
+    }
+
+    override toHTML(): string {
+
+        let directions = this.directions.join(", ");
+        return `OrientationConstraint with directions [${directions}] and selector <code>${this.selector}</code>`;
     }
 }
+
+
 
 
 export class GroupBySelector extends ConstraintOperation{
@@ -99,6 +111,11 @@ export class GroupBySelector extends ConstraintOperation{
     constructor(selector : string, name: string) {
         super(selector);
         this.name = name;
+    }
+
+    override toHTML(): string {
+        return `GroupBySelector with selector <pre>${this.selector}</pre> 
+        and name <pre>${this.name}</pre>.`;
     }
 }
 
@@ -140,7 +157,11 @@ export class CyclicOrientationConstraint extends ConstraintOperation {
     }
 
     override inconsistencyMessage(): string {
-        return `Inconsistent Cyclic Orientation Constraint: Direction ${this.direction} applied to: ${this.selector}.`;  
+        return `Cyclic constraint with direction <code>${this.direction}</code> with selector <code>${this.selector}</code> is inconsistent.`;  
+    }
+
+    override toHTML(): string {
+        return `Cyclic constraint with direction ${this.direction} and selector ${this.selector}`;
     }
 }
 
@@ -286,7 +307,11 @@ export function parseLayoutSpec(s: string): LayoutSpec {
           layoutSpec.constraints = constraintsParsed;
         }
         catch (e) {
-            throw new Error("Error parsing constraints.\n" + e.message);
+            throw new Error(`
+
+                <div class="container mt-4 mb-4">
+                    <p> ${e.message} </p
+                </div>`);
         }
     }
 
@@ -297,7 +322,12 @@ export function parseLayoutSpec(s: string): LayoutSpec {
         }
 
         catch (e) {
-            throw new Error("Error parsing directives.\n" + e.message);
+            throw new Error(`                
+                <div class="container mt-4 mb-4">
+                <p>
+                    ${e.message}
+                    </p>
+                </div>`);
         }
     }
     return layoutSpec;

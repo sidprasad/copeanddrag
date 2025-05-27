@@ -1,5 +1,5 @@
 import { types } from "util";
-
+import { RelativeOrientationConstraint, CyclicOrientationConstraint } from "./layoutspec";
 
 export interface LayoutGroup {
     // The name of the group
@@ -37,11 +37,24 @@ interface LayoutEdge {
     id : string;
 }
 
+export class ImplicitConstraint {
+    constructor(public c : RelativeOrientationConstraint | CyclicOrientationConstraint, public reason: string) {}
+
+    toHTML(): string {
+        let origHTML = this.c.toHTML();
+        return `Implicit constraint ${origHTML} because ${this.reason}`;
+    }
+}
+
+export interface LayoutConstraint {
+    sourceConstraint: RelativeOrientationConstraint | CyclicOrientationConstraint | ImplicitConstraint; // Not grouping, and I hate introducing implicit (which should hopefully never show up)
+}
 
 
-export type LayoutConstraint = TopConstraint | LeftConstraint | AlignmentConstraint;
 
-export interface TopConstraint {
+
+
+export interface TopConstraint extends LayoutConstraint {
     top : LayoutNode;
     bottom : LayoutNode;
     minDistance : number;
@@ -52,7 +65,7 @@ export function isTopConstraint(constraint: LayoutConstraint): constraint is Top
     return (constraint as TopConstraint).top !== undefined;
 }
 
-export interface LeftConstraint {
+export interface LeftConstraint extends LayoutConstraint {
     left : LayoutNode;
     right : LayoutNode;
     minDistance : number;
@@ -63,7 +76,7 @@ export function isLeftConstraint(constraint: LayoutConstraint): constraint is Le
 }
 
 // Same value along axis
-export interface AlignmentConstraint {
+export interface AlignmentConstraint extends LayoutConstraint {
     axis : "x" | "y";
     node1 : LayoutNode;
     node2 : LayoutNode;
