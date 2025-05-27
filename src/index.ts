@@ -225,7 +225,7 @@ function generateDiagram (req, res)  {
         cope,
         projectionData,
         instAsString,
-        errors: error.replace(/\n/g, "<br>"),
+        errors: error,//.replace(/\n/g, "<br>"),
         loggingEnabled,
         tables : tables
     });

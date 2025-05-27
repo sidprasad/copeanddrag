@@ -2,10 +2,10 @@
  <!-- For example, you should be able to explore errors in terms of the SOURCE LANG, THE INTERMEDIATE REPRESENTATION,
   and eventually counter-factuals? -->
 
-<div class="container" id="error_container" style="display: none;">
+<div class="container m4" id="error_container" >
     <% if (errors && errors.length > 0) { %>
         <div id="error_messages" >
-            <h4>Error</h4>
+            <h4 style="color: darkred">A diagram was not produced, because:</h4>
             <%- errors %>
         </div>
     <% } %>

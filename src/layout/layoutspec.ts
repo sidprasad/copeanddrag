@@ -27,7 +27,7 @@ class ConstraintOperation implements Operation {
     }
 
     toHTML(): string {
-        return `ConstraintOperation with selector <pre>${this.selector} </pre>.`;
+        return `ConstraintOperation with selector <code>${this.selector} </code>.`;
     }
 }
 
@@ -92,7 +92,7 @@ export class RelativeOrientationConstraint extends ConstraintOperation {
 
     override inconsistencyMessage(): string {
         let dirStr : string = this.directions.join(", ");
-        return `Inconsistent Relative Orientation Constraint: Directions [${dirStr}] applied to: ${this.selector}.`;  
+        return `Orientation Constraint with directions  <code>[${dirStr}]</code> and selector <code> ${this.selector} </code> is internally inconsistent.`;  
     }
 
     override toHTML(): string {
@@ -157,11 +157,11 @@ export class CyclicOrientationConstraint extends ConstraintOperation {
     }
 
     override inconsistencyMessage(): string {
-        return `Inconsistent Cyclic Orientation Constraint: Direction ${this.direction} applied to: ${this.selector}.`;  
+        return `Cyclic constraint with direction <code>${this.direction}</code> with selector <code>${this.selector}</code> is inconsistent.`;  
     }
 
     override toHTML(): string {
-        return `Cyclic Constraint with direction ${this.direction} and selector ${this.selector}`;
+        return `Cyclic constraint with direction ${this.direction} and selector ${this.selector}`;
     }
 }
 
@@ -307,7 +307,11 @@ export function parseLayoutSpec(s: string): LayoutSpec {
           layoutSpec.constraints = constraintsParsed;
         }
         catch (e) {
-            throw new Error("Error parsing constraints.\n" + e.message);
+            throw new Error(`
+
+                <div class="container mt-4 mb-4">
+                    <p> ${e.message} </p
+                </div>`);
         }
     }
 
@@ -318,7 +322,12 @@ export function parseLayoutSpec(s: string): LayoutSpec {
         }
 
         catch (e) {
-            throw new Error("Error parsing directives.\n" + e.message);
+            throw new Error(`                
+                <div class="container mt-4 mb-4">
+                <p>
+                    ${e.message}
+                    </p>
+                </div>`);
         }
     }
     return layoutSpec;
