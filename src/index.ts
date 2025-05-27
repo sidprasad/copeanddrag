@@ -171,7 +171,7 @@ function generateDiagram (req, res)  {
             var { layout, projectionData } = li.generateLayout(instances[instanceNumber], projections);
         }
         catch(e){
-            throw new Error("<p>The instance being visualized is inconsistent with layout constraints.<p> " + e.message);
+            throw new Error("<p>The instance being visualized is inconsistent with the Cope and Drag spec.<p> " + e.message);
         }
 
         let cl = new WebColaLayout(layout);
