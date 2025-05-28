@@ -222,6 +222,7 @@ class ConstraintValidator {
 
                 // Thankfully, we know that *before* set collapsing, the mapping is one to many (src to intermediate representation).
 
+                // The vibe coded attempt below doesnt work. Should write this properly.
 
 
             let previousSourceConstraints = this.added_constraints.map((c) => c.sourceConstraint);
