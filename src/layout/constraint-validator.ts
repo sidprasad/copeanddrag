@@ -214,15 +214,59 @@ class ConstraintValidator {
         catch (e) {
                
 
-                // TODO: Add some correspondence between the source constraint and the intermediate representation.
-                // in the HTML. Something like (on hover on the source constraint, hightlight the intermediate representation)
-                // and vice versa.
+            // TODO: Add some correspondence between the source constraint and the intermediate representation.
+            // in the HTML. Something like (on hover on the source constraint, hightlight the intermediate representation)
+            // and vice versa.
 
-                // This might be tricky bc we collapse the constraints into sets. When we do so, we should add highlighting for both. Perhaps we could do this via css classes?
+            // This might be tricky bc we collapse the constraints into sets. When we do so, we should add highlighting for both. Perhaps we could do this via css classes?
 
-                // Thankfully, we know that *before* set collapsing, the mapping is one to many (src to intermediate representation).
+            // Thankfully, we know that *before* set collapsing, the mapping is one to many (src to intermediate representation).
 
-                // The vibe coded attempt below doesnt work. Should write this properly.
+            // The vibe coded attempt below doesnt work. Should write this properly.
+
+
+            let sourceConstraintToAddedConstraintsMap = {};
+
+            this.added_constraints.forEach((c) => {
+                const src = c.sourceConstraint ? c.sourceConstraint.toHTML() : '';
+                if (!sourceConstraintToAddedConstraintsMap[src]) {
+                    sourceConstraintToAddedConstraintsMap[src] = [];
+                }
+                sourceConstraintToAddedConstraintsMap[src].push(this.orientationConstraintToString(c));
+            });
+
+
+            let currentSourceConstraint = constraint.sourceConstraint.toHTML();
+            let currentIRConstraint = this.orientationConstraintToString(constraint);
+
+            if (!sourceConstraintToAddedConstraintsMap[currentSourceConstraint]) {
+                sourceConstraintToAddedConstraintsMap[currentSourceConstraint] = [];
+            }
+            sourceConstraintToAddedConstraintsMap[currentSourceConstraint].push(currentIRConstraint);
+
+            // Now we should create a new mapping that adds a span around
+            // the source constraint and the intermediate representation, so that we can highlight them later,
+            // and which adds a unique class to each key->value pair in the map that becomes a css class.
+
+            let htmlSourceToIRMap = {};
+            Object.keys(sourceConstraintToAddedConstraintsMap).forEach((src, idx) => {
+                const irConstraints = sourceConstraintToAddedConstraintsMap[src];
+                const uniqueClass = `constraint-pair-${idx}`;
+                let newSrc = `<span class="constraint-link ${uniqueClass}">${src}</span>`;
+                let newIR = irConstraints.map(ir => `<span class="constraint-link ${uniqueClass}">${ir}</span>`);
+                htmlSourceToIRMap[newSrc] = newIR;
+            });
+
+
+            // The thing above should be smarter. We should add to the map for each source constraint.
+            // and collapse dups by just adding class.
+            // And then we should have a different thing for each source.
+
+
+
+
+
+            //////////////
 
 
             let previousSourceConstraints = this.added_constraints.map((c) => c.sourceConstraint);
@@ -236,13 +280,16 @@ class ConstraintValidator {
             // Generate a unique id for this constraint conflict
             const conflictId = `conflict-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
 
-// Build a mapping from unique source constraint string to all intermediate constraints that share it
-const sourceToIntermediate: { [key: string]: string[] } = {};
-this.added_constraints.forEach((c) => {
-    const src = c.sourceConstraint ? c.sourceConstraint.toHTML() : '';
-    if (!sourceToIntermediate[src]) sourceToIntermediate[src] = [];
-    sourceToIntermediate[src].push(this.orientationConstraintToString(c));
-});
+            // Build a mapping from unique source constraint string to all intermediate constraints that share it
+            const sourceToIntermediate: { [key: string]: string[] } = {};
+            this.added_constraints.forEach((c) => {
+                const src = c.sourceConstraint ? c.sourceConstraint.toHTML() : '';
+                if (!sourceToIntermediate[src]) sourceToIntermediate[src] = [];
+                sourceToIntermediate[src].push(this.orientationConstraintToString(c));
+            });
+
+
+
 
 // Assign a unique pair class for each source constraint
 const sourceConstraintStrings = Object.keys(sourceToIntermediate);
