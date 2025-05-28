@@ -214,7 +214,15 @@ class ConstraintValidator {
         catch (e) {
                
 
-            // TODO: We can improve this now, with the new attached thing.
+                // TODO: Add some correspondence between the source constraint and the intermediate representation.
+                // in the HTML. Something like (on hover on the source constraint, hightlight the intermediate representation)
+                // and vice versa.
+
+                // This might be tricky bc we collapse the constraints into sets. When we do so, we should add highlighting for both. Perhaps we could do this via css classes?
+
+                // Thankfully, we know that *before* set collapsing, the mapping is one to many (src to intermediate representation).
+
+
 
             let previousSourceConstraints = this.added_constraints.map((c) => c.sourceConstraint);
             let previousSourceConstraintSet = new Set(previousSourceConstraints.map((c) => c.toHTML()));
@@ -224,21 +232,40 @@ class ConstraintValidator {
             let conflictingSourceConstraintString = conflictingSourceConstraint.toHTML();
 
 
-            let sourceLanguageError = `Constraint:<br> <code>${conflictingSourceConstraintString}</code><br> conflicts with one (or some) the following source constraints: <br>` + previousSourceConstraints.map((c) => `<code>${c}</code>`).join('<br>');
+            // Generate a unique id for this constraint conflict
+            const conflictId = `conflict-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
 
-            
+// Build a mapping from unique source constraint string to all intermediate constraints that share it
+const sourceToIntermediate: { [key: string]: string[] } = {};
+this.added_constraints.forEach((c) => {
+    const src = c.sourceConstraint ? c.sourceConstraint.toHTML() : '';
+    if (!sourceToIntermediate[src]) sourceToIntermediate[src] = [];
+    sourceToIntermediate[src].push(this.orientationConstraintToString(c));
+});
 
+// Assign a unique pair class for each source constraint
+const sourceConstraintStrings = Object.keys(sourceToIntermediate);
+const pairClasses = sourceConstraintStrings.map((src, idx) => `constraint-pair-${conflictId}-${idx}`);
 
-            let previousConstraintList = this.added_constraints.map((c) => this.orientationConstraintToString(c));
-            let previousConstraintSet = new Set(previousConstraintList); 
-            previousConstraintList = [...previousConstraintSet];
+// Source constraints with per-pair highlighting
+let sourceLanguageError = `Constraint:<br>`;
+sourceLanguageError += `<code class="constraint-link ${pairClasses[0]}">${conflictingSourceConstraintString}</code><br> conflicts with one (or some) the following source constraints: <br>`;
+sourceConstraintStrings.forEach((src, idx) => {
+    sourceLanguageError += `<code class="constraint-link ${pairClasses[idx]}">${src}</code><br>`;
+});
 
-            let previousConstraintString = "<br><br>" + previousConstraintList.map((c) => "<code>" + c + "</code>").join('<br>');
+// Intermediate constraints with per-pair highlighting
+let previousConstraintString = "<br><br>";
+sourceConstraintStrings.forEach((src, idx) => {
+    sourceToIntermediate[src].forEach((intermediateStr) => {
+        previousConstraintString += `<code class="constraint-link ${pairClasses[idx]}">${intermediateStr}</code><br>`;
+    });
+});
+let currentConstraintString = `<code class="constraint-link ${pairClasses[0]}">${this.orientationConstraintToString(constraint)}</code>`;
+let intermediateReprError = `Constraint:<br> ${currentConstraintString}<br> conflicts with one (or some) the following constraints:` + previousConstraintString;
 
-            let currentConstraintString = this.orientationConstraintToString(constraint);
-            let intermediateReprError = `Constraint:<br> <code>${currentConstraintString}</code><br> conflicts with one (or some) the following constraints:` + previousConstraintString;
-            //Uncaught SyntaxError: Unexpected token ';'
-            this.error = `
+// Error HTML with highlighting script and style
+this.error = `
   <div class="mb-3">
     <div style="display: flex; gap: 1rem; overflow-x: auto;">
       <div class="card flex-shrink-0" style="min-width: 320px; max-width: 100%;">
@@ -258,11 +285,38 @@ class ConstraintValidator {
         </div>
       </div>
     </div>
+    <style>
+      .constraint-highlight {
+        background: #ffeeba;
+        transition: background 0.2s;
+      }
+    </style>
+    <script>
+      (function() {
+        document.querySelectorAll('.constraint-link').forEach(function(el) {
+          el.addEventListener('mouseenter', function() {
+            Array.from(el.classList).forEach(function(cls) {
+              if (cls.startsWith('constraint-pair-')) {
+                document.querySelectorAll('.' + cls).forEach(function(match) {
+                  match.classList.add('constraint-highlight');
+                });
+              }
+            });
+          });
+          el.addEventListener('mouseleave', function() {
+            Array.from(el.classList).forEach(function(cls) {
+              if (cls.startsWith('constraint-pair-')) {
+                document.querySelectorAll('.' + cls).forEach(function(match) {
+                  match.classList.remove('constraint-highlight');
+                });
+              }
+            });
+          });
+        });
+      })();
+    </script>
   </div>
 `;
-
-// MAybe we can do better with the errors here.
-
 
             return;
         }
