@@ -1,0 +1,28 @@
+name: Deploy MkDocs documentation
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install mkdocs mkdocs-material pymdown-extensions mkdocs-macros-plugin
+
+      - name: Build and deploy docs
+        run: mkdocs gh-deploy --force
+
