@@ -27,7 +27,7 @@ If you want a specific image on your local filesystem to be used in an icon dire
 Cope and Drag also includes a selection of [built in icons](/copeanddrag/bundledicons) for ease of use.
 
 
-### How can I integrate Cope and Drag with my own workdflow?
+### How can I integrate Cope and Drag with my own workflow?
 
 Cope and Drag API endpoints are documented via the Open API convention, and can be found
 at the `/openapi` endpoint of your running Cope and Drag instance. 

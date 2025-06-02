@@ -16,7 +16,7 @@
 3. Run a Forge specification that includes a `run` statement (an example is available [here](https://github.com/tnelson/Forge/blob/main/forge/examples/oopsla24/goat_cabbage_wolf.frg)).
 4. This will open up Sterling, the default Forge visualizer, in a browser window. 
 Run your command, and then, once Sterling displays a graph, click the `Layout` drawer.
- Select `Load Layout` to lkoad the graph in Cope and Drag. If you already have a Cope and Drag specification, you can 
+ Select `Load Layout` to load the graph in Cope and Drag. If you already have a Cope and Drag specification, you can 
 paste it in here before clicking load layout.
 
 
