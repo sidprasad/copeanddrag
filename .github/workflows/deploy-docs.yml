@@ -21,7 +21,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install --upgrade mkdocs mkdocs-material 'pymdown-extensions>=10.0' mkdocs-macros-plugin
+          pip install --upgrade mkdocs mkdocs-material mkdocs-macros-plugin
 
       - name: Build and deploy docs
         run: mkdocs gh-deploy --force

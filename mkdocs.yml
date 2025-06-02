@@ -18,7 +18,6 @@ markdown_extensions:
       guess_lang: false
       linenums: true
   - pymdownx.highlight
-  - pymdownx.footnotes
 
 plugins:
   - search
