@@ -223,40 +223,36 @@ class ConstraintValidator {
             // Thankfully, we know that *before* set collapsing, the mapping is one to many (src to intermediate representation).
 
             // The vibe coded attempt below doesnt work. Should write this properly.
+            const relevantIRConstraints = this.added_constraints;
 
+            // For each unique source constraint HTML
+            const sourceConstraintHTMLs = Array.from(new Set(
+              relevantIRConstraints
+                .map(c => c.sourceConstraint && c.sourceConstraint.toHTML())
+                .filter(Boolean)
+            ));
 
-            let sourceConstraintToAddedConstraintsMap = {};
-
-            this.added_constraints.forEach((c) => {
-                const src = c.sourceConstraint ? c.sourceConstraint.toHTML() : '';
-                if (!sourceConstraintToAddedConstraintsMap[src]) {
-                    sourceConstraintToAddedConstraintsMap[src] = [];
-                }
-                sourceConstraintToAddedConstraintsMap[src].push(this.orientationConstraintToString(c));
+            // Map: source constraint HTML → related IR constraints
+            const correspondence = sourceConstraintHTMLs.map((srcHTML, idx) => {
+              const relatedIRs = relevantIRConstraints
+                .filter(c => c.sourceConstraint && c.sourceConstraint.toHTML() === srcHTML)
+                .map(c => this.orientationConstraintToString(c));
+              return {
+                srcHTML,
+                relatedIRs,
+                cssClass: `constraint-pair-${idx}`
+              };
             });
 
+            let sourceHtml = '';
+            let irHtml = '';
 
-            let currentSourceConstraint = constraint.sourceConstraint.toHTML();
-            let currentIRConstraint = this.orientationConstraintToString(constraint);
-
-            if (!sourceConstraintToAddedConstraintsMap[currentSourceConstraint]) {
-                sourceConstraintToAddedConstraintsMap[currentSourceConstraint] = [];
-            }
-            sourceConstraintToAddedConstraintsMap[currentSourceConstraint].push(currentIRConstraint);
-
-            // Now we should create a new mapping that adds a span around
-            // the source constraint and the intermediate representation, so that we can highlight them later,
-            // and which adds a unique class to each key->value pair in the map that becomes a css class.
-
-            let htmlSourceToIRMap = {};
-            Object.keys(sourceConstraintToAddedConstraintsMap).forEach((src, idx) => {
-                const irConstraints = sourceConstraintToAddedConstraintsMap[src];
-                const uniqueClass = `constraint-pair-${idx}`;
-                let newSrc = `<span class="constraint-link ${uniqueClass}">${src}</span>`;
-                let newIR = irConstraints.map(ir => `<span class="constraint-link ${uniqueClass}">${ir}</span>`);
-                htmlSourceToIRMap[newSrc] = newIR;
+            correspondence.forEach(({ srcHTML, relatedIRs, cssClass }) => {
+              sourceHtml += `<code class="constraint-link ${cssClass}">${srcHTML}</code><br>`;
+              relatedIRs.forEach(ir =>
+                irHtml += `<code class="constraint-link ${cssClass}">${ir}</code><br>`
+              );
             });
-
 
             // The thing above should be smarter. We should add to the map for each source constraint.
             // and collapse dups by just adding class.
