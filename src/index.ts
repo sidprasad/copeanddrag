@@ -28,6 +28,7 @@ import AdmZip from 'adm-zip';
 
 import swaggerUi from 'swagger-ui-express';
 import swaggerJSDoc from 'swagger-jsdoc';
+import swaggerUiDist from 'swagger-ui-dist';
 
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
@@ -57,7 +58,10 @@ const swaggerOptions = {
 };
 
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
-app.use('/openapi', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/openapi', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCssUrl: swaggerUiDist.getAbsoluteFSPath() + '/swagger-ui.css',
+  customJs: swaggerUiDist.getAbsoluteFSPath() + '/swagger-ui-bundle.js'
+}));
 
 // Function to get or generate a persistent user ID using HMAC
 function getPersistentUserId(): string {
@@ -596,9 +600,3 @@ app.post('/feedback', (req, res) => {
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
 
-if (require.main === module) {
-  // Start your server here
-  app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
-  });
-}

@@ -1,6 +1,6 @@
 {
   "name": "cope-and-drag",
-  "version": "3.3.0",
+  "version": "3.3.1",
   "description": "A web application for lightweight diagramming for Alloy/Forge.",
   "main": "dist/index.js",
   "keywords": [],
@@ -21,8 +21,9 @@
   "scripts": {
     "dev": "nodemon --exec ts-node src/index.ts",
     "clean": "rimraf dist",
-    "build": "npm run clean && ncc build src/index.ts -o dist && npm run copy-files",
+    "build": "npm run clean && ncc build src/index.ts -o dist && npm run copy-files && npm run copy-swagger",
     "copy-files": "cpx \"views/**/*\" dist/views && cpx \"public/**/*\" dist/public",
+    "copy-swagger": "cpx \"node_modules/swagger-ui-dist/*\" dist/public/swagger-ui-dist",
     "start": "node dist/index.js",
     "prepublishOnly": "npm run build",
     "publish-docs": "mkdocs gh-deploy",
