@@ -63,5 +63,8 @@
     "views/**/*",
     "package.json",
     "README.md"
-  ]
+  ],
+  "bin": {
+    "copeanddrag": "./dist/index.js"
+  }
 }

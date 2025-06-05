@@ -1,4 +1,5 @@
-// src/index.ts
+#!/usr/bin/env node
+
 import * as http from 'http';
 import { AlloyAtom, AlloyDatum, AlloyInstance, AlloyType, parseAlloyXML } from './alloy-instance';
 
@@ -236,7 +237,8 @@ function generateDiagram (req, res)  {
 
 const server = http.createServer(app);
 
-const PORT = process.env.PORT || 3000; 
+const argvPort = process.argv.find((arg, i, arr) => arg === '--port' && arr[i + 1]) ? parseInt(process.argv[process.argv.indexOf('--port') + 1]) : undefined;
+const PORT = argvPort || process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}/`);
 });
@@ -593,3 +595,10 @@ app.post('/feedback', (req, res) => {
 
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
+
+if (require.main === module) {
+  // Start your server here
+  app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
+  });
+}
