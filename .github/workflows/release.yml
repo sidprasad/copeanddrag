@@ -71,3 +71,9 @@ jobs:
           asset_path: cnd.zip
           asset_name: cnd.zip
           asset_content_type: application/zip
+
+      # Step 9: Publish to npm
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
