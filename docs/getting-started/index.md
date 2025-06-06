@@ -4,17 +4,33 @@
 > This guide assumes you have a basic understanding of the Forge language. If you need an introduction to Forge,
 > check out the [Forge language documentation](https://csci1710.github.io/forge-documentation/getting-started/installation.html).
 
+
+
+## Installing CnD
+
+
+You can install CnD in one of the following ways:
+
+1. A stable, but less often updated version of CnD is packaged with the [Forge VS Code Extension](https://marketplace.visualstudio.com/items?itemName=SiddharthaPrasad.forge-language-server). This automatically launches CnD at [`localhost:3000`](http://localhost:3000).
+2. **NPM**: CnD is available as an [NPM package](https://www.npmjs.com/package/cope-and-drag). You can install and launch CnD as follows:
+```
+npm i cope-and-drag # Install
+copeanddrag --port 3000 # Port is optional, defaults to 3000
+```
+
+3. **From a specific GitHub release** : Download `CnD` from [GitHub releases](https://github.com/sidprasad/copeanddrag/releases) and run `node index.js`
+
 ---
 
 
+## Running CnD with Forge
+
+These instructions assume that you have an actively running `CnD` server **on port 3000**. If you are using the Forge VS Code Extension, you will not have to manually launch CnD.
 
 
-1. Install the [Forge VS Code Extension](https://marketplace.visualstudio.com/items?itemName=SiddharthaPrasad.forge-language-server)
-2. The extension will automatically start CnD at [`localhost:3000`](http://localhost:3000). Alternative setup: Download `CnD` from [GitHub releases](https://github.com/sidprasad/copeanddrag/releases) and run `node index.js`
 
-
-3. Run a Forge specification that includes a `run` statement (an example is available [here](https://github.com/tnelson/Forge/blob/main/forge/examples/oopsla24/goat_cabbage_wolf.frg)).
-4. This will open up Sterling, the default Forge visualizer, in a browser window. 
+1. Run a Forge specification that includes a `run` statement (an example is available [here](https://github.com/tnelson/Forge/blob/main/forge/examples/oopsla24/goat_cabbage_wolf.frg)).
+2. This will open up Sterling, the default Forge visualizer, in a browser window. 
 Run your command, and then, once Sterling displays a graph, click the `Layout` drawer.
  Select `Load Layout` to load the graph in Cope and Drag. If you already have a Cope and Drag specification, you can 
 paste it in here before clicking load layout.
