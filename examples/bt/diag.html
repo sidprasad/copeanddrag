@@ -1,0 +1,1241 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Cope and Drag</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+    <!-- Include Bootstrap CSS, JQuery, etc -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <link rel="icon" type="image/svg+xml" href="/img/logo.svg">
+    <link rel="stylesheet" href="../css/diagramstyle.css">
+
+    <script>
+        function loadLocalGraphlib() {
+            console.warn("CDN for graphlib-dot.min.js failed. Loading local copy...");
+            const script = document.createElement("script");
+            script.src = "/js/libs/graphlib-dot.min.js"; // Path to your local copy
+            document.head.appendChild(script);
+        }
+
+        function loadLocalCola() {
+            console.warn("CDN for cola.min.js failed. Loading local copy...");
+            const script = document.createElement("script");
+            script.src = "/js/libs/cola.js"; // Path to your local copy
+            document.head.appendChild(script);
+        }
+    </script>
+    <!-- Primary CDN -->
+    <script src="https://marvl.infotech.monash.edu/webcola/extern/graphlib-dot.min.js" onerror="loadLocalGraphlib()"></script>
+    <script src="https://ialab.it.monash.edu/webcola/cola.js" onerror="loadLocalCola()"></script>
+
+    <!-- Include d3 here -->
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+
+    <!-- Include your custom JavaScript file -->
+    <script src="../js/renderer.js" defer></script>
+    <script src="../js/imgdownload.js" defer></script>
+
+    <!-- Include Split.js -->
+    <script src="https://cdn.jsdelivr.net/npm/split.js/dist/split.min.js"></script>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            Split(['#exploreCol', '#instanceCol', '#controlsCol']);
+        });
+
+        window.addEventListener('load', function () {
+            var width = 800, height = 800;
+            var nodes = [{"id":"Node0","color":"rgb(222, 58, 0)","attributes":{"key":["7"]},"width":100,"height":60,"x":50,"y":190,"icon":null,"fixed":0,"mostSpecificType":"Node","showLabels":true},{"id":"Node1","color":"rgb(222, 58, 0)","attributes":{"key":["7"]},"width":100,"height":60,"x":200,"y":190,"icon":null,"fixed":0,"mostSpecificType":"Node","showLabels":true},{"id":"Node2","color":"rgb(222, 58, 0)","attributes":{"key":["6"]},"width":100,"height":60,"x":200,"y":510,"icon":null,"fixed":0,"mostSpecificType":"Node","showLabels":true},{"id":"Node3","color":"rgb(222, 58, 0)","attributes":{"key":["6"]},"width":100,"height":60,"x":125,"y":30,"icon":null,"fixed":0,"mostSpecificType":"Node","showLabels":true},{"id":"Node4","color":"rgb(222, 58, 0)","attributes":{"key":["5"]},"width":100,"height":60,"x":200,"y":350,"icon":null,"fixed":0,"mostSpecificType":"Node","showLabels":true}];
+            var edges = [{"source":1,"target":4,"relName":"right","id":"Node<:right:Node1->Node4","label":"right"},{"source":3,"target":0,"relName":"right","id":"Node<:right:Node3->Node0","label":"right"},{"source":3,"target":1,"relName":"left","id":"Node<:left:Node3->Node1","label":"left"},{"source":4,"target":2,"relName":"left","id":"Node<:left:Node4->Node2","label":"left"}];
+            var constraints = [{"type":"separation","axis":"x","left":1,"right":4,"gap":115},{"type":"separation","axis":"y","left":1,"right":4,"gap":75},{"type":"separation","axis":"x","left":3,"right":0,"gap":115},{"type":"separation","axis":"y","left":3,"right":0,"gap":75},{"type":"separation","axis":"x","left":1,"right":3,"gap":115},{"type":"separation","axis":"y","left":3,"right":1,"gap":75},{"type":"separation","axis":"x","left":2,"right":4,"gap":115},{"type":"separation","axis":"y","left":4,"right":2,"gap":75}];
+            var groups = [];
+
+            if (width && height && nodes && edges && constraints && groups) {
+                setupLayout(d3, nodes, edges, constraints, groups, width, height);
+            } else {
+                console.error('Missing required data for layout');
+            }
+        });
+    </script>
+
+    <style>
+        /* Hide elements with the hidden class */
+        .hidden {
+            display: none !important;
+        }
+
+
+        .split {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .gutter {
+            background-color: #eee;
+            background-repeat: no-repeat;
+            background-position: 50%;
+
+        }
+
+        .gutter.gutter-horizontal {
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+            cursor: col-resize;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-light bg-light">
+        <div class="row w-100">
+            <div class="col">
+                <h4 class="navbar-brand">Cope and Drag</h4>
+            </div>
+            <div class="col-auto">
+                <!-- Logging Control Section -->
+                <div class="input-group" id="loggingControlSection">
+                    <div class="input-group-prepend">
+                        <label for="loggingEnabled" class="form-check-label">
+                            <span class="input-group-text">Logging</span>
+                        </label>
+                    </div>
+                    <select class="form-control" id="loggingEnabled" name="loggingEnabled">
+                        <option value="enabled">Enabled</option>
+                        <option value="disabled" selected>Disabled</option>
+                    </select>
+                    <div class="input-group-append">
+                        <button type="button" class="btn btn-sm btn-outline-info float-right" data-toggle="modal" data-target="#loggingInfoModal" id="loggingmoreinfo">?</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col">
+                <!-- Button Group -->
+                <div class="btn-group mp-2" role="group">
+                    <!-- Download Diagram Button -->
+                    <button id="diagramDownloadButton" class="btn btn-outline-secondary" onclick="downloadBundle();" title="Export Diagram">
+                        <i class="fas fa-download"></i>
+                    </button>
+
+                    <!-- Docs Button -->
+                    <a href="https://sidprasad.github.io/copeanddrag/" target="_blank" class="btn btn-outline-secondary mp-2" title="Docs">
+                        <i class="fas fa-book"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="container-fluid" id="error_container" style="display: none;">
+    
+
+    <div id="runtime_messages" class="container"></div>
+
+    <!-- Feedback Form in Dismissible Alert -->
+    <div class="alert alert-secondary alert-dismissible fade show" role="alert" id="feedbackAlert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <form id="feedbackForm" onsubmit="return false;">
+            <div class="form-group">
+                <label for="feedback"><strong>Confused by this error message?</strong></label>
+                <textarea id="feedback" name="feedback" class="form-control" rows="3" placeholder="Let us know what’s unclear or how we could improve it..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-block btn-dark">Submit Feedback</button>
+        </form>
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const errorContainer = document.getElementById('error_container');
+        const errorMessages = document.getElementById('error_messages');
+        const runtimeMessages = document.getElementById('runtime_messages');
+
+        // Show the error container if error_messages exists
+        if (errorMessages) {
+            errorContainer.style.display = 'block';
+        }
+
+        // Observe changes to runtime_messages
+        const observer = new MutationObserver(() => {
+            if (runtimeMessages.innerHTML.trim().length > 0) {
+                errorContainer.style.display = 'block';
+            }
+        });
+
+        observer.observe(runtimeMessages, { childList: true, subtree: true });
+
+        const feedbackForm = document.getElementById('feedbackForm');
+
+        feedbackForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevent form from reloading the page
+
+            let errorContent = "";
+
+            if (document.getElementById('error_messages')) {
+                errorContent = document.getElementById('error_messages').innerHTML;
+            }
+            // Check if there are any runtime errors
+            let runTimeErrors = document.getElementById('runtime_messages').innerHTML;
+            if (runTimeErrors && runTimeErrors.trim().length > 0) {
+                errorContent += "<br>" + runTimeErrors;
+            }
+
+            let instanceNumber = document.getElementById('instancenumber').value;
+            let alloyDatum = document.getElementById('alloydatum').value;
+            let cnd = window.editor.getValue() || "";
+            // Construct the request body
+            const body = {
+                alloydatum: alloyDatum, 
+                cnd: cnd, 
+                feedback: document.getElementById('feedback').value,
+                error: errorContent,
+                instanceNumber: instanceNumber
+            };
+
+            try {
+                // Send POST request to /feedback
+                const response = await fetch('/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                if (response.ok) {
+                    document.getElementById('feedback').style.border = '2px solid green';
+                } else {
+                    alert('An error occurred while submitting feedback.');
+                }
+            } catch (err) {
+                alert('An error occurred while submitting feedback.');
+            }
+        });
+    });
+</script>
+
+    <div class="split" id="contentcontainer">
+        <!-- Columns for Split.js -->
+        <div id="exploreCol">
+            <!-- TODO: Improve UI HERE -->
+<div id="reltable-container" class="ml-3">
+
+
+    <div class="row mt-1">
+        
+
+<style>
+    /* Sliding Drawer Styles */
+    .drawer {
+        position: fixed;
+        top: 10vh; /* Start 10% of the viewport height from the top */
+        left: 0; /* Open from the left */
+        width: 70vw; /* Fixed width: 70% of the viewport width */
+        height: 90vh; /* Adjust height to fill the remaining 90% of the viewport */
+        background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent white background */
+        z-index: 1050; /* Ensure it overlays everything else */
+        transform: translateX(-100%); /* Initially hidden (off-screen to the left) */
+        transition: transform 0.3s ease-in-out; /* Smooth slide-in/out transition */
+        display: flex;
+        flex-direction: column;
+    }
+
+    .drawer.open {
+        transform: translateX(0); /* Slide into view */
+    }
+
+    .drawer-header {
+        padding: 10px;
+        background-color: #f8f9fa; /* Light gray header */
+        border-bottom: 1px solid #ddd;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .drawer-content {
+        flex: 1;
+        overflow-y: auto; /* Enable vertical scrolling for large content */
+        overflow-x: auto; /* Enable horizontal scrolling for wide content */
+        padding: 20px;
+    }
+
+    .mermaid-container {
+        overflow-x: auto; /* Enable horizontal scrolling */
+        overflow-y: auto; /* Enable vertical scrolling */
+        white-space: nowrap; /* Prevent Mermaid graph from wrapping */
+    }
+
+    .mermaid {
+        display: inline-block; /* Ensure the graph respects horizontal scrolling */
+        width: auto; /* Allow the graph to grow horizontally */
+        height: auto; /* Allow the graph to grow vertically */
+    }
+</style>
+
+
+
+    </div>
+
+    <div class="row mt-1 ">
+        <div id="compactnessControl" class="container">
+            <input title="Diagram Compactness" type="range" class="form-control-range" id="scaleFactor" name="scaleFactor" min="0.5" max="10" step="0.5" value="5">
+        </div>
+        <hr>
+    </div>
+
+    <!-- Here, projections is a list of type { type : string, projectedAtom : string, atoms : string[]} 
+     If projections is non-empty, then show each type as a form input  and projectedAtom as the selected element of atoms
+    -->
+
+    
+
+    <style>
+        .chevron-icon {
+            transition: transform 0.3s ease; /* Smooth rotation animation */
+        }
+
+        #toggleRelationCard {
+            cursor: pointer; /* Make the header look clickable */
+        }
+    </style>
+    <div class="row mt-1 bg-light">
+        <div class="container">
+            <!-- Collapsible Header -->
+            <p class="text-center text-bold" id="toggleRelationCard" style="cursor: pointer;">
+                <i class="chevron-icon fas fa-chevron-right"></i> <!-- Start with chevron pointing right -->
+                Fields 
+            </p>
+        </div>
+
+        <!-- Collapsible Relation Card -->
+        <div class="container" id="relationcard" style="display: none;">
+            <p class="text-muted text-small">Hover over a field name to highlight it.</p>
+            <ul class="list-group list-group-sm" id="relationList">
+            </ul>
+        </div>
+        <hr>
+    </div>
+    <script>
+        document.getElementById('toggleRelationCard').addEventListener('click', function () {
+            const relationCard = document.getElementById('relationcard');
+            const chevronIcon = this.querySelector('.chevron-icon');
+
+            if (relationCard.style.display === 'none' || relationCard.style.display === '') {
+                relationCard.style.display = 'block'; // Show the relation card
+                chevronIcon.classList.remove('fa-chevron-right'); // Remove right-pointing chevron
+                chevronIcon.classList.add('fa-chevron-down'); // Add down-pointing chevron
+            } else {
+                relationCard.style.display = 'none'; // Hide the relation card
+                chevronIcon.classList.remove('fa-chevron-down'); // Remove down-pointing chevron
+                chevronIcon.classList.add('fa-chevron-right'); // Add right-pointing chevron
+            }
+        });
+    </script>
+    <div class="row mt-1">
+        <div class="container-fluid mt-3" id="evalcontainer" >
+
+
+
+  <!-- Input form -->
+  <form id="evaluatorForm" onsubmit="return false;">
+    <input type="text" class="form-control" id="expressionInput" name="expression" autocomplete="off"
+      placeholder="Enter expression to evaluate..." disabled>
+  </form>
+
+  <!-- REPL output -->
+  <div id="replOutput" style="font-family: monospace; white-space: pre-wrap; max-height: 60vh; overflow-y: auto;"></div>
+</div>
+
+<script>
+  const form = document.getElementById('evaluatorForm');
+  const input = document.getElementById('expressionInput');
+  const replOutput = document.getElementById('replOutput');
+
+  input.addEventListener('keydown', async function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+
+      const expression = input.value.trim();
+      if (!expression) return;
+
+      // Get other fields
+
+      const alloydatum = document.getElementById('alloydatum').value;
+      const instancenumber = document.getElementById('instancenumber').value;
+
+      input.disabled = true;
+
+      try {
+        const res = await fetch('/evaluator', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            expression,
+            alloydatum,
+            instancenumber,
+          })
+        });
+
+        const data = await res.json();
+        const output = data.result || 'No result';
+
+        replOutput.textContent = `> ${expression}\n${output}\n\n` + replOutput.textContent;
+        replOutput.scrollTop = 0; //replOutput.scrollHeight;
+      } catch (err) {
+        replOutput.textContent += `> ${expression}\n[error: ${err.message}]\n\n`;
+      }
+
+      input.value = '';
+      input.disabled = false;
+      input.focus();
+    }
+  });
+</script>
+    </div>
+</div>
+        </div>
+        <div id="instanceCol">
+            <div class="container-fluid" id="instanceviews">
+
+    <!-- Nav Tabs -->
+    <ul class="nav nav-tabs" id="instanceTabs">
+        <li class="nav-item">
+            <a class="nav-link active" data-target="#svggraphview" href="#!">Diagram</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-target="#tableview" href="#!">Table</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-target="#forgeinstview" href="#!">Forge Instance</a>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div id="svggraphview" class="tab-content">
+        <div id="svg-container" >
+    <svg id="svg"      >
+        <!-- width="800"  -->
+        <!-- height="800"  -->
+
+        <defs>
+            <marker id="end-arrow" markerWidth="15" markerHeight="10" refX="12" refY="5" orient="auto">
+                <polygon points="0 0, 15 5, 0 10" />
+            </marker>
+            <!-- Hand-drawn arrow marker -->
+            <marker id="hand-drawn-arrow" markerWidth="15" markerHeight="10" refX="12" refY="5" orient="auto">
+                <!-- Hand-drawn arrow with a different fill -->
+                <polygon points="0 0, 15 5, 0 10" 
+                            fill="#666666"  />
+            </marker>
+        </defs>
+        <g class="zoomable">
+            <!-- Your graph elements go here -->
+        </g>
+    </svg>
+</div>
+    </div>
+    <div id="tableview" class="tab-content" style="display: none;">
+        <div class="container-fluid" id="tablescontainer">
+    
+        <!-- Atoms Section -->
+        <div class="d-flex flex-wrap">
+            
+                
+                    <div class="table-wrapper">
+                        <table class="table table-bordered table-sm compact-table">
+                            <thead>
+                                <tr>
+                                    <th>Int</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                                    <tr>
+                                        <td>-8</td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>-7</td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>-6</td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>-5</td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>-4</td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>-3</td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>-2</td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>-1</td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>0</td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>1</td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>2</td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>3</td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>4</td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>5</td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>6</td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>7</td>
+                                    </tr>
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                
+            
+                
+                    <div class="table-wrapper">
+                        <table class="table table-bordered table-sm compact-table">
+                            <thead>
+                                <tr>
+                                    <th>Node</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                                    <tr>
+                                        <td>Node0</td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>Node1</td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>Node2</td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>Node3</td>
+                                    </tr>
+                                
+                                    <tr>
+                                        <td>Node4</td>
+                                    </tr>
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                
+            
+        </div>
+
+        <!-- Relations Section -->
+        <div class="d-flex flex-wrap">
+            
+                
+                    <div class="table-wrapper">
+                        <table class="table table-bordered table-sm compact-table">
+                            <thead>
+                                <tr>
+                                    <th>right</th>
+                                    
+                                        <th></th>
+                                    
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                                    <tr>
+                                        
+                                            <td>Node1</td>
+                                        
+                                            <td>Node4</td>
+                                        
+                                    </tr>
+                                
+                                    <tr>
+                                        
+                                            <td>Node3</td>
+                                        
+                                            <td>Node0</td>
+                                        
+                                    </tr>
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                
+            
+                
+                    <div class="table-wrapper">
+                        <table class="table table-bordered table-sm compact-table">
+                            <thead>
+                                <tr>
+                                    <th>key</th>
+                                    
+                                        <th></th>
+                                    
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                                    <tr>
+                                        
+                                            <td>Node0</td>
+                                        
+                                            <td>7</td>
+                                        
+                                    </tr>
+                                
+                                    <tr>
+                                        
+                                            <td>Node1</td>
+                                        
+                                            <td>7</td>
+                                        
+                                    </tr>
+                                
+                                    <tr>
+                                        
+                                            <td>Node2</td>
+                                        
+                                            <td>6</td>
+                                        
+                                    </tr>
+                                
+                                    <tr>
+                                        
+                                            <td>Node3</td>
+                                        
+                                            <td>6</td>
+                                        
+                                    </tr>
+                                
+                                    <tr>
+                                        
+                                            <td>Node4</td>
+                                        
+                                            <td>5</td>
+                                        
+                                    </tr>
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                
+            
+                
+                    <div class="table-wrapper">
+                        <table class="table table-bordered table-sm compact-table">
+                            <thead>
+                                <tr>
+                                    <th>left</th>
+                                    
+                                        <th></th>
+                                    
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                                    <tr>
+                                        
+                                            <td>Node3</td>
+                                        
+                                            <td>Node1</td>
+                                        
+                                    </tr>
+                                
+                                    <tr>
+                                        
+                                            <td>Node4</td>
+                                        
+                                            <td>Node2</td>
+                                        
+                                    </tr>
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                
+            
+        </div>
+    
+</div>
+
+<style>
+    /* Flexbox for compact layout */
+    .d-flex {
+        display: flex;
+        flex-wrap: wrap; /* Allow wrapping to the next line if tables don't fit */
+        gap: 1rem; /* Add spacing between tables */
+    }
+
+    .table-wrapper {
+        flex: 1 1 auto; /* Allow tables to shrink and grow as needed */
+        max-width: 300px; /* Optional: Set a max width for each table */
+    }
+
+    /* Compact table styling */
+    .compact-table th,
+    .compact-table td {
+        padding: 0.25rem; /* Reduce padding inside cells */
+        font-size: 0.9rem; /* Slightly smaller font size */
+    }
+
+    .compact-table {
+        margin-bottom: 0.5rem; /* Reduce space between tables */
+        border-collapse: collapse;
+    }
+
+    .compact-table th,
+    .compact-table td {
+        border: 1px solid #ddd; /* Light border for better readability */
+    }
+</style>
+
+    </div>
+    <div id="forgeinstview" class="tab-content" style="display: none;">
+        <div class="container-fluid">
+    
+        <code style="white-space: pre-wrap;">inst  cnd_generated {
+Int = `-8+`-7+`-6+`-5+`-4+`-3+`-2+`-1+`0+`1+`2+`3+`4+`5+`6+`7
+Node = `Node0+`Node1+`Node2+`Node3+`Node4
+no no-field-guard
+right = (`Node1->`Node4)+(`Node3->`Node0)
+key = (`Node0->`7)+(`Node1->`7)+(`Node2->`6)+(`Node3->`6)+(`Node4->`5)
+left = (`Node3->`Node1)+(`Node4->`Node2)
+
+}</code>
+    
+</div>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tabs = document.querySelectorAll('#instanceTabs .nav-link');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                // Remove active class from all tabs
+                tabs.forEach(t => t.classList.remove('active'));
+
+                // Hide all tab contents
+                tabContents.forEach(content => content.style.display = 'none');
+
+                // Add active class to the clicked tab
+                this.classList.add('active');
+
+                // Show the corresponding tab content
+                const target = document.querySelector(this.dataset.target);
+                if (target) {
+                    target.style.display = 'block';
+                }
+            });
+        });
+    });
+</script>
+        </div>
+        <div id="controlsCol">
+            <div id="controls" class="col">
+    <script src="../js/structuredEditorScripts.js" defer></script>
+
+    <form id="controlsForm" method="post" action="/" style="padding-top: 5px;">
+    <button type="submit" id='cola' class="btn btn-primary btn-lg btn-block" disabled>Apply Layout</button>
+    <br>
+    <hr>
+
+
+     <!-- HERE, we should be able to choose between structured and yaml.  -->
+    <!-- Toggle Buttons -->
+    <div class="btn-group" role="group" aria-label="Editor Toggle">
+        <button type="button" class="btn btn-outline-primary active" id="showYamlEditor">YAML View</button>
+        <button type="button" class="btn btn-outline-primary" id="showStructuredEditor" >No Code View</button>
+    </div>    
+
+    <div class="form-group" id="yamlEditorControls">
+        <div id="yamlEditor" class="container-fluid">
+
+    <style>
+        /* .CodeMirror {
+            height: auto;
+            width: calc(30ch + 2px);
+            overflow: auto;
+        } */
+
+        .CodeMirror {
+            height: auto;
+
+            overflow: auto;
+            resize: horizontal; /* Allow horizontal resizing */
+            min-width: 30ch; /* Set a minimum width */
+            max-width: 100%; /* Set a maximum width */
+        }
+
+        .CodeMirror.is-valid {
+            border: 1px solid #28a745;
+        }
+
+        .CodeMirror.is-invalid {
+            border: 2px solid #dc3545;
+        }
+
+        .cope {
+            height: auto;
+            width: 100%;
+            overflow: auto;
+        }
+
+    </style>
+
+<textarea class="form-control" id="cope" rows="10" name="cope">constraints:
+  - orientation:
+      selector: right
+      directions:
+        - right
+        - below
+  - orientation:
+      selector: left
+      directions:
+        - left
+        - below
+directives:
+  - attribute:
+      field: key
+  - flag: hideDisconnectedBuiltIns
+</textarea>
+
+
+</div>
+
+<!-- Text Area Block -->
+<div class="container">
+            <!-- <label for="layoutannotation" class="lead"><h2>Layout</h2></label> -->
+            <button id="prettify" class="btn btn-outline-dark btn-sm">Check Syntax</button>
+            <br>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+<!-- Include CodeMirror CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+<!-- Include CodeMirror JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+<!-- Include CodeMirror YAML mode -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/yaml/yaml.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var copeTextarea = document.getElementById('cope');
+        window.editor = CodeMirror.fromTextArea(copeTextarea, {
+            mode: 'yaml',
+            lineNumbers: true,
+            theme: 'default',
+            lineWrapping: false, // Disable line wrapping
+        });
+
+        
+
+
+        // Event listener for the Prettify button
+        document.getElementById('prettify').addEventListener('click', function (event) {
+
+            event.preventDefault();
+            try {
+                var yamlContent = window.editor.getValue();
+                var parsedYaml = jsyaml.load(yamlContent);
+                var formattedYaml = jsyaml.dump(parsedYaml);
+                window.editor.setValue(formattedYaml);
+                window.editor.getWrapperElement().classList.remove('is-invalid');
+                window.editor.getWrapperElement().classList.add('is-valid');
+            } catch (e) {
+                window.editor.getWrapperElement().classList.remove('is-valid');
+                window.editor.getWrapperElement().classList.add('is-invalid');
+                alert('Invalid YAML format: ' + e.message);
+            }
+        });
+
+
+
+        window.editor.on('blur', function () {
+            try {
+                var yamlContent = window.editor.getValue();
+                var parsedYaml = jsyaml.load(yamlContent);
+                window.editor.getWrapperElement().classList.remove('is-invalid');
+                window.editor.getWrapperElement().classList.add('is-valid');
+            } catch (e) {
+                window.editor.getWrapperElement().classList.remove('is-valid');
+                window.editor.getWrapperElement().classList.add('is-invalid');
+            }
+        });
+    });
+</script>
+    </div>
+    <div class="form-group" id="structuredEditorControls" style="display: none;">
+        <div class="container-fluid" id="structuredEditor">
+    <br>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinycolor/1.4.2/tinycolor.min.js"></script>    <style>
+        .constraint {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        .directive {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        .infolabel {
+            cursor: help; /* Changes the cursor to a question mark */
+            text-decoration: underline; /* Adds an underline to indicate interactivity */
+            color: #007bff; /* Makes the text look like a link */
+        }
+
+        .infolabel:hover {
+            color: #0056b3; /* Darkens the color on hover */
+            text-decoration: none; /* Optionally remove underline on hover */
+        }
+
+        /* Highlight effect for newly added elements */
+        .highlight {
+            border: 2px solid #007bff; /* Thin blue border */
+            animation: fadeBorder 1s ease-out forwards; /* Fade out the border */
+        }
+
+        /* Keyframes for fading out the border */
+        @keyframes fadeBorder {
+            0% {
+                border-color: #007bff; /* Start with blue */
+            }
+            100% {
+                border-color: transparent; /* End with no border */
+            }
+        }
+
+
+    </style>
+
+    <div class="container-fluid">
+        <h5>Constraints  <button type="button" onclick="addConstraint()" title="Click to add a new constraint">+</button></h5>
+        <!-- <br> -->
+       
+        <div id="constraintContainer"></div>
+    </div>
+    <hr>
+    <div class="container-fluid">
+        <h5>Directives  <button type="button" onclick="addDirective()" title="Click to add a new directive">+</button></h5>
+        <div id="directiveContainer"></div>
+    </div>
+
+
+
+</div>
+    </div>
+
+    <!-- And here, we are in actual controls terroir. -->
+
+
+    <br>
+    <div class="form-group" id="alloyDatumControlSection">
+        <label for="alloydatum" class="btn btn-outline-dark btn-sm" id="alloyinstancelabel"
+            style="cursor: pointer;">Edit Datum</label>
+        <textarea class="form-control" id="alloydatum" rows="5" name="alloydatum"
+            style="display: none;">&lt;alloy builddate=&#34;Wednesday, May 14th, 2025&#34;&gt;
+&lt;instance bitwidth=&#34;4&#34; maxseq=&#34;-1&#34; command=&#34;temporary-name_source_1&#34; filename=&#34;/Users/siddharthaprasad/Desktop/copeanddrag/examples/paper-examples/bt/source.frg&#34; version=&#34;4.1&#34;  &gt;
+
+&lt;sig label=&#34;seq/Int&#34; ID=&#34;0&#34; parentID=&#34;1&#34; builtin=&#34;yes&#34;&gt;
+&lt;/sig&gt;
+
+&lt;sig label=&#34;Int&#34; ID=&#34;1&#34; parentID=&#34;2&#34; builtin=&#34;yes&#34;&gt;
+
+&lt;/sig&gt;
+
+&lt;sig label=&#34;univ&#34; ID=&#34;2&#34; builtin=&#34;yes&#34;&gt;
+&lt;/sig&gt;
+
+&lt;field label=&#34;no-field-guard&#34; ID=&#34;3&#34; parentID=&#34;2&#34;&gt;
+&lt;types&gt; &lt;type ID=&#34;2&#34;/&gt;&lt;type ID=&#34;2&#34;/&gt; &lt;/types&gt;
+&lt;/field&gt;
+
+&lt;sig label=&#34;Node&#34; ID=&#34;4&#34; parentID=&#34;2&#34;&gt;
+&lt;atom label=&#34;Node0&#34;/&gt;&lt;atom label=&#34;Node1&#34;/&gt;&lt;atom label=&#34;Node2&#34;/&gt;&lt;atom label=&#34;Node3&#34;/&gt;&lt;atom label=&#34;Node4&#34;/&gt;
+&lt;/sig&gt;
+
+&lt;field label=&#34;right&#34; ID=&#34;5&#34; parentID=&#34;4&#34;&gt;
+&lt;tuple&gt;&lt;atom label=&#34;Node1&#34;/&gt;&lt;atom label=&#34;Node4&#34;/&gt;&lt;/tuple&gt;
+&lt;tuple&gt;&lt;atom label=&#34;Node3&#34;/&gt;&lt;atom label=&#34;Node0&#34;/&gt;&lt;/tuple&gt;
+&lt;types&gt;&lt;type ID=&#34;4&#34;/&gt;&lt;type ID=&#34;4&#34;/&gt;&lt;/types&gt;
+
+&lt;/field&gt;
+
+&lt;field label=&#34;key&#34; ID=&#34;6&#34; parentID=&#34;4&#34;&gt;
+&lt;tuple&gt;&lt;atom label=&#34;Node0&#34;/&gt;&lt;atom label=&#34;7&#34;/&gt;&lt;/tuple&gt;
+&lt;tuple&gt;&lt;atom label=&#34;Node1&#34;/&gt;&lt;atom label=&#34;7&#34;/&gt;&lt;/tuple&gt;
+&lt;tuple&gt;&lt;atom label=&#34;Node2&#34;/&gt;&lt;atom label=&#34;6&#34;/&gt;&lt;/tuple&gt;
+&lt;tuple&gt;&lt;atom label=&#34;Node3&#34;/&gt;&lt;atom label=&#34;6&#34;/&gt;&lt;/tuple&gt;
+&lt;tuple&gt;&lt;atom label=&#34;Node4&#34;/&gt;&lt;atom label=&#34;5&#34;/&gt;&lt;/tuple&gt;
+&lt;types&gt;&lt;type ID=&#34;4&#34;/&gt;&lt;type ID=&#34;1&#34;/&gt;&lt;/types&gt;
+
+&lt;/field&gt;
+
+&lt;field label=&#34;left&#34; ID=&#34;7&#34; parentID=&#34;4&#34;&gt;
+&lt;tuple&gt;&lt;atom label=&#34;Node3&#34;/&gt;&lt;atom label=&#34;Node1&#34;/&gt;&lt;/tuple&gt;
+&lt;tuple&gt;&lt;atom label=&#34;Node4&#34;/&gt;&lt;atom label=&#34;Node2&#34;/&gt;&lt;/tuple&gt;
+&lt;types&gt;&lt;type ID=&#34;4&#34;/&gt;&lt;type ID=&#34;4&#34;/&gt;&lt;/types&gt;
+
+&lt;/field&gt;
+
+
+&lt;/instance&gt;
+
+&lt;source filename=&#34;/Users/siddharthaprasad/Desktop/copeanddrag/examples/paper-examples/bt/source.frg&#34; content=&#34;#lang forge
+&amp;#xA;option run_sterling &amp;amp;quot;bst.js&amp;amp;quot;
+&amp;#xA;
+&amp;#xA;/*
+&amp;#xA;  Model of binary search trees
+&amp;#xA;  Tim, 2024
+&amp;#xA;*/
+&amp;#xA;
+&amp;#xA;sig Node {
+&amp;#xA;  key: one Int,     -- every node has some key 
+&amp;#xA;  left: lone Node,  -- every node has at most one left-child
+&amp;#xA;  right: lone Node  -- every node has at most one right-child
+&amp;#xA;}
+&amp;#xA;fun descendantsOf[ancestor: Node]: set Node {
+&amp;#xA;  ancestor.^(left + right) -- nodes reachable via transitive closure
+&amp;#xA;}
+&amp;#xA;pred binary_tree {
+&amp;#xA;  -- no cycles (modified)
+&amp;#xA;  all n: Node | 
+&amp;#xA;    n not in descendantsOf[n] 
+&amp;#xA;  -- connected via finite chain of left, right, and inverses
+&amp;#xA;  all disj n1, n2: Node | n1 in n2.^(left + right + ~left + ~right)
+&amp;#xA;  -- left+right differ (unless both are empty)
+&amp;#xA;  all n: Node | some n.left =&amp;amp;gt; n.left != n.right 
+&amp;#xA;  -- nodes have a unique parent (if any)
+&amp;#xA;  all n: Node | lone parent: Node | n in parent.(left+right)
+&amp;#xA;}
+&amp;#xA;--run {binary_tree} for 7 Node
+&amp;#xA;
+&amp;#xA;
+&amp;#xA;
+&amp;#xA;run {binary_tree and (some right) and (some left)} for exactly 5 Node
+&amp;#xA;&#34;&gt;&lt;/source&gt;
+&lt;/alloy&gt;</textarea>
+    </div>
+    <br>
+    
+    <div class="form-group d-none" id="temporalInstanceNumberControl">
+        <label for="instancenumber">Temporal Instance Number</label>
+        <input type="number" class="form-control" id="instancenumber" name="instancenumber"
+            value="0">
+    </div>
+
+
+    <!-- Here, projections is a list of type { type : string, projectedAtom : string, atoms : string[]} 
+     If projections is non-empty, then show each type as a form input  and projectedAtom as the selected element of atoms
+    -->
+
+
+
+    </form>
+
+    <!-- Modal for logging info.-->
+    <div class="modal fade" id="loggingInfoModal" tabindex="-1" role="dialog"
+        aria-labelledby="loggingInfoModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loggingInfoModalLabel">Logging Information</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    By enabling logging, you allow us to examine your <b>anonymized</b>
+                    specifications and diagrams in order
+                    to improve Cope and Drag, and understand its effectiveness.
+                    <br><br>
+                    Have questions? <a
+                        href="https://docs.google.com/forms/d/e/1FAIpQLSdQcAlnW86OLlpmFovEiviToq5WMU10N4U_pz01N-9LUJ4qzQ/viewform?usp=dialog"
+                        target="_blank">Fill out this form</a>.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+<!-- Include CodeMirror CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+<!-- Include CodeMirror JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+<!-- Include CodeMirror YAML mode -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/yaml/yaml.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // THis has to do with the Alloy inst.
+        var alloyInstanceLabel = document.getElementById('alloyinstancelabel');
+        var alloyDatumTextarea = document.getElementById('alloydatum');
+
+        alloyInstanceLabel.addEventListener('click', function () {
+            if (alloyDatumTextarea.style.display === 'none') {
+                alloyDatumTextarea.style.display = 'block';
+            } else {
+                alloyDatumTextarea.style.display = 'none';
+            }
+        });
+
+        const showYamlEditorButton = document.getElementById('showYamlEditor');
+        const showStructuredEditorButton = document.getElementById('showStructuredEditor');
+
+        let yamlEditorControls = document.getElementById('yamlEditorControls');
+        let structuredEditorControls = document.getElementById('structuredEditorControls');
+
+        function showYamlEditor() {
+            yamlEditorControls.style.display = 'block';
+            showYamlEditorButton.classList.add('active');
+            showStructuredEditorButton.classList.remove('active');
+            structuredEditorControls.style.display = 'none';
+
+            // And add to local storage
+            localStorage.setItem('editorView', 'yaml');
+        }
+
+        function showStructuredEditor() {
+            yamlEditorControls.style.display = 'none';
+            structuredEditorControls.style.display = 'block';
+            showStructuredEditorButton.classList.add('active');
+            showYamlEditorButton.classList.remove('active');
+
+            // And add to local storage
+            localStorage.setItem('editorView', 'structured');
+        }
+
+        // Check local storage for the editor view preference
+        const editorView = localStorage.getItem('editorView');
+        if (editorView === 'structured') {
+            populateStructuredEditor();
+            showStructuredEditor();
+        } else {
+            showYamlEditor();
+        }
+
+
+
+        // Show YAML Editor and hide Structured Editor
+        showYamlEditorButton.addEventListener('click', function () {
+            writeToYAMLEditor();
+            showYamlEditor();
+        });
+
+        // Show Structured Editor and hide YAML Editor
+        showStructuredEditorButton.addEventListener('click', function () {
+            // First set up the structured editor from the YAML contents.
+            populateStructuredEditor();
+            showStructuredEditor();
+        });
+
+
+        const form = document.getElementById('controlsForm');
+        const submitButton = document.getElementById('cola');
+        const loggingEnabled = document.getElementById('loggingEnabled'); // Reference the loggingEnabled element
+
+        // Add a submit event listener to the form
+        form.addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Set the class of the button to spinner
+            submitButton.classList.add('spinner-border', 'spinner-border-sm');
+            submitButton.setAttribute('disabled', 'disabled'); // Disable the button
+
+
+
+            // Find all form controls with IDs ending in "_projection"
+            const projectionControls = document.querySelectorAll('[id$="_projection"]');
+
+            // Add each projection control's value as a hidden input to the form
+            projectionControls.forEach(control => {
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = control.name; // Use the control's name as the input name
+                hiddenInput.value = control.value; // Use the control's value as the input value
+                form.appendChild(hiddenInput);
+            });
+
+            // Add the loggingEnabled value to the logging object
+            const loggingObject = {
+                loggingEnabled: loggingEnabled.value // Get the value of the loggingEnabled select element
+            };
+
+            form.appendChild(loggingEnabled); // Append the loggingEnabled element to the form
+           
+
+            // Check if the structured editor is in view
+            const structuredEditorControls = document.getElementById('structuredEditorControls');
+            if (structuredEditorControls.style.display === 'block') {
+                writeToYAMLEditor(); // Sync structured editor data to YAML editor
+            }
+
+            form.submit(); // Submit the form
+        });
+
+
+
+
+    });
+</script>
+        </div>
+    </div>
+</body>
+
+</html>
