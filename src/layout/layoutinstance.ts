@@ -264,7 +264,7 @@ export class LayoutInstance {
                     if (existingGroup) {
                         existingGroup.nodeIds.push(toAdd);
                         // But also remove this edge from the graph.
-                        g.removeEdge(edge.v, edge.w, edgeId);
+                        // g.removeEdge(edge.v, edge.w, edgeId);
                     }
                     else {
 
@@ -470,6 +470,7 @@ export class LayoutInstance {
 
         /// Groups have to happen here ///
         let groups = this.generateGroups(g, a);
+        // let groups = this.generatePowerGroups(g, a);
         this.ensureNoExtraNodes(g, a);
 
         let dcN = this.getDisconnectedNodes(g);
@@ -583,7 +584,7 @@ export class LayoutInstance {
         );
         groups = groups.concat(dcnGroups);
 
-
+        // NOTE: This is the layout that is passed into setupLayout in renderer.js
         let layout = { nodes: layoutNodes, edges: layoutEdges, constraints: constraints, groups: groups };
 
         let finalConstraintValidator = new ConstraintValidator(layout);

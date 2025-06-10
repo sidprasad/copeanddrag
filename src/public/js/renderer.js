@@ -173,14 +173,21 @@ function getContainingGroups(groups, node) {
 /**
  * Main function for the renderer. Sets up the layout for the graph using D3 and WebCola.
  * @param {*} d3 
- * @param {*} nodes 
- * @param {*} edges 
- * @param {*} constraints 
- * @param {*} groups 
+ * @param {Object[]} nodes - Array of node objects with properties like id, color, width, height, etc.
+ * @param {Object[]} edges - Array of edge objects with properties like source, target, id, label, relName (name of Forge relation) etc.
+ * @param {Object[]} constraints - Array of WebCola constraint objects that define CnD constraints
+ * @param {Object[]} groups - Array of group objects with properties like name, groups, leaves, bounds, etc.
  * @param {*} width 
  * @param {*} height 
  */
 function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
+
+    // LOGGING inputs to understand the shape of the data
+
+    // console.log("Nodes", nodes)
+    // console.log("edges", edges)
+    // console.log("constraints", constraints)
+    // console.log("groups", groups)
 
 
     let edgeRouteIdx = 0;
@@ -242,19 +249,24 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 initialUnconstrainedIterations,
                 initialUserConstraintIterations,
                 initialAllConstraintsIterations,
-                gridSnapIterations)
-                .on("end", routeEdges);
+                gridSnapIterations);
+                // .on("end", routeEdges);
         });
     }
 
     // TODO: Figure out WHEN to use flowLayout and when not to use it.
     // I think having directly above/ below makes it impossible to have flow layout 'y' *unless we have heirarchy*
 
+    var powerGraph;
     colaLayout
         .nodes(nodes)
         .links(edges)
         .constraints(constraints)
-        .groups(groups)
+        // .groups(groups)
+        .powerGraphGroups(function (d) {
+            powerGraph = d;
+            powerGraph.groups.forEach(function (v) { v.padding = 20; });
+        })
         .groupCompactness(1e-3) // The higer the number, the more compact the groups will be
         // .symmetricDiffLinkLengths(min_sep + default_node_width);
         .linkDistance(50)
@@ -267,6 +279,10 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
     
     var routeEdges = function () {
+
+        if (edgeRouteIdx > 1000) {
+            return;
+        }
 
         try {
             // Initialize WebCola's edge routing system with collision avoidance
@@ -367,97 +383,101 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     return lineFunction([{ x: d.source.x, y: d.source.y }, { x: d.target.x, y: d.target.y }]);
                 }
 
+                /*
+                    Handling group edges
+                */
                 // This is a special case for group edges
                 // Draw edges to the closest point on the rectangle of the group
-                if (n.startsWith("_g_")) {
-                    let source = d.source;
-                    let target = d.target;
 
-                    let sourceIndex = getNodeIndex(source.id);
-                    let targetIndex = getNodeIndex(target.id);
+                // if (n.startsWith("_g_")) {
+                //     let source = d.source;
+                //     let target = d.target;
 
-                    // Get the groupOn and addToGroup indices
-                    let { groupOnIndex, addToGroupIndex } = getGroupOnAndAddToGroupIndices(n);
+                //     let sourceIndex = getNodeIndex(source.id);
+                //     let targetIndex = getNodeIndex(target.id);
 
-                    /**
-                     * Helper function to find the closest point on a rectangle to a given point.
-                     * @param {*} bounds 
-                     * @param {*} point 
-                     * @returns {{x: number, y: number}} - The closest point on the rectangle to the given point.
-                     */
-                    function closestPointOnRect(bounds, point) {
-                        // Destructure the rectangle bounds
-                        const { x, y, X, Y } = bounds;
+                //     // Get the groupOn and addToGroup indices
+                //     let { groupOnIndex, addToGroupIndex } = getGroupOnAndAddToGroupIndices(n);
 
-                        // Calculate the rectangle's edges
-                        const left = x;
-                        const right = X;
-                        const top = y;
-                        const bottom = Y;
+                //     /**
+                //      * Helper function to find the closest point on a rectangle to a given point.
+                //      * @param {*} bounds 
+                //      * @param {*} point 
+                //      * @returns {{x: number, y: number}} - The closest point on the rectangle to the given point.
+                //      */
+                //     function closestPointOnRect(bounds, point) {
+                //         // Destructure the rectangle bounds
+                //         const { x, y, X, Y } = bounds;
 
-                        // Clamp the point's coordinates to the rectangle's bounds
-                        const closestX = Math.max(left, Math.min(point.x, right));
-                        const closestY = Math.max(top, Math.min(point.y, bottom));
+                //         // Calculate the rectangle's edges
+                //         const left = x;
+                //         const right = X;
+                //         const top = y;
+                //         const bottom = Y;
 
-                        if (closestX != left && closestX != right
-                            && closestY != top && closestY != bottom) {
+                //         // Clamp the point's coordinates to the rectangle's bounds
+                //         const closestX = Math.max(left, Math.min(point.x, right));
+                //         const closestY = Math.max(top, Math.min(point.y, bottom));
 
-                            console.log("Point is inside the rectangle", bounds, closestX, closestY);
-                        }
+                //         if (closestX != left && closestX != right
+                //             && closestY != top && closestY != bottom) {
 
-                        return { x: closestX, y: closestY };
-                    }
+                //             console.log("Point is inside the rectangle", bounds, closestX, closestY);
+                //         }
 
-                    // Determine which end of the edge connects to a group based on the edge ID
-                    // The target of the edge is the relevant group member.
-                    let addTargetToGroup = groupOnIndex < addToGroupIndex;
-                    // The source of the edge is the relevant group member.
-                    let addSourceToGroup = groupOnIndex >= addToGroupIndex;
+                //         return { x: closestX, y: closestY };
+                //     }
 
-                    if (addTargetToGroup) {
-                        // Find the group that contains the target node and is keyed by the source
-                        let potentialGroups = getContainingGroups(groups, target);
-                        let targetGroup = potentialGroups.find(group => group.keyNode === sourceIndex);
-                        if (targetGroup) {
-                            // Adjust the endpoint to the closest point on the group boundary
-                            let newTargetCoords = closestPointOnRect(targetGroup.bounds, route[0]);
-                            let currentTarget = route[route.length - 1];
-                            currentTarget.x = newTargetCoords.x;
-                            currentTarget.y = newTargetCoords.y;
-                            route[route.length - 1] = currentTarget;
-                        }
-                        else {
-                            console.log("Target group not found", potentialGroups, targetIndex, n);
-                        }
-                    }
-                    else if (addSourceToGroup) {
-                        // Find the group that contains the source node and is keyed by the target
-                        let potentialGroups = getContainingGroups(groups, source);
-                        let sourceGroup = potentialGroups.find(group => group.keyNode === targetIndex);
-                        if (sourceGroup) {
-                            // Adjust the startpoint to the closest point on the group boundary
-                            let newSourceCoords = closestPointOnRect(sourceGroup.bounds.inflate(-1), route[route.length - 1]);
-                            let currentSource = route[0];
-                            currentSource.x = newSourceCoords.x;
-                            currentSource.y = newSourceCoords.y;
-                            route[0] = currentSource;
-                        }
-                        else {
-                            console.log("Source group not found", potentialGroups, sourceIndex, targetIndex, n );
-                        }
+                //     // Determine which end of the edge connects to a group based on the edge ID
+                //     // The target of the edge is the relevant group member.
+                //     let addTargetToGroup = groupOnIndex < addToGroupIndex;
+                //     // The source of the edge is the relevant group member.
+                //     let addSourceToGroup = groupOnIndex >= addToGroupIndex;
 
-                    }
-                    else {
-                        console.log("This is a group edge, but neither source nor target is a group.", d);
-                    }
+                //     if (addTargetToGroup) {
+                //         // Find the group that contains the target node and is keyed by the source
+                //         let potentialGroups = getContainingGroups(groups, target);
+                //         let targetGroup = potentialGroups.find(group => group.keyNode === sourceIndex);
+                //         if (targetGroup) {
+                //             // Adjust the endpoint to the closest point on the group boundary
+                //             let newTargetCoords = closestPointOnRect(targetGroup.bounds, route[0]);
+                //             let currentTarget = route[route.length - 1];
+                //             currentTarget.x = newTargetCoords.x;
+                //             currentTarget.y = newTargetCoords.y;
+                //             route[route.length - 1] = currentTarget;
+                //         }
+                //         else {
+                //             console.log("Target group not found", potentialGroups, targetIndex, n);
+                //         }
+                //     }
+                //     else if (addSourceToGroup) {
+                //         // Find the group that contains the source node and is keyed by the target
+                //         let potentialGroups = getContainingGroups(groups, source);
+                //         let sourceGroup = potentialGroups.find(group => group.keyNode === targetIndex);
+                //         if (sourceGroup) {
+                //             // Adjust the startpoint to the closest point on the group boundary
+                //             let newSourceCoords = closestPointOnRect(sourceGroup.bounds.inflate(-1), route[route.length - 1]);
+                //             let currentSource = route[0];
+                //             currentSource.x = newSourceCoords.x;
+                //             currentSource.y = newSourceCoords.y;
+                //             route[0] = currentSource;
+                //         }
+                //         else {
+                //             console.log("Source group not found", potentialGroups, sourceIndex, targetIndex, n );
+                //         }
 
-                    // Not ideal but we dont want odd curves.
-                    // Simplify group edge routes to avoid complex curves
-                    if (route.length > 2) {
-                        route.splice(1, route.length - 2);
-                    }
-                    return lineFunction(route);
-                }
+                //     }
+                //     else {
+                //         console.log("This is a group edge, but neither source nor target is a group.", d);
+                //     }
+
+                //     // Not ideal but we dont want odd curves.
+                //     // Simplify group edge routes to avoid complex curves
+                //     if (route.length > 2) {
+                //         route.splice(1, route.length - 2);
+                //     }
+                //     return lineFunction(route);
+                // }
 
                 // Find all parallel edges between the same two nodes (bidirectional)
                 // Get all edges between the two nodes, regardless of direction
@@ -591,6 +611,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
             // LABEL POSITIONING: Place labels at edge midpoints and resolve overlaps
             // Update label positions after routing edges
+            /*
             linkGroups.select("text.linklabel")
                 .attr("x", function (d) {
                     // Find the corresponding path element and calculate its midpoint
@@ -625,6 +646,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     }
                 })
                 .raise();
+            */
 
             /**** This bit ensures we zoom to fit ***/
             const bbox = svg.node().getBBox();
@@ -701,13 +723,15 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
 
     const linkGroups = svg.selectAll(".link-group")
-        .data(edges)
+        // .data(edges)
+        .data(powerGraph.powerEdges)
         .enter()
         .append("g")
         .attr("class", "link-group");
 
     const link = linkGroups.append("path")
-        .attr("class", d => isInferredEdge(d) ? "inferredLink" : "link") // Dynamically assign class
+        // .attr("class", d => isInferredEdge(d) ? "inferredLink" : "link") // Dynamically assign class")
+        .attr("class", "link") // Dynamically assign class")
         .attr("data-link-id", d => d.id);
 
     linkGroups.append("text")
@@ -857,22 +881,26 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     const DISCONNECTED_NODE_GROUP = "_d_";
 
     var group = svg.selectAll(".group")
-        .data(groups)
+        // .data(groups)
+        .data(powerGraph.groups)
         .enter().append("rect")
         .attr("class", function (d) {
-            return d.name.startsWith(DISCONNECTED_NODE_GROUP) ? "disconnectedNode" : "group";
+            // return d.name.startsWith(DISCONNECTED_NODE_GROUP) ? "disconnectedNode" : "group";
+            return "group";
         })
         .attr("rx", 8).attr("ry", 8)
         .style("fill", function (d, i) {
 
+            console.log(d);
+
             // If d.name starts with "_d_", color it transparent
-            if (d.name.startsWith(DISCONNECTED_NODE_GROUP)) {
-                return "transparent";
-            }
+            // if (d.name.startsWith(DISCONNECTED_NODE_GROUP)) {
+            //     return "transparent";
+            // }
 
 
-            var targetNode = nodes[d.keyNode];
-            return targetNode.color;
+            // var targetNode = nodes[d.keyNode];
+            // return targetNode.color;
         })
         .attr("fill-opacity", 0.25)
         .call(colaLayout.drag);
@@ -970,6 +998,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 const targetIndex = getNodeIndex(target);
 
                 let n = d.id;
+                /*
                 if (n.startsWith("_g_")) {
 
                     // First get the groupOn and addToGroup indices
@@ -1006,6 +1035,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                         console.log("This is a group edge (_on tick_), but neither source nor target is a group.", d);
                     }
                 }
+                */
                 var route = cola.makeEdgeBetween(source.innerBounds, target.innerBounds, 5);
                 return lineFunction([route.sourceIntersection, route.arrowStart]);
             })
@@ -1047,6 +1077,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         initialUnconstrainedIterations,
         initialUserConstraintIterations,
         initialAllConstraintsIterations,
-        gridSnapIterations)
-        .on("end", routeEdges);
+        gridSnapIterations);
+        // .on("end", routeEdges);
 }

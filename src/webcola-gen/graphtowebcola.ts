@@ -287,11 +287,11 @@ export class WebColaLayout {
 
       return groupsAndSubgroups;
 
-    }
+  }
 
 
-    // Returns true if group1 is a subgroup of group2
-    private isSubGroup(group1: string[], group2: string[]) {
+  // Returns true if group1 is a subgroup of group2
+  private isSubGroup(group1: string[], group2: string[]) {
     return group1.every((node) => group2.includes(node));
   }
 
