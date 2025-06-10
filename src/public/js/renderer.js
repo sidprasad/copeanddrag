@@ -7,6 +7,11 @@ const margin = 10;
 const dy_for_linespacing = 5; // Adjust for spacing between lines
 //////////
 
+/**
+ * Determines if an edge is an inferred edge by checking for the helper prefix.
+ * @param {Object} edge - The edge object to check
+ * @returns {boolean} True if the edge is an inferred edge, false otherwise
+ */
 function isInferredEdge(edge) {
 
     const helperPrefix = "_inferred_";
@@ -16,12 +21,22 @@ function isInferredEdge(edge) {
 
 }
 
+/**
+ * Determines if an edge is a group edge by checking for the group prefix.
+ * @param {Object} edge - The edge object to check
+ * @returns {boolean} True if the edge is a group edge, false otherwise
+ */
 function isGroupEdge(edge) {
     const groupPrefix = "_g_";
     return edge.id.startsWith(groupPrefix);
 }
 
-
+/**
+ * Obtains the groupOn and addToGroup indices from the edge ID.
+ * @param {string} edgeId - The edge ID in format "_g_{groupOnIndex}_{addToGroupIndex}_"
+ * @returns {{groupOnIndex: number, addToGroupIndex: number}} Object containing the parsed indices
+ * @throws {Error} If the edge ID doesn't match the expected pattern
+ */
 function getGroupOnAndAddToGroupIndices(edgeId) {
 
 
@@ -38,8 +53,12 @@ function getGroupOnAndAddToGroupIndices(edgeId) {
     }
 }
 
-
-
+/**
+ * Adjusts a point to remain on the perimeter of a rectangle with padding.
+ * @param {Object} point - The point to adjust
+ * @param {Object} rect - The rectangle bounds
+ * @returns {Object} The adjusted point with x and y coordinates
+ */
 function adjustPointToRectanglePerimeter(point, rect) {
     const { x, y, width, height } = rect;
     const padding = 3; // Padding in pixels
@@ -65,18 +84,31 @@ function adjustPointToRectanglePerimeter(point, rect) {
     return point;
 }
 
-// Function to generate a random offset along the path
+/**
+ * Generates a random offset value for positioning elements along a path.
+ * @returns {number} Random offset value between -10 and 10
+ */
 function getRandomOffsetAlongPath() {
     return (Math.random() - 0.5) * 20; // Random value between -10 and 10
 }
 
-
+/**
+ * Calculates the overlapping area between two bounding boxes.
+ * @param {Object} bbox1 - First bounding box
+ * @param {Object} bbox2 - Second bounding box
+ * @returns {number} The area of overlap between the two boxes
+ */
 function calculateOverlapArea(bbox1, bbox2) {
     const x_overlap = Math.max(0, Math.min(bbox1.x + bbox1.width, bbox2.x + bbox2.width) - Math.max(bbox1.x, bbox2.x));
     const y_overlap = Math.max(0, Math.min(bbox1.y + bbox1.height, bbox2.y + bbox2.height) - Math.max(bbox1.y, bbox2.y));
     return x_overlap * y_overlap;
 }
 
+/**
+ * Minimizes overlap between a label and other overlapping labels by finding the best position.
+ * @param {SVGTextElement} currentLabel - The label element to reposition
+ * @param {SVGTextElement[]} overlapsWith - Array of labels that overlap with the current label
+ */
 function minimizeOverlap(currentLabel, overlapsWith) {
     const originalBBox = currentLabel.getBBox();
     let minOverlapArea = Infinity;
@@ -114,8 +146,12 @@ function minimizeOverlap(currentLabel, overlapsWith) {
         .attr('text-anchor', bestPosition.textAnchor);
 }
 
-// Goes through the groups and finds ALL groups that contain the node
-
+/**
+ * Finds all groups that contain a given node, including nested groups.
+ * @param {Object[]} groups - Array of group objects
+ * @param {Object} node - The node to find containing groups for
+ * @returns {Object[]} Array of all groups that contain the node
+ */
 function getContainingGroups(groups, node) {
     const containingGroups = [];
 
@@ -134,7 +170,16 @@ function getContainingGroups(groups, node) {
 }
 
 
-
+/**
+ * Main function for the renderer. Sets up the layout for the graph using D3 and WebCola.
+ * @param {*} d3 
+ * @param {*} nodes 
+ * @param {*} edges 
+ * @param {*} constraints 
+ * @param {*} groups 
+ * @param {*} width 
+ * @param {*} height 
+ */
 function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
 
@@ -146,14 +191,15 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
 
     // Create a zoom behavior
+    function zoomed() {
+        d3.select(".zoomable").attr("transform", d3.event.transform);
+    }
+    
     var zoom = d3.zoom()
         .scaleExtent([0.5, 5]) // Set the zoom scale limits
         .on("zoom", zoomed);
 
-    function zoomed() {
-        d3.select(".zoomable").attr("transform", d3.event.transform);
-    }
-
+    // Helper function to get the index of a node by its ID
     function getNodeIndex(n) {
         const nodeId = typeof n === 'string' ? n : n.id;
         return nodes.findIndex(node => node.id === nodeId);
@@ -178,10 +224,13 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     const default_node_width = 100;
 
     ///// Check whats up TODO ////
+
+    // Adjust the graph by the scale factor
     let scaleFactorInput = document.getElementById("scaleFactor");
     let scaleFactor = scaleFactorInput ? parseFloat(scaleFactorInput.value) : 1;
 
     if (scaleFactorInput) {
+        // Add an event listener to the scale factor input to update the layout when the scale factor changes
         scaleFactorInput.addEventListener("change", function () {
             scaleFactor = parseFloat(scaleFactorInput.value) / 5;
 
@@ -206,8 +255,9 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .links(edges)
         .constraints(constraints)
         .groups(groups)
-        .groupCompactness(1e-3)
-        .symmetricDiffLinkLengths(min_sep + default_node_width);
+        .groupCompactness(1e-3) // The higer the number, the more compact the groups will be
+        // .symmetricDiffLinkLengths(min_sep + default_node_width);
+        .linkDistance(50)
 
 
     var lineFunction = d3.line()
@@ -215,9 +265,11 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .y(function (d) { return d.y; })
         .curve(d3.curveBasis);
 
+    
     var routeEdges = function () {
 
         try {
+            // Initialize WebCola's edge routing system with collision avoidance
             colaLayout.prepareEdgeRouting(margin / 3);
             console.log("Routing edges for the nth time", ++edgeRouteIdx);
 
@@ -236,7 +288,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 const edgeCount = allEdges.length;
                 let index = allEdges.findIndex(edge => edge.id == edgeid);
 
-                // Calculate curvature
+                // Calculate curvature: alternates positive/negative with increasing magnitude
+                // Formula creates symmetric curves on both sides of the straight line
                 let curvature = 0;
                 if (edgeCount > 1) {
                     curvature = (index % 2 === 0 ? 1 : -1) * (Math.floor(index / 2) + 1) * 0.15 * edgeCount;
@@ -244,14 +297,16 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 return curvature;
             }
 
-
-            link.attr("d", function (d, i) {
+            // Main edge drawing function - sets the SVG path 'd' attribute for each edge
+            link.attr("d", function (d, i) {  // d = a link between two nodes
 
                 let n = d.id;
 
                 try {
+                    // Get the initial route from WebCola's routing algorithm
                     var route = colaLayout.routeEdge(d);
 
+                    // SPECIAL CASE: Handle self-loops (edges from a node to itself)
                     if (d.source.id === d.target.id) {
                         const source = d.source;
 
@@ -288,11 +343,11 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                         ];
                     }
                 } catch (e) {
-
+                    // Handle errors when drawing edges
                     console.log("Error routing edge", d.id, `from ${d.source.id} to ${d.target.id}`);
                     console.error(e);
 
-
+                    // Create an alert message in the runtime errors section
                     let runtimeMessages = document.getElementById("runtime_messages");
                     let dismissableAlert = document.createElement("div");
                     dismissableAlert.className = "alert alert-danger alert-dismissible fade show";
@@ -308,10 +363,12 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     });
                     
                     runtimeMessages.appendChild(dismissableAlert);
+                    // Fallback: return a simple straight line between node centers
                     return lineFunction([{ x: d.source.x, y: d.source.y }, { x: d.target.x, y: d.target.y }]);
                 }
 
                 // This is a special case for group edges
+                // Draw edges to the closest point on the rectangle of the group
                 if (n.startsWith("_g_")) {
                     let source = d.source;
                     let target = d.target;
@@ -322,7 +379,12 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     // Get the groupOn and addToGroup indices
                     let { groupOnIndex, addToGroupIndex } = getGroupOnAndAddToGroupIndices(n);
 
-
+                    /**
+                     * Helper function to find the closest point on a rectangle to a given point.
+                     * @param {*} bounds 
+                     * @param {*} point 
+                     * @returns {{x: number, y: number}} - The closest point on the rectangle to the given point.
+                     */
                     function closestPointOnRect(bounds, point) {
                         // Destructure the rectangle bounds
                         const { x, y, X, Y } = bounds;
@@ -346,16 +408,18 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                         return { x: closestX, y: closestY };
                     }
 
+                    // Determine which end of the edge connects to a group based on the edge ID
                     // The target of the edge is the relevant group member.
                     let addTargetToGroup = groupOnIndex < addToGroupIndex;
                     // The source of the edge is the relevant group member.
                     let addSourceToGroup = groupOnIndex >= addToGroupIndex;
 
                     if (addTargetToGroup) {
-
+                        // Find the group that contains the target node and is keyed by the source
                         let potentialGroups = getContainingGroups(groups, target);
                         let targetGroup = potentialGroups.find(group => group.keyNode === sourceIndex);
                         if (targetGroup) {
+                            // Adjust the endpoint to the closest point on the group boundary
                             let newTargetCoords = closestPointOnRect(targetGroup.bounds, route[0]);
                             let currentTarget = route[route.length - 1];
                             currentTarget.x = newTargetCoords.x;
@@ -367,10 +431,11 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                         }
                     }
                     else if (addSourceToGroup) {
-
+                        // Find the group that contains the source node and is keyed by the target
                         let potentialGroups = getContainingGroups(groups, source);
                         let sourceGroup = potentialGroups.find(group => group.keyNode === targetIndex);
                         if (sourceGroup) {
+                            // Adjust the startpoint to the closest point on the group boundary
                             let newSourceCoords = closestPointOnRect(sourceGroup.bounds.inflate(-1), route[route.length - 1]);
                             let currentSource = route[0];
                             currentSource.x = newSourceCoords.x;
@@ -387,13 +452,14 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     }
 
                     // Not ideal but we dont want odd curves.
+                    // Simplify group edge routes to avoid complex curves
                     if (route.length > 2) {
                         route.splice(1, route.length - 2);
                     }
                     return lineFunction(route);
                 }
 
-
+                // Find all parallel edges between the same two nodes (bidirectional)
                 // Get all edges between the two nodes, regardless of direction
                 const allEdgesBetweenSourceAndTarget = edges.filter(edge => {
                     return (edge.source.id == d.source.id && edge.target.id == d.target.id) ||
@@ -401,6 +467,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 });
 
 
+                // Ensure we have at least 3 points for proper curve control
                 // If there are only two points in the route, get the midpoint of the route and add it to the route
                 if (route.length === 2) {
                     const midpoint = {
@@ -410,9 +477,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     route.splice(1, 0, midpoint);
                 }
 
-
-
-
+                // Calculate edge direction and distance for offset calculations
                 // Determine the direction of the edge
                 var dx = route[1].x - route[0].x;
                 var dy = route[1].y - route[0].y;
@@ -421,14 +486,17 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
 
 
+                // PARALLEL EDGE SEPARATION: Offset multiple edges to prevent overlap
                 /** Here, we do some point of incidence adjustment IF the number of edges between the same nodes is greater than 1 */
                 if (allEdgesBetweenSourceAndTarget.length > 1) {
                     const minDistance = 10; // Minimum distance between edges (divided by 2)
                     const edgeIndex = allEdgesBetweenSourceAndTarget.findIndex(edge => edge.id === d.id);
 
+                    // Calculate alternating offsets: positive/negative with increasing magnitude
                     // Start with a small offset and grow it based on the edge index. But start with min offset of 5
                     const offset = (edgeIndex % 2 === 0 ? 1 : -1) * (Math.floor(edgeIndex / 2) + 1) * minDistance;
 
+                    // Apply perpendicular offset based on edge direction
                     // Now we should apply the offset to the start and end points of the route, depending on the angle.
 
                     if (route.length > 1) {
@@ -460,19 +528,23 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                         let direction = getDominantDirection(angle);
 
 
+                        // Apply offset perpendicular to the edge direction
                         // As a result, offset along the y axis.
                         if (direction === 'right' || direction === 'left') {
+                            // For horizontal edges, offset vertically
                             route[startIndex].y += offset;
                             route[endIndex].y += offset;
                         }
                         // else if direction is up or down, offset along the x axis
                         else if (direction === 'up' || direction === 'down') {
+                            // For vertical edges, offset horizontally
                             route[startIndex].x += offset;
                             route[endIndex].x += offset;
                         }
 
                         // Ignore the other directions, if they do crop up.
 
+                        // Ensure connection points remain on node perimeters after offset
                         // And ensure it stays on the rectangle perimeter
                         console.log("Adjusting points to rectangle perimeter");
                         route[startIndex] = adjustPointToRectanglePerimeter(route[startIndex], d.source.innerBounds);
@@ -482,14 +554,17 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 }
 
 
+                // Apply visual curvature to separate multiple edges
                 // Calculate the curvature for the current edge
                 var curvature = calculateCurvature(edges, d.source.id, d.target.id, d.id);
+                // Apply curvature only to intermediate control points (not endpoints)
                 //Apply curvature to the control points (but this does not help with the direction)
                 route.forEach(function (point, index) {
 
-
+                    // Only modify control points, not start/end points
                     if (index > 0 && index < route.length - 1 && curvature !== 0) {
 
+                        // Calculate perpendicular offset based on edge direction and curvature
                         // Adjust the control points based on the direction
                         var offsetX = curvature * Math.abs(Math.sin(angle)) * distance;
                         var offsetY = curvature * Math.abs(Math.cos(angle)) * distance;
@@ -499,9 +574,11 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     }
                 });
 
+                // Convert route points to SVG path string using D3's line function
                 return lineFunction(route);
             });
 
+            // LABEL OVERLAP DETECTION: Check if two label bounding boxes intersect
             // Function to check for overlap
             function isOverlapping(label1, label2) {
                 const bbox1 = label1.getBBox();
@@ -512,32 +589,37 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     bbox2.y + bbox2.height < bbox1.y);
             }
 
-
+            // LABEL POSITIONING: Place labels at edge midpoints and resolve overlaps
             // Update label positions after routing edges
             linkGroups.select("text.linklabel")
                 .attr("x", function (d) {
+                    // Find the corresponding path element and calculate its midpoint
                     const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
                     const pathLength = pathElement.getTotalLength();
                     const midpoint = pathElement.getPointAtLength(pathLength / 2);
                     return midpoint.x;
                 })
                 .attr("y", function (d) {
+                    // Find the corresponding path element and calculate its midpoint
                     const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
                     const pathLength = pathElement.getTotalLength();
                     const midpoint = pathElement.getPointAtLength(pathLength / 2);
                     return midpoint.y;
                 })
                 .attr("text-anchor", "end")
+                // Check each label for overlaps and adjust positioning
                 .each(function (d, i, nodes) {
                     const currentLabel = this;
                     const overlapsWith = [];
 
+                    // Find all labels that overlap with the current one
                     d3.selectAll("text.linklabel").each(function () {
                         if (this !== currentLabel && isOverlapping(currentLabel, this)) {
                             overlapsWith.push(this);
                         }
                     });
 
+                    // Apply overlap minimization if conflicts exist
                     if (overlapsWith.length > 0) {
                         minimizeOverlap(currentLabel, overlapsWith);
                     }
@@ -572,11 +654,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
             // Get a set of all relNames
             const relNames = new Set(edges.map(edge => edge.relName));
-            // For each relName, add a LI element to the ul with id "relationList", with the relName as text and hover event to highlight the relation,
-            // also a mouseout event to remove the highlight
 
-
-            // Maybe these should be checkboxes instead of just text?
+            // TODO: Maybe these should be checkboxes instead of just text?
             // I wory about the removal of the highlight on uncheck
             const relationList = d3.select("#relationList");
             relationList.selectAll("li")
@@ -601,7 +680,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         }
         finally {
 
-
+            // PERFORMANCE TRACKING: Record timing data for optimization
             // Only record timing data for the first edge route
             if (edgeRouteIdx === 1) {
                 // Stop measuring client-side execution time
