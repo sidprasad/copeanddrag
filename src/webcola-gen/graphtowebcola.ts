@@ -2,6 +2,7 @@ import { Node } from 'webcola';
 import * as dagre from 'dagre';
 import { InstanceLayout, LayoutNode, LayoutEdge, LayoutConstraint, LayoutGroup, LeftConstraint, TopConstraint, AlignmentConstraint, isLeftConstraint, isTopConstraint, isAlignmentConstraint } from '../layout/interfaces';
 import { LayoutInstance } from '../layout/layoutinstance';
+import isEqual from 'lodash.isequal';
 
 
 
@@ -85,8 +86,16 @@ export class WebColaLayout {
     this.groupDefinitions = this.determineGroups(instanceLayout.groups);
 
 
-    this.colaConstraints = instanceLayout.constraints.map(constraint => this.toColaConstraint(constraint));
-
+    // Can we de-dup this.ColaConstraints?
+    let uniqueConstraints: any[] = [];
+    instanceLayout.constraints
+      .map(constraint => this.toColaConstraint(constraint))
+      .forEach(c => {
+        if (!uniqueConstraints.some(existing => isEqual(existing, c))) {
+          uniqueConstraints.push(c);
+        }
+      });
+    this.colaConstraints = uniqueConstraints;
 
     //// IF THERE ARE NO CONSTRAINTS, THEN FIX THE NODES TO WHATEVER
     // STERLING / DAGRE GIVES US. OTHERWISE JUST USE THOSE
