@@ -86,16 +86,7 @@ export class WebColaLayout {
     this.groupDefinitions = this.determineGroups(instanceLayout.groups);
 
 
-    // Can we de-dup this.ColaConstraints?
-    let uniqueConstraints: any[] = [];
-    instanceLayout.constraints
-      .map(constraint => this.toColaConstraint(constraint))
-      .forEach(c => {
-        if (!uniqueConstraints.some(existing => isEqual(existing, c))) {
-          uniqueConstraints.push(c);
-        }
-      });
-    this.colaConstraints = uniqueConstraints;
+    this.colaConstraints = this.layoutConstraintsToColaConstraints(instanceLayout.constraints);
 
     //// IF THERE ARE NO CONSTRAINTS, THEN FIX THE NODES TO WHATEVER
     // STERLING / DAGRE GIVES US. OTHERWISE JUST USE THOSE
@@ -238,34 +229,110 @@ export class WebColaLayout {
     }
 
     if (isAlignmentConstraint(constraint)) {
+       // Deprecated, we should not get here!
+      throw new Error("Alignment constraints are now dealt with en-masse.");
 
-      let gap = Math.floor(Math.random() * 2); // a random number between 0 and 1
-      // This is a hack to potentially ameliorate cola stability issues
-      // causing nodes to be placed on top of each other.
+     
+
+      // let gap = Math.floor(Math.random() * 2); // a random number between 0 and 1
+      // // This is a hack to potentially ameliorate cola stability issues
+      // // causing nodes to be placed on top of each other.
 
 
-      // Is this right or do I have to switch axes. Check.
-      const alignmentConstraint = {
-        type: "separation",
-        axis: constraint.axis,
-        left: this.getNodeIndex(constraint.node1.id),
-        right: this.getNodeIndex(constraint.node2.id),
-        gap: 0, 
-        'equality': true
-      }
+      // // Is this right or do I have to switch axes. Check.
+      // const alignmentConstraint = {
+      //   type: "separation",
+      //   axis: constraint.axis,
+      //   left: this.getNodeIndex(constraint.node1.id),
+      //   right: this.getNodeIndex(constraint.node2.id),
+      //   gap: 0, 
+      //   'equality': true
+      // }
       
-      // FInd the two cola nodes that are being aligned
-      let node1 = this.colaNodes[this.getNodeIndex(constraint.node1.id)];
-      let node2 = this.colaNodes[this.getNodeIndex(constraint.node2.id)];
-      //      // Set fixed to 0 here.
-      node1.fixed = 0;
-      node2.fixed = 0;
+      // // FInd the two cola nodes that are being aligned
+      // let node1 = this.colaNodes[this.getNodeIndex(constraint.node1.id)];
+      // let node2 = this.colaNodes[this.getNodeIndex(constraint.node2.id)];
+      // //      // Set fixed to 0 here.
+      // node1.fixed = 0;
+      // node2.fixed = 0;
       
-      return alignmentConstraint;
+      // return alignmentConstraint;
 
     }
     throw new Error("Constraint type not recognized");
   }
+
+
+  private layoutConstraintsToColaConstraints(constraints: LayoutConstraint[]): any[] {
+    // --- 1. Aggregate alignment constraints ---
+    type Axis = 'x' | 'y';
+    // Union-find for each axis
+    const uf: Record<Axis, Record<string, string>> = { x: {}, y: {} };
+
+    function find(axis: Axis, x: string): string {
+        if (uf[axis][x] !== x) uf[axis][x] = find(axis, uf[axis][x]);
+        return uf[axis][x];
+    }
+    function union(axis: Axis, x: string, y: string) {
+        uf[axis][find(axis, x)] = find(axis, y);
+    }
+
+    // Initialize union-find
+    constraints.forEach(c => {
+        if (isAlignmentConstraint(c)) {
+            const axis = c.axis as Axis;
+            uf[axis][c.node1.id] = c.node1.id;
+            uf[axis][c.node2.id] = c.node2.id;
+        }
+    });
+    // Union aligned nodes
+    constraints.forEach(c => {
+        if (isAlignmentConstraint(c)) {
+            const axis = c.axis as Axis;
+            union(axis, c.node1.id, c.node2.id);
+        }
+    });
+
+    // Collect equivalence classes
+    const alignmentGroups: Record<Axis, Record<string, Set<string>>> = { x: {}, y: {} };
+    constraints.forEach(c => {
+        if (isAlignmentConstraint(c)) {
+            const axis = c.axis as Axis;
+            const root1 = find(axis, c.node1.id);
+            const root2 = find(axis, c.node2.id);
+            if (!alignmentGroups[axis][root1]) alignmentGroups[axis][root1] = new Set();
+            if (!alignmentGroups[axis][root2]) alignmentGroups[axis][root2] = new Set();
+            alignmentGroups[axis][root1].add(c.node1.id);
+            alignmentGroups[axis][root1].add(c.node2.id);
+            alignmentGroups[axis][root2].add(c.node1.id);
+            alignmentGroups[axis][root2].add(c.node2.id);
+        }
+    });
+
+    // Build cola alignment constraints
+    const colaAlignments: any[] = [];
+    (['x', 'y'] as Axis[]).forEach(axis => {
+        Object.values(alignmentGroups[axis]).forEach(nodeSet => {
+            if (nodeSet.size > 1) {
+                colaAlignments.push({
+                    type: "alignment",
+                    axis,
+                    offsets: Array.from(nodeSet).map(nodeId => ({
+                        node: this.getNodeIndex(nodeId),
+                        offset: 0
+                    }))
+                });
+            }
+        });
+    });
+
+    // --- 2. Convert non-alignment constraints ---
+    const colaOthers = constraints
+        .filter(c => !isAlignmentConstraint(c))
+        .map(c => this.toColaConstraint(c));
+
+    return [...colaAlignments, ...colaOthers];
+}
 
 
   private determineGroups(groups: LayoutGroup[]): { leaves: number[], padding: number, name: string, groups: number[] }[] {
