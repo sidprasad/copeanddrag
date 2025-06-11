@@ -2,7 +2,7 @@ import { Graph, Edge } from 'graphlib';
 import { AlloyInstance, getAtomType, getInstanceTypes } from '../alloy-instance';
 import { isBuiltin, AlloyType } from '../alloy-instance/src/type';
 import { applyProjections } from '../alloy-instance/src/projection';
-
+import {isAlignmentConstraint, isLeftConstraint, isTopConstraint} from './interfaces';
 
 
 
@@ -592,8 +592,113 @@ export class LayoutInstance {
             throw new Error(finalLayoutError);
         }
 
+        // And now simplify the constraints to remove redundant alignment constraints.
+        layout.constraints = this.simplifyConstraints(layout.constraints);
+
         return { layout, projectionData };
     }
+
+
+    /**
+     * Simplifies the set of layout constraints by deduplicating alignment constraints.
+     *
+     * This method processes a list of layout constraints and reduces redundant alignment constraints
+     * (specifically, those that align nodes along the same axis, such as "x" or "y"). It does so by
+     * constructing a minimal set of alignment constraints that still ensure all required alignments,
+     * using a spanning forest approach for each axis. This helps to avoid over-constraining the layout
+     * solver and improves performance.
+     *
+     * - Alignment constraints are separated by axis ("x" and "y").
+     * - For each axis, an undirected graph is built where nodes are connected if they are aligned.
+     * - A minimal set of constraints is computed by traversing the graph (BFS), ensuring all nodes
+     *   that must be aligned are connected, but without redundant constraints.
+     * - All non-alignment constraints are preserved as-is.
+     *
+     * @param constraints The array of layout constraints to simplify.
+     * @returns A new array of layout constraints with redundant alignment constraints removed.
+     */
+    simplifyConstraints(constraints: LayoutConstraint[]): LayoutConstraint[] {    
+        // Separate constraints by type using isAlignmentConstraint
+        const alignmentX: AlignmentConstraint[] = [];
+        const alignmentY: AlignmentConstraint[] = [];
+        const topConstraints: LayoutConstraint[] = [];
+        const leftConstraints: LayoutConstraint[] = [];
+
+        for (const c of constraints) {
+            if (isAlignmentConstraint(c)) {
+                if (c.axis === "x") alignmentX.push(c);
+                else if (c.axis === "y") alignmentY.push(c);
+            } else if (isTopConstraint(c)) {
+                topConstraints.push(c);
+            }
+            else if (isLeftConstraint(c)) {
+                leftConstraints.push(c);
+            }
+        }
+
+        // Helper to build minimal alignment constraints for an axis
+        function minimalAlignments(alignment: AlignmentConstraint[]): AlignmentConstraint[] {
+            const nodeMap = new Map<string, Set<string>>();
+            alignment.forEach(({ node1, node2 }) => {
+                if (!nodeMap.has(node1.id)) nodeMap.set(node1.id, new Set());
+                if (!nodeMap.has(node2.id)) nodeMap.set(node2.id, new Set());
+                nodeMap.get(node1.id)!.add(node2.id);
+                nodeMap.get(node2.id)!.add(node1.id);
+            });
+
+            const visited = new Set<string>();
+            const result: AlignmentConstraint[] = [];
+            for (const start of nodeMap.keys()) {
+                if (visited.has(start)) continue;
+                const queue = [start];
+                visited.add(start);
+                while (queue.length) {
+                    const node = queue.shift()!;
+                    for (const neighbor of nodeMap.get(node)!) {
+                        if (!visited.has(neighbor)) {
+                            const orig = alignment.find(
+                                c =>
+                                    (c.node1.id === node && c.node2.id === neighbor) ||
+                                    (c.node1.id === neighbor && c.node2.id === node)
+                            );
+                            if (orig) result.push(orig);
+                            visited.add(neighbor);
+                            queue.push(neighbor);
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+
+        // Usage:
+        const minimizedTopConstraints = minimizeDirectedConstraints(
+            topConstraints as TopConstraint[],
+            c => c.top.id,
+            c => c.bottom.id
+        );
+
+        const minimizedLeftConstraints = minimizeDirectedConstraints(
+            leftConstraints as LeftConstraint[],
+            c => c.left.id,
+            c => c.right.id
+        );
+
+        const minimizedXAlignments = minimalAlignments(alignmentX);
+        const minimizedYAlignments = minimalAlignments(alignmentY);
+
+
+
+        return [
+            ...minimizedTopConstraints,
+            ...minimizedLeftConstraints,
+            ...minimizedXAlignments,
+            ...minimizedYAlignments
+        ];
+    }
+
+    
+
 
     /**
      * Applies the cyclic orientation constraints to the layout nodes.
@@ -1149,3 +1254,45 @@ export class LayoutInstance {
         });
     }
 }
+
+
+
+function minimizeDirectedConstraints<T>(
+    constraints: T[],
+    getSource: (c: T) => string,
+    getTarget: (c: T) => string
+): T[] {
+    // Build adjacency list
+    const adj = new Map<string, Set<string>>();
+    constraints.forEach((c) => {
+        const src = getSource(c);
+        const tgt = getTarget(c);
+        if (!adj.has(src)) adj.set(src, new Set());
+        adj.get(src)!.add(tgt);
+    });
+
+    // Helper: DFS to check if there's a path from src to tgt (excluding direct edge)
+    function hasPath(src: string, tgt: string, skip: [string, string]): boolean {
+        const stack = [src];
+        const visited = new Set<string>();
+        while (stack.length) {
+            const node = stack.pop()!;
+            if (node === tgt) return true;
+            if (visited.has(node)) continue;
+            visited.add(node);
+            for (const neighbor of adj.get(node) || []) {
+                if (node === skip[0] && neighbor === skip[1]) continue; // skip direct edge
+                stack.push(neighbor);
+            }
+        }
+        return false;
+    }
+
+    // Only keep edges that are not implied by transitivity
+    return constraints.filter((c) => {
+        const src = getSource(c);
+        const tgt = getTarget(c);
+        return !hasPath(src, tgt, [src, tgt]);
+    });
+}
+
