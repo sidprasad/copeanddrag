@@ -264,10 +264,27 @@ export class WebColaLayout {
 
 
   private layoutConstraintsToColaConstraints(constraints: LayoutConstraint[]): any[] {
-    // --- 1. Aggregate alignment constraints ---
     type Axis = 'x' | 'y';
-    // Union-find for each axis
+    // 1. Collect all node IDs
+    const allNodeIds = new Set<string>();
+    constraints.forEach(c => {
+        if (isAlignmentConstraint(c)) {
+            allNodeIds.add(c.node1.id);
+            allNodeIds.add(c.node2.id);
+        } else if (isLeftConstraint(c)) {
+            allNodeIds.add(c.left.id);
+            allNodeIds.add(c.right.id);
+        } else if (isTopConstraint(c)) {
+            allNodeIds.add(c.top.id);
+            allNodeIds.add(c.bottom.id);
+        }
+    });
+
+    // 2. Union-find for each axis
     const uf: Record<Axis, Record<string, string>> = { x: {}, y: {} };
+    (['x', 'y'] as Axis[]).forEach(axis => {
+        allNodeIds.forEach(id => { uf[axis][id] = id; });
+    });
 
     function find(axis: Axis, x: string): string {
         if (uf[axis][x] !== x) uf[axis][x] = find(axis, uf[axis][x]);
@@ -277,15 +294,7 @@ export class WebColaLayout {
         uf[axis][find(axis, x)] = find(axis, y);
     }
 
-    // Initialize union-find
-    constraints.forEach(c => {
-        if (isAlignmentConstraint(c)) {
-            const axis = c.axis as Axis;
-            uf[axis][c.node1.id] = c.node1.id;
-            uf[axis][c.node2.id] = c.node2.id;
-        }
-    });
-    // Union aligned nodes
+    // 3. Union aligned nodes
     constraints.forEach(c => {
         if (isAlignmentConstraint(c)) {
             const axis = c.axis as Axis;
@@ -293,42 +302,109 @@ export class WebColaLayout {
         }
     });
 
-    // Collect equivalence classes
+    // 4. Build alignment groups (equivalence classes)
     const alignmentGroups: Record<Axis, Record<string, Set<string>>> = { x: {}, y: {} };
-    constraints.forEach(c => {
-        if (isAlignmentConstraint(c)) {
-            const axis = c.axis as Axis;
-            const root1 = find(axis, c.node1.id);
-            const root2 = find(axis, c.node2.id);
-            if (!alignmentGroups[axis][root1]) alignmentGroups[axis][root1] = new Set();
-            if (!alignmentGroups[axis][root2]) alignmentGroups[axis][root2] = new Set();
-            alignmentGroups[axis][root1].add(c.node1.id);
-            alignmentGroups[axis][root1].add(c.node2.id);
-            alignmentGroups[axis][root2].add(c.node1.id);
-            alignmentGroups[axis][root2].add(c.node2.id);
-        }
+    (['x', 'y'] as Axis[]).forEach(axis => {
+        allNodeIds.forEach(id => {
+            const root = find(axis, id);
+            if (!alignmentGroups[axis][root]) alignmentGroups[axis][root] = new Set();
+            alignmentGroups[axis][root].add(id);
+        });
     });
 
-    // Build cola alignment constraints
+    // Helper to order nodes in an alignment group
+    function orderAlignmentGroup(
+        nodeSet: Set<string>,
+        constraints: LayoutConstraint[],
+        axis: Axis
+    ): string[] {
+        // Build adjacency list for the relevant axis
+        const adj = new Map<string, Set<string>>();
+        nodeSet.forEach(id => adj.set(id, new Set()));
+
+        if (axis === 'y') {
+            // Use left constraints for left-to-right order
+            constraints.forEach(c => {
+                if (isLeftConstraint(c) && nodeSet.has(c.left.id) && nodeSet.has(c.right.id)) {
+                    adj.get(c.left.id)!.add(c.right.id);
+                }
+            });
+        } else if (axis === 'x') {
+            // Use top constraints for top-to-bottom order
+            constraints.forEach(c => {
+                if (isTopConstraint(c) && nodeSet.has(c.top.id) && nodeSet.has(c.bottom.id)) {
+                    adj.get(c.top.id)!.add(c.bottom.id);
+                }
+            });
+        }
+
+        // Kahn's algorithm for topological sort
+        const inDegree = new Map<string, number>();
+        nodeSet.forEach(id => inDegree.set(id, 0));
+        adj.forEach((neighbors, id) => {
+            neighbors.forEach(n => inDegree.set(n, (inDegree.get(n) || 0) + 1));
+        });
+
+        const queue = Array.from(nodeSet).filter(id => inDegree.get(id) === 0);
+        const result: string[] = [];
+        while (queue.length) {
+            const node = queue.shift()!;
+            result.push(node);
+            adj.get(node)!.forEach(neighbor => {
+                inDegree.set(neighbor, inDegree.get(neighbor)! - 1);
+                if (inDegree.get(neighbor) === 0) queue.push(neighbor);
+            });
+        }
+        // If cycle or incomplete, fallback to original order
+        if (result.length !== nodeSet.size) return Array.from(nodeSet);
+
+        // Ascending along x (left-to-right): leave as is for axis 'y'
+        // Descending along y (top-to-bottom): reverse for axis 'x'
+        if (axis === 'x') {
+            return result.reverse();
+        }
+        return result;
+    }
+
+    // 5. Build cola alignment constraints (ORDERED)
     const colaAlignments: any[] = [];
     (['x', 'y'] as Axis[]).forEach(axis => {
         Object.values(alignmentGroups[axis]).forEach(nodeSet => {
             if (nodeSet.size > 1) {
+                const ordered = orderAlignmentGroup(nodeSet, constraints, axis);
                 colaAlignments.push({
                     type: "alignment",
                     axis,
-                    offsets: Array.from(nodeSet).map(nodeId => ({
+                    offsets: ordered.map(nodeId => ({
                         node: this.getNodeIndex(nodeId),
                         offset: 0
                     }))
                 });
+                // Optional: Debug print
+                console.log(`Ordered alignment group on ${axis}:`, ordered);
             }
         });
     });
 
-    // --- 2. Convert non-alignment constraints ---
+    // 6. Filter out separation constraints between nodes in the same alignment group (on that axis)
+    function inSameAlignmentGroup(axis: Axis, id1: string, id2: string): boolean {
+        return find(axis, id1) === find(axis, id2);
+    }
+
+
+    // TODO: THis is CLOSER< BUT NOT QUITE!!!!
+    // DO WE FILTER THESE OUT??
+    // THE BUG MAY BE HERE!!!
     const colaOthers = constraints
-        .filter(c => !isAlignmentConstraint(c))
+        .filter(c => {
+            if (isLeftConstraint(c)) {
+                return !inSameAlignmentGroup('x', c.left.id, c.right.id);
+            }
+            if (isTopConstraint(c)) {
+                return !inSameAlignmentGroup('y', c.top.id, c.bottom.id);
+            }
+            return !isAlignmentConstraint(c);
+        })
         .map(c => this.toColaConstraint(c));
 
     return [...colaAlignments, ...colaOthers];
