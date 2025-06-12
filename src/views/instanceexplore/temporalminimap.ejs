@@ -1,6 +1,6 @@
 <% if (num_instances > 1) { %>
-<script type="module">
-    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script >
     const config = {
         startOnLoad: true,
         flowchart: { useMaxWidth: false, htmlLabels: true, curve: 'cardinal' }, /* Disable shrinking */
@@ -14,71 +14,49 @@
         // Now submit the form
         document.getElementById('controlsForm').submit();
     };
+
+
+
 </script>
 
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const toggleDrawerButton = document.getElementById('toggleDrawer');
-        const closeDrawerButton = document.getElementById('closeDrawer');
-        const drawer = document.getElementById('mermaidDrawer');
-
-        // Open the drawer
-        toggleDrawerButton.addEventListener('click', function () {
-            drawer.classList.add('open'); // Add the "open" class to slide the drawer in
-        });
-
-        // Close the drawer
-        closeDrawerButton.addEventListener('click', function () {
-            drawer.classList.remove('open'); // Remove the "open" class to slide the drawer out
-        });
-    });
-</script>
 
 
 <div class="container">
 
-    <div class="row">
-        <div class="col">
-            <h3 class="justify-content lead">
-                <div class="container">
-                    <p class="text-muted">Current State <%= instanceNumber %> </p>
-                </div>
-                <button class="btn btn-outline-dark" type="button" id="toggleDrawer">
-                    Temporal Map 
-                </button>
-            </h3>
+    <div class="row mb-2">
+        <div class="btn-group" role="group" aria-label="Instance navigation">
+            <button
+                id="previnstance"
+                <%= instanceNumber <= 0 ? "disabled" : "" %>
+                onclick="if(<%= instanceNumber %> > 0) window.stateclick(<%= instanceNumber - 1 %>)"
+            >&lt;&lt;</button>
+            <button
+                id="nextinstance"
+                <%= instanceNumber >= num_instances - 1 ? "disabled" : "" %>
+                onclick="if(<%= instanceNumber %> < <%= num_instances - 1 %>) window.stateclick(<%= instanceNumber + 1 %>)"
+            >&gt;&gt;</button>
         </div>
     </div>
 
-    <!-- Sliding Drawer -->
-    <div id="mermaidDrawer" class="drawer">
-        <div class="drawer-header">
-
-            <button class="btn btn-sm btn-outline-danger" id="closeDrawer">Close</button>
-        </div>
-        <h4> Temporal Trace Map </h4>
-        <p class="text-muted">Click on any trace state to view it.</p>
-        <div class="drawer-content">
-            <div class="mermaid-container">
-                <div class="mermaid" title="Click on any trace state to see its graph.">
-                    graph LR;
-                    <% for (var i = 0; i < num_instances; i++) { %>
-                        <% if (i === instanceNumber) { %>
-                            A<%= i %>((<%= i %>)):::highlight;
-                        <% } else { %>
-                            A<%= i %>((<%= i %>));
-                        <% } %>
-                        <% if (i < num_instances - 1) { %>
-                            A<%= i %> --> A<%= i + 1 %>;
-                        <% } %>
-                        click A<%= i %> call stateclick("<%= i %>");
+    <div class="row">
+        <div class="mermaid-container">
+            <div class="mermaid" title="Click on any trace state to see its graph.">
+                graph LR;
+                <% for (var i = 0; i < num_instances; i++) { %>
+                    <% if (i === instanceNumber) { %>
+                        A<%= i %>((<%= i %>)):::highlight;
+                    <% } else { %>
+                        A<%= i %>((<%= i %>));
                     <% } %>
-                    <% if (loopBack >= 0 && loopBack < num_instances) { %>
-                        A<%= num_instances - 1 %> --> A<%= loopBack %>;
+                    <% if (i < num_instances - 1) { %>
+                        A<%= i %> --> A<%= i + 1 %>;
                     <% } %>
-                    classDef highlight fill:#f96,stroke:#333,stroke-width:2px;
-                </div>
+                    click A<%= i %> call stateclick("<%= i %>");
+                <% } %>
+                <% if (loopBack >= 0 && loopBack < num_instances) { %>
+                    A<%= num_instances - 1 %> --> A<%= loopBack %>;
+                <% } %>
+                classDef highlight fill:#f96,stroke:#333,stroke-width:2px;
             </div>
         </div>
     </div>
@@ -86,50 +64,18 @@
 <% } %>
 
 <style>
-    /* Sliding Drawer Styles */
-    .drawer {
-        position: fixed;
-        top: 10vh; /* Start 10% of the viewport height from the top */
-        left: 0; /* Open from the left */
-        width: 70vw; /* Fixed width: 70% of the viewport width */
-        height: 90vh; /* Adjust height to fill the remaining 90% of the viewport */
-        background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent white background */
-        z-index: 1050; /* Ensure it overlays everything else */
-        transform: translateX(-100%); /* Initially hidden (off-screen to the left) */
-        transition: transform 0.3s ease-in-out; /* Smooth slide-in/out transition */
-        display: flex;
-        flex-direction: column;
-    }
-
-    .drawer.open {
-        transform: translateX(0); /* Slide into view */
-    }
-
-    .drawer-header {
-        padding: 10px;
-        background-color: #f8f9fa; /* Light gray header */
-        border-bottom: 1px solid #ddd;
-        display: flex;
-        justify-content: flex-end;
-    }
-
-    .drawer-content {
-        flex: 1;
-        overflow-y: auto; /* Enable vertical scrolling for large content */
-        overflow-x: auto; /* Enable horizontal scrolling for wide content */
-        padding: 20px;
-    }
-
     .mermaid-container {
-        overflow-x: auto; /* Enable horizontal scrolling */
-        overflow-y: auto; /* Enable vertical scrolling */
-        white-space: nowrap; /* Prevent Mermaid graph from wrapping */
+        overflow-x: auto;      /* Enable horizontal scrolling */
+        overflow-y: hidden;    /* Hide vertical scroll if not needed */
+        white-space: nowrap;   /* Prevent wrapping */
+        width: 100%;           /* Take full width of parent */
     }
 
     .mermaid {
-        display: inline-block; /* Ensure the graph respects horizontal scrolling */
-        width: auto; /* Allow the graph to grow horizontally */
-        height: auto; /* Allow the graph to grow vertically */
+        display: inline-block; /* Prevent shrinking */
+        min-width: max-content; /* Ensure graph is as wide as needed */
+        width: auto;
+        height: auto;
     }
 </style>
 
