@@ -190,6 +190,21 @@
                 writeToYAMLEditor(); // Sync structured editor data to YAML editor
             }
 
+
+
+            // I also want the value of the scale factor to be read.
+            const scaleFactorInput = document.getElementById('scaleFactor');
+            let scaleFactorValue = 5; // Default to 5
+            if (scaleFactorInput) {
+                scaleFactorValue = scaleFactorInput.value || 5;
+            }
+            const scaleFactorHiddenInput = document.createElement('input');
+            scaleFactorHiddenInput.type = 'hidden';
+            scaleFactorHiddenInput.name = 'scaleFactor';
+            scaleFactorHiddenInput.value = scaleFactorValue;
+            form.appendChild(scaleFactorHiddenInput);
+
+
             form.submit(); // Submit the form
         });
 
