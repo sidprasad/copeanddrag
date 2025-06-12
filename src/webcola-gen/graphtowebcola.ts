@@ -367,6 +367,8 @@ export class WebColaLayout {
     }
 
     // 5. Build cola alignment constraints (ORDERED)
+    const gap = 100; // or compute based on node size, or pass as parameter
+
     const colaAlignments: any[] = [];
     (['x', 'y'] as Axis[]).forEach(axis => {
         Object.values(alignmentGroups[axis]).forEach(nodeSet => {
@@ -375,13 +377,11 @@ export class WebColaLayout {
                 colaAlignments.push({
                     type: "alignment",
                     axis,
-                    offsets: ordered.map(nodeId => ({
+                    offsets: ordered.map((nodeId, i) => ({
                         node: this.getNodeIndex(nodeId),
                         offset: 0
                     }))
                 });
-                // Optional: Debug print
-                console.log(`Ordered alignment group on ${axis}:`, ordered);
             }
         });
     });
@@ -398,12 +398,25 @@ export class WebColaLayout {
     const colaOthers = constraints
         .filter(c => {
             if (isLeftConstraint(c)) {
-                return !inSameAlignmentGroup('x', c.left.id, c.right.id);
+                if (inSameAlignmentGroup('x', c.left.id, c.right.id)) {
+                    console.log('Filtered out left constraint (same x-alignment group):', c);
+                    return false;
+                }
+                return true;
             }
             if (isTopConstraint(c)) {
-                return !inSameAlignmentGroup('y', c.top.id, c.bottom.id);
+                if (inSameAlignmentGroup('y', c.top.id, c.bottom.id)) {
+                    console.log('Filtered out top constraint (same y-alignment group):', c);
+                    return false;
+                }
+                return true;
             }
-            return !isAlignmentConstraint(c);
+            if (isAlignmentConstraint(c)) {
+                // Alignment constraints are handled en-masse
+               // console.log('Filtered out alignment constraint (handled en-masse):', c);
+                return false;
+            }
+            return true;
         })
         .map(c => this.toColaConstraint(c));
 

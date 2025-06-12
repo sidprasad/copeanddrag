@@ -687,6 +687,12 @@ export class LayoutInstance {
         const minimizedXAlignments = minimalAlignments(alignmentX);
         const minimizedYAlignments = minimalAlignments(alignmentY);
 
+        console.log("Minimized constraints:", {
+            minimizedTopConstraints,
+            minimizedLeftConstraints,
+            minimizedXAlignments,
+            minimizedYAlignments
+        });
 
 
         return [
