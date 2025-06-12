@@ -371,8 +371,22 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             var edgeData = edges[index];
             
             // Calculate midpoint of the route
-            var midIndex = Math.floor(route.length / 2);
-            var midpoint = route[midIndex];
+            let combinedSegment = [];
+            let direction = []; // 'L' for left, 'R' for right, 'U' for up, 'D' for down
+            route.forEach(function(segment) {
+                combinedSegment = combinedSegment.concat(segment);
+            });
+            console.log("Combined segment", combinedSegment);
+            const midpointIndex = Math.floor(combinedSegment.length / 2); // NOTE: Length should be even
+            const midpoint = {
+                x: (combinedSegment[midpointIndex - 1].x + combinedSegment[midpointIndex].x) / 2,
+                y: (combinedSegment[midpointIndex - 1].y + combinedSegment[midpointIndex].y) / 2
+            };
+
+            // Compute the direction of the angle
+            
+
+            console.log(`Midpoint for edge ${edgeData.id}:`, midpoint);
             
             // Update corresponding label
             linkGroups.filter(function(d) { return d.id === edgeData.id; })
@@ -1049,36 +1063,36 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .attr("x", function (d) {
             if (d.showLabels) {
                 // Move to the top-right corner
-                return d.x + (d.width/2) - (d.width * SMALL_IMG_SCALE_FACTOR);
+                return (d.width/2) - (d.width * SMALL_IMG_SCALE_FACTOR);
             } else {
                 // Align with d.bounds.x
-                return d.bounds.x;
+                return -d.width / 2;
             }
         })
         .attr("y", function (d) {
             if (d.showLabels) {
                 // Align with the top edge
-                return d.y - d.height / 2;
+                return -d.height / 2;
             } else {
                 // Align with d.bounds.y
-                return d.bounds.y;
+                return -d.height / 2;
             }
         })
 
         mostSpecificTypeLabel
-            .attr("x", function (d) { return d.x - d.width / 2 + 5; })
-            .attr("y", function (d) { return d.y - (d.height / 2) + 10; })
+            .attr("x", function (d) { return -d.width / 2 + 5; })
+            .attr("y", function (d) { return -d.height / 2 + 10; })
             .raise();
 
 
         // Render node labels
         label
-            .attr("x", d => d.x)
-            .attr("y", d => d.y)
+            .attr("x", 0)
+            .attr("y", 0)
             .each(function (d) {
                 var y = 0; // Initialize y offset for tspans
                 d3.select(this).selectAll("tspan")
-                    .attr("x", d.x) // Align tspans with the node's x position
+                    .attr("x", 0) // Align tspans with the node's x position
                     .attr("dy", function () {
                         y += 1; // Increment y for each tspan to create line spacing
                         return y === 1 ? "0em" : "1em"; // Keep the first tspan in place, move others down
@@ -1150,6 +1164,11 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         //     })
         //     .raise();
 
+        // linkGroups.select("text.linklabel")
+        //     .attr("x", d => {
+
+        //     )
+
 
 
         // Render group labels
@@ -1166,7 +1185,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
         // Can we get all end-arrow markers and raise them?
         // svg.selectAll("marker").raise();
-        // linkGroups.select("text.linklabel").raise(); // Ensure link labels are raised
+        linkGroups.select("text.linklabel").raise(); // Ensure link labels are raised
 
     });
 
