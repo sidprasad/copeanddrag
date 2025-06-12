@@ -8,7 +8,16 @@
 
     <div class="row mt-1 ">
         <div id="compactnessControl" class="container">
-            <input title="Diagram Compactness" type="range" class="form-control-range" id="scaleFactor" name="scaleFactor" min="0.5" max="10" step="0.5" value="5">
+            <input
+                title="Diagram Compactness"
+                type="range"
+                class="form-control-range"
+                id="scaleFactor"
+                name="scaleFactor"
+                min="0.5"
+                max="10"
+                step="0.5"
+                value="<%= typeof scaleFactor !== 'undefined' ? scaleFactor : 5 %>">
         </div>
         <hr>
     </div>
