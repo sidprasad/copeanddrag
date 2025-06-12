@@ -170,6 +170,8 @@ function generateDiagram (req, res)  {
     var loggingEnabled = (req.body.loggingEnabled == undefined) ? true : (req.body.loggingEnabled.toLowerCase() === 'enabled');
     const startTime = performance.now();
 
+    let scaleFactor = parseFloat(req.body.scaleFactor) || 5; // Default scale factor is 5
+
     try {
         var tables = getTableFromRequest(req) || {};
         var { instances, li, instanceNumber, loopBack, projections } = getFormContents(req);
@@ -180,6 +182,7 @@ function generateDiagram (req, res)  {
         } else if (loopBack != 0 && !loopBack) {
             loopBack = 0;
         }
+
 
 
 
@@ -245,7 +248,8 @@ function generateDiagram (req, res)  {
         instAsString,
         errors: error,//.replace(/\n/g, "<br>"),
         loggingEnabled,
-        tables : tables
+        tables : tables,
+        scaleFactor : scaleFactor // Default. 
     });
 }
 
@@ -344,7 +348,8 @@ app.get('/', (req, res) => {
         // sourceFileName: "",
         instAsString: "",
         errors: "",
-        tables: instanceToTables
+        tables: instanceToTables,
+        scaleFactor: 5, // Default scale factor
     });
 });
 

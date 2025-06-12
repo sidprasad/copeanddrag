@@ -228,7 +228,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
             console.log("Link length", linkLength);
 
-            colaLayout.linkDistance(linkLength);
+            colaLayout.symmetricDiffLinkLengths(linkLength);
 
             colaLayout.constraints(scaledConstraints)
                 .start(
