@@ -242,8 +242,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 initialUnconstrainedIterations,
                 initialUserConstraintIterations,
                 initialAllConstraintsIterations,
-                gridSnapIterations)
-                .on("end", routeEdges);
+                gridSnapIterations);
+                // .on("end", routeEdges);
         });
     }
 
@@ -266,11 +266,82 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .curve(d3.curveBasis);
 
     
+    function route(nodes, groups, margin, groupMargin) {
+        nodes.forEach(d => {
+            d.routerNode = {
+                name: d.name,
+                bounds: d.bounds || d.innerBounds
+            };
+        });
+        groups.forEach(d => {
+            d.routerNode = {
+                bounds: d.bounds.inflate(-groupMargin),
+                children: (typeof d.groups !== 'undefined' ? d.groups.map(c=> nodes.length + c.id) : [])
+                    .concat(typeof d.leaves !== 'undefined' ? d.leaves.map(c=> c.index) : [])
+            };
+        });
+        let gridRouterNodes = nodes.concat(groups).map((d, i) => {
+            d.routerNode.id = i;
+            return d.routerNode;
+        });
+        return new cola.GridRouter(gridRouterNodes, {
+            getChildren: (v) => v.children,
+            getBounds: v => v.bounds
+        }, margin - groupMargin);
+    }
+
+    
+    function gridify(svg, colaLayout, nudgeGap, margin, groupMargin) {
+        // var routes = cola.gridify(pgLayout, 10, margin, groupMargin);
+        colaLayout.start(0, 0, 0, 10, false);
+        var gridrouter = route(nodes, groups, margin, groupMargin);
+        var routes = gridrouter.routeEdges(edges, nudgeGap, function (e) { return e.source.routerNode.id; }, function (e) { return e.target.routerNode.id; });
+
+        console.log(routes);
+
+        // return routes;
+
+        svg.selectAll('path').remove();
+        routes.forEach(function (route) {
+            var cornerradius = 5;
+            var arrowwidth = 3;
+            var arrowheight = 7;
+            var p = cola.GridRouter.getRoutePath(route, cornerradius, arrowwidth, arrowheight);
+            if (arrowheight > 0) {
+                svg.append('path')
+                    .attr('class', 'linkarrowoutline')
+                    .attr('d', p.arrowpath);
+                svg.append('path')
+                    .attr('class', 'linkarrow')
+                    .attr('d', p.arrowpath);
+            }
+            svg.append('path')
+                .attr('class', 'linkoutline')
+                .attr('d', p.routepath)
+                .attr('fill', 'none');
+            svg.append('path')
+                .attr('class', 'link')
+                .attr('d', p.routepath)
+                .attr('fill', 'none');
+        });
+        svg.selectAll(".label").transition().attr("x", function (d) { return d.routerNode.bounds.cx(); })
+            .attr("y", function (d) {
+            var h = this.getBBox().height;
+            return d.bounds.cy() + h / 3.5;
+        });
+        svg.selectAll(".node").transition().attr("x", function (d) { return d.routerNode.bounds.x; })
+            .attr("y", function (d) { return d.routerNode.bounds.y; })
+            .attr("width", function (d) { return d.routerNode.bounds.width(); })
+            .attr("height", function (d) { return d.routerNode.bounds.height(); });
+    }
+
+    
     var routeEdges = function () {
 
         try {
             // Initialize WebCola's edge routing system with collision avoidance
-            colaLayout.prepareEdgeRouting(margin / 3);
+            // colaLayout.prepareEdgeRouting(margin / 3);
+
             console.log("Routing edges for the nth time", ++edgeRouteIdx);
 
             // What I want to do is change the angle based on the number of edges between the same nodes
@@ -296,27 +367,24 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 }
                 return curvature;
             }
+            
+            var routes = gridify(svg, colaLayout, 10, 25, 10); 
 
             // Main edge drawing function - sets the SVG path 'd' attribute for each edge
-            link.attr("d", function (d, i) {  // d = a link between two nodes
-
-                let n = d.id;
-
+            routes.forEach(function (route) {
                 try {
-                    // Get the initial route from WebCola's routing algorithm
-                    var route = colaLayout.routeEdge(d);
-
+                    
                     // SPECIAL CASE: Handle self-loops (edges from a node to itself)
                     if (d.source.id === d.target.id) {
                         const source = d.source;
-
+    
                         // Get the bounds of the source/target node
                         const bounds = source.bounds;
-
+    
                         // Calculate width and height from bounds
                         const width = bounds.X - bounds.x;
                         const height = bounds.Y - bounds.y;
-
+    
                         // Define two distinct points on the bounds for the start and end of the arc
                         const startPoint = {
                             x: bounds.x + width / 2, // Center of the top edge
@@ -326,7 +394,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                             x: bounds.X, // Center of the right edge
                             y: bounds.y + height / 2
                         };
-
+    
                         // Dynamically calculate the control point for the arc
                         const selfLoopIndex = d.selfLoopIndex || 0; // Index of the self-loop (if multiple exist)
                         const curvatureScale = 1 + selfLoopIndex * 0.2; // Scale curvature based on self-loop index
@@ -334,7 +402,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                             x: bounds.X + width / 2 * curvatureScale, // Offset based on node width and scale
                             y: bounds.y - height / 2 * curvatureScale // Offset based on node height and scale
                         };
-
+    
                         // Create a route with three points: start, control, and end
                         route = [
                             startPoint,   // Start point on the bounds
@@ -346,7 +414,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     // Handle errors when drawing edges
                     console.log("Error routing edge", d.id, `from ${d.source.id} to ${d.target.id}`);
                     console.error(e);
-
+    
                     // Create an alert message in the runtime errors section
                     let runtimeMessages = document.getElementById("runtime_messages");
                     let dismissableAlert = document.createElement("div");
@@ -366,19 +434,19 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     // Fallback: return a simple straight line between node centers
                     return lineFunction([{ x: d.source.x, y: d.source.y }, { x: d.target.x, y: d.target.y }]);
                 }
-
+    
                 // This is a special case for group edges
                 // Draw edges to the closest point on the rectangle of the group
                 if (n.startsWith("_g_")) {
                     let source = d.source;
                     let target = d.target;
-
+    
                     let sourceIndex = getNodeIndex(source.id);
                     let targetIndex = getNodeIndex(target.id);
-
+    
                     // Get the groupOn and addToGroup indices
                     let { groupOnIndex, addToGroupIndex } = getGroupOnAndAddToGroupIndices(n);
-
+    
                     /**
                      * Helper function to find the closest point on a rectangle to a given point.
                      * @param {*} bounds 
@@ -388,32 +456,32 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     function closestPointOnRect(bounds, point) {
                         // Destructure the rectangle bounds
                         const { x, y, X, Y } = bounds;
-
+    
                         // Calculate the rectangle's edges
                         const left = x;
                         const right = X;
                         const top = y;
                         const bottom = Y;
-
+    
                         // Clamp the point's coordinates to the rectangle's bounds
                         const closestX = Math.max(left, Math.min(point.x, right));
                         const closestY = Math.max(top, Math.min(point.y, bottom));
-
+    
                         if (closestX != left && closestX != right
                             && closestY != top && closestY != bottom) {
-
+    
                             console.log("Point is inside the rectangle", bounds, closestX, closestY);
                         }
-
+    
                         return { x: closestX, y: closestY };
                     }
-
+    
                     // Determine which end of the edge connects to a group based on the edge ID
                     // The target of the edge is the relevant group member.
                     let addTargetToGroup = groupOnIndex < addToGroupIndex;
                     // The source of the edge is the relevant group member.
                     let addSourceToGroup = groupOnIndex >= addToGroupIndex;
-
+    
                     if (addTargetToGroup) {
                         // Find the group that contains the target node and is keyed by the source
                         let potentialGroups = getContainingGroups(groups, target);
@@ -445,12 +513,12 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                         else {
                             console.log("Source group not found", potentialGroups, sourceIndex, targetIndex, n );
                         }
-
+    
                     }
                     else {
                         console.log("This is a group edge, but neither source nor target is a group.", d);
                     }
-
+    
                     // Not ideal but we dont want odd curves.
                     // Simplify group edge routes to avoid complex curves
                     if (route.length > 2) {
@@ -458,6 +526,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     }
                     return lineFunction(route);
                 }
+
 
                 // Find all parallel edges between the same two nodes (bidirectional)
                 // Get all edges between the two nodes, regardless of direction
@@ -699,6 +768,9 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         }
     };
 
+    /*
+        LINK RENDERING
+    */
 
     const linkGroups = svg.selectAll(".link-group")
         .data(edges)
@@ -708,7 +780,10 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
     const link = linkGroups.append("path")
         .attr("class", d => isInferredEdge(d) ? "inferredLink" : "link") // Dynamically assign class
-        .attr("data-link-id", d => d.id);
+        .attr("data-link-id", function (d) {
+            console.log("d.id", d.id);
+            return d.id;
+        });
 
     linkGroups.append("text")
         .attr("class", "linklabel")
@@ -720,7 +795,9 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     }
 
 
-
+    /*
+        NODE RENDERING
+    */
     var node = svg.selectAll(".node")
         .data(nodes)
         .enter().append("g") // Create a group for each node
@@ -743,8 +820,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
     const SMALL_IMG_SCALE_FACTOR = 0.3;
 
-    
-
+    // Add icon images to nodes if available
     node.filter(d => d.icon) // Filter nodes that have an icon
         .append("image")
         .attr("xlink:href", d => d.icon)
@@ -783,16 +859,13 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             console.error(`Failed to load icon for node ${d.id}: ${d.icon}`);
         });
 
-
-
-
     // Add most specific type label
     var mostSpecificTypeLabel = node.append("text")
         .attr("class", "mostSpecificTypeLabel")
         .style("fill", function (d) { return d.color; }) // Set the font color to d.color
         .text(function (d) { return d.mostSpecificType; });
 
-
+    // Add main label (name and attributes)
     var label =
         //svg.selectAll(".label")
         //.data(nodes)
@@ -852,6 +925,10 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     node.append("title")
         .text(function (d) { return d.name; });
 
+    
+    /*
+        GROUP RENDERING 
+    */
 
     // Add a rectangle for each group and a label at the top of the group
     const DISCONNECTED_NODE_GROUP = "_d_";
@@ -896,157 +973,159 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             //
         })
         .call(colaLayout.drag);
+    
+    gridify(svg, colaLayout, 10, 25, 10);
 
-    colaLayout.on("tick", function () {
+    // colaLayout.on("tick", function () {
 
-        group.attr("x", function (d) {
-            return d.bounds.x;
-        })
-            .attr("y", function (d) {
-                return d.bounds.y;
-            })
+    //     group.attr("x", function (d) {
+    //         return d.bounds.x;
+    //     })
+    //         .attr("y", function (d) {
+    //             return d.bounds.y;
+    //         })
 
-            .attr("width", function (d) { return d.bounds.width(); })
-            .attr("height", function (d) { return d.bounds.height(); })
-            .lower();
-
-
-        node.select("rect")
-            .each(function (d) { d.innerBounds = d.bounds.inflate(-1); })
-            .attr("x", function (d) { return d.bounds.x; })
-            .attr("y", function (d) { return d.bounds.y; })
-            .attr("width", function (d) { return d.bounds.width(); })
-            .attr("height", function (d) { return d.bounds.height(); });
-
-        node.select("image")
-        .attr("x", function (d) {
-            if (d.showLabels) {
-                // Move to the top-right corner
-                return d.x + (d.width/2) - (d.width * SMALL_IMG_SCALE_FACTOR);
-            } else {
-                // Align with d.bounds.x
-                return d.bounds.x;
-            }
-        })
-        .attr("y", function (d) {
-            if (d.showLabels) {
-                // Align with the top edge
-                return d.y - d.height / 2;
-            } else {
-                // Align with d.bounds.y
-                return d.bounds.y;
-            }
-        })
-
-        mostSpecificTypeLabel
-            .attr("x", function (d) { return d.x - d.width / 2 + 5; })
-            .attr("y", function (d) { return d.y - (d.height / 2) + 10; })
-            .raise();
+    //         .attr("width", function (d) { return d.bounds.width(); })
+    //         .attr("height", function (d) { return d.bounds.height(); })
+    //         .lower();
 
 
+    //     node.select("rect")
+    //         .each(function (d) { d.innerBounds = d.bounds.inflate(-1); })
+    //         .attr("x", function (d) { return d.bounds.x; })
+    //         .attr("y", function (d) { return d.bounds.y; })
+    //         .attr("width", function (d) { return d.bounds.width(); })
+    //         .attr("height", function (d) { return d.bounds.height(); });
 
-        label
-            .attr("x", d => d.x)
-            .attr("y", d => d.y)
-            .each(function (d) {
-                var y = 0; // Initialize y offset for tspans
-                d3.select(this).selectAll("tspan")
-                    .attr("x", d.x) // Align tspans with the node's x position
-                    .attr("dy", function () {
-                        y += 1; // Increment y for each tspan to create line spacing
-                        return y === 1 ? "0em" : "1em"; // Keep the first tspan in place, move others down
-                    });
-            })
-            .raise();
+    //     node.select("image")
+    //     .attr("x", function (d) {
+    //         if (d.showLabels) {
+    //             // Move to the top-right corner
+    //             return d.x + (d.width/2) - (d.width * SMALL_IMG_SCALE_FACTOR);
+    //         } else {
+    //             // Align with d.bounds.x
+    //             return d.bounds.x;
+    //         }
+    //     })
+    //     .attr("y", function (d) {
+    //         if (d.showLabels) {
+    //             // Align with the top edge
+    //             return d.y - d.height / 2;
+    //         } else {
+    //             // Align with d.bounds.y
+    //             return d.bounds.y;
+    //         }
+    //     })
 
-
-        linkGroups.select("path.link")
-            .attr("d", function (d) {
-
-                let source = d.source;
-                let target = d.target;
-
-                const sourceIndex = getNodeIndex(source);
-                const targetIndex = getNodeIndex(target);
-
-                let n = d.id;
-                if (n.startsWith("_g_")) {
-
-                    // First get the groupOn and addToGroup indices
-                    let { groupOnIndex, addToGroupIndex } = getGroupOnAndAddToGroupIndices(n);
-                    let addSourceToGroup = groupOnIndex >= addToGroupIndex;
-                    let addTargetToGroup = groupOnIndex < addToGroupIndex;
-
-
-                    if (addTargetToGroup) {
-
-                        let potentialGroups = getContainingGroups(groups, target);
-                        let targetGroup = potentialGroups.find(group => group.keyNode === sourceIndex);
-                        if (targetGroup) {
-                            target = targetGroup;
-                            target.innerBounds = targetGroup.bounds.inflate(-1 * targetGroup.padding);
-                        }
-                        else {
-                            console.log("Target group not found", potentialGroups, targetIndex);
-                        }
-                    }
-                    else if (addSourceToGroup) {
-
-                        let potentialGroups = getContainingGroups(groups, source);
-                        let sourceGroup = potentialGroups.find(group => group.keyNode === targetIndex);
-                        if (sourceGroup) {
-                            source = sourceGroup;
-                            source.innerBounds = sourceGroup.bounds.inflate(-1 * sourceGroup.padding);
-                        }
-                        else {
-                            console.log("Source group not found", potentialGroups, sourceIndex);
-                        }
-                    }
-                    else {
-                        console.log("This is a group edge (_on tick_), but neither source nor target is a group.", d);
-                    }
-                }
-                var route = cola.makeEdgeBetween(source.innerBounds, target.innerBounds, 5);
-                return lineFunction([route.sourceIntersection, route.arrowStart]);
-            })
-            .attr("marker-end", "url(#end-arrow)") // Ensure the marker-end attribute is set
-            .raise(); // Raise the path to the top
-
-        linkGroups.select("text.linklabel")
-            .attr("x", d => {
-                const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
-                return calculateNewPosition(d.x, pathElement, 'x');
-            })
-            .attr("y", d => {
-                const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
-                return calculateNewPosition(d.y, pathElement, 'y');
-            })
-            .raise();
+    //     mostSpecificTypeLabel
+    //         .attr("x", function (d) { return d.x - d.width / 2 + 5; })
+    //         .attr("y", function (d) { return d.y - (d.height / 2) + 10; })
+    //         .raise();
 
 
 
+    //     label
+    //         .attr("x", d => d.x)
+    //         .attr("y", d => d.y)
+    //         .each(function (d) {
+    //             var y = 0; // Initialize y offset for tspans
+    //             d3.select(this).selectAll("tspan")
+    //                 .attr("x", d.x) // Align tspans with the node's x position
+    //                 .attr("dy", function () {
+    //                     y += 1; // Increment y for each tspan to create line spacing
+    //                     return y === 1 ? "0em" : "1em"; // Keep the first tspan in place, move others down
+    //                 });
+    //         })
+    //         .raise();
 
-        groupLabel.attr("x", function (d) {
-            return d.bounds.x + d.bounds.width() / 2;
 
-        }) // Center horizontally
-            .attr("y", function (d) { return d.bounds.y + 12; })
-            .attr("text-anchor", "middle") // Center the text on its position
-            .lower();
+    //     // linkGroups.select("path.link")
+    //     //     .attr("d", function (d) {
+
+    //     //         let source = d.source;
+    //     //         let target = d.target;
+
+    //     //         const sourceIndex = getNodeIndex(source);
+    //     //         const targetIndex = getNodeIndex(target);
+
+    //     //         let n = d.id;
+    //     //         if (n.startsWith("_g_")) {
+
+    //     //             // First get the groupOn and addToGroup indices
+    //     //             let { groupOnIndex, addToGroupIndex } = getGroupOnAndAddToGroupIndices(n);
+    //     //             let addSourceToGroup = groupOnIndex >= addToGroupIndex;
+    //     //             let addTargetToGroup = groupOnIndex < addToGroupIndex;
 
 
-        linkGroups.select("text.linklabel").raise();
+    //     //             if (addTargetToGroup) {
 
-        // Can we get all end-arrow markers and raise them?
-        svg.selectAll("marker").raise();
-        linkGroups.select("text.linklabel").raise(); // Ensure link labels are raised
+    //     //                 let potentialGroups = getContainingGroups(groups, target);
+    //     //                 let targetGroup = potentialGroups.find(group => group.keyNode === sourceIndex);
+    //     //                 if (targetGroup) {
+    //     //                     target = targetGroup;
+    //     //                     target.innerBounds = targetGroup.bounds.inflate(-1 * targetGroup.padding);
+    //     //                 }
+    //     //                 else {
+    //     //                     console.log("Target group not found", potentialGroups, targetIndex);
+    //     //                 }
+    //     //             }
+    //     //             else if (addSourceToGroup) {
 
-    });
+    //     //                 let potentialGroups = getContainingGroups(groups, source);
+    //     //                 let sourceGroup = potentialGroups.find(group => group.keyNode === targetIndex);
+    //     //                 if (sourceGroup) {
+    //     //                     source = sourceGroup;
+    //     //                     source.innerBounds = sourceGroup.bounds.inflate(-1 * sourceGroup.padding);
+    //     //                 }
+    //     //                 else {
+    //     //                     console.log("Source group not found", potentialGroups, sourceIndex);
+    //     //                 }
+    //     //             }
+    //     //             else {
+    //     //                 console.log("This is a group edge (_on tick_), but neither source nor target is a group.", d);
+    //     //             }
+    //     //         }
+    //     //         var route = cola.makeEdgeBetween(source.innerBounds, target.innerBounds, 5);
+    //     //         return lineFunction([route.sourceIntersection, route.arrowStart]);
+    //     //     })
+    //     //     .attr("marker-end", "url(#end-arrow)") // Ensure the marker-end attribute is set
+    //     //     .raise(); // Raise the path to the top
 
-    colaLayout.start(
-        initialUnconstrainedIterations,
-        initialUserConstraintIterations,
-        initialAllConstraintsIterations,
-        gridSnapIterations)
-        .on("end", routeEdges);
+    //     // linkGroups.select("text.linklabel")
+    //     //     .attr("x", d => {
+    //     //         const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
+    //     //         return calculateNewPosition(d.x, pathElement, 'x');
+    //     //     })
+    //     //     .attr("y", d => {
+    //     //         const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
+    //     //         return calculateNewPosition(d.y, pathElement, 'y');
+    //     //     })
+    //     //     .raise();
+
+
+
+
+    //     groupLabel.attr("x", function (d) {
+    //         return d.bounds.x + d.bounds.width() / 2;
+
+    //     }) // Center horizontally
+    //         .attr("y", function (d) { return d.bounds.y + 12; })
+    //         .attr("text-anchor", "middle") // Center the text on its position
+    //         .lower();
+
+
+    //     // linkGroups.select("text.linklabel").raise();
+
+    //     // Can we get all end-arrow markers and raise them?
+    //     // svg.selectAll("marker").raise();
+    //     // linkGroups.select("text.linklabel").raise(); // Ensure link labels are raised
+
+    // });
+
+    // colaLayout.start(
+    //     initialUnconstrainedIterations,
+    //     initialUserConstraintIterations,
+    //     initialAllConstraintsIterations,
+    //     gridSnapIterations);
+        // .on("end", routeEdges);
 }
