@@ -129,7 +129,19 @@ function getFormContents(req: any) {
     let layoutSpec : LayoutSpec = parseLayoutSpec(cope);
     
     
-    let li = new LayoutInstance(layoutSpec,  evaluator , instanceNumber);
+    // 1. Add a runtime flag (default true)
+    let ENABLE_ALIGNMENT_EDGES = true;
+
+    // 2. Allow override via env or command-line
+    if (process.env.ENABLE_ALIGNMENT_EDGES !== undefined) {
+        ENABLE_ALIGNMENT_EDGES = process.env.ENABLE_ALIGNMENT_EDGES === 'true';
+    }
+    const argIdx = process.argv.indexOf('--alignment-edges');
+    if (argIdx !== -1 && process.argv[argIdx + 1]) {
+        ENABLE_ALIGNMENT_EDGES = process.argv[argIdx + 1] === 'true';
+    }
+
+    let li = new LayoutInstance(layoutSpec, evaluator, instanceNumber, ENABLE_ALIGNMENT_EDGES);
     return { instances, li, instanceNumber, loopBack, projections };
 }
 

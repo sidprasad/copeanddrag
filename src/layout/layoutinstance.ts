@@ -59,11 +59,14 @@ export class LayoutInstance {
     private evaluator: WrappedForgeEvaluator;
     private instanceNum: number;
 
+    private readonly addAlignmentEdges: boolean;
 
-    constructor(layoutSpec: LayoutSpec, evaluator: WrappedForgeEvaluator, instNum: number = 0) {
+
+    constructor(layoutSpec: LayoutSpec, evaluator: WrappedForgeEvaluator, instNum: number = 0, addAlignmentEdges: boolean = true) {
         this.instanceNum = instNum;
         this.evaluator = evaluator;
         this._layoutSpec = layoutSpec;
+        this.addAlignmentEdges = addAlignmentEdges;
     }
 
 
@@ -865,9 +868,8 @@ export class LayoutInstance {
                 let targetNodeId = tuple[1];
 
                 directions.forEach((direction) => {
-                    // Add an edge for any "directly" direction
-                    if (direction.startsWith("directly")) {
-                        // TODO: At some point, we should decide if we want to do this for the cyclic layout.
+                    // Only add alignment edge if enabled
+                    if (direction.startsWith("directly") && this.addAlignmentEdges) {
                         const alignmentEdgeLabel = `_alignment_${sourceNodeId}_${targetNodeId}_`;
                         g.setEdge(sourceNodeId, targetNodeId, alignmentEdgeLabel, alignmentEdgeLabel);
                     }
