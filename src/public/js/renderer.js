@@ -256,8 +256,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .constraints(constraints)
         .groups(groups)
         .groupCompactness(1e-3) // The higer the number, the more compact the groups will be
-        // .symmetricDiffLinkLengths(min_sep + default_node_width);
-        .linkDistance(50)
+        .symmetricDiffLinkLengths(min_sep + default_node_width);
+        // .linkDistance(50)
 
 
     var lineFunction = d3.line()
