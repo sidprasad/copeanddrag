@@ -200,6 +200,14 @@ export interface HidingDirective extends Operation {}
 export interface AttributeDirective extends HidingDirective {
     field: string;
 }
+
+export interface FieldHidingDirective extends HidingDirective {
+    field: string;
+}
+
+
+
+
 export interface ProjectionDirective extends HidingDirective {
     sig : string;
 }
@@ -232,6 +240,7 @@ export interface LayoutSpec {
         icons: AtomIconDirective[];
         projections: ProjectionDirective[];
         attributes: AttributeDirective[];
+        hiddenFields: FieldHidingDirective[];
         inferredEdges: InferredEdgeDirective[];
         hideDisconnected : boolean;
         hideDisconnectedBuiltIns : boolean;
@@ -258,6 +267,7 @@ function DEFAULT_LAYOUT() : LayoutSpec
             icons: [],
             projections: [],
             attributes: [],
+            hiddenFields: [],
             inferredEdges: [],
             hideDisconnected: false,
             hideDisconnectedBuiltIns: false
@@ -459,6 +469,7 @@ function parseDirectives(directives: any[]): {
                             icons: AtomIconDirective[];
                             projections: ProjectionDirective[];
                             attributes: AttributeDirective[];
+                            hiddenFields: FieldHidingDirective[];
                             inferredEdges: InferredEdgeDirective[];
                             hideDisconnected : boolean;
                             hideDisconnectedBuiltIns : boolean;
@@ -499,6 +510,12 @@ function parseDirectives(directives: any[]): {
         }
     });
 
+    let hiddenFields : FieldHidingDirective[] = directives.filter(d => d.hideField).map(d => {
+        return {
+            field: d.hideField.field
+        }
+    });
+
     let projections : ProjectionDirective[] = directives.filter(d => d.projection).map(d => {
             return {
                 sig: d.projection.sig
@@ -523,6 +540,7 @@ function parseDirectives(directives: any[]): {
         icons,
         projections,
         attributes,
+        hiddenFields,
         inferredEdges,
         hideDisconnected,
         hideDisconnectedBuiltIns
