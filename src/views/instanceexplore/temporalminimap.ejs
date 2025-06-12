@@ -1,82 +1,89 @@
 <% if (num_instances > 1) { %>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-<script >
+<script>
     const config = {
         startOnLoad: true,
-        flowchart: { useMaxWidth: false, htmlLabels: true, curve: 'cardinal' }, /* Disable shrinking */
+        flowchart: { useMaxWidth: false, htmlLabels: true, curve: 'cardinal' },
         securityLevel: 'loose',
     };
     mermaid.initialize(config);
 
     window.stateclick = function (i) {
-        // First, set the instance number's value to i
         document.getElementById('instancenumber').value = i;
-        // Now submit the form
         document.getElementById('controlsForm').submit();
     };
-
-
-
 </script>
 
-
-
-<div class="container">
-
-    <div class="row mb-2">
-        <div class="btn-group" role="group" aria-label="Instance navigation">
-            <button
-                id="previnstance"
-                <%= instanceNumber <= 0 ? "disabled" : "" %>
-                onclick="if(<%= instanceNumber %> > 0) window.stateclick(<%= instanceNumber - 1 %>)"
-            >&lt;&lt;</button>
-            <button
-                id="nextinstance"
-                <%= instanceNumber >= num_instances - 1 ? "disabled" : "" %>
-                onclick="if(<%= instanceNumber %> < <%= num_instances - 1 %>) window.stateclick(<%= instanceNumber + 1 %>)"
-            >&gt;&gt;</button>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="mermaid-container">
-            <div class="mermaid" title="Click on any trace state to see its graph.">
-                graph LR;
-                <% for (var i = 0; i < num_instances; i++) { %>
-                    <% if (i === instanceNumber) { %>
-                        A<%= i %>((<%= i %>)):::highlight;
-                    <% } else { %>
-                        A<%= i %>((<%= i %>));
-                    <% } %>
-                    <% if (i < num_instances - 1) { %>
-                        A<%= i %> --> A<%= i + 1 %>;
-                    <% } %>
-                    click A<%= i %> call stateclick("<%= i %>");
-                <% } %>
-                <% if (loopBack >= 0 && loopBack < num_instances) { %>
-                    A<%= num_instances - 1 %> --> A<%= loopBack %>;
-                <% } %>
-                classDef highlight fill:#f96,stroke:#333,stroke-width:2px;
-            </div>
-        </div>
-    </div>
-</div>
-<% } %>
-
 <style>
-    .mermaid-container {
-        overflow-x: auto;      /* Enable horizontal scrolling */
-        overflow-y: hidden;    /* Hide vertical scroll if not needed */
-        white-space: nowrap;   /* Prevent wrapping */
-        width: 100%;           /* Take full width of parent */
-    }
+.mermaid-container {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    background: #fff;
+    margin-top: 0.5rem;
+    box-sizing: border-box;
+}
 
-    .mermaid {
-        display: inline-block; /* Prevent shrinking */
-        min-width: max-content; /* Ensure graph is as wide as needed */
-        width: auto;
-        height: auto;
-    }
+.mermaid {
+    display: inline-block;
+    min-width: max-content;
+    min-height: 120px;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+/* Force the SVG to not overflow its parent */
+.mermaid-container .mermaid > svg {
+    display: block;
+    height: auto !important;
+    box-sizing: border-box;
+    /* Do NOT set width: 100% or max-width: 100% here! */
+}
 </style>
+
+<table style="width:100%; border-collapse:separate; border-spacing:0 0.5rem;">
+    <tr>
+        <td>
+            <div class="btn-group" role="group" aria-label="Instance navigation">
+                <button
+                    id="previnstance"
+                    <%= instanceNumber <= 0 ? "disabled" : "" %>
+                    onclick="if(<%= instanceNumber %> > 0) window.stateclick(<%= instanceNumber - 1 %>)"
+                >&lt;&lt;</button>
+                <button
+                    id="nextinstance"
+                    <%= instanceNumber >= num_instances - 1 ? "disabled" : "" %>
+                    onclick="if(<%= instanceNumber %> < <%= num_instances - 1 %>) window.stateclick(<%= instanceNumber + 1 %>)"
+                >&gt;&gt;</button>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="mermaid-container" style="background:#fff;">
+                <div class="mermaid" style="min-height:120px;" title="Click on any trace state to see its graph.">
+                    graph LR;
+                    <% for (var i = 0; i < num_instances; i++) { %>
+                        <% if (i === instanceNumber) { %>
+                            A<%= i %>((<%= i %>)):::highlight;
+                        <% } else { %>
+                            A<%= i %>((<%= i %>));
+                        <% } %>
+                        <% if (i < num_instances - 1) { %>
+                            A<%= i %> --> A<%= i + 1 %>;
+                        <% } %>
+                        click A<%= i %> call stateclick("<%= i %>");
+                    <% } %>
+                    <% if (loopBack >= 0 && loopBack < num_instances) { %>
+                        A<%= num_instances - 1 %> --> A<%= loopBack %>;
+                    <% } %>
+                    classDef highlight fill:#f96,stroke:#333,stroke-width:2px;
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+<% } %>
 
 
