@@ -92,6 +92,11 @@ export class LayoutInstance {
         return isAttributeRel ? true : false;
     }
 
+    isHiddenField(fieldId: string): boolean {
+        const isHiddenRel = this._layoutSpec.directives.hiddenFields.find((hd) => hd.field === fieldId);
+        return isHiddenRel ? true : false;
+    }
+
 
 
     /**
@@ -296,7 +301,7 @@ export class LayoutInstance {
      * @param g - The graph, which will be modified to remove the edges that are used to determine attributes.
      * @returns A record of attributes
      */
-    private generateAttributes(g: Graph): Record<string, Record<string, string[]>> {
+    private generateAttributesAndRemoveEdges(g: Graph): Record<string, Record<string, string[]>> {
         // Node : [] of attributes
         let attributes: Record<string, Record<string, string[]>> = {};
 
@@ -307,6 +312,17 @@ export class LayoutInstance {
             const edgeId = edge.name;
             const relName = this.getRelationName(g, edge);
             const isAttributeRel = this.isAttributeField(relName);
+            const isHiddenRel = this.isHiddenField(relName);
+
+            if (isHiddenRel && isAttributeRel) {
+                throw new Error(`${relName} cannot be both an attribute and a hidden field.`);
+            }
+
+            if (isHiddenRel) {
+                // If the field is a hidden field, we should remove the edge from the graph.
+                g.removeEdge(edge.v, edge.w, edgeId);
+                return;
+            }
 
             if (isAttributeRel) {
 
@@ -459,7 +475,7 @@ export class LayoutInstance {
 
         let g: Graph = generateGraph(ai, this.hideDisconnected, this.hideDisconnectedBuiltIns);
 
-        const attributes = this.generateAttributes(g);
+        const attributes = this.generateAttributesAndRemoveEdges(g);
 
 
         let nodeIconMap = this.getNodeIconMap(g);
