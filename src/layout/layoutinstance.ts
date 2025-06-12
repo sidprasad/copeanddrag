@@ -59,11 +59,14 @@ export class LayoutInstance {
     private evaluator: WrappedForgeEvaluator;
     private instanceNum: number;
 
+    private readonly addAlignmentEdges: boolean;
 
-    constructor(layoutSpec: LayoutSpec, evaluator: WrappedForgeEvaluator, instNum: number = 0) {
+
+    constructor(layoutSpec: LayoutSpec, evaluator: WrappedForgeEvaluator, instNum: number = 0, addAlignmentEdges: boolean = true) {
         this.instanceNum = instNum;
         this.evaluator = evaluator;
         this._layoutSpec = layoutSpec;
+        this.addAlignmentEdges = addAlignmentEdges;
     }
 
 
@@ -509,7 +512,7 @@ export class LayoutInstance {
         });
 
         ///////////// CONSTRAINTS ////////////
-        let constraints: LayoutConstraint[] = this.applyRelatativeOrientationConstraints(layoutNodes);
+        let constraints: LayoutConstraint[] = this.applyRelatativeOrientationConstraints(layoutNodes, g);
 
         let layoutEdges: LayoutEdge[] = g.edges().map((edge) => {
 
@@ -957,7 +960,7 @@ export class LayoutInstance {
      * @param layoutNodes - The layout nodes to which the constraints will be applied.
      * @returns An array of layout constraints.
      */
-    applyRelatativeOrientationConstraints(layoutNodes: LayoutNode[]): LayoutConstraint[] {
+    applyRelatativeOrientationConstraints(layoutNodes: LayoutNode[], g : Graph): LayoutConstraint[] {
 
         let constraints: LayoutConstraint[] = [];
         let relativeOrientationConstraints = this._layoutSpec.constraints.orientation.relative;
@@ -976,6 +979,12 @@ export class LayoutInstance {
                 let targetNodeId = tuple[1];
 
                 directions.forEach((direction) => {
+                    // Only add alignment edge if enabled
+                    if (direction.startsWith("directly") && this.addAlignmentEdges) {
+                        const alignmentEdgeLabel = `_alignment_${sourceNodeId}_${targetNodeId}_`;
+                        g.setEdge(sourceNodeId, targetNodeId, alignmentEdgeLabel, alignmentEdgeLabel);
+                    }
+
                     if (direction == "left") {
                         constraints.push(this.leftConstraint(targetNodeId, sourceNodeId, this.minSepWidth, layoutNodes, c));
                     }
