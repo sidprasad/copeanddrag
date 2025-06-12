@@ -174,7 +174,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .handleDisconnected(true)
         .size([width, height]);
 
-    const min_sep = 50;
+    const min_sep = 150;
     const default_node_width = 100;
 
     ///// Check whats up TODO ////
@@ -189,7 +189,35 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             console.log("Link length", linkLength);
 
             colaLayout.linkDistance(linkLength);
-            colaLayout.start(
+
+            /*
+            For each constraint, if it is a separation constraint, adjust the distance by the scale factor.
+            */
+
+            // Instead of mutating the original constraints array, create a new scaled constraints array
+            function getScaledConstraints(constraints, scaleFactor) {
+                return constraints.map(constraint => {
+                    if (constraint.type === "separation" && typeof constraint.gap === "number") {
+
+                        const oldgap = constraint.gap;
+                        const newgap = oldgap / scaleFactor; // or * scaleFactor, depending on your UI logic
+                        console.log(`Scaling constraint gap from ${oldgap} to ${newgap} with scale factor ${scaleFactor}`);
+
+                        return {
+                            ...constraint,
+                            gap: newgap // or * scaleFactor, depending on your UI logic
+                        };
+                    }
+                    return constraint;
+                });
+            }
+
+            // Usage:
+            const scaledConstraints = getScaledConstraints(constraints, scaleFactor);
+            //colaLayout.constraints(scaledConstraints);
+
+            colaLayout.constraints(scaledConstraints)
+                .start(
                 initialUnconstrainedIterations,
                 initialUserConstraintIterations,
                 initialAllConstraintsIterations,
