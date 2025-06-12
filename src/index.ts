@@ -173,13 +173,14 @@ function generateDiagram (req, res)  {
 
         var instAsString = instanceToInst(instances[instanceNumber]);
         try{
-            var { layout, projectionData } = li.generateLayout(instances[instanceNumber], projections);
+            var { layout, projectionData, g } = li.generateLayout(instances[instanceNumber], projections);
         }
         catch(e){
             throw new Error("<p>The instance being visualized is inconsistent with the Cope and Drag spec.<p> " + e.message);
         }
 
         let cl = new WebColaLayout(layout);
+        var colaGraph = cl.dagre_graph;
         var colaConstraints = cl.colaConstraints;
         var colaNodes = cl.colaNodes;
         var colaEdges = cl.colaEdges;
@@ -218,6 +219,7 @@ function generateDiagram (req, res)  {
 
 
     res.render('diagram', {
+        'colaGraph': colaGraph || {},
         'height': height !== undefined ? height : 0,
         'width': width !== undefined ? width : 0,
         'colaNodes': colaNodes,
@@ -317,6 +319,7 @@ app.get('/', (req, res) => {
     }
 
     res.render('diagram', {
+        'colaGraph': {},
         'height': 0,
         'width': 0,
         'colaNodes': [],

@@ -37,7 +37,8 @@ export class WebColaLayout {
   private readonly DEFAULT_X: number;
   private readonly DEFAULT_Y: number;
 
-  private dagre_graph : any;
+  // private dagre_graph : any;
+  readonly dagre_graph: any;
 
   readonly FIG_WIDTH: number;
   readonly FIG_HEIGHT: number;

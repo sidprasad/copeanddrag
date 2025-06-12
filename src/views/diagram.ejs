@@ -56,14 +56,15 @@
         });
 
         window.addEventListener('load', function () {
+            var graph = <%- JSON.stringify(colaGraph) %>;
             var width = <%- width %>, height = <%- height %>;
             var nodes = <%- JSON.stringify(colaNodes) %>;
             var edges = <%- JSON.stringify(colaEdges) %>;
             var constraints = <%- JSON.stringify(colaConstraints) %>;
             var groups = <%- JSON.stringify(colaGroups) %>;
 
-            if (width && height && nodes && edges && constraints && groups) {
-                setupLayout(d3, nodes, edges, constraints, groups, width, height);
+            if (width && height && nodes && edges && constraints && groups && graph) {
+                setupLayout(d3, nodes, edges, constraints, groups, graph, width, height);
             } else {
                 console.error('Missing required data for layout');
             }

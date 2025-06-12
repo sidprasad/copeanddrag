@@ -27,6 +27,7 @@ import { WrappedForgeEvaluator } from '../forge-util/evaluatorUtil';
 import { ColorPicker } from './colorpicker';
 import { ConstraintValidator } from './constraint-validator';
 import { SingleValue } from 'forge-expr-evaluator/dist/ForgeExprEvaluator';
+import { groups } from 'd3';
 
 const UNIVERSAL_TYPE = "univ";
 
@@ -97,7 +98,7 @@ export class LayoutInstance {
      * @param a - The ORIGINAL (pre-projection) Alloy instance.
      * @returns A record of groups.
      */
-    private generateGroups(g: Graph, a : AlloyInstance): LayoutGroup[] {
+    private generateGroups(g: Graph, a : AlloyInstance): { graph: Graph, layoutGroups: LayoutGroup[]} {
 
         //let groupingConstraints : GroupingConstraint[] = this._layoutSpec.constraints.grouping;
 
@@ -107,7 +108,10 @@ export class LayoutInstance {
 
 
         if (!groupByFieldConstraints && !groupBySelectorConstraints) {
-            return [];
+            return {
+                graph: g,
+                layoutGroups: []
+            };
         }
 
         let groups: LayoutGroup[] = [];
@@ -285,7 +289,10 @@ export class LayoutInstance {
                 }
             });
         });
-        return groups;
+        return {
+            graph: g,
+            layoutGroups: groups
+        };
     }
 
     /**
@@ -448,7 +455,7 @@ export class LayoutInstance {
 
 
 
-    public generateLayout(a: AlloyInstance, projections: Record<string, string>): { layout: InstanceLayout, projectionData: { type: string, projectedAtom: string, atoms: string[] }[] } {
+    public generateLayout(a: AlloyInstance, projections: Record<string, string>): { layout: InstanceLayout, projectionData: { type: string, projectedAtom: string, atoms: string[] }[], g: Graph } {
 
         let projectionResult = this.applyLayoutProjections(a, projections);
         let ai = projectionResult.projectedInstance;
@@ -469,7 +476,7 @@ export class LayoutInstance {
 
 
         /// Groups have to happen here ///
-        let groups = this.generateGroups(g, a);
+        let {graph: _, layoutGroups: groups} = this.generateGroups(g, a);
         // let groups = this.generatePowerGroups(g, a);
         this.ensureNoExtraNodes(g, a);
 
@@ -593,7 +600,7 @@ export class LayoutInstance {
             throw new Error(finalLayoutError);
         }
 
-        return { layout, projectionData };
+        return { layout, projectionData, g };
     }
 
     /**

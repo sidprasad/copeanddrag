@@ -177,17 +177,19 @@ function getContainingGroups(groups, node) {
  * @param {Object[]} edges - Array of edge objects with properties like source, target, id, label, relName (name of Forge relation) etc.
  * @param {Object[]} constraints - Array of WebCola constraint objects that define CnD constraints
  * @param {Object[]} groups - Array of group objects with properties like name, groups, leaves, bounds, etc.
+ * @param {Object} graph - The graph object containing metadata about the graph
  * @param {*} width 
  * @param {*} height 
  */
-function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
+function setupLayout(d3, nodes, edges, constraints, groups, graph, width, height) {
 
     // LOGGING inputs to understand the shape of the data
 
-    // console.log("Nodes", nodes)
+    console.log("Nodes", nodes)
     // console.log("edges", edges)
     // console.log("constraints", constraints)
     // console.log("groups", groups)
+    console.log("Graph metadata", graph);
 
 
     let edgeRouteIdx = 0;
@@ -212,7 +214,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         return nodes.findIndex(node => node.id === nodeId);
     }
 
-    const LINK_DISTANCE = Math.min(width, height) / Math.sqrt(nodes.length);
+    // const LINK_DISTANCE = Math.min(width, height) / Math.sqrt(nodes.length);
 
     nodes.forEach(function (node) {
         node.name = node.id;
@@ -249,8 +251,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 initialUnconstrainedIterations,
                 initialUserConstraintIterations,
                 initialAllConstraintsIterations,
-                gridSnapIterations);
-                // .on("end", routeEdges);
+                gridSnapIterations)
+                .on("end", routeEdges);
         });
     }
 
@@ -265,11 +267,13 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         // .groups(groups)
         .powerGraphGroups(function (d) {
             powerGraph = d;
+            console.log("Power graph groups", powerGraph.groups);
             powerGraph.groups.forEach(function (v) { v.padding = 20; });
         })
+        // .links(powerGraph.powerEdges)
         .groupCompactness(1e-3) // The higer the number, the more compact the groups will be
-        // .symmetricDiffLinkLengths(min_sep + default_node_width);
-        .linkDistance(50)
+        .symmetricDiffLinkLengths(min_sep + default_node_width);
+        // .linkDistance(50)
 
 
     var lineFunction = d3.line()
@@ -280,9 +284,9 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     
     var routeEdges = function () {
 
-        if (edgeRouteIdx > 1000) {
-            return;
-        }
+        // if (edgeRouteIdx > 1000) {
+        //     return;
+        // }
 
         try {
             // Initialize WebCola's edge routing system with collision avoidance
@@ -291,6 +295,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
             // What I want to do is change the angle based on the number of edges between the same nodes
             // Function to calculate curvature based on number of edges and index
+            /*
             function calculateCurvature(edges, fromNode, toNode, edgeid) {
                 const sourceIndex = getNodeIndex(fromNode);
                 const targetIndex = getNodeIndex(toNode);
@@ -312,15 +317,18 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 }
                 return curvature;
             }
+            */
 
             // Main edge drawing function - sets the SVG path 'd' attribute for each edge
             link.attr("d", function (d, i) {  // d = a link between two nodes
-
-                let n = d.id;
+                console.log("d", d);
+                // let n = d.id;
 
                 try {
                     // Get the initial route from WebCola's routing algorithm
                     var route = colaLayout.routeEdge(d);
+
+                    console.log("REACHED HERE!", route);
 
                     // SPECIAL CASE: Handle self-loops (edges from a node to itself)
                     if (d.source.id === d.target.id) {
@@ -360,7 +368,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     }
                 } catch (e) {
                     // Handle errors when drawing edges
-                    console.log("Error routing edge", d.id, `from ${d.source.id} to ${d.target.id}`);
+                    console.log("Error routing edge", d, `from ${d.source.id} to ${d.target.id}`);
                     console.error(e);
 
                     // Create an alert message in the runtime errors section
@@ -481,118 +489,118 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
                 // Find all parallel edges between the same two nodes (bidirectional)
                 // Get all edges between the two nodes, regardless of direction
-                const allEdgesBetweenSourceAndTarget = edges.filter(edge => {
-                    return (edge.source.id == d.source.id && edge.target.id == d.target.id) ||
-                        (edge.source.id == d.target.id && edge.target.id == d.source.id);
-                });
+                // const allEdgesBetweenSourceAndTarget = edges.filter(edge => {
+                //     return (edge.source.id == d.source.id && edge.target.id == d.target.id) ||
+                //         (edge.source.id == d.target.id && edge.target.id == d.source.id);
+                // });
 
 
                 // Ensure we have at least 3 points for proper curve control
                 // If there are only two points in the route, get the midpoint of the route and add it to the route
-                if (route.length === 2) {
-                    const midpoint = {
-                        x: (route[0].x + route[1].x) / 2,
-                        y: (route[0].y + route[1].y) / 2
-                    };
-                    route.splice(1, 0, midpoint);
-                }
+                // if (route.length === 2) {
+                //     const midpoint = {
+                //         x: (route[0].x + route[1].x) / 2,
+                //         y: (route[0].y + route[1].y) / 2
+                //     };
+                //     route.splice(1, 0, midpoint);
+                // }
 
                 // Calculate edge direction and distance for offset calculations
                 // Determine the direction of the edge
-                var dx = route[1].x - route[0].x;
-                var dy = route[1].y - route[0].y;
-                var angle = Math.atan2(dy, dx);
-                var distance = Math.sqrt(dx * dx + dy * dy);
+                // var dx = route[1].x - route[0].x;
+                // var dy = route[1].y - route[0].y;
+                // var angle = Math.atan2(dy, dx);
+                // var distance = Math.sqrt(dx * dx + dy * dy);
 
 
 
                 // PARALLEL EDGE SEPARATION: Offset multiple edges to prevent overlap
                 /** Here, we do some point of incidence adjustment IF the number of edges between the same nodes is greater than 1 */
-                if (allEdgesBetweenSourceAndTarget.length > 1) {
-                    const minDistance = 10; // Minimum distance between edges (divided by 2)
-                    const edgeIndex = allEdgesBetweenSourceAndTarget.findIndex(edge => edge.id === d.id);
+                // if (allEdgesBetweenSourceAndTarget.length > 1) {
+                //     const minDistance = 10; // Minimum distance between edges (divided by 2)
+                //     const edgeIndex = allEdgesBetweenSourceAndTarget.findIndex(edge => edge.id === d.id);
 
-                    // Calculate alternating offsets: positive/negative with increasing magnitude
-                    // Start with a small offset and grow it based on the edge index. But start with min offset of 5
-                    const offset = (edgeIndex % 2 === 0 ? 1 : -1) * (Math.floor(edgeIndex / 2) + 1) * minDistance;
+                //     // Calculate alternating offsets: positive/negative with increasing magnitude
+                //     // Start with a small offset and grow it based on the edge index. But start with min offset of 5
+                //     const offset = (edgeIndex % 2 === 0 ? 1 : -1) * (Math.floor(edgeIndex / 2) + 1) * minDistance;
 
-                    // Apply perpendicular offset based on edge direction
-                    // Now we should apply the offset to the start and end points of the route, depending on the angle.
+                //     // Apply perpendicular offset based on edge direction
+                //     // Now we should apply the offset to the start and end points of the route, depending on the angle.
 
-                    if (route.length > 1) {
-                        const startIndex = 0;
-                        const endIndex = route.length - 1;
+                //     if (route.length > 1) {
+                //         const startIndex = 0;
+                //         const endIndex = route.length - 1;
 
-                        /*
+                //         /*
                         
-                        Angle 0: The edge is horizontal and points to the right.
-                        Angle π/2 (90 degrees): The edge is vertical and points upwards.
-                        Angle π (180 degrees): The edge is horizontal and points to the left.
-                        Angle -π/2 (-90 degrees): The edge is vertical and points downwards.
-                        */
-                        function getDominantDirection(angle) {
-                            // Normalize angle between -π and π
-                            angle = ((angle + Math.PI) % (2 * Math.PI)) - Math.PI;
+                //         Angle 0: The edge is horizontal and points to the right.
+                //         Angle π/2 (90 degrees): The edge is vertical and points upwards.
+                //         Angle π (180 degrees): The edge is horizontal and points to the left.
+                //         Angle -π/2 (-90 degrees): The edge is vertical and points downwards.
+                //         */
+                //         function getDominantDirection(angle) {
+                //             // Normalize angle between -π and π
+                //             angle = ((angle + Math.PI) % (2 * Math.PI)) - Math.PI;
 
-                            if (angle >= -Math.PI / 4 && angle <= Math.PI / 4) {
-                                return 'right'; // Dominant direction is right
-                            } else if (angle > Math.PI / 4 && angle < 3 * Math.PI / 4) {
-                                return 'up'; // Dominant direction is up
-                            } else if (angle >= 3 * Math.PI / 4 || angle <= -3 * Math.PI / 4) {
-                                return 'left'; // Dominant direction is left
-                            } else if (angle > -3 * Math.PI / 4 && angle < -Math.PI / 4) {
-                                return 'down'; // Dominant direction is down
-                            }
-                            return null; // Default to null if something unexpected happens
-                        }
-                        let direction = getDominantDirection(angle);
+                //             if (angle >= -Math.PI / 4 && angle <= Math.PI / 4) {
+                //                 return 'right'; // Dominant direction is right
+                //             } else if (angle > Math.PI / 4 && angle < 3 * Math.PI / 4) {
+                //                 return 'up'; // Dominant direction is up
+                //             } else if (angle >= 3 * Math.PI / 4 || angle <= -3 * Math.PI / 4) {
+                //                 return 'left'; // Dominant direction is left
+                //             } else if (angle > -3 * Math.PI / 4 && angle < -Math.PI / 4) {
+                //                 return 'down'; // Dominant direction is down
+                //             }
+                //             return null; // Default to null if something unexpected happens
+                //         }
+                //         let direction = getDominantDirection(angle);
 
 
-                        // Apply offset perpendicular to the edge direction
-                        // As a result, offset along the y axis.
-                        if (direction === 'right' || direction === 'left') {
-                            // For horizontal edges, offset vertically
-                            route[startIndex].y += offset;
-                            route[endIndex].y += offset;
-                        }
-                        // else if direction is up or down, offset along the x axis
-                        else if (direction === 'up' || direction === 'down') {
-                            // For vertical edges, offset horizontally
-                            route[startIndex].x += offset;
-                            route[endIndex].x += offset;
-                        }
+                //         // Apply offset perpendicular to the edge direction
+                //         // As a result, offset along the y axis.
+                //         if (direction === 'right' || direction === 'left') {
+                //             // For horizontal edges, offset vertically
+                //             route[startIndex].y += offset;
+                //             route[endIndex].y += offset;
+                //         }
+                //         // else if direction is up or down, offset along the x axis
+                //         else if (direction === 'up' || direction === 'down') {
+                //             // For vertical edges, offset horizontally
+                //             route[startIndex].x += offset;
+                //             route[endIndex].x += offset;
+                //         }
 
-                        // Ignore the other directions, if they do crop up.
+                //         // Ignore the other directions, if they do crop up.
 
-                        // Ensure connection points remain on node perimeters after offset
-                        // And ensure it stays on the rectangle perimeter
-                        console.log("Adjusting points to rectangle perimeter");
-                        route[startIndex] = adjustPointToRectanglePerimeter(route[startIndex], d.source.innerBounds);
-                        route[endIndex] = adjustPointToRectanglePerimeter(route[endIndex], d.target.innerBounds);
-                    }
+                //         // Ensure connection points remain on node perimeters after offset
+                //         // And ensure it stays on the rectangle perimeter
+                //         console.log("Adjusting points to rectangle perimeter");
+                //         route[startIndex] = adjustPointToRectanglePerimeter(route[startIndex], d.source.innerBounds);
+                //         route[endIndex] = adjustPointToRectanglePerimeter(route[endIndex], d.target.innerBounds);
+                //     }
 
-                }
+                // }
 
 
                 // Apply visual curvature to separate multiple edges
                 // Calculate the curvature for the current edge
-                var curvature = calculateCurvature(edges, d.source.id, d.target.id, d.id);
-                // Apply curvature only to intermediate control points (not endpoints)
-                //Apply curvature to the control points (but this does not help with the direction)
-                route.forEach(function (point, index) {
+                // var curvature = calculateCurvature(edges, d.source.id, d.target.id, d.id);
+                // // Apply curvature only to intermediate control points (not endpoints)
+                // //Apply curvature to the control points (but this does not help with the direction)
+                // route.forEach(function (point, index) {
 
-                    // Only modify control points, not start/end points
-                    if (index > 0 && index < route.length - 1 && curvature !== 0) {
+                //     // Only modify control points, not start/end points
+                //     if (index > 0 && index < route.length - 1 && curvature !== 0) {
 
-                        // Calculate perpendicular offset based on edge direction and curvature
-                        // Adjust the control points based on the direction
-                        var offsetX = curvature * Math.abs(Math.sin(angle)) * distance;
-                        var offsetY = curvature * Math.abs(Math.cos(angle)) * distance;
+                //         // Calculate perpendicular offset based on edge direction and curvature
+                //         // Adjust the control points based on the direction
+                //         var offsetX = curvature * Math.abs(Math.sin(angle)) * distance;
+                //         var offsetY = curvature * Math.abs(Math.cos(angle)) * distance;
 
-                        point.x += offsetX;
-                        point.y += offsetY;
-                    }
-                });
+                //         point.x += offsetX;
+                //         point.y += offsetY;
+                //     }
+                // });
 
                 // Convert route points to SVG path string using D3's line function
                 return lineFunction(route);
@@ -600,14 +608,14 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
             // LABEL OVERLAP DETECTION: Check if two label bounding boxes intersect
             // Function to check for overlap
-            function isOverlapping(label1, label2) {
-                const bbox1 = label1.getBBox();
-                const bbox2 = label2.getBBox();
-                return !(bbox2.x > bbox1.x + bbox1.width ||
-                    bbox2.x + bbox2.width < bbox1.x ||
-                    bbox2.y > bbox1.y + bbox1.height ||
-                    bbox2.y + bbox2.height < bbox1.y);
-            }
+            // function isOverlapping(label1, label2) {
+            //     const bbox1 = label1.getBBox();
+            //     const bbox2 = label2.getBBox();
+            //     return !(bbox2.x > bbox1.x + bbox1.width ||
+            //         bbox2.x + bbox2.width < bbox1.x ||
+            //         bbox2.y > bbox1.y + bbox1.height ||
+            //         bbox2.y + bbox2.height < bbox1.y);
+            // }
 
             // LABEL POSITIONING: Place labels at edge midpoints and resolve overlaps
             // Update label positions after routing edges
@@ -669,9 +677,9 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     .filter(link => link.relName === relName)
                     .classed("highlighted", true);
                 
-                d3.selectAll(".inferredLink")
-                    .filter(link => link.relName === relName)
-                    .classed("highlighted", true);
+                // d3.selectAll(".inferredLink")
+                //     .filter(link => link.relName === relName)
+                //     .classed("highlighted", true);
             }
 
             // Get a set of all relNames
@@ -694,8 +702,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 .on("mouseout", function (event, d) {
                     d3.selectAll(".link")
                         .classed("highlighted", false);
-                    d3.selectAll(".inferredLink")
-                        .classed("highlighted", false);
+                    // d3.selectAll(".inferredLink")
+                    //     .classed("highlighted", false);
                     // Also make the text normal
                     d3.select(this).style("font-weight", "normal");
                 });
@@ -721,6 +729,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         }
     };
 
+    console.log("Edges", edges);
+    console.log("Power Edges", powerGraph.powerEdges);
 
     const linkGroups = svg.selectAll(".link-group")
         // .data(edges)
@@ -739,9 +749,9 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .text(d => d.label);
 
 
-    function isHiddenNode(node) {
-        return node.name.startsWith("_");
-    }
+    // function isHiddenNode(node) {
+    //     return node.name.startsWith("_");
+    // }
 
 
 
@@ -761,7 +771,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .attr("ry", 3) // Set the y-axis radius for rounded corners
         .attr("stroke-width", 1.5) // Adjust the stroke width as needed
         .attr("fill", function (d) {
-            let f = isHiddenNode(d) || (d.icon != null) ? "transparent" : "white";
+            // let f = isHiddenNode(d) || (d.icon != null) ? "transparent" : "white";
+            let f = (d.icon != null) ? "transparent" : "white";
             return f;
         });
 
@@ -810,7 +821,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
 
 
-    // Add most specific type label
+    // Add most specific type label (i.e. Sig name)
     var mostSpecificTypeLabel = node.append("text")
         .attr("class", "mostSpecificTypeLabel")
         .style("fill", function (d) { return d.color; }) // Set the font color to d.color
@@ -825,13 +836,16 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             .attr("class", "label")
             .each(function (d) {
 
-                if (isHiddenNode(d)) {
-                    return;
-                }
+                // if (isHiddenNode(d)) {
+                //     return;
+                // }
 
 
                 let shouldShowLabels = d.showLabels;
                 let displayLabel = shouldShowLabels ? d.name : "";
+                // let displayLabel = shouldShowLabels ? d.id : "";
+
+                console.log("d displayLabel", displayLabel);
 
 
                 // Append tspan for d.name
@@ -874,7 +888,10 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     }
 
     node.append("title")
-        .text(function (d) { return d.name; });
+        .text(function (d) { 
+            console.log("d.name", d.name);
+            return d.name; 
+        });
 
 
     // Add a rectangle for each group and a label at the top of the group
@@ -891,8 +908,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .attr("rx", 8).attr("ry", 8)
         .style("fill", function (d, i) {
 
-            console.log(d);
-
             // If d.name starts with "_d_", color it transparent
             // if (d.name.startsWith(DISCONNECTED_NODE_GROUP)) {
             //     return "transparent";
@@ -907,7 +922,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
     // TODO: Uncomment to reenable group labels
     var groupLabel = svg.selectAll(".groupLabel")
-        .data(groups)
+        // .data(groups)
+        .data(powerGraph.groups)
         .enter().append("text")
         .attr("class", "groupLabel")
         .text(function (d) {
@@ -997,7 +1013,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 const sourceIndex = getNodeIndex(source);
                 const targetIndex = getNodeIndex(target);
 
-                let n = d.id;
+                // let n = d.id;
                 /*
                 if (n.startsWith("_g_")) {
 
@@ -1042,6 +1058,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             .attr("marker-end", "url(#end-arrow)") // Ensure the marker-end attribute is set
             .raise(); // Raise the path to the top
 
+        // NOTE: this is sus
         linkGroups.select("text.linklabel")
             .attr("x", d => {
                 const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
@@ -1077,6 +1094,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         initialUnconstrainedIterations,
         initialUserConstraintIterations,
         initialAllConstraintsIterations,
-        gridSnapIterations);
-        // .on("end", routeEdges);
+        gridSnapIterations)
+        .on("end", routeEdges);
 }
