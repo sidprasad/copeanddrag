@@ -356,6 +356,12 @@ export class WrappedForgeEvaluator {
 
         try {
             let result : EvaluationResult = this.evaluator.evaluateExpression(expr, instanceIndex);
+
+            if (isErrorResult(result)) {
+                throw new Error(result.error.message);
+            }
+
+
             return new WrappedEvalResult(result, expr);
         }
         catch (e) {
