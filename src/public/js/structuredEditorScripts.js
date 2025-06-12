@@ -112,6 +112,7 @@ const DIRECTIVE_SELECT = `
         <select onchange="updateFields(this)">
             <option value="flag">Visibility Flag</option>
             <option value="attribute">Attribute</option>
+            <option value="hideField">Hide Field</option>
             <option value="icon">Icon</option>
             <option value="color">Color</option>
             <option value="size">Size</option>
@@ -124,6 +125,12 @@ const DIRECTIVE_SELECT = `
 
 
 const ATTRIBUTE_SELECTOR = `
+<div class="input-group">
+    <div class="input-group-prepend"> <span class="input-group-text">Field</span></div>
+    <input type="text" name="field" class="form-control" required>
+</div>`;
+
+const HIDE_FIELD_SELECTOR = `
 <div class="input-group">
     <div class="input-group-prepend"> <span class="input-group-text">Field</span></div>
     <input type="text" name="field" class="form-control" required>
@@ -253,7 +260,11 @@ function updateFields(select) {
     // Directive Fields
     if (type === "attribute") {
         paramsDiv.innerHTML = ATTRIBUTE_SELECTOR;
-    } else if (type === "icon") {
+    }
+    else if (type === "hideField") {
+        paramsDiv.innerHTML = HIDE_FIELD_SELECTOR;
+    }
+     else if (type === "icon") {
         paramsDiv.innerHTML = ICON_SELECTOR;
     } else if (type === "color") {
         paramsDiv.innerHTML = COLOR_SELECTOR;
