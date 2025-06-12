@@ -117,3 +117,11 @@
     stroke-width: 3px; /* Change this to your desired highlight width */
 }
 
+.alignmentLink {
+    stroke: transparent;
+    fill: none;
+    stroke-width: 1px;
+    stroke-opacity: 0;
+    marker-end: none;
+}
+
