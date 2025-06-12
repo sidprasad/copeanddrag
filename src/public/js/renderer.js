@@ -292,47 +292,95 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
     
     function gridify(svg, colaLayout, nudgeGap, margin, groupMargin) {
-        // var routes = cola.gridify(pgLayout, 10, margin, groupMargin);
+
+        // Start the layout to get node positions
         colaLayout.start(0, 0, 0, 10, false);
+
+        // Create the grid router
         var gridrouter = route(nodes, groups, margin, groupMargin);
+
+        // Route all edges using the GridRouter
         var routes = gridrouter.routeEdges(edges, nudgeGap, function (e) { return e.source.routerNode.id; }, function (e) { return e.target.routerNode.id; });
 
-        console.log(routes);
+        console.log("GridRouter routes: ", routes);
 
         // return routes;
 
+        // Clear existing paths; NOTE: Why??
         svg.selectAll('path').remove();
-        routes.forEach(function (route) {
+
+        // Create paths from GridRouter routes
+        routes.forEach(function (route, index) {
             var cornerradius = 5;
             var arrowwidth = 3;
             var arrowheight = 7;
+
+            // Get the corresponding edge data
+            // Assumption: edges are in the same order as routes
+            var edgeData = edges[index];
+
             var p = cola.GridRouter.getRoutePath(route, cornerradius, arrowwidth, arrowheight);
+
+            // Create arrow path
             if (arrowheight > 0) {
                 svg.append('path')
-                    .attr('class', 'linkarrowoutline')
-                    .attr('d', p.arrowpath);
-                svg.append('path')
-                    .attr('class', 'linkarrow')
+                    .attr('data-link-id', edgeData.id)
                     .attr('d', p.arrowpath);
             }
+
+            // Create main path
             svg.append('path')
-                .attr('class', 'linkoutline')
-                .attr('d', p.routepath)
-                .attr('fill', 'none');
-            svg.append('path')
-                .attr('class', 'link')
-                .attr('d', p.routepath)
-                .attr('fill', 'none');
+                .attr('class', function () {
+                    return isInferredEdge(edgeData) ? 'inferredLink' : 'link';
+                })
+                .attr('data-link-id', edgeData.id)
+                .attr('fill', 'none')
+                .attr('d', p.routepath);
         });
-        svg.selectAll(".label").transition().attr("x", function (d) { return d.routerNode.bounds.cx(); })
+
+        // Update node positions using router bounds; NOTE: what are the routerNode bounds?
+        svg.selectAll(".node").transition()
+            .attr("transform", function (d) { 
+                return `translate(${d.routerNode.bounds.cx()}, ${d.routerNode.bounds.cy()})`;
+            });
+        
+        // Update group positions
+        var groupPadding = margin - groupMargin;
+        svg.selectAll(".group").transition()
+            .attr("x", function (d) { return d.routerNode.bounds.x - groupPadding; })
+            .attr('y', function (d) { return d.routerNode.bounds.y + 2 * groupPadding; })
+            .attr('width', function (d) { return d.routerNode.bounds.width() - groupPadding; })
+            .attr('height', function (d) { return d.routerNode.bounds.height() - groupPadding; });
+
+        
+        // Update labels positions
+        svg.selectAll(".label").transition()
+            .attr("x", function (d) { return d.routerNode.bounds.cx(); })
             .attr("y", function (d) {
-            var h = this.getBBox().height;
-            return d.bounds.cy() + h / 3.5;
+                var h = this.getBBox().height;
+                return d.bounds.cy() + h / 3.5;
+            });
+        
+        // Position link labels at route midpoints
+        updateLinkLabels(routes, edges);
+    }
+
+    // Helper function to update link labels
+    function updateLinkLabels(routes, edges) {
+        routes.forEach(function(route, index) {
+            var edgeData = edges[index];
+            
+            // Calculate midpoint of the route
+            var midIndex = Math.floor(route.length / 2);
+            var midpoint = route[midIndex];
+            
+            // Update corresponding label
+            linkGroups.filter(function(d) { return d.id === edgeData.id; })
+                .select("text.linklabel")
+                .attr("x", midpoint.x)
+                .attr("y", midpoint.y)
+                .attr("text-anchor", "middle");
         });
-        svg.selectAll(".node").transition().attr("x", function (d) { return d.routerNode.bounds.x; })
-            .attr("y", function (d) { return d.routerNode.bounds.y; })
-            .attr("width", function (d) { return d.routerNode.bounds.width(); })
-            .attr("height", function (d) { return d.routerNode.bounds.height(); });
     }
 
     
@@ -976,156 +1024,157 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     
     gridify(svg, colaLayout, 10, 25, 10);
 
-    // colaLayout.on("tick", function () {
+    colaLayout.on("tick", function () {
+        // Render group rectangles
+        group.attr("x", function (d) {
+            return d.bounds.x;
+        })
+            .attr("y", function (d) {
+                return d.bounds.y;
+            })
 
-    //     group.attr("x", function (d) {
-    //         return d.bounds.x;
-    //     })
-    //         .attr("y", function (d) {
-    //             return d.bounds.y;
-    //         })
+            .attr("width", function (d) { return d.bounds.width(); })
+            .attr("height", function (d) { return d.bounds.height(); })
+            .lower();
 
-    //         .attr("width", function (d) { return d.bounds.width(); })
-    //         .attr("height", function (d) { return d.bounds.height(); })
-    //         .lower();
+        // Render node rectangles and images
+        node.select("rect")
+            .each(function (d) { d.innerBounds = d.bounds.inflate(-1); })
+            .attr("x", function (d) { return -d.bounds.width() / 2; })
+            .attr("y", function (d) { return -d.bounds.height() / 2; })
+            .attr("width", function (d) { return d.bounds.width(); })
+            .attr("height", function (d) { return d.bounds.height(); });
 
+        node.select("image")
+        .attr("x", function (d) {
+            if (d.showLabels) {
+                // Move to the top-right corner
+                return d.x + (d.width/2) - (d.width * SMALL_IMG_SCALE_FACTOR);
+            } else {
+                // Align with d.bounds.x
+                return d.bounds.x;
+            }
+        })
+        .attr("y", function (d) {
+            if (d.showLabels) {
+                // Align with the top edge
+                return d.y - d.height / 2;
+            } else {
+                // Align with d.bounds.y
+                return d.bounds.y;
+            }
+        })
 
-    //     node.select("rect")
-    //         .each(function (d) { d.innerBounds = d.bounds.inflate(-1); })
-    //         .attr("x", function (d) { return d.bounds.x; })
-    //         .attr("y", function (d) { return d.bounds.y; })
-    //         .attr("width", function (d) { return d.bounds.width(); })
-    //         .attr("height", function (d) { return d.bounds.height(); });
-
-    //     node.select("image")
-    //     .attr("x", function (d) {
-    //         if (d.showLabels) {
-    //             // Move to the top-right corner
-    //             return d.x + (d.width/2) - (d.width * SMALL_IMG_SCALE_FACTOR);
-    //         } else {
-    //             // Align with d.bounds.x
-    //             return d.bounds.x;
-    //         }
-    //     })
-    //     .attr("y", function (d) {
-    //         if (d.showLabels) {
-    //             // Align with the top edge
-    //             return d.y - d.height / 2;
-    //         } else {
-    //             // Align with d.bounds.y
-    //             return d.bounds.y;
-    //         }
-    //     })
-
-    //     mostSpecificTypeLabel
-    //         .attr("x", function (d) { return d.x - d.width / 2 + 5; })
-    //         .attr("y", function (d) { return d.y - (d.height / 2) + 10; })
-    //         .raise();
-
-
-
-    //     label
-    //         .attr("x", d => d.x)
-    //         .attr("y", d => d.y)
-    //         .each(function (d) {
-    //             var y = 0; // Initialize y offset for tspans
-    //             d3.select(this).selectAll("tspan")
-    //                 .attr("x", d.x) // Align tspans with the node's x position
-    //                 .attr("dy", function () {
-    //                     y += 1; // Increment y for each tspan to create line spacing
-    //                     return y === 1 ? "0em" : "1em"; // Keep the first tspan in place, move others down
-    //                 });
-    //         })
-    //         .raise();
+        mostSpecificTypeLabel
+            .attr("x", function (d) { return d.x - d.width / 2 + 5; })
+            .attr("y", function (d) { return d.y - (d.height / 2) + 10; })
+            .raise();
 
 
-    //     // linkGroups.select("path.link")
-    //     //     .attr("d", function (d) {
-
-    //     //         let source = d.source;
-    //     //         let target = d.target;
-
-    //     //         const sourceIndex = getNodeIndex(source);
-    //     //         const targetIndex = getNodeIndex(target);
-
-    //     //         let n = d.id;
-    //     //         if (n.startsWith("_g_")) {
-
-    //     //             // First get the groupOn and addToGroup indices
-    //     //             let { groupOnIndex, addToGroupIndex } = getGroupOnAndAddToGroupIndices(n);
-    //     //             let addSourceToGroup = groupOnIndex >= addToGroupIndex;
-    //     //             let addTargetToGroup = groupOnIndex < addToGroupIndex;
+        // Render node labels
+        label
+            .attr("x", d => d.x)
+            .attr("y", d => d.y)
+            .each(function (d) {
+                var y = 0; // Initialize y offset for tspans
+                d3.select(this).selectAll("tspan")
+                    .attr("x", d.x) // Align tspans with the node's x position
+                    .attr("dy", function () {
+                        y += 1; // Increment y for each tspan to create line spacing
+                        return y === 1 ? "0em" : "1em"; // Keep the first tspan in place, move others down
+                    });
+            })
+            .raise();
 
 
-    //     //             if (addTargetToGroup) {
+        // linkGroups.select("path.link")
+        //     .attr("d", function (d) {
 
-    //     //                 let potentialGroups = getContainingGroups(groups, target);
-    //     //                 let targetGroup = potentialGroups.find(group => group.keyNode === sourceIndex);
-    //     //                 if (targetGroup) {
-    //     //                     target = targetGroup;
-    //     //                     target.innerBounds = targetGroup.bounds.inflate(-1 * targetGroup.padding);
-    //     //                 }
-    //     //                 else {
-    //     //                     console.log("Target group not found", potentialGroups, targetIndex);
-    //     //                 }
-    //     //             }
-    //     //             else if (addSourceToGroup) {
+        //         let source = d.source;
+        //         let target = d.target;
 
-    //     //                 let potentialGroups = getContainingGroups(groups, source);
-    //     //                 let sourceGroup = potentialGroups.find(group => group.keyNode === targetIndex);
-    //     //                 if (sourceGroup) {
-    //     //                     source = sourceGroup;
-    //     //                     source.innerBounds = sourceGroup.bounds.inflate(-1 * sourceGroup.padding);
-    //     //                 }
-    //     //                 else {
-    //     //                     console.log("Source group not found", potentialGroups, sourceIndex);
-    //     //                 }
-    //     //             }
-    //     //             else {
-    //     //                 console.log("This is a group edge (_on tick_), but neither source nor target is a group.", d);
-    //     //             }
-    //     //         }
-    //     //         var route = cola.makeEdgeBetween(source.innerBounds, target.innerBounds, 5);
-    //     //         return lineFunction([route.sourceIntersection, route.arrowStart]);
-    //     //     })
-    //     //     .attr("marker-end", "url(#end-arrow)") // Ensure the marker-end attribute is set
-    //     //     .raise(); // Raise the path to the top
+        //         const sourceIndex = getNodeIndex(source);
+        //         const targetIndex = getNodeIndex(target);
 
-    //     // linkGroups.select("text.linklabel")
-    //     //     .attr("x", d => {
-    //     //         const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
-    //     //         return calculateNewPosition(d.x, pathElement, 'x');
-    //     //     })
-    //     //     .attr("y", d => {
-    //     //         const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
-    //     //         return calculateNewPosition(d.y, pathElement, 'y');
-    //     //     })
-    //     //     .raise();
+        //         let n = d.id;
+        //         if (n.startsWith("_g_")) {
+
+        //             // First get the groupOn and addToGroup indices
+        //             let { groupOnIndex, addToGroupIndex } = getGroupOnAndAddToGroupIndices(n);
+        //             let addSourceToGroup = groupOnIndex >= addToGroupIndex;
+        //             let addTargetToGroup = groupOnIndex < addToGroupIndex;
 
 
+        //             if (addTargetToGroup) {
+
+        //                 let potentialGroups = getContainingGroups(groups, target);
+        //                 let targetGroup = potentialGroups.find(group => group.keyNode === sourceIndex);
+        //                 if (targetGroup) {
+        //                     target = targetGroup;
+        //                     target.innerBounds = targetGroup.bounds.inflate(-1 * targetGroup.padding);
+        //                 }
+        //                 else {
+        //                     console.log("Target group not found", potentialGroups, targetIndex);
+        //                 }
+        //             }
+        //             else if (addSourceToGroup) {
+
+        //                 let potentialGroups = getContainingGroups(groups, source);
+        //                 let sourceGroup = potentialGroups.find(group => group.keyNode === targetIndex);
+        //                 if (sourceGroup) {
+        //                     source = sourceGroup;
+        //                     source.innerBounds = sourceGroup.bounds.inflate(-1 * sourceGroup.padding);
+        //                 }
+        //                 else {
+        //                     console.log("Source group not found", potentialGroups, sourceIndex);
+        //                 }
+        //             }
+        //             else {
+        //                 console.log("This is a group edge (_on tick_), but neither source nor target is a group.", d);
+        //             }
+        //         }
+        //         var route = cola.makeEdgeBetween(source.innerBounds, target.innerBounds, 5);
+        //         return lineFunction([route.sourceIntersection, route.arrowStart]);
+        //     })
+        //     .attr("marker-end", "url(#end-arrow)") // Ensure the marker-end attribute is set
+        //     .raise(); // Raise the path to the top
+
+        // linkGroups.select("text.linklabel")
+        //     .attr("x", d => {
+        //         const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
+        //         return calculateNewPosition(d.x, pathElement, 'x');
+        //     })
+        //     .attr("y", d => {
+        //         const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
+        //         return calculateNewPosition(d.y, pathElement, 'y');
+        //     })
+        //     .raise();
 
 
-    //     groupLabel.attr("x", function (d) {
-    //         return d.bounds.x + d.bounds.width() / 2;
 
-    //     }) // Center horizontally
-    //         .attr("y", function (d) { return d.bounds.y + 12; })
-    //         .attr("text-anchor", "middle") // Center the text on its position
-    //         .lower();
+        // Render group labels
+        groupLabel.attr("x", function (d) {
+            return d.bounds.x + d.bounds.width() / 2;
+
+        }) // Center horizontally
+            .attr("y", function (d) { return d.bounds.y + 12; })
+            .attr("text-anchor", "middle") // Center the text on its position
+            .lower();
 
 
-    //     // linkGroups.select("text.linklabel").raise();
+        // linkGroups.select("text.linklabel").raise();
 
-    //     // Can we get all end-arrow markers and raise them?
-    //     // svg.selectAll("marker").raise();
-    //     // linkGroups.select("text.linklabel").raise(); // Ensure link labels are raised
+        // Can we get all end-arrow markers and raise them?
+        // svg.selectAll("marker").raise();
+        // linkGroups.select("text.linklabel").raise(); // Ensure link labels are raised
 
-    // });
+    });
 
-    // colaLayout.start(
-    //     initialUnconstrainedIterations,
-    //     initialUserConstraintIterations,
-    //     initialAllConstraintsIterations,
-    //     gridSnapIterations);
-        // .on("end", routeEdges);
+    // Start the cola layout with the specified iterations
+    colaLayout.start(
+        initialUnconstrainedIterations,
+        initialUserConstraintIterations,
+        initialAllConstraintsIterations,
+        gridSnapIterations);
+    //     // .on("end", routeEdges);
 }
