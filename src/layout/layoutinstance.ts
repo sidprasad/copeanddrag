@@ -509,7 +509,7 @@ export class LayoutInstance {
         });
 
         ///////////// CONSTRAINTS ////////////
-        let constraints: LayoutConstraint[] = this.applyRelatativeOrientationConstraints(layoutNodes);
+        let constraints: LayoutConstraint[] = this.applyRelatativeOrientationConstraints(layoutNodes, g);
 
         let layoutEdges: LayoutEdge[] = g.edges().map((edge) => {
 
@@ -846,7 +846,7 @@ export class LayoutInstance {
      * @param layoutNodes - The layout nodes to which the constraints will be applied.
      * @returns An array of layout constraints.
      */
-    applyRelatativeOrientationConstraints(layoutNodes: LayoutNode[]): LayoutConstraint[] {
+    applyRelatativeOrientationConstraints(layoutNodes: LayoutNode[], g : Graph): LayoutConstraint[] {
 
         let constraints: LayoutConstraint[] = [];
         let relativeOrientationConstraints = this._layoutSpec.constraints.orientation.relative;
@@ -865,6 +865,13 @@ export class LayoutInstance {
                 let targetNodeId = tuple[1];
 
                 directions.forEach((direction) => {
+                    // Add an edge for any "directly" direction
+                    if (direction.startsWith("directly")) {
+                        // TODO: At some point, we should decide if we want to do this for the cyclic layout.
+                        const alignmentEdgeLabel = `_alignment_${sourceNodeId}_${targetNodeId}_`;
+                        g.setEdge(sourceNodeId, targetNodeId, alignmentEdgeLabel, alignmentEdgeLabel);
+                    }
+
                     if (direction == "left") {
                         constraints.push(this.leftConstraint(targetNodeId, sourceNodeId, this.minSepWidth, layoutNodes, c));
                     }

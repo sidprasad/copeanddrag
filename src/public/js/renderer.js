@@ -571,7 +571,11 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             }
 
             // Get a set of all relNames
-            const relNames = new Set(edges.map(edge => edge.relName));
+            const relNames = new Set(
+                edges
+                    .filter(edge => !isAlignmentEdge(edge))
+                    .map(edge => edge.relName)
+            );
             // For each relName, add a LI element to the ul with id "relationList", with the relName as text and hover event to highlight the relation,
             // also a mouseout event to remove the highlight
 
@@ -628,16 +632,26 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .attr("class", "link-group");
 
     const link = linkGroups.append("path")
-        .attr("class", d => isInferredEdge(d) ? "inferredLink" : "link") // Dynamically assign class
+        .attr("class", d => {
+            if (isAlignmentEdge(d)) return "alignmentLink";
+            if (isInferredEdge(d)) return "inferredLink";
+            return "link";
+        }) // Dynamically assign class
         .attr("data-link-id", d => d.id);
 
-    linkGroups.append("text")
+    linkGroups
+        .filter(d => !isAlignmentEdge(d))
+        .append("text")
         .attr("class", "linklabel")
         .text(d => d.label);
 
 
     function isHiddenNode(node) {
         return node.name.startsWith("_");
+    }
+
+    function isAlignmentEdge(edge) {
+        return edge.id.startsWith("_alignment_");
     }
 
 
