@@ -163,7 +163,7 @@ function generateDiagram (req, res)  {
     function logEventTime(start, eventName, perfloglevel = PERF_LOGGING_LEVELS.info) {
         let t = performance.now() - start;
         if (PERF_LOGGING_LEVEL >= perfloglevel) {
-            console.log(`${logEventTime} time: ${t} ms`);
+            console.log(`${eventName} time: ${t} ms`);
         }
 
     }
