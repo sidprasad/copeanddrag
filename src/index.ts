@@ -29,6 +29,7 @@ import AdmZip from 'adm-zip';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUiDist from 'swagger-ui-dist';
+import { log } from 'console';
 
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
@@ -159,9 +160,9 @@ function generateDiagram (req, res)  {
     const startTime = performance.now();
 
 
-    function logEventTime(start, eventName) {
+    function logEventTime(start, eventName, perfloglevel = PERF_LOGGING_LEVELS.info) {
         let t = performance.now() - start;
-        if (PERF_LOGGING_LEVEL >= PERF_LOGGING_LEVELS.info) {
+        if (PERF_LOGGING_LEVEL >= perfloglevel) {
             console.log(`${logEventTime} time: ${t} ms`);
         }
 
@@ -174,13 +175,17 @@ function generateDiagram (req, res)  {
         var { instances, li, instanceNumber, loopBack, projections } = getFormContents(req);
         var num_instances = instances.length;
 
-        if (instanceNumber >= num_instances) {
-            throw new Error(`Temporal instance ${instanceNumber} number out of range. The temporal trace has only ${num_instances} states.`);
-        } else if (loopBack != 0 && !loopBack) {
-            loopBack = 0;
+        try {
+            if (instanceNumber >= num_instances) {
+                throw new Error(`Temporal instance ${instanceNumber} number out of range. The temporal trace has only ${num_instances} states.`);
+            } else if (loopBack != 0 && !loopBack) {
+                loopBack = 0;
+            }
+        } finally {
+
+            const parsingTime = performance.now() - startTime;
+            logEventTime(startTime, "Parse and Static Checks", PERF_LOGGING_LEVELS.verbose);
         }
-
-
 
 
         var instAsString = instanceToInst(instances[instanceNumber]);
@@ -190,6 +195,11 @@ function generateDiagram (req, res)  {
         catch(e){
             throw new Error("<p>The instance being visualized is inconsistent with the Cope and Drag spec.<p> " + e.message);
         }
+        finally {
+            const layoutGen = performance.now() - startTime;
+            logEventTime(parsingTime, "Layout Validation + Translation", PERF_LOGGING_LEVELS.verbose);
+        }
+
 
         let cl = new WebColaLayout(layout);
         var colaConstraints = cl.colaConstraints;
@@ -219,7 +229,7 @@ function generateDiagram (req, res)  {
         }
 
 
-        logEventTime(startTime, "Total Server-Side");
+        logEventTime(startTime, "Total Server-Side", PERF_LOGGING_LEVELS.info);
 
         if (loggingEnabled) {
             logger.log_payload(payload, LogLevel.INFO, Event.CND_RUN);
