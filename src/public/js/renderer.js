@@ -291,10 +291,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     }
 
     
-    function gridify(svg, colaLayout, nudgeGap, margin, groupMargin) {
-
-        // Start the layout to get node positions
-        colaLayout.start(0, 0, 0, 10, false);
+    function gridify(svg, nudgeGap, margin, groupMargin) {
 
         // Create the grid router
         var gridrouter = route(nodes, groups, margin, groupMargin);
@@ -338,8 +335,13 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 .attr('d', p.routepath);
         });
 
-        // Update node positions using router bounds; NOTE: what are the routerNode bounds?
+        // Update node positions using router bounds;
+        // NOTE: what are the routerNode bounds?
         svg.selectAll(".node").transition()
+            // NOTE: the `transform` attribute moves the entire group; relative positions are now relative to the group center
+            // This should be easier to work with because you can use the center of the node group as the reference point
+            // Be careful of this when updating positions of labels, icons, etc.
+            // NOTE: There may be other places in the code that still use absolute positions; fix where necessary
             .attr("transform", function (d) { 
                 return `translate(${d.routerNode.bounds.cx()}, ${d.routerNode.bounds.cy()})`;
             });
@@ -355,10 +357,16 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         
         // Update labels positions
         svg.selectAll(".label").transition()
-            .attr("x", function (d) { return d.routerNode.bounds.cx(); })
+            .attr("x", function (d) { 
+                console.log(`label ${d.id} x`, d.routerNode.bounds.cx())
+                // return d.routerNode.bounds.cx(); 
+                return 0;
+            })
             .attr("y", function (d) {
                 var h = this.getBBox().height;
-                return d.bounds.cy() + h / 3.5;
+                console.log(`label ${d.id} y`, d.bounds.cy() + h / 3.5);
+                // return d.bounds.cy() + h / 3.5;
+                return 0;
             });
         
         // Position link labels at route midpoints
@@ -366,6 +374,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     }
 
     // Helper function to update link labels
+    // TODO: Improve label placement to avoid overlap with other labels
     function updateLinkLabels(routes, edges) {
         routes.forEach(function(route, index) {
             var edgeData = edges[index];
@@ -383,8 +392,9 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 y: (combinedSegment[midpointIndex - 1].y + combinedSegment[midpointIndex].y) / 2
             };
 
-            // Compute the direction of the angle
-            
+            // TODO: Compute the direction of the angle
+            // This is useful for determining where to place padding around the label
+            // Currently, the label is directly on the line, which can be hard to read
 
             // console.log(`Midpoint for edge ${edgeData.id}:`, midpoint);
             
@@ -397,7 +407,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         });
     }
 
-    
     var routeEdges = function () {
 
         try {
@@ -857,21 +866,13 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     }
 
     /*
-        DRAGGING
-    */
-
-    var dragListener = d3.drag()
-        .on("end", function() { gridify(svg, colaLayout, 10, 25, 10) });
-
-    /*
         NODE RENDERING
     */
     var node = svg.selectAll(".node")
         .data(nodes)
         .enter().append("g") // Create a group for each node
         .attr("class", "node")
-        // .call(colaLayout.drag);
-        .call(dragListener);
+        .call(colaLayout.drag);
 
     node.append("rect")
         .attr("width", function (d) { return d.width; })
@@ -972,8 +973,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     }
                 }
             })
-            // .call(colaLayout.drag);
-            .call(dragListener);
+            .call(colaLayout.drag);
 
 
     // Helper function to calculate new position along the path
@@ -1043,12 +1043,11 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             //
         })
         .call(colaLayout.drag);
-    
-    gridify(svg, colaLayout, 10, 25, 10);
 
     colaLayout.on("tick", function () {
-        console.log("tick");
-        // Render group rectangles
+        // console.log("tick");
+
+        // Update group rectangles
         group.attr("x", function (d) {
             return d.bounds.x;
         })
@@ -1060,7 +1059,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             .attr("height", function (d) { return d.bounds.height(); })
             .lower();
 
-        // Render node rectangles and images
+        // Update node rectangles and images
         node.select("rect")
             .each(function (d) { d.innerBounds = d.bounds.inflate(-1); })
             .attr("x", function (d) { return -d.bounds.width() / 2; })
@@ -1087,14 +1086,14 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 return -d.height / 2;
             }
         })
+        
+        // Update node labels
 
         mostSpecificTypeLabel
             .attr("x", function (d) { return -d.width / 2 + 5; })
             .attr("y", function (d) { return -d.height / 2 + 10; })
             .raise();
 
-
-        // Render node labels
         label
             .attr("x", 0)
             .attr("y", 0)
@@ -1179,7 +1178,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         //     )
 
 
-
         // Render group labels
         groupLabel.attr("x", function (d) {
             return d.bounds.x + d.bounds.width() / 2;
@@ -1203,6 +1201,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         initialUnconstrainedIterations,
         initialUserConstraintIterations,
         initialAllConstraintsIterations,
-        gridSnapIterations);
-    //     // .on("end", routeEdges);
+        gridSnapIterations)
+        .on("end", function () {
+            gridify(svg, 10, 25, 10);
+        });
 }
