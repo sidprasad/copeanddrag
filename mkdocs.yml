@@ -12,6 +12,7 @@ nav:
   - Examples: examples/index.md
   - Constraints: constraints.md
   - Directives: directives.md
+  - Under the Hood: underthehood.md
 
 markdown_extensions:
   - codehilite:
