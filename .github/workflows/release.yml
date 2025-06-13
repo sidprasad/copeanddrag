@@ -30,6 +30,7 @@ jobs:
         run: npm install
 
       # Step 4: Build the project
+      - name: Build the project
         run: npm run build
 
       # Step 5: Generate a unique tag (if needed)
