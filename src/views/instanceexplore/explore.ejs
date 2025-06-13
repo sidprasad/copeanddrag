@@ -26,24 +26,37 @@
      If projections is non-empty, then show each type as a form input  and projectedAtom as the selected element of atoms
     -->
 
-    <% if (projectionData && projectionData.length> 0) { %>
+    <% if (projectionData && projectionData.length > 0) { %>
     <div class="row container mt-1" id="projectionsSection">
-        <h4>Projections</h4>
-        <p> For each projected type, choose the atom to project over.</p>
-        <% projectionData.forEach(function(projection) { %>
-            <div class="form-group">
-                <label for="<%= projection.type %>_projection">
-                    <%= projection.type %>
-                </label>
-                <select class="form-control" id="<%= projection.type %>_projection"
-                    name="<%= projection.type %>_projection">
-                    <% projection.atoms.forEach(function(atom) { %>
-                        <option value="<%= atom %>" <%= projection.projectedAtom===atom ? 'selected' : '' %>> <%= atom %>
-                        </option>
-                        <% }); %>
-                </select>
-            </div>
-        <% }); %>
+        <div class="row mb-2 container">
+            <p>
+                <span class="font-weight-bold">Projections:</span>
+                <span class="text-muted">Choose the atom to project over.</span>
+            </p>
+        </div>
+        <div class="row mt-2 container">
+            <% projectionData.forEach(function(projection) { %>
+                <div class="form-group col-auto">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="<%= projection.type %>_label">
+                                <%= projection.type %>
+                            </span>
+                        </div>
+                        <select class="form-control"
+                                id="<%= projection.type %>_projection"
+                                name="<%= projection.type %>_projection"
+                                aria-describedby="<%= projection.type %>_label">
+                            <% projection.atoms.forEach(function(atom) { %>
+                                <option value="<%= atom %>" <%= projection.projectedAtom === atom ? 'selected' : '' %>>
+                                    <%= atom %>
+                                </option>
+                            <% }); %>
+                        </select>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
     </div>
     <% } %>
 
