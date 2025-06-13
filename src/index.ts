@@ -183,7 +183,7 @@ function generateDiagram (req, res)  {
             }
         } finally {
 
-            const parsingTime = performance.now() - startTime;
+            var parsingTime = performance.now() - startTime;
             logEventTime(startTime, "Parse and Static Checks", PERF_LOGGING_LEVELS.verbose);
         }
 
@@ -196,7 +196,7 @@ function generateDiagram (req, res)  {
             throw new Error("<p>The instance being visualized is inconsistent with the Cope and Drag spec.<p> " + e.message);
         }
         finally {
-            const layoutGen = performance.now() - startTime;
+            //var layoutGen = performance.now() - startTime;
             logEventTime(parsingTime, "Layout Validation + Translation", PERF_LOGGING_LEVELS.verbose);
         }
 
