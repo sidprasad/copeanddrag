@@ -12,7 +12,22 @@ directives:
 ```
 
 #### Parameters
-- `field` : Name of the field in the source specification upon which the constraint acts.
+- `field` : Name of the field in the source specification upon which the directive acts.
+
+
+### Field Hiding Directives
+
+These remove graph edges representing a relation from the graph. This is similar to an attribute directive, but without 
+adding data to an edge's source node.
+
+```
+directives:
+  - hideField:
+      field: id
+```
+
+#### Parameters
+- `field` : Name of the field in the source specification upon which the directive acts.
 
 
 ### Size Directives
@@ -29,7 +44,7 @@ directives:
 
 #### Parameters
 
-- `selector` : A Forge expression that determines which elements upon which the constraint acts. This expression must return a set of singletons.
+- `selector` : A Forge expression that determines which elements upon which the directive acts. This expression must return a set of singletons.
 - `height` : Height with which the node should be displayed.
 - `width` : Width with which the node should be displayed.
 
@@ -47,7 +62,7 @@ directives:
 
 #### Parameters
 
-- `selector` : A Forge expression that determines which elements upon which the constraint acts. This expression must return a set of singletons.
+- `selector` : A Forge expression that determines which elements upon which the directive acts. This expression must return a set of singletons.
 - `path` : Path to the icon image (`png` and `jpg` supported). This path must be a publicly accessible URI.
 - `showLabels` : [Optional, default `false`] Should atom labels (e.g., atom name, attributes) be shown in addition to icons. If `true`, the icon is made smaller to prevent overlap with label text. 
 
