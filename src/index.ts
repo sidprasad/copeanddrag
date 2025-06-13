@@ -158,6 +158,15 @@ function generateDiagram (req, res)  {
     var loggingEnabled = (req.body.loggingEnabled == undefined) ? true : (req.body.loggingEnabled.toLowerCase() === 'enabled');
     const startTime = performance.now();
 
+
+    function logEventTime(start, eventName) {
+        let t = performance.now() - start;
+        if (PERF_LOGGING_LEVEL >= PERF_LOGGING_LEVELS.info) {
+            console.log(`${logEventTime} time: ${t} ms`);
+        }
+
+    }
+
     let scaleFactor = parseFloat(req.body.scaleFactor) || 5; // Default scale factor is 5
 
     try {
@@ -209,12 +218,8 @@ function generateDiagram (req, res)  {
             "error": error
         }
 
-        let endTime = performance.now();
-        var serverTime = endTime - startTime;
 
-        if (PERF_LOGGING_LEVEL >= PERF_LOGGING_LEVELS.info) {
-            console.log(`Server time: ${serverTime} ms`);
-        }
+        logEventTime(startTime, "Total Server-Side");
 
         if (loggingEnabled) {
             logger.log_payload(payload, LogLevel.INFO, Event.CND_RUN);
@@ -497,7 +502,7 @@ app.post('/timing', (req, res) => {
 
     if (PERF_LOGGING_LEVEL  >= PERF_LOGGING_LEVELS.info) {
         // Log the client time
-        console.log(`Client time: ${clientTime} ms`);
+        console.log(`Client-Side time: ${clientTime} ms`);
     }
     res.json({ message: 'Client time received successfully' });
 });
