@@ -376,7 +376,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             route.forEach(function(segment) {
                 combinedSegment = combinedSegment.concat(segment);
             });
-            console.log("Combined segment", combinedSegment);
+            // console.log("Combined segment", combinedSegment);
             const midpointIndex = Math.floor(combinedSegment.length / 2); // NOTE: Length should be even
             const midpoint = {
                 x: (combinedSegment[midpointIndex - 1].x + combinedSegment[midpointIndex].x) / 2,
@@ -386,7 +386,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             // Compute the direction of the angle
             
 
-            console.log(`Midpoint for edge ${edgeData.id}:`, midpoint);
+            // console.log(`Midpoint for edge ${edgeData.id}:`, midpoint);
             
             // Update corresponding label
             linkGroups.filter(function(d) { return d.id === edgeData.id; })
@@ -856,6 +856,12 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         return node.name.startsWith("_");
     }
 
+    /*
+        DRAGGING
+    */
+
+    var dragListener = d3.drag()
+        .on("end", function() { gridify(svg, colaLayout, 10, 25, 10) });
 
     /*
         NODE RENDERING
@@ -864,7 +870,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .data(nodes)
         .enter().append("g") // Create a group for each node
         .attr("class", "node")
-        .call(colaLayout.drag);
+        // .call(colaLayout.drag);
+        .call(dragListener);
 
     node.append("rect")
         .attr("width", function (d) { return d.width; })
@@ -965,7 +972,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     }
                 }
             })
-            .call(colaLayout.drag);
+            // .call(colaLayout.drag);
+            .call(dragListener);
 
 
     // Helper function to calculate new position along the path
@@ -1039,6 +1047,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     gridify(svg, colaLayout, 10, 25, 10);
 
     colaLayout.on("tick", function () {
+        console.log("tick");
         // Render group rectangles
         group.attr("x", function (d) {
             return d.bounds.x;
