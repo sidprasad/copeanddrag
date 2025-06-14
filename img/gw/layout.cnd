@@ -1,0 +1,8 @@
+constraints:
+  - group:
+      field: animals
+      groupOn: '0'
+      addToGroup: '1'
+  - group:
+      selector: '{ w : Wolf | w in Far.animals }'
+      name: farwolves

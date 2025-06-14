@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://sidprasad.github.io/copeanddrag/examples/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Examples - Cope and Drag Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Examples";
+        var mkdocs_page_input_path = "examples/index.md";
+        var mkdocs_page_url = "/copeanddrag/examples/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Cope and Drag Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../getting-started/">Getting Started</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../faq/">FAQ</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Examples</a>
+    <ul class="current">
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../constraints/">Constraints</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../directives/">Directives</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../underthehood/">Under the Hood</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Cope and Drag Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Examples</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/sidprasad/copeanddrag/edit/master/docs/examples/index.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="examples">Examples</h1>
+<p>These example diagrams demonstrate key features of <code>CnD</code>. You can interact with each example directly in your browser using a client-side viewer (note: the Cope and Drag specification cannot be edited in this mode), or download the full example as a <code>.zip</code> file for use with Cope and Drag at the <code>/import</code> endpoint.</p>
+<hr />
+<div class="container">
+  <div class="row">
+
+    <div class="col-md-12" style="margin-bottom: 20px;" id="bt">
+      <div class="card" style="display: flex; flex-direction: row; align-items: center; padding: 15px; border: 1px solid #ddd;">
+        <!-- Text Column -->
+        <div class="col-md-8">
+          <h5 class="card-title">Binary Tree</h5>
+          <p class="card-text">Uses orientation constraints to ensure that a binary tree's children are appropriately laid out.</p>
+          <a href="bt/diag.html" class="btn btn-primary" style="margin-right: 10px;">View Interactive Diagram</a>
+
+          <a href="bt/bt.zip" class="btn btn-secondary" download>Download Example</a>
+
+        </div>
+        <!-- Image Column -->
+        <div class="col-md-4 text-center">
+          <img src="bt/icon.png" alt="Binary Tree" style="max-height: 300px; max-width: 300px; width: auto; height: auto; border: 1px solid #ccc; padding: 5px;">
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-12" style="margin-bottom: 20px;" id="fruit">
+      <div class="card" style="display: flex; flex-direction: row; align-items: center; padding: 15px; border: 1px solid #ddd;">
+        <!-- Text Column -->
+        <div class="col-md-8">
+          <h5 class="card-title">Fruit in Baskets</h5>
+          <p class="card-text">Uses grouping constraints to group a set of fruit by the baskets they are in, as well as group all rotten fruit in a basket together. Also uses icons to identify each fruit type.</p>
+          <a href="fruit/diag.html" class="btn btn-primary" style="margin-right: 10px;">View Interactive Diagram</a>
+
+          <a href="fruit/fruit.zip" class="btn btn-secondary" download>Download Example</a>
+
+        </div>
+        <!-- Image Column -->
+        <div class="col-md-4 text-center">
+          <img src="fruit/icon.png" alt="Fruit in Baskets" style="max-height: 300px; max-width: 300px; width: auto; height: auto; border: 1px solid #ccc; padding: 5px;">
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-12" style="margin-bottom: 20px;" id="ringlights">
+      <div class="card" style="display: flex; flex-direction: row; align-items: center; padding: 15px; border: 1px solid #ddd;">
+        <!-- Text Column -->
+        <div class="col-md-8">
+          <h5 class="card-title">Ring Lights</h5>
+          <p class="card-text">Uses cyclic constraints to arrange a ring of lights along the boundary of a regular shape.</p>
+          <a href="ringlights/diag.html" class="btn btn-primary" style="margin-right: 10px;">View Interactive Diagram</a>
+
+          <a href="ringlights/ringlights.zip" class="btn btn-secondary" download>Download Example</a>
+
+        </div>
+        <!-- Image Column -->
+        <div class="col-md-4 text-center">
+          <img src="ringlights/icon.png" alt="Ring Lights" style="max-height: 300px; max-width: 300px; width: auto; height: auto; border: 1px solid #ccc; padding: 5px;">
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-12" style="margin-bottom: 20px;" id="ttt">
+      <div class="card" style="display: flex; flex-direction: row; align-items: center; padding: 15px; border: 1px solid #ddd;">
+        <!-- Text Column -->
+        <div class="col-md-8">
+          <h5 class="card-title">Tic Tac Toe</h5>
+          <p class="card-text">Uses orientation constraints to arrange a tic tac toe board.</p>
+          <a href="ttt/diag.html" class="btn btn-primary" style="margin-right: 10px;">View Interactive Diagram</a>
+
+          <a href="ttt/ttt.zip" class="btn btn-secondary" download>Download Example</a>
+
+        </div>
+        <!-- Image Column -->
+        <div class="col-md-4 text-center">
+          <img src="ttt/icon.png" alt="Tic Tac Toe" style="max-height: 300px; max-width: 300px; width: auto; height: auto; border: 1px solid #ccc; padding: 5px;">
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../faq/" class="btn btn-neutral float-left" title="FAQ"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../constraints/" class="btn btn-neutral float-right" title="Constraints">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/sidprasad/copeanddrag" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../faq/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../constraints/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
