@@ -41,7 +41,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.json({ limit: '50mb' }));
 
 // This is a hack. I'm not sure how to encode the version number.
-const version = "3.3.7";
+const version = "3.3.8";
 
 const secretKey = "cope-and-drag-logging-key";
 
@@ -60,8 +60,11 @@ const swaggerOptions = {
 
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
 app.use('/openapi', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-  customCssUrl: swaggerUiDist.getAbsoluteFSPath() + '/swagger-ui.css',
-  customJs: swaggerUiDist.getAbsoluteFSPath() + '/swagger-ui-bundle.js'
+  customCssUrl: '/swagger-ui-dist/swagger-ui.css',
+  customJs: [
+    '/swagger-ui-dist/swagger-ui-bundle.js',
+    '/swagger-ui-dist/swagger-ui-standalone-preset.js'
+  ]
 }));
 
 // Function to get or generate a persistent user ID using HMAC
@@ -623,9 +626,6 @@ app.post('/evaluator', (req, res) => {
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 message:
  *                   type: string
  */
 app.post('/feedback', (req, res) => {
