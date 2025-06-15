@@ -1,6 +1,7 @@
 # Lightweight Diagramming by Spatial Refinement
 
 ![Latest Release](https://img.shields.io/github/v/release/sidprasad/copeanddrag)
+[![npm version](https://img.shields.io/npm/v/cope-and-drag)](https://www.npmjs.com/package/cope-and-drag)
 [![Documentation](https://img.shields.io/badge/docs-available-brightgreen)](https://sidprasad.github.io/copeanddrag)
 
 > “Spatial thinking is the foundation of abstract thought” - B Tversky
