@@ -350,38 +350,36 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
         // return routes;
 
-        // Clear existing paths; NOTE: Why??
-        svg.selectAll('path').remove();
+        // Clear existing paths; 
+        // NOTE: Why?? This is necessary to avoid node explosion when re-routing
+        svg.selectAll('.link-group').remove();
 
         // Create paths from GridRouter routes
         routes.forEach(function (route, index) {
             var cornerradius = 5;
-            var arrowwidth = 3;
-            var arrowheight = 7;
+            var arrowwidth = 3; // Abitrary value (see note below)
+            var arrowheight = 7; // Abitrary value (see note below)
 
             // Get the corresponding edge data
             // Assumption: edges are in the same order as routes
             var edgeData = edges[index];
 
+            // Calculate the route path using the GridRouter
+            // NOTE: Arrow width/height not used in our implementation
             var p = cola.GridRouter.getRoutePath(route, cornerradius, arrowwidth, arrowheight);
 
-            // Create arrow path
-            // if (arrowheight > 0) {
-            //     svg.append('path')
-            //         .attr('data-link-id', edgeData.id)
-            //         .attr('d', p.arrowpath)
-            //         .lower();
-            // }
+            // Create the link groups
+            const linkGroup = svg.append('g')
+                .attr("class", "link-group");
 
-            // Create main path
-            svg.append('path')
+            // NOTE: This is the link
+            linkGroup.append('path')
                 .attr("class", function () {
                     if (isAlignmentEdge(edgeData)) return "alignmentLink";
                     if (isInferredEdge(edgeData)) return "inferredLink";
                     return "link";
                 })
                 .attr('data-link-id', edgeData.id)
-                .attr('fill', 'none')
                 .attr('d', p.routepath)
                 .lower();
         });
@@ -493,8 +491,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
                 return curvature;
             }
-            
-            var routes = gridify(svg, colaLayout, 10, 25, 10); 
 
             // Main edge drawing function - sets the SVG path 'd' attribute for each edge
             routes.forEach(function (route) {
@@ -904,11 +900,11 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         LINK RENDERING
     */
 
-    const linkGroups = svg.selectAll(".link-group")
-        .data(edges)
-        .enter()
-        .append("g")
-        .attr("class", "link-group");
+    const linkGroups = svg.selectAll(".link-group");
+        // .data(edges)
+        // .enter()
+        // .append("g")
+        // .attr("class", "link-group");
 
     const link = linkGroups.append("path")
         .attr("class", d => {
