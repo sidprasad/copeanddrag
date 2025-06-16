@@ -51,7 +51,7 @@ class ConstraintValidator {
 
         for (let i = 0; i < this.orientationConstraints.length; i++) {
             let constraint = this.orientationConstraints[i]; // TODO: This changes?
-            this.constraintToCassowary(constraint);
+            this.addConstraintToSolver(constraint);
             if (this.error) {
                 return this.error;
             }
@@ -137,7 +137,7 @@ class ConstraintValidator {
     //Find the SMALLEST subset of consistentConstraints that is inconsistent with conflictingConstraint
 
     // This is still only LOCALLY minimal.
-    private getMinimalConflictingConstraints(consistentConstraints: any[], conflictingConstraint: any): any[] {
+    private getMinimalConflictingConstraints(consistentConstraints: LayoutConstraint[], conflictingConstraint: LayoutConstraint): LayoutConstraint[] {
         // Start with all consistent constraints plus the conflicting one
         let core = [...consistentConstraints, conflictingConstraint];
         let changed = true;
@@ -150,7 +150,16 @@ class ConstraintValidator {
                 let solver = new SimplexSolver();
                 try {
                     for (const c of testSet) {
-                        solver.addConstraint(c);
+
+
+                        let cassowaryConstraints = this.constraintToCassowary(c);
+                        // Add the Cassowary constraints to the solver
+                        cassowaryConstraints.forEach((cassowaryConstraint) => {
+                            // console.log("Adding constraint to solver:", cassowaryConstraint);
+                            // console.log("Constraint to add:", this.orientationConstraintToString(c));
+                            // console.log("Cassowary constraint:", cassowaryConstraint);
+                            solver.addConstraint(cassowaryConstraint);
+                        });
                     }
                     solver.solve();
                     // If no error, this subset is satisfiable, so keep the constraint in the core
@@ -166,10 +175,9 @@ class ConstraintValidator {
         return core.filter(c => c !== conflictingConstraint);
     }
 
-
-    private constraintToCassowary(constraint: LayoutConstraint) {
-        try {
-            if (isTopConstraint(constraint)) {
+    private constraintToCassowary(constraint: LayoutConstraint) : any[] {
+        // This is the main method that converts a LayoutConstraint to a Cassowary constraint.
+        if (isTopConstraint(constraint)) {
                 let tc = constraint as TopConstraint;
 
                 let top = tc.top;
@@ -186,7 +194,7 @@ class ConstraintValidator {
                     .plus(new Expression(minDistance));
                 let rhs = new Expression(bottomVar);
 
-                this.solver.addConstraint(new Inequality(lhs, LEQ, rhs, Strength.required));
+                return [new Inequality(lhs, LEQ, rhs, Strength.required)];
             }
             else if (isLeftConstraint(constraint)) {
                 let lc = constraint as LeftConstraint;
@@ -205,7 +213,7 @@ class ConstraintValidator {
                     .plus(new Expression(minDistance));
                 let rhs = new Expression(rightVar);
 
-                this.solver.addConstraint(new Inequality(lhs, LEQ, rhs, Strength.required));
+                return [new Inequality(lhs, LEQ, rhs, Strength.required)];
             }
             else if (isAlignmentConstraint(constraint)) {
 
@@ -226,9 +234,7 @@ class ConstraintValidator {
                 let lhs = new Expression(node1Var);
                 let rhs = new Expression(node2Var);
 
-                this.solver.addConstraint(new Inequality(lhs, LEQ, rhs, Strength.required));
-                this.solver.addConstraint(new Inequality(lhs, GEQ, rhs, Strength.required));
-
+             
 
                 // And register the alignment
                 if (axis === 'x') {
@@ -237,11 +243,24 @@ class ConstraintValidator {
                 else if (axis === 'y') {
                     this.horizontallyAligned.push([node1, node2]);
                 }
+
+                return [new Inequality(lhs, LEQ, rhs, Strength.required),
+                        new Inequality(lhs, GEQ, rhs, Strength.required)];
             }
             else {
                 console.log(constraint, "Unknown constraint type");
                 this.error = "Unknown constraint type";
+                return [];
             }
+    }
+
+    // TODO: Factor out the constraintToCassowary bit. from the ADD to solver.
+    private addConstraintToSolver(constraint: LayoutConstraint) {
+        try {
+            let cassowaryConstraints = this.constraintToCassowary(constraint);
+            cassowaryConstraints.forEach((cassowaryConstraint) => {
+                this.solver.addConstraint(cassowaryConstraint);
+            });
             this.added_constraints.push(constraint);
         }
         catch (e) {
