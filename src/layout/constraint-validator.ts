@@ -265,14 +265,7 @@ class ConstraintValidator {
         }
         catch (e) {
                
-
-            // TODO: We can improve this now, with the new attached thing.
-
-            // We could figure out the unsat core here of the added_constraints + constraint.
             const minimal_conflicting_constraints = this.getMinimalConflictingConstraints(this.added_constraints, constraint);
-
-
-            //let previousSourceConstraints = ;
             let previousSourceConstraintSet = new Set(minimal_conflicting_constraints.map((c) => c.sourceConstraint).map((c) => c.toHTML()));
             let previousSourceConstraints = [...previousSourceConstraintSet];
 
@@ -285,7 +278,7 @@ class ConstraintValidator {
             
 
 
-            let previousConstraintList = this.added_constraints.map((c) => this.orientationConstraintToString(c));
+            let previousConstraintList = minimal_conflicting_constraints.map((c) => this.orientationConstraintToString(c));
             let previousConstraintSet = new Set(previousConstraintList); 
             previousConstraintList = [...previousConstraintSet];
 
