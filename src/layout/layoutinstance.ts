@@ -884,8 +884,9 @@ export class LayoutInstance {
                 let targetNodeId = tuple[1];
 
                 directions.forEach((direction) => {
-                    // Only add alignment edge if enabled
-                    if (direction.startsWith("directly") && this.addAlignmentEdges) {
+                    // Only add alignment edge if enabled AND edge doesn't already exist in the graph
+                    const edgeExists = g.hasEdge(sourceNodeId, targetNodeId) || g.hasEdge(targetNodeId, sourceNodeId);
+                    if (direction.startsWith("directly") && this.addAlignmentEdges && !edgeExists) {
                         const alignmentEdgeLabel = `_alignment_${sourceNodeId}_${targetNodeId}_`;
                         g.setEdge(sourceNodeId, targetNodeId, alignmentEdgeLabel, alignmentEdgeLabel);
                     }

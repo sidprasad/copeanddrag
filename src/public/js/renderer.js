@@ -464,14 +464,18 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
             // What I want to do is change the angle based on the number of edges between the same nodes
             // Function to calculate curvature based on number of edges and index
+            // NOTE: Only applies to non-alignment edges
             function calculateCurvature(edges, fromNode, toNode, edgeid) {
-                const sourceIndex = getNodeIndex(fromNode);
-                const targetIndex = getNodeIndex(toNode);
+                if (edgeid.startsWith("_alignment_")) {
+                    return 0;
+                }
 
                 // Get all edges between the two nodes, regardless of direction
-                const allEdges = edges.filter(edge => {
-                    return (edge.source.id == fromNode && edge.target.id == toNode) ||
-                        (edge.source.id == toNode && edge.target.id == fromNode);
+                const allEdges = edges.filter(edge => { 
+                    return !isAlignmentEdge(edge) && (
+                                (edge.source.id == fromNode && edge.target.id == toNode) ||
+                                (edge.source.id == toNode && edge.target.id == fromNode)
+                            );
                 });
 
                 const edgeCount = allEdges.length;
@@ -483,6 +487,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 if (edgeCount > 1) {
                     curvature = (index % 2 === 0 ? 1 : -1) * (Math.floor(index / 2) + 1) * 0.15 * edgeCount;
                 }
+
                 return curvature;
             }
             
@@ -647,10 +652,12 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
 
                 // Find all parallel edges between the same two nodes (bidirectional)
-                // Get all edges between the two nodes, regardless of direction
+                // Get all non-alignment edges between the two nodes, regardless of direction
                 const allEdgesBetweenSourceAndTarget = edges.filter(edge => {
-                    return (edge.source.id == d.source.id && edge.target.id == d.target.id) ||
-                        (edge.source.id == d.target.id && edge.target.id == d.source.id);
+                    return !isAlignmentEdge(edge) && (
+                                (edge.source.id == d.source.id && edge.target.id == d.target.id) ||
+                                (edge.source.id == d.target.id && edge.target.id == d.source.id)
+                            );
                 });
 
 
@@ -744,14 +751,12 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 // Apply visual curvature to separate multiple edges
                 // Calculate the curvature for the current edge
                 var curvature = calculateCurvature(edges, d.source.id, d.target.id, d.id);
-                // Apply curvature only to intermediate control points (not endpoints)
-                //Apply curvature to the control points (but this does not help with the direction)
+
+                // Apply curvature to the control points (but this does not help with the direction)
                 route.forEach(function (point, index) {
 
                     // Only modify control points, not start/end points
                     if (index > 0 && index < route.length - 1 && curvature !== 0) {
-
-                        // Calculate perpendicular offset based on edge direction and curvature
                         // Adjust the control points based on the direction
                         var offsetX = curvature * Math.abs(Math.sin(angle)) * distance;
                         var offsetY = curvature * Math.abs(Math.cos(angle)) * distance;
