@@ -134,6 +134,37 @@ class ConstraintValidator {
     }
 
 
+    //Find the SMALLEST subset of consistentConstraints that is inconsistent with conflictingConstraint
+    private getMinimalConflictingConstraints(consistentConstraints: any[], conflictingConstraint: any): any[] {
+        // Start with all consistent constraints plus the conflicting one
+        let core = [...consistentConstraints, conflictingConstraint];
+        let changed = true;
+
+        // Only try removing from the consistent constraints, not the conflicting one (which must be present)
+        while (changed) {
+            changed = false;
+            for (let i = 0; i < core.length - 1; i++) { // -1 to always keep conflictingConstraint
+                let testSet = core.slice(0, i).concat(core.slice(i + 1));
+                let solver = new SimplexSolver();
+                try {
+                    for (const c of testSet) {
+                        solver.addConstraint(c);
+                    }
+                    solver.solve();
+                    // If no error, this subset is satisfiable, so keep the constraint in the core
+                } catch {
+                    // Still unsat, so we can remove this constraint from the core
+                    core = testSet;
+                    changed = true;
+                    break;
+                }
+            }
+        }
+        // Return only the minimal subset of consistentConstraints (excluding the conflictingConstraint)
+        return core.filter(c => c !== conflictingConstraint);
+    }
+
+
     private constraintToCassowary(constraint: LayoutConstraint) {
         try {
             if (isTopConstraint(constraint)) {
@@ -216,6 +247,9 @@ class ConstraintValidator {
 
             // TODO: We can improve this now, with the new attached thing.
 
+
+            // We could figure out the unsat core here of the added_constraints + constraint.
+
             let previousSourceConstraints = this.added_constraints.map((c) => c.sourceConstraint);
             let previousSourceConstraintSet = new Set(previousSourceConstraints.map((c) => c.toHTML()));
             previousSourceConstraints = [...previousSourceConstraintSet];
@@ -237,7 +271,9 @@ class ConstraintValidator {
 
             let currentConstraintString = this.orientationConstraintToString(constraint);
             let intermediateReprError = `Constraint:<br> <code>${currentConstraintString}</code><br> conflicts with one (or some) the following constraints:` + previousConstraintString;
-            //Uncaught SyntaxError: Unexpected token ';'
+
+
+
             this.error = `
   <div class="mb-3">
     <div style="display: flex; gap: 1rem; overflow-x: auto;">
