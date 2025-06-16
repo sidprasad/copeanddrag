@@ -59,11 +59,14 @@ export class LayoutInstance {
     private evaluator: WrappedForgeEvaluator;
     private instanceNum: number;
 
+    private readonly addAlignmentEdges: boolean;
 
-    constructor(layoutSpec: LayoutSpec, evaluator: WrappedForgeEvaluator, instNum: number = 0) {
+
+    constructor(layoutSpec: LayoutSpec, evaluator: WrappedForgeEvaluator, instNum: number = 0, addAlignmentEdges: boolean = true) {
         this.instanceNum = instNum;
         this.evaluator = evaluator;
         this._layoutSpec = layoutSpec;
+        this.addAlignmentEdges = addAlignmentEdges;
     }
 
 
@@ -87,6 +90,11 @@ export class LayoutInstance {
     isAttributeField(fieldId: string): boolean {
         const isAttributeRel = this._layoutSpec.directives.attributes.find((ad) => ad.field === fieldId);
         return isAttributeRel ? true : false;
+    }
+
+    isHiddenField(fieldId: string): boolean {
+        const isHiddenRel = this._layoutSpec.directives.hiddenFields.find((hd) => hd.field === fieldId);
+        return isHiddenRel ? true : false;
     }
 
 
@@ -293,7 +301,7 @@ export class LayoutInstance {
      * @param g - The graph, which will be modified to remove the edges that are used to determine attributes.
      * @returns A record of attributes
      */
-    private generateAttributes(g: Graph): Record<string, Record<string, string[]>> {
+    private generateAttributesAndRemoveEdges(g: Graph): Record<string, Record<string, string[]>> {
         // Node : [] of attributes
         let attributes: Record<string, Record<string, string[]>> = {};
 
@@ -304,6 +312,17 @@ export class LayoutInstance {
             const edgeId = edge.name;
             const relName = this.getRelationName(g, edge);
             const isAttributeRel = this.isAttributeField(relName);
+            const isHiddenRel = this.isHiddenField(relName);
+
+            if (isHiddenRel && isAttributeRel) {
+                throw new Error(`${relName} cannot be both an attribute and a hidden field.`);
+            }
+
+            if (isHiddenRel) {
+                // If the field is a hidden field, we should remove the edge from the graph.
+                g.removeEdge(edge.v, edge.w, edgeId);
+                return;
+            }
 
             if (isAttributeRel) {
 
@@ -456,7 +475,7 @@ export class LayoutInstance {
 
         let g: Graph = generateGraph(ai, this.hideDisconnected, this.hideDisconnectedBuiltIns);
 
-        const attributes = this.generateAttributes(g);
+        const attributes = this.generateAttributesAndRemoveEdges(g);
 
 
         let nodeIconMap = this.getNodeIconMap(g);
@@ -509,7 +528,7 @@ export class LayoutInstance {
         });
 
         ///////////// CONSTRAINTS ////////////
-        let constraints: LayoutConstraint[] = this.applyRelatativeOrientationConstraints(layoutNodes);
+        let constraints: LayoutConstraint[] = this.applyRelatativeOrientationConstraints(layoutNodes, g);
 
         let layoutEdges: LayoutEdge[] = g.edges().map((edge) => {
 
@@ -846,7 +865,7 @@ export class LayoutInstance {
      * @param layoutNodes - The layout nodes to which the constraints will be applied.
      * @returns An array of layout constraints.
      */
-    applyRelatativeOrientationConstraints(layoutNodes: LayoutNode[]): LayoutConstraint[] {
+    applyRelatativeOrientationConstraints(layoutNodes: LayoutNode[], g : Graph): LayoutConstraint[] {
 
         let constraints: LayoutConstraint[] = [];
         let relativeOrientationConstraints = this._layoutSpec.constraints.orientation.relative;
@@ -865,6 +884,12 @@ export class LayoutInstance {
                 let targetNodeId = tuple[1];
 
                 directions.forEach((direction) => {
+                    // Only add alignment edge if enabled
+                    if (direction.startsWith("directly") && this.addAlignmentEdges) {
+                        const alignmentEdgeLabel = `_alignment_${sourceNodeId}_${targetNodeId}_`;
+                        g.setEdge(sourceNodeId, targetNodeId, alignmentEdgeLabel, alignmentEdgeLabel);
+                    }
+
                     if (direction == "left") {
                         constraints.push(this.leftConstraint(targetNodeId, sourceNodeId, this.minSepWidth, layoutNodes, c));
                     }

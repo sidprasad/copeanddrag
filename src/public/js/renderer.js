@@ -31,6 +31,45 @@ function isGroupEdge(edge) {
     return edge.id.startsWith(groupPrefix);
 }
 
+
+
+function adjustLinkLengthsAndSeparationConstraintsToScaleFactor(constraints, scaleFactor) {
+
+    const adjustedScaleFactor = scaleFactor / 5;
+    const min_sep = 150;
+    const default_node_width = 100;
+
+    let linkLength = (min_sep + default_node_width) / adjustedScaleFactor;
+
+
+
+    /*
+    For each constraint, if it is a separation constraint, adjust the distance by the scale factor.
+    */
+
+    // Instead of mutating the original constraints array, create a new scaled constraints array
+    function getScaledConstraints(constraints) {
+        return constraints.map(constraint => {
+            if (constraint.type === "separation" && typeof constraint.gap === "number") {
+
+                const oldgap = constraint.gap;
+                const newgap = oldgap / adjustedScaleFactor; // or * scaleFactor, depending on your UI logic
+                //console.log(`Scaling constraint gap from ${oldgap} to ${newgap} with scale factor ${adjustedScaleFactor}`);
+
+                return {
+                    ...constraint,
+                    gap: newgap 
+                };
+            }
+            return constraint;
+        });
+    }
+
+    return {
+        scaledConstraints: getScaledConstraints(constraints),
+        linkLength: linkLength
+    }
+}
 /**
  * Obtains the groupOn and addToGroup indices from the edge ID.
  * @param {string} edgeId - The edge ID in format "_g_{groupOnIndex}_{addToGroupIndex}_"
@@ -220,8 +259,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .handleDisconnected(true)
         .size([width, height]);
 
-    const min_sep = 50;
-    const default_node_width = 100;
+
 
     ///// Check whats up TODO ////
 
@@ -232,32 +270,38 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     if (scaleFactorInput) {
         // Add an event listener to the scale factor input to update the layout when the scale factor changes
         scaleFactorInput.addEventListener("change", function () {
-            scaleFactor = parseFloat(scaleFactorInput.value) / 5;
+            scaleFactor = parseFloat(scaleFactorInput.value)    ;
+            
 
-            let linkLength = (min_sep + default_node_width) / scaleFactor;
+            let { scaledConstraints, linkLength } = adjustLinkLengthsAndSeparationConstraintsToScaleFactor(constraints, scaleFactor);
+
             console.log("Link length", linkLength);
 
-            colaLayout.linkDistance(linkLength);
-            colaLayout.start(
-                initialUnconstrainedIterations,
-                initialUserConstraintIterations,
-                initialAllConstraintsIterations,
-                gridSnapIterations);
-                // .on("end", routeEdges);
+            colaLayout.symmetricDiffLinkLengths(linkLength);
+
+            colaLayout.constraints(scaledConstraints)
+                .start(
+                    initialUnconstrainedIterations,
+                    initialUserConstraintIterations,
+                    initialAllConstraintsIterations,
+                    gridSnapIterations)
+                .on("end", routeEdges);
         });
     }
 
     // TODO: Figure out WHEN to use flowLayout and when not to use it.
     // I think having directly above/ below makes it impossible to have flow layout 'y' *unless we have heirarchy*
 
+    const currentScaleFactor = scaleFactorInput ? parseFloat(scaleFactorInput.value) : 1;
+    let { scaledConstraints, linkLength } = adjustLinkLengthsAndSeparationConstraintsToScaleFactor(constraints, currentScaleFactor);
+
     colaLayout
         .nodes(nodes)
         .links(edges)
-        .constraints(constraints)
+        .constraints(scaledConstraints)
         .groups(groups)
-        .groupCompactness(1e-3) // The higer the number, the more compact the groups will be
-        .symmetricDiffLinkLengths(min_sep + default_node_width);
-        // .linkDistance(50)
+        .groupCompactness(1e-3)
+        .symmetricDiffLinkLengths(linkLength);
 
 
     var lineFunction = d3.line()
@@ -492,7 +536,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     dismissableAlert.className = "alert alert-danger alert-dismissible fade show";
                     dismissableAlert.setAttribute("role", "alert");
                     dismissableAlert.innerHTML = `Runtime (WebCola) error when laying out an edge from ${d.source.id} to ${d.target.id}. You may have to click and drag these nodes slightly to un-stick layout.`;
-                    
+
                     // Make sure we don't have duplicate alerts
                     let existingAlerts = runtimeMessages.querySelectorAll(".alert");
                     existingAlerts.forEach(alert => {
@@ -500,7 +544,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                             alert.remove();
                         }
                     });
-                    
+
                     runtimeMessages.appendChild(dismissableAlert);
                     // Fallback: return a simple straight line between node centers
                     return lineFunction([{ x: d.source.x, y: d.source.y }, { x: d.target.x, y: d.target.y }]);
@@ -582,7 +626,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                             route[0] = currentSource;
                         }
                         else {
-                            console.log("Source group not found", potentialGroups, sourceIndex, targetIndex, n );
+                            console.log("Source group not found", potentialGroups, sourceIndex, targetIndex, n);
                         }
     
                     }
@@ -786,14 +830,20 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 d3.selectAll(".link")
                     .filter(link => link.relName === relName)
                     .classed("highlighted", true);
-                
+
                 d3.selectAll(".inferredLink")
                     .filter(link => link.relName === relName)
                     .classed("highlighted", true);
             }
 
             // Get a set of all relNames
-            const relNames = new Set(edges.map(edge => edge.relName));
+            const relNames = new Set(
+                edges
+                    .filter(edge => !isAlignmentEdge(edge))
+                    .map(edge => edge.relName)
+            );
+            // For each relName, add a LI element to the ul with id "relationList", with the relName as text and hover event to highlight the relation,
+            // also a mouseout event to remove the highlight
 
             // TODO: Maybe these should be checkboxes instead of just text?
             // I wory about the removal of the highlight on uncheck
@@ -850,13 +900,16 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .attr("class", "link-group");
 
     const link = linkGroups.append("path")
-        .attr("class", d => isInferredEdge(d) ? "inferredLink" : "link") // Dynamically assign class
-        .attr("data-link-id", function (d) {
-            console.log("d.id", d.id);
-            return d.id;
-        });
+        .attr("class", d => {
+            if (isAlignmentEdge(d)) return "alignmentLink";
+            if (isInferredEdge(d)) return "inferredLink";
+            return "link";
+        }) // Dynamically assign class
+        .attr("data-link-id", d => d.id);
 
-    linkGroups.append("text")
+    linkGroups
+        .filter(d => !isAlignmentEdge(d))
+        .append("text")
         .attr("class", "linklabel")
         .text(d => d.label);
 
@@ -865,9 +918,12 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         return node.name.startsWith("_");
     }
 
-    /*
-        NODE RENDERING
-    */
+    function isAlignmentEdge(edge) {
+        return edge.id.startsWith("_alignment_");
+    }
+
+
+
     var node = svg.selectAll(".node")
         .data(nodes)
         .enter().append("g") // Create a group for each node
@@ -894,33 +950,33 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     node.filter(d => d.icon) // Filter nodes that have an icon
         .append("image")
         .attr("xlink:href", d => d.icon)
-        .attr("width", function (d) { 
+        .attr("width", function (d) {
             if (d.showLabels) {
-                return d.width * SMALL_IMG_SCALE_FACTOR; 
+                return d.width * SMALL_IMG_SCALE_FACTOR;
             }
-            return d.width; 
+            return d.width;
         }) // Scale down the icon to fit inside the rectangle
-        .attr("height", function (d) { 
+        .attr("height", function (d) {
             if (d.showLabels) {
-                return d.height * SMALL_IMG_SCALE_FACTOR; 
+                return d.height * SMALL_IMG_SCALE_FACTOR;
             }
-            return d.height; 
+            return d.height;
         }) // Scale down the icon to fit inside the rectangle
-        .attr("x", function (d) { 
+        .attr("x", function (d) {
             if (d.showLabels) {
                 // Move to the top-right corner
-                return d.x + d.width - (d.width * SMALL_IMG_SCALE_FACTOR); 
+                return d.x + d.width - (d.width * SMALL_IMG_SCALE_FACTOR);
             }
             // Center the icon horizontally
-            return d.x - d.width / 2; 
+            return d.x - d.width / 2;
         })
-        .attr("y", function (d) { 
+        .attr("y", function (d) {
             if (d.showLabels) {
                 // Align with the top edge
-                return d.y - d.height / 2; 
+                return d.y - d.height / 2;
             }
             // Center the icon vertically
-            return d.y - d.height / 2; 
+            return d.y - d.height / 2;
         })
         .append("title")
         .text(function (d) { return d.name; })
@@ -1033,10 +1089,10 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
             let shouldShouldGroupLabel = d.showLabel || false;
             if (shouldShouldGroupLabel) {
-                if(d.padding) {
+                if (d.padding) {
                     d.padding = 20;
                 }
-                return d.name; 
+                return d.name;
             }
             // TODO: Added this
             return "";

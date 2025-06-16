@@ -1,6 +1,7 @@
 # Lightweight Diagramming by Spatial Refinement
 
 ![Latest Release](https://img.shields.io/github/v/release/sidprasad/copeanddrag)
+[![npm version](https://img.shields.io/npm/v/cope-and-drag)](https://www.npmjs.com/package/cope-and-drag)
 [![Documentation](https://img.shields.io/badge/docs-available-brightgreen)](https://sidprasad.github.io/copeanddrag)
 
 > “Spatial thinking is the foundation of abstract thought” - B Tversky
@@ -13,3 +14,12 @@ diagrams based on Alloy and Forge instances.
 The language is based on a small number of orthogonal primitives,
 and is grounded in the cognitive science literature on 
 effective diagramming.
+
+CnD is available as an npm package. You can install and launch CnD with:
+
+```sh
+npm install -g cope-and-drag
+copeanddrag
+```
+
+[View on npm](https://www.npmjs.com/package/cope-and-drag)

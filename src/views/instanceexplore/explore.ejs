@@ -8,7 +8,16 @@
 
     <div class="row mt-1 ">
         <div id="compactnessControl" class="container">
-            <input title="Diagram Compactness" type="range" class="form-control-range" id="scaleFactor" name="scaleFactor" min="0.5" max="10" step="0.5" value="5">
+            <input
+                title="Diagram Compactness"
+                type="range"
+                class="form-control-range"
+                id="scaleFactor"
+                name="scaleFactor"
+                min="0.5"
+                max="10"
+                step="0.5"
+                value="<%= typeof scaleFactor !== 'undefined' ? scaleFactor : 5 %>">
         </div>
         <hr>
     </div>
@@ -16,27 +25,6 @@
     <!-- Here, projections is a list of type { type : string, projectedAtom : string, atoms : string[]} 
      If projections is non-empty, then show each type as a form input  and projectedAtom as the selected element of atoms
     -->
-
-    <% if (projectionData && projectionData.length> 0) { %>
-    <div class="row container mt-1" id="projectionsSection">
-        <h4>Projections</h4>
-        <p> For each projected type, choose the atom to project over.</p>
-        <% projectionData.forEach(function(projection) { %>
-            <div class="form-group">
-                <label for="<%= projection.type %>_projection">
-                    <%= projection.type %>
-                </label>
-                <select class="form-control" id="<%= projection.type %>_projection"
-                    name="<%= projection.type %>_projection">
-                    <% projection.atoms.forEach(function(atom) { %>
-                        <option value="<%= atom %>" <%= projection.projectedAtom===atom ? 'selected' : '' %>> <%= atom %>
-                        </option>
-                        <% }); %>
-                </select>
-            </div>
-        <% }); %>
-    </div>
-    <% } %>
 
     <style>
         .chevron-icon {
@@ -46,7 +34,69 @@
         #toggleRelationCard {
             cursor: pointer; /* Make the header look clickable */
         }
+        .unsaved-select {
+            border: 2px solid #ffc107 !important;
+            background-color: #fff8e1 !important;
+            position: relative;
+        }
+        .custom-tooltip {
+            display: none;
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #343a40;
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            z-index: 1000;
+            white-space: nowrap;
+            margin-left: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .unsaved-select:hover + .custom-tooltip {
+            display: block;
+        }
     </style>
+    <% if (projectionData && projectionData.length > 0) { %>
+    <div class="row container mt-1" id="projectionsSection">
+        <div class="row mb-2 container">
+            <p>
+                <span class="font-weight-bold">Projections:</span>
+                <span class="text-muted">Choose the atom to project over.</span>
+            </p>
+        </div>
+        <div class="row mt-2 container">
+            <% projectionData.forEach(function(projection) { %>
+                <div class="form-group col-auto" style="position:relative;">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="<%= projection.type %>_label">
+                                <%= projection.type %>
+                            </span>
+                        </div>
+                        <select class="form-control projection-select"
+                                id="<%= projection.type %>_projection"
+                                name="<%= projection.type %>_projection"
+                                aria-describedby="<%= projection.type %>_label"
+                                data-initial="<%= projection.projectedAtom %>">
+                            <% projection.atoms.forEach(function(atom) { %>
+                                <option value="<%= atom %>" <%= projection.projectedAtom === atom ? 'selected' : '' %>>
+                                    <%= atom %>
+                                </option>
+                            <% }); %>
+                        </select>
+                        <div class="custom-tooltip">
+                           Projection choice has changed from when diagram was rendered. Click 'Apply Layout' to project over the new atom.
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+    <% } %>
+
     <div class="row mt-1 bg-light">
         <div class="container">
             <!-- Collapsible Header -->
@@ -78,6 +128,17 @@
                 chevronIcon.classList.remove('fa-chevron-down'); // Remove down-pointing chevron
                 chevronIcon.classList.add('fa-chevron-right'); // Add right-pointing chevron
             }
+        });
+
+        document.querySelectorAll('.projection-select').forEach(function(select) {
+            const initial = select.getAttribute('data-initial');
+            select.addEventListener('change', function() {
+                if (this.value !== initial) {
+                    this.classList.add('unsaved-select');
+                } else {
+                    this.classList.remove('unsaved-select');
+                }
+            });
         });
     </script>
     <div class="row mt-1">

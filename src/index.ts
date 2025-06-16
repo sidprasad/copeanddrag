@@ -29,6 +29,7 @@ import AdmZip from 'adm-zip';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUiDist from 'swagger-ui-dist';
+import { log } from 'console';
 
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
@@ -40,7 +41,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.json({ limit: '50mb' }));
 
 // This is a hack. I'm not sure how to encode the version number.
-const version = "3.3.0";
+const version = "3.3.8";
 
 const secretKey = "cope-and-drag-logging-key";
 
@@ -59,8 +60,11 @@ const swaggerOptions = {
 
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
 app.use('/openapi', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-  customCssUrl: swaggerUiDist.getAbsoluteFSPath() + '/swagger-ui.css',
-  customJs: swaggerUiDist.getAbsoluteFSPath() + '/swagger-ui-bundle.js'
+  customCssUrl: '/swagger-ui-dist/swagger-ui.css',
+  customJs: [
+    '/swagger-ui-dist/swagger-ui-bundle.js',
+    '/swagger-ui-dist/swagger-ui-standalone-preset.js'
+  ]
 }));
 
 // Function to get or generate a persistent user ID using HMAC
@@ -128,8 +132,8 @@ function getFormContents(req: any) {
     // Internal consistency checks happen here.
     let layoutSpec : LayoutSpec = parseLayoutSpec(cope);
     
-    
-    let li = new LayoutInstance(layoutSpec,  evaluator , instanceNumber);
+
+    let li = new LayoutInstance(layoutSpec, evaluator, instanceNumber, ENABLE_ALIGNMENT_EDGES);
     return { instances, li, instanceNumber, loopBack, projections };
 }
 
@@ -158,17 +162,33 @@ function generateDiagram (req, res)  {
     var loggingEnabled = (req.body.loggingEnabled == undefined) ? true : (req.body.loggingEnabled.toLowerCase() === 'enabled');
     const startTime = performance.now();
 
+
+    function logEventTime(start, eventName, perfloglevel = PERF_LOGGING_LEVELS.info) {
+        let t = performance.now() - start;
+        if (PERF_LOGGING_LEVEL >= perfloglevel) {
+            console.log(`${eventName} time: ${t} ms`);
+        }
+
+    }
+
+    let scaleFactor = parseFloat(req.body.scaleFactor) || 5; // Default scale factor is 5
+
     try {
         var tables = getTableFromRequest(req) || {};
         var { instances, li, instanceNumber, loopBack, projections } = getFormContents(req);
         var num_instances = instances.length;
 
-        if (instanceNumber >= num_instances) {
-            throw new Error(`Temporal instance ${instanceNumber} number out of range. The temporal trace has only ${num_instances} states.`);
-        } else if (loopBack != 0 && !loopBack) {
-            loopBack = 0;
-        }
+        try {
+            if (instanceNumber >= num_instances) {
+                throw new Error(`Temporal instance ${instanceNumber} number out of range. The temporal trace has only ${num_instances} states.`);
+            } else if (loopBack != 0 && !loopBack) {
+                loopBack = 0;
+            }
+        } finally {
 
+            var parsingTime = performance.now() - startTime;
+            logEventTime(startTime, "Parse and Static Checks", PERF_LOGGING_LEVELS.verbose);
+        }
 
 
         var instAsString = instanceToInst(instances[instanceNumber]);
@@ -178,6 +198,11 @@ function generateDiagram (req, res)  {
         catch(e){
             throw new Error("<p>The instance being visualized is inconsistent with the Cope and Drag spec.<p> " + e.message);
         }
+        finally {
+            //var layoutGen = performance.now() - startTime;
+            logEventTime(parsingTime, "Layout Validation + Translation", PERF_LOGGING_LEVELS.verbose);
+        }
+
 
         let cl = new WebColaLayout(layout);
         var colaConstraints = cl.colaConstraints;
@@ -206,9 +231,8 @@ function generateDiagram (req, res)  {
             "error": error
         }
 
-        let endTime = performance.now();
-        var serverTime = endTime - startTime;
-        console.log(`Server time: ${serverTime} ms`);
+
+        logEventTime(startTime, "Total Server-Side", PERF_LOGGING_LEVELS.info);
 
         if (loggingEnabled) {
             logger.log_payload(payload, LogLevel.INFO, Event.CND_RUN);
@@ -233,7 +257,8 @@ function generateDiagram (req, res)  {
         instAsString,
         errors: error,//.replace(/\n/g, "<br>"),
         loggingEnabled,
-        tables : tables
+        tables : tables,
+        scaleFactor : scaleFactor // Default. 
     });
 }
 
@@ -241,8 +266,39 @@ function generateDiagram (req, res)  {
 
 const server = http.createServer(app);
 
-const argvPort = process.argv.find((arg, i, arr) => arg === '--port' && arr[i + 1]) ? parseInt(process.argv[process.argv.indexOf('--port') + 1]) : undefined;
-const PORT = argvPort || process.env.PORT || 3000;
+
+const argv = require('minimist')(process.argv.slice(2), {
+    boolean: ['alignment-edges'],
+    string: ['port', 'perf-logging'],
+    alias: {
+        p: 'port',
+        a: 'alignment-edges',
+        l: 'perf-logging'
+    },
+    default: {
+        port: process.env.PORT || 3000,
+        'alignment-edges': true,
+        'perf-logging': process.env.PERF_LOGGING || 'none' // default to 'info'
+    }
+});
+
+/*
+node index.js --perf-logging=none
+node index.js --perf-logging=info
+node index.js --perf-logging=verbose
+*/
+const PORT = parseInt(argv.port, 10);
+const ENABLE_ALIGNMENT_EDGES = argv['alignment-edges'];
+const PERF_LOGGING_LEVELS = {
+    none: 0,
+    info: 1,
+    verbose: 2
+};
+
+const pll = (argv['perf-logging'] || 'none').toLowerCase();
+const PERF_LOGGING_LEVEL = PERF_LOGGING_LEVELS[pll] ?? PERF_LOGGING_LEVELS.none;
+
+
 server.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}/`);
 });
@@ -332,7 +388,8 @@ app.get('/', (req, res) => {
         // sourceFileName: "",
         instAsString: "",
         errors: "",
-        tables: instanceToTables
+        tables: instanceToTables,
+        scaleFactor: 5, // Default scale factor
     });
 });
 
@@ -456,7 +513,10 @@ app.post('/import', upload.single('file'), async (req, res) => {
 app.post('/timing', (req, res) => {
     const clientTime = req.body.clientTime;
 
-    console.log(`Client time: ${clientTime} ms`);
+    if (PERF_LOGGING_LEVEL  >= PERF_LOGGING_LEVELS.info) {
+        // Log the client time
+        console.log(`Client-Side time: ${clientTime} ms`);
+    }
     res.json({ message: 'Client time received successfully' });
 });
 
@@ -566,9 +626,6 @@ app.post('/evaluator', (req, res) => {
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 message:
  *                   type: string
  */
 app.post('/feedback', (req, res) => {
