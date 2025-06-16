@@ -272,9 +272,9 @@ class ConstraintValidator {
             const minimal_conflicting_constraints = this.getMinimalConflictingConstraints(this.added_constraints, constraint);
 
 
-            let previousSourceConstraints = minimal_conflicting_constraints.map((c) => c.sourceConstraint);
-            let previousSourceConstraintSet = new Set(previousSourceConstraints.map((c) => c.toHTML()));
-            previousSourceConstraints = [...previousSourceConstraintSet];
+            //let previousSourceConstraints = ;
+            let previousSourceConstraintSet = new Set(minimal_conflicting_constraints.map((c) => c.sourceConstraint).map((c) => c.toHTML()));
+            let previousSourceConstraints = [...previousSourceConstraintSet];
 
             let conflictingSourceConstraint = constraint.sourceConstraint;
             let conflictingSourceConstraintString = conflictingSourceConstraint.toHTML();
