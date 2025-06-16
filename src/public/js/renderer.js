@@ -285,7 +285,9 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     initialUserConstraintIterations,
                     initialAllConstraintsIterations,
                     gridSnapIterations)
-                .on("end", routeEdges);
+                .on("end", function () {
+                    gridify(svg, 15, margin, 5);
+                });
         });
     }
 
@@ -301,7 +303,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .constraints(scaledConstraints)
         .groups(groups)
         .groupCompactness(1e-3)
-        .symmetricDiffLinkLengths(linkLength);
+        // .symmetricDiffLinkLengths(linkLength); // FIXME: The default link length is too large for small graphs
+        .linkDistance(100);
 
 
     var lineFunction = d3.line()
