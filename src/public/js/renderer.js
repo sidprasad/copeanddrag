@@ -337,9 +337,9 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         }, margin - groupMargin);
     }
 
-    
+    // NOTE: The introduction of alignment edges might be the cause of some issues when using GridRouter
     function gridify(svg, nudgeGap, margin, groupMargin) {
-
+        console.log("Gridify");
         // Create the grid router
         var gridrouter = route(nodes, groups, margin, groupMargin);
 
@@ -366,20 +366,24 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             var p = cola.GridRouter.getRoutePath(route, cornerradius, arrowwidth, arrowheight);
 
             // Create arrow path
-            if (arrowheight > 0) {
-                svg.append('path')
-                    .attr('data-link-id', edgeData.id)
-                    .attr('d', p.arrowpath);
-            }
+            // if (arrowheight > 0) {
+            //     svg.append('path')
+            //         .attr('data-link-id', edgeData.id)
+            //         .attr('d', p.arrowpath)
+            //         .lower();
+            // }
 
             // Create main path
             svg.append('path')
-                .attr('class', function () {
-                    return isInferredEdge(edgeData) ? 'inferredLink' : 'link';
+                .attr("class", function () {
+                    if (isAlignmentEdge(edgeData)) return "alignmentLink";
+                    if (isInferredEdge(edgeData)) return "inferredLink";
+                    return "link";
                 })
                 .attr('data-link-id', edgeData.id)
                 .attr('fill', 'none')
-                .attr('d', p.routepath);
+                .attr('d', p.routepath)
+                .lower();
         });
 
         // Update node positions using router bounds;
@@ -395,6 +399,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         
         // Update group positions
         var groupPadding = margin - groupMargin;
+        console.log("Group padding", groupPadding);
         svg.selectAll(".group").transition()
             .attr("x", function (d) { return d.routerNode.bounds.x - groupPadding; })
             .attr('y', function (d) { return d.routerNode.bounds.y + 2 * groupPadding; })
@@ -405,13 +410,11 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         // Update labels positions
         svg.selectAll(".label").transition()
             .attr("x", function (d) { 
-                console.log(`label ${d.id} x`, d.routerNode.bounds.cx())
                 // return d.routerNode.bounds.cx(); 
                 return 0;
             })
             .attr("y", function (d) {
                 var h = this.getBBox().height;
-                console.log(`label ${d.id} y`, d.bounds.cy() + h / 3.5);
                 // return d.bounds.cy() + h / 3.5;
                 return 0;
             });
@@ -927,6 +930,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     }
 
     function isAlignmentEdge(edge) {
+        // console.log("Checking if edge is alignment", edge.id);
         return edge.id.startsWith("_alignment_");
     }
 
@@ -1109,21 +1113,9 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .call(colaLayout.drag);
 
     colaLayout.on("tick", function () {
-        // console.log("tick");
+        console.log("tick");
 
-        // Update group rectangles
-        group.attr("x", function (d) {
-            return d.bounds.x;
-        })
-            .attr("y", function (d) {
-                return d.bounds.y;
-            })
-
-            .attr("width", function (d) { return d.bounds.width(); })
-            .attr("height", function (d) { return d.bounds.height(); })
-            .lower();
-
-        // Update node rectangles and images
+        // UPDATE NODES AND NODE LABELS
         node.select("rect")
             .each(function (d) { d.innerBounds = d.bounds.inflate(-1); })
             .attr("x", function (d) { return -d.bounds.width() / 2; })
@@ -1150,8 +1142,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 return -d.height / 2;
             }
         })
-        
-        // Update node labels
 
         mostSpecificTypeLabel
             .attr("x", function (d) { return -d.width / 2 + 5; })
@@ -1241,6 +1231,16 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
         //     )
 
+        // UPDATE GROUPS AND GROUP LABELS
+        group.attr("x", function (d) {
+                return d.bounds.x + (d.bounds.width() / 2);
+            })
+            .attr("y", function (d) {
+                return d.bounds.y + (d.bounds.height() / 2);
+            })
+            .attr("width", function (d) { return d.bounds.width(); })
+            .attr("height", function (d) { return d.bounds.height(); })
+            .lower();
 
         // Render group labels
         groupLabel.attr("x", function (d) {
@@ -1249,7 +1249,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         }) // Center horizontally
             .attr("y", function (d) { return d.bounds.y + 12; })
             .attr("text-anchor", "middle") // Center the text on its position
-            .lower();
+            .raise();
 
 
         // linkGroups.select("text.linklabel").raise();
