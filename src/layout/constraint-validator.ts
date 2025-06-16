@@ -135,6 +135,8 @@ class ConstraintValidator {
 
 
     //Find the SMALLEST subset of consistentConstraints that is inconsistent with conflictingConstraint
+
+    // This is still only LOCALLY minimal.
     private getMinimalConflictingConstraints(consistentConstraints: any[], conflictingConstraint: any): any[] {
         // Start with all consistent constraints plus the conflicting one
         let core = [...consistentConstraints, conflictingConstraint];
@@ -247,10 +249,11 @@ class ConstraintValidator {
 
             // TODO: We can improve this now, with the new attached thing.
 
-
             // We could figure out the unsat core here of the added_constraints + constraint.
+            const minimal_conflicting_constraints = this.getMinimalConflictingConstraints(this.added_constraints, constraint);
 
-            let previousSourceConstraints = this.added_constraints.map((c) => c.sourceConstraint);
+
+            let previousSourceConstraints = minimal_conflicting_constraints.map((c) => c.sourceConstraint);
             let previousSourceConstraintSet = new Set(previousSourceConstraints.map((c) => c.toHTML()));
             previousSourceConstraints = [...previousSourceConstraintSet];
 
