@@ -280,20 +280,27 @@ class ConstraintValidator {
             // let previousSourceConstraints = [...previousSourceConstraintSet];
 
 
-            // Now I want a mapping of the constraints to their source constraints.
+            // TODO: We want to invert this mapping so 
+            // that we can map a source constraint to several layout constraints.
 
-            let previousLayoutConstraintToSourceConstraint = {};
+            let sourceConstraintToLayoutConstraints = {};
+
             minimal_conflicting_constraints.forEach((c) => {
-                let key = this.orientationConstraintToString(c);
-                let sourceConstraintHTML = c.sourceConstraint.toHTML();
+                // Use a unique identifier for the source constraint as the key
+                let sourceKey = c.sourceConstraint.toHTML(); // or another unique property
+                let layoutConstraintHTML = this.orientationConstraintToString(c);
                 let uid = uuidv4();
 
-
-                previousLayoutConstraintToSourceConstraint[key] = {
-                    sourceConstraint: sourceConstraintHTML,
+                if (!sourceConstraintToLayoutConstraints[sourceKey]) {
+                    sourceConstraintToLayoutConstraints[sourceKey] = [];
+                }
+                sourceConstraintToLayoutConstraints[sourceKey].push({
+                    layoutConstraint: layoutConstraintHTML,
                     uid: uid
-                };
+                });
             });
+
+
 
             let conflictingConstraint = this.orientationConstraintToString(constraint);
             let conflictingSourceConstraint = constraint.sourceConstraint.toHTML();
@@ -301,7 +308,7 @@ class ConstraintValidator {
             const context = {
                 conflictingConstraint: conflictingConstraint,
                 conflictingSourceConstraint: conflictingSourceConstraint,
-                previousLayoutConstraintToSourceConstraint: previousLayoutConstraintToSourceConstraint,
+                previousSourceConstraintToLayoutConstraints: sourceConstraintToLayoutConstraints,
 
             };
                
