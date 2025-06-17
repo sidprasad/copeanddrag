@@ -916,7 +916,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     }
 
     function isAlignmentEdge(edge) {
-        // console.log("Checking if edge is alignment", edge.id);
         return edge.id.startsWith("_alignment_");
     }
 
@@ -1113,24 +1112,24 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         
 
         node.select("image")
-        .attr("x", function (d) {
-            if (d.showLabels) {
-                // Move to the top-right corner
-                return d.x + (d.width/2) - (d.width * SMALL_IMG_SCALE_FACTOR);
-            } else {
-                // Align with d.bounds.x
-                return d.bounds.x;
-            }
-        })
-        .attr("y", function (d) {
-            if (d.showLabels) {
-                // Align with the top edge
-                return d.y - d.height / 2;
-            } else {
-                // Align with d.bounds.y
-                return d.bounds.y;
-            }
-        })
+            .attr("x", function (d) {
+                if (d.showLabels) {
+                    // Move to the top-right corner
+                    return d.x + (d.width / 2) - (d.width * SMALL_IMG_SCALE_FACTOR);
+                } else {
+                    // Align with d.bounds.x
+                    return d.bounds.x;
+                }
+            })
+            .attr("y", function (d) {
+                if (d.showLabels) {
+                    // Align with the top edge
+                    return d.y - d.height / 2;
+                } else {
+                    // Align with d.bounds.y
+                    return d.bounds.y;
+                }
+            })
 
         mostSpecificTypeLabel
             .attr("x", function (d) { return -d.width / 2 + 5; })
