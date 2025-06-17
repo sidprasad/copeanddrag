@@ -285,10 +285,11 @@ class ConstraintValidator {
             let previousSourceConstraints = [...previousSourceConstraintSet];
 
             let conflictingSourceConstraint = constraint.sourceConstraint;
-            let conflictingSourceConstraintString = conflictingSourceConstraint.toHTML();
+            
+            context['conflictingSourceConstraint'] = conflictingSourceConstraint.toHTML();
+            context['musSourceConstraints'] = previousSourceConstraints;
 
-
-            let sourceLanguageError = `Constraint:<br> <code>${conflictingSourceConstraintString}</code><br> conflicts with one (or some) the following source constraints: <br>` + previousSourceConstraints.map((c) => `<code>${c}</code>`).join('<br>');
+            //let sourceLanguageError = `Constraint:<br> <code>${conflictingSourceConstraintString}</code><br> conflicts with one (or some) the following source constraints: <br>` + previousSourceConstraints.map((c) => `<code>${c}</code>`).join('<br>');
 
             
 
@@ -297,11 +298,10 @@ class ConstraintValidator {
             let previousConstraintSet = new Set(previousConstraintList); 
             previousConstraintList = [...previousConstraintSet];
 
-            let previousConstraintString = "<br><br>" + previousConstraintList.map((c) => "<code>" + c + "</code>").join('<br>');
-
             let currentConstraintString = this.orientationConstraintToString(constraint);
-            let intermediateReprError = `Constraint:<br> <code>${currentConstraintString}</code><br> conflicts with one (or some) the following constraints:` + previousConstraintString;
 
+            context['conflictingIRConstraint'] = currentConstraintString;
+            context['musIRConstraints'] = previousConstraintList;
 
             this.error = ejs.render(errorTemplate, context);
 
