@@ -11,7 +11,7 @@
             following source constraints: <br>
 
 
-            <% Object.entries(sourceConstraintToLayoutConstraints).forEach(function([key, item]) { %>
+            <% Object.entries(previousSourceConstraintToLayoutConstraints).forEach(function([key, item]) { %>
                 <code class="highlight <%= item.uid %>"><%= key %></code>
                 <br>
             <% }); %>
@@ -34,7 +34,7 @@
 
 
 
-            <% Object.entries(sourceConstraintToLayoutConstraints).forEach(function([sourceKey, layoutArray]) { %>
+            <% Object.entries(previousSourceConstraintToLayoutConstraints).forEach(function([sourceKey, layoutArray]) { %>
                 <div class="card mb-3">
                     <div class="card-header">
                     <%- sourceKey %>
