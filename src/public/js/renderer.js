@@ -369,9 +369,10 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
             // Create the link groups
             const linkGroup = svg.append('g')
-                .attr("class", "link-group");
+                .attr("class", "link-group")
+                .datum(edgeData);
 
-            // NOTE: This is the link
+            // Create the link
             linkGroup.append('path')
                 .attr("class", function () {
                     if (isAlignmentEdge(edgeData)) return "alignmentLink";
@@ -381,6 +382,13 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 .attr('data-link-id', edgeData.id)
                 .attr('d', p.routepath)
                 .lower();
+            
+            // Create the link labels
+            linkGroup
+                .filter(d => !isAlignmentEdge(d))
+                .append("text")
+                .attr("class", "linklabel")
+                .text(d => d.label);
         });
 
         // Update node positions
@@ -409,11 +417,14 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         
         // Position link labels at route midpoints
         updateLinkLabels(routes, edges);
+
+        // zoomToFit();
     }
 
     // Helper function to update link labels
     // TODO: Improve label placement to avoid overlap with other labels
     function updateLinkLabels(routes, edges) {
+        console.log("Updating link labels");
         routes.forEach(function(route, index) {
             var edgeData = edges[index];
             
@@ -437,6 +448,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             // console.log(`Midpoint for edge ${edgeData.id}:`, midpoint);
             
             // Update corresponding label
+            const linkGroups = svg.selectAll(".link-group");
             linkGroups.filter(function(d) { return d.id === edgeData.id; })
                 .select("text.linklabel")
                 .attr("x", midpoint.x)
@@ -806,64 +818,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     }
                 })
                 .raise();
-
-            /**** This bit ensures we zoom to fit ***/
-            const bbox = svg.node().getBBox();
-            const padding = 10; // Padding in pixels
-
-            const viewBox = [
-                bbox.x - padding,
-                bbox.y - padding,
-                bbox.width + 2 * padding,
-                bbox.height + 2 * padding
-            ].join(' ');
-
-
-            const topSvg = d3.select("#svg");
-            topSvg.attr('viewBox', viewBox);
-            /*************************************/
-
-            function highlightRelation(relName) {
-                d3.selectAll(".link")
-                    .filter(link => link.relName === relName)
-                    .classed("highlighted", true);
-
-                d3.selectAll(".inferredLink")
-                    .filter(link => link.relName === relName)
-                    .classed("highlighted", true);
-            }
-
-            // Get a set of all relNames
-            const relNames = new Set(
-                edges
-                    .filter(edge => !isAlignmentEdge(edge))
-                    .map(edge => edge.relName)
-            );
-            // For each relName, add a LI element to the ul with id "relationList", with the relName as text and hover event to highlight the relation,
-            // also a mouseout event to remove the highlight
-
-            // TODO: Maybe these should be checkboxes instead of just text?
-            // I wory about the removal of the highlight on uncheck
-            const relationList = d3.select("#relationList");
-            relationList.selectAll("li")
-                .data(Array.from(relNames))
-                .enter()
-                .append("li")
-                .attr("class", "list-group-item")
-                .text(d => d)
-                .on("mouseover", function (d) {
-                    highlightRelation(d);
-                    // Also make the text bold
-                    d3.select(this).style("font-weight", "bold");
-                })
-                .on("mouseout", function (event, d) {
-                    d3.selectAll(".link")
-                        .classed("highlighted", false);
-                    d3.selectAll(".inferredLink")
-                        .classed("highlighted", false);
-                    // Also make the text normal
-                    d3.select(this).style("font-weight", "normal");
-                });
+                zoomToFit();
         }
         finally {
 
@@ -886,30 +841,75 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         }
     };
 
+    /**
+     * Function meant to be run AFTER layout is completed to zoom the SVG to fit
+     */
+    function zoomToFit() {
+        /**** This bit ensures we zoom to fit ***/
+        const bbox = svg.node().getBBox();
+        const padding = 10; // Padding in pixels
+    
+        const viewBox = [
+            bbox.x - padding,
+            bbox.y - padding,
+            bbox.width + 2 * padding,
+            bbox.height + 2 * padding
+        ].join(' ');
+    
+    
+        const topSvg = d3.select("#svg");
+        topSvg.attr('viewBox', viewBox);
+    }
+
     /*
-        LINK RENDERING
+        HIGHLIGHT RELATIONS
     */
 
-    const linkGroups = svg.selectAll(".link-group");
-        // .data(edges)
-        // .enter()
-        // .append("g")
-        // .attr("class", "link-group");
+    /*************************************/
 
-    const link = linkGroups.append("path")
-        .attr("class", d => {
-            if (isAlignmentEdge(d)) return "alignmentLink";
-            if (isInferredEdge(d)) return "inferredLink";
-            return "link";
-        }) // Dynamically assign class
-        .attr("data-link-id", d => d.id);
+    function highlightRelation(relName) {
+        d3.selectAll("path.link")
+            .filter(link => link.relName === relName)
+            .classed("highlighted", true);
 
-    linkGroups
-        .filter(d => !isAlignmentEdge(d))
-        .append("text")
-        .attr("class", "linklabel")
-        .text(d => d.label);
+        d3.selectAll("path.inferredLink")
+            .filter(link => link.relName === relName)
+            .classed("highlighted", true);
+    }
 
+    // // Get a set of all relNames
+    // const relNames = new Set(
+    //     edges
+    //         .filter(edge => !isAlignmentEdge(edge))
+    //         .map(edge => edge.relName)
+    // );
+    // console.log("Relation names:", relNames);
+    // // For each relName, add a LI element to the ul with id "relationList", with the relName as text and hover event to highlight the relation,
+    // // also a mouseout event to remove the highlight
+
+    // // TODO: Maybe these should be checkboxes instead of just text?
+    // // I wory about the removal of the highlight on uncheck
+    // const relationList = d3.select("#relationList");
+    // relationList.selectAll("li")
+    //     .data(Array.from(relNames))
+    //     .enter()
+    //     .append("li")
+    //     .attr("class", "list-group-item")
+    //     .text(d => d)
+    //     .on("mouseover", function (d) {
+    //         console.log("Highlighting relation", d);
+    //         highlightRelation(d);
+    //         // Also make the text bold
+    //         d3.select(this).style("font-weight", "bold");
+    //     })
+    //     .on("mouseout", function (event, d) {
+    //         d3.selectAll(".link")
+    //             .classed("highlighted", false);
+    //         d3.selectAll(".inferredLink")
+    //             .classed("highlighted", false);
+    //         // Also make the text normal
+    //         d3.select(this).style("font-weight", "normal");
+    //     });
 
     function isHiddenNode(node) {
         return node.name.startsWith("_");
@@ -918,8 +918,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     function isAlignmentEdge(edge) {
         return edge.id.startsWith("_alignment_");
     }
-
-
 
     var node = svg.selectAll(".node")
         .data(nodes)
@@ -1132,8 +1130,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             })
 
         mostSpecificTypeLabel
-            .attr("x", function (d) { return -d.width / 2 + 5; })
-            .attr("y", function (d) { return -d.height / 2 + 10; })
+            .attr("x", function (d) { return d.bounds.x + 5; })
+            .attr("y", function (d) { return d.bounds.y + 10; })
             .raise();
 
         label
