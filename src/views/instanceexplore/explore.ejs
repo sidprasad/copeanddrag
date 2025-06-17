@@ -6,10 +6,10 @@
         <%- include('temporalminimap') %>
     </div>
 
-    <div class="row mt-1 ">
+    <div class="row mt-1">
         <div id="compactnessControl" class="container">
             <input
-                title="Diagram Compactness"
+                title="Select the Diagram Compactness"
                 type="range"
                 class="form-control-range"
                 id="scaleFactor"
@@ -20,6 +20,17 @@
                 value="<%= typeof scaleFactor !== 'undefined' ? scaleFactor : 5 %>">
         </div>
         <hr>
+    </div>
+
+    <div class="row mt-1">
+        <div id="layoutControl" class="container">
+            <div class="input-group">
+                <select title="Choose the Layout Format" class="form-control" id="layoutFormat" name="layoutFormat">
+                    <option value="grid" selected>Grid</option>
+                    <option value="freeform">Freeform</option>
+                </select>
+            </div>
+        </div>
     </div>
 
     <!-- Here, projections is a list of type { type : string, projectedAtom : string, atoms : string[]} 

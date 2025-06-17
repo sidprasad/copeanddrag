@@ -263,6 +263,24 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
     ///// Check whats up TODO ////
 
+    function runWebCola() {
+        colaLayout.constraints(scaledConstraints)
+            .start(
+                initialUnconstrainedIterations,
+                initialUserConstraintIterations,
+                initialAllConstraintsIterations,
+                gridSnapIterations)
+            .on("end", function () {
+                gridify(svg, 15, margin, 5);
+            });
+    }
+
+    /*
+
+        SCALE FACTOR INPUT
+
+    */
+
     // Adjust the graph by the scale factor
     let scaleFactorInput = document.getElementById("scaleFactor");
     let scaleFactor = scaleFactorInput ? parseFloat(scaleFactorInput.value) : 1;
@@ -273,12 +291,13 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             scaleFactor = parseFloat(scaleFactorInput.value)    ;
             
 
-            let { scaledConstraints, linkLength } = adjustLinkLengthsAndSeparationConstraintsToScaleFactor(constraints, scaleFactor);
+            var { scaledConstraints, linkLength } = adjustLinkLengthsAndSeparationConstraintsToScaleFactor(constraints, scaleFactor);
 
             console.log("Link length", linkLength);
 
             colaLayout.symmetricDiffLinkLengths(linkLength);
 
+            // TODO: Refactor this to function
             colaLayout.constraints(scaledConstraints)
                 .start(
                     initialUnconstrainedIterations,
@@ -305,6 +324,38 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .groupCompactness(1e-3)
         // .symmetricDiffLinkLengths(linkLength); // FIXME: The default link length is too large for small graphs
         .linkDistance(100);
+
+    /*
+
+        LAYOUT FORMAT
+
+    */
+
+    let layoutFormatInput = document.getElementById("layoutFormat");
+    let layoutFormat = layoutFormatInput ? layoutFormatInput.value : "freeform";
+
+    if (layoutFormatInput) {
+        // Add onChange event listener
+        layoutFormatInput.addEventListener("change", function () {
+            layoutFormat = layoutFormatInput.value;
+
+            colaLayout.start(
+                    initialUnconstrainedIterations,
+                    initialUserConstraintIterations,
+                    initialAllConstraintsIterations,
+                    gridSnapIterations)
+                .on("end", function () {
+                    if (layoutFormat === "grid") {
+                        console.log("running gridify");
+                        gridify(svg, 15, margin, 5);
+                    }
+                    if (layoutFormat === "freeform") {
+                        console.log("Running route edges")
+                        routeEdges();
+                    }
+                });
+        });
+    }
 
 
     var lineFunction = d3.line()
@@ -459,10 +510,31 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
     var routeEdges = function () {
 
-        try {
-            // Initialize WebCola's edge routing system with collision avoidance
-            // colaLayout.prepareEdgeRouting(margin / 3);
+        // Clear all existing links
+        svg.selectAll('.link-group').remove();
 
+        const linkGroups = svg.selectAll(".link-group")
+            .data(edges)
+            .enter()
+            .append("g")
+            .attr("class", "link-group");
+
+        const link = linkGroups.append("path")
+            .attr("class", d => {
+                if (isAlignmentEdge(d)) return "alignmentLink";
+                if (isInferredEdge(d)) return "inferredLink";
+                return "link";
+            }) // Dynamically assign class
+            .attr("data-link-id", d => d.id);
+
+        linkGroups
+            .filter(d => !isAlignmentEdge(d))
+            .append("text")
+            .attr("class", "linklabel")
+            .text(d => d.label);
+
+        try {
+            colaLayout.prepareEdgeRouting(margin / 3);
             console.log("Routing edges for the nth time", ++edgeRouteIdx);
 
             // What I want to do is change the angle based on the number of edges between the same nodes
@@ -484,8 +556,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 const edgeCount = allEdges.length;
                 let index = allEdges.findIndex(edge => edge.id == edgeid);
 
-                // Calculate curvature: alternates positive/negative with increasing magnitude
-                // Formula creates symmetric curves on both sides of the straight line
+                // Calculate curvature
                 let curvature = 0;
                 if (edgeCount > 1) {
                     curvature = (index % 2 === 0 ? 1 : -1) * (Math.floor(index / 2) + 1) * 0.15 * edgeCount;
@@ -494,21 +565,24 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 return curvature;
             }
 
-            // Main edge drawing function - sets the SVG path 'd' attribute for each edge
-            routes.forEach(function (route) {
+
+            link.attr("d", function (d, i) {
+
+                let n = d.id;
+
                 try {
-                    
-                    // SPECIAL CASE: Handle self-loops (edges from a node to itself)
+                    var route = colaLayout.routeEdge(d);
+
                     if (d.source.id === d.target.id) {
                         const source = d.source;
-    
+
                         // Get the bounds of the source/target node
                         const bounds = source.bounds;
-    
+
                         // Calculate width and height from bounds
                         const width = bounds.X - bounds.x;
                         const height = bounds.Y - bounds.y;
-    
+
                         // Define two distinct points on the bounds for the start and end of the arc
                         const startPoint = {
                             x: bounds.x + width / 2, // Center of the top edge
@@ -518,7 +592,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                             x: bounds.X, // Center of the right edge
                             y: bounds.y + height / 2
                         };
-    
+
                         // Dynamically calculate the control point for the arc
                         const selfLoopIndex = d.selfLoopIndex || 0; // Index of the self-loop (if multiple exist)
                         const curvatureScale = 1 + selfLoopIndex * 0.2; // Scale curvature based on self-loop index
@@ -526,7 +600,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                             x: bounds.X + width / 2 * curvatureScale, // Offset based on node width and scale
                             y: bounds.y - height / 2 * curvatureScale // Offset based on node height and scale
                         };
-    
+
                         // Create a route with three points: start, control, and end
                         route = [
                             startPoint,   // Start point on the bounds
@@ -535,11 +609,11 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                         ];
                     }
                 } catch (e) {
-                    // Handle errors when drawing edges
+
                     console.log("Error routing edge", d.id, `from ${d.source.id} to ${d.target.id}`);
                     console.error(e);
-    
-                    // Create an alert message in the runtime errors section
+
+
                     let runtimeMessages = document.getElementById("runtime_messages");
                     let dismissableAlert = document.createElement("div");
                     dismissableAlert.className = "alert alert-danger alert-dismissible fade show";
@@ -555,63 +629,54 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     });
 
                     runtimeMessages.appendChild(dismissableAlert);
-                    // Fallback: return a simple straight line between node centers
                     return lineFunction([{ x: d.source.x, y: d.source.y }, { x: d.target.x, y: d.target.y }]);
                 }
-    
+
                 // This is a special case for group edges
-                // Draw edges to the closest point on the rectangle of the group
                 if (n.startsWith("_g_")) {
                     let source = d.source;
                     let target = d.target;
-    
+
                     let sourceIndex = getNodeIndex(source.id);
                     let targetIndex = getNodeIndex(target.id);
-    
+
                     // Get the groupOn and addToGroup indices
                     let { groupOnIndex, addToGroupIndex } = getGroupOnAndAddToGroupIndices(n);
-    
-                    /**
-                     * Helper function to find the closest point on a rectangle to a given point.
-                     * @param {*} bounds 
-                     * @param {*} point 
-                     * @returns {{x: number, y: number}} - The closest point on the rectangle to the given point.
-                     */
+
+
                     function closestPointOnRect(bounds, point) {
                         // Destructure the rectangle bounds
                         const { x, y, X, Y } = bounds;
-    
+
                         // Calculate the rectangle's edges
                         const left = x;
                         const right = X;
                         const top = y;
                         const bottom = Y;
-    
+
                         // Clamp the point's coordinates to the rectangle's bounds
                         const closestX = Math.max(left, Math.min(point.x, right));
                         const closestY = Math.max(top, Math.min(point.y, bottom));
-    
+
                         if (closestX != left && closestX != right
                             && closestY != top && closestY != bottom) {
-    
+
                             console.log("Point is inside the rectangle", bounds, closestX, closestY);
                         }
-    
+
                         return { x: closestX, y: closestY };
                     }
-    
-                    // Determine which end of the edge connects to a group based on the edge ID
+
                     // The target of the edge is the relevant group member.
                     let addTargetToGroup = groupOnIndex < addToGroupIndex;
                     // The source of the edge is the relevant group member.
                     let addSourceToGroup = groupOnIndex >= addToGroupIndex;
-    
+
                     if (addTargetToGroup) {
-                        // Find the group that contains the target node and is keyed by the source
+
                         let potentialGroups = getContainingGroups(groups, target);
                         let targetGroup = potentialGroups.find(group => group.keyNode === sourceIndex);
                         if (targetGroup) {
-                            // Adjust the endpoint to the closest point on the group boundary
                             let newTargetCoords = closestPointOnRect(targetGroup.bounds, route[0]);
                             let currentTarget = route[route.length - 1];
                             currentTarget.x = newTargetCoords.x;
@@ -623,11 +688,10 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                         }
                     }
                     else if (addSourceToGroup) {
-                        // Find the group that contains the source node and is keyed by the target
+
                         let potentialGroups = getContainingGroups(groups, source);
                         let sourceGroup = potentialGroups.find(group => group.keyNode === targetIndex);
                         if (sourceGroup) {
-                            // Adjust the startpoint to the closest point on the group boundary
                             let newSourceCoords = closestPointOnRect(sourceGroup.bounds.inflate(-1), route[route.length - 1]);
                             let currentSource = route[0];
                             currentSource.x = newSourceCoords.x;
@@ -637,14 +701,13 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                         else {
                             console.log("Source group not found", potentialGroups, sourceIndex, targetIndex, n);
                         }
-    
+
                     }
                     else {
                         console.log("This is a group edge, but neither source nor target is a group.", d);
                     }
-    
+
                     // Not ideal but we dont want odd curves.
-                    // Simplify group edge routes to avoid complex curves
                     if (route.length > 2) {
                         route.splice(1, route.length - 2);
                     }
@@ -652,7 +715,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 }
 
 
-                // Find all parallel edges between the same two nodes (bidirectional)
                 // Get all non-alignment edges between the two nodes, regardless of direction
                 const allEdgesBetweenSourceAndTarget = edges.filter(edge => {
                     return !isAlignmentEdge(edge) && (
@@ -662,7 +724,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 });
 
 
-                // Ensure we have at least 3 points for proper curve control
                 // If there are only two points in the route, get the midpoint of the route and add it to the route
                 if (route.length === 2) {
                     const midpoint = {
@@ -672,7 +733,9 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     route.splice(1, 0, midpoint);
                 }
 
-                // Calculate edge direction and distance for offset calculations
+
+
+
                 // Determine the direction of the edge
                 var dx = route[1].x - route[0].x;
                 var dy = route[1].y - route[0].y;
@@ -681,17 +744,14 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
 
 
-                // PARALLEL EDGE SEPARATION: Offset multiple edges to prevent overlap
                 /** Here, we do some point of incidence adjustment IF the number of edges between the same nodes is greater than 1 */
                 if (allEdgesBetweenSourceAndTarget.length > 1) {
                     const minDistance = 10; // Minimum distance between edges (divided by 2)
                     const edgeIndex = allEdgesBetweenSourceAndTarget.findIndex(edge => edge.id === d.id);
 
-                    // Calculate alternating offsets: positive/negative with increasing magnitude
                     // Start with a small offset and grow it based on the edge index. But start with min offset of 5
                     const offset = (edgeIndex % 2 === 0 ? 1 : -1) * (Math.floor(edgeIndex / 2) + 1) * minDistance;
 
-                    // Apply perpendicular offset based on edge direction
                     // Now we should apply the offset to the start and end points of the route, depending on the angle.
 
                     if (route.length > 1) {
@@ -723,23 +783,19 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                         let direction = getDominantDirection(angle);
 
 
-                        // Apply offset perpendicular to the edge direction
                         // As a result, offset along the y axis.
                         if (direction === 'right' || direction === 'left') {
-                            // For horizontal edges, offset vertically
                             route[startIndex].y += offset;
                             route[endIndex].y += offset;
                         }
                         // else if direction is up or down, offset along the x axis
                         else if (direction === 'up' || direction === 'down') {
-                            // For vertical edges, offset horizontally
                             route[startIndex].x += offset;
                             route[endIndex].x += offset;
                         }
 
                         // Ignore the other directions, if they do crop up.
 
-                        // Ensure connection points remain on node perimeters after offset
                         // And ensure it stays on the rectangle perimeter
                         console.log("Adjusting points to rectangle perimeter");
                         route[startIndex] = adjustPointToRectanglePerimeter(route[startIndex], d.source.innerBounds);
@@ -749,14 +805,12 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 }
 
 
-                // Apply visual curvature to separate multiple edges
                 // Calculate the curvature for the current edge
                 var curvature = calculateCurvature(edges, d.source.id, d.target.id, d.id);
-
                 // Apply curvature to the control points (but this does not help with the direction)
                 route.forEach(function (point, index) {
 
-                    // Only modify control points, not start/end points
+
                     if (index > 0 && index < route.length - 1 && curvature !== 0) {
                         // Adjust the control points based on the direction
                         var offsetX = curvature * Math.abs(Math.sin(angle)) * distance;
@@ -767,11 +821,9 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     }
                 });
 
-                // Convert route points to SVG path string using D3's line function
                 return lineFunction(route);
             });
 
-            // LABEL OVERLAP DETECTION: Check if two label bounding boxes intersect
             // Function to check for overlap
             function isOverlapping(label1, label2) {
                 const bbox1 = label1.getBBox();
@@ -782,47 +834,99 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     bbox2.y + bbox2.height < bbox1.y);
             }
 
-            // LABEL POSITIONING: Place labels at edge midpoints and resolve overlaps
+
             // Update label positions after routing edges
             linkGroups.select("text.linklabel")
                 .attr("x", function (d) {
-                    // Find the corresponding path element and calculate its midpoint
                     const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
                     const pathLength = pathElement.getTotalLength();
                     const midpoint = pathElement.getPointAtLength(pathLength / 2);
                     return midpoint.x;
                 })
                 .attr("y", function (d) {
-                    // Find the corresponding path element and calculate its midpoint
                     const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
                     const pathLength = pathElement.getTotalLength();
                     const midpoint = pathElement.getPointAtLength(pathLength / 2);
                     return midpoint.y;
                 })
                 .attr("text-anchor", "end")
-                // Check each label for overlaps and adjust positioning
                 .each(function (d, i, nodes) {
                     const currentLabel = this;
                     const overlapsWith = [];
 
-                    // Find all labels that overlap with the current one
                     d3.selectAll("text.linklabel").each(function () {
                         if (this !== currentLabel && isOverlapping(currentLabel, this)) {
                             overlapsWith.push(this);
                         }
                     });
 
-                    // Apply overlap minimization if conflicts exist
                     if (overlapsWith.length > 0) {
                         minimizeOverlap(currentLabel, overlapsWith);
                     }
                 })
                 .raise();
-                zoomToFit();
+
+            /**** This bit ensures we zoom to fit ***/
+            const bbox = svg.node().getBBox();
+            const padding = 10; // Padding in pixels
+
+            const viewBox = [
+                bbox.x - padding,
+                bbox.y - padding,
+                bbox.width + 2 * padding,
+                bbox.height + 2 * padding
+            ].join(' ');
+
+
+            const topSvg = d3.select("#svg");
+            topSvg.attr('viewBox', viewBox);
+            /*************************************/
+
+            function highlightRelation(relName) {
+                d3.selectAll(".link")
+                    .filter(link => link.relName === relName)
+                    .classed("highlighted", true);
+
+                d3.selectAll(".inferredLink")
+                    .filter(link => link.relName === relName)
+                    .classed("highlighted", true);
+            }
+
+            // Get a set of all relNames
+            const relNames = new Set(
+                edges
+                    .filter(edge => !isAlignmentEdge(edge))
+                    .map(edge => edge.relName)
+            );
+            // For each relName, add a LI element to the ul with id "relationList", with the relName as text and hover event to highlight the relation,
+            // also a mouseout event to remove the highlight
+
+
+            // Maybe these should be checkboxes instead of just text?
+            // I wory about the removal of the highlight on uncheck
+            const relationList = d3.select("#relationList");
+            relationList.selectAll("li")
+                .data(Array.from(relNames))
+                .enter()
+                .append("li")
+                .attr("class", "list-group-item")
+                .text(d => d)
+                .on("mouseover", function (d) {
+                    highlightRelation(d);
+                    // Also make the text bold
+                    d3.select(this).style("font-weight", "bold");
+                })
+                .on("mouseout", function (event, d) {
+                    d3.selectAll(".link")
+                        .classed("highlighted", false);
+                    d3.selectAll(".inferredLink")
+                        .classed("highlighted", false);
+                    // Also make the text normal
+                    d3.select(this).style("font-weight", "normal");
+                });
         }
         finally {
 
-            // PERFORMANCE TRACKING: Record timing data for optimization
             // Only record timing data for the first edge route
             if (edgeRouteIdx === 1) {
                 // Stop measuring client-side execution time
@@ -1095,7 +1199,13 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         })
         .call(colaLayout.drag);
 
-    colaLayout.on("tick", function () {
+    /*
+
+        TICK FUNCTIONS
+
+    */
+
+    function gridTickHandler() {
         console.log("tick");
 
         // UPDATE NODES AND NODE LABELS
@@ -1148,75 +1258,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             })
             .raise();
 
-
-        // linkGroups.select("path.link")
-        //     .attr("d", function (d) {
-
-        //         let source = d.source;
-        //         let target = d.target;
-
-        //         const sourceIndex = getNodeIndex(source);
-        //         const targetIndex = getNodeIndex(target);
-
-        //         let n = d.id;
-        //         if (n.startsWith("_g_")) {
-
-        //             // First get the groupOn and addToGroup indices
-        //             let { groupOnIndex, addToGroupIndex } = getGroupOnAndAddToGroupIndices(n);
-        //             let addSourceToGroup = groupOnIndex >= addToGroupIndex;
-        //             let addTargetToGroup = groupOnIndex < addToGroupIndex;
-
-
-        //             if (addTargetToGroup) {
-
-        //                 let potentialGroups = getContainingGroups(groups, target);
-        //                 let targetGroup = potentialGroups.find(group => group.keyNode === sourceIndex);
-        //                 if (targetGroup) {
-        //                     target = targetGroup;
-        //                     target.innerBounds = targetGroup.bounds.inflate(-1 * targetGroup.padding);
-        //                 }
-        //                 else {
-        //                     console.log("Target group not found", potentialGroups, targetIndex);
-        //                 }
-        //             }
-        //             else if (addSourceToGroup) {
-
-        //                 let potentialGroups = getContainingGroups(groups, source);
-        //                 let sourceGroup = potentialGroups.find(group => group.keyNode === targetIndex);
-        //                 if (sourceGroup) {
-        //                     source = sourceGroup;
-        //                     source.innerBounds = sourceGroup.bounds.inflate(-1 * sourceGroup.padding);
-        //                 }
-        //                 else {
-        //                     console.log("Source group not found", potentialGroups, sourceIndex);
-        //                 }
-        //             }
-        //             else {
-        //                 console.log("This is a group edge (_on tick_), but neither source nor target is a group.", d);
-        //             }
-        //         }
-        //         var route = cola.makeEdgeBetween(source.innerBounds, target.innerBounds, 5);
-        //         return lineFunction([route.sourceIntersection, route.arrowStart]);
-        //     })
-        //     .attr("marker-end", "url(#end-arrow)") // Ensure the marker-end attribute is set
-        //     .raise(); // Raise the path to the top
-
-        // linkGroups.select("text.linklabel")
-        //     .attr("x", d => {
-        //         const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
-        //         return calculateNewPosition(d.x, pathElement, 'x');
-        //     })
-        //     .attr("y", d => {
-        //         const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
-        //         return calculateNewPosition(d.y, pathElement, 'y');
-        //     })
-        //     .raise();
-
-        // linkGroups.select("text.linklabel")
-        //     .attr("x", d => {
-
-        //     )
-
         // UPDATE GROUPS AND GROUP LABELS
         group.attr("x", function (d) { return d.bounds.x; })
             .attr("y", function (d) { return d.bounds.y; })
@@ -1230,13 +1271,168 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             .attr("text-anchor", "middle") // Center the text on its position
             .raise();
 
-        // linkGroups.select("text.linklabel").raise();
+        const linkGroups = svg.selectAll(".linkGroup");
+        linkGroups.select("text.linklabel").raise(); // Ensure link labels are raised
+    }
+
+    function freeformTickHandler() {
+        group.attr("x", function (d) {
+            return d.bounds.x;
+        })
+            .attr("y", function (d) {
+                return d.bounds.y;
+            })
+
+            .attr("width", function (d) { return d.bounds.width(); })
+            .attr("height", function (d) { return d.bounds.height(); })
+            .lower();
+
+
+        node.select("rect")
+            .each(function (d) { d.innerBounds = d.bounds.inflate(-1); })
+            .attr("x", function (d) { return d.bounds.x; })
+            .attr("y", function (d) { return d.bounds.y; })
+            .attr("width", function (d) { return d.bounds.width(); })
+            .attr("height", function (d) { return d.bounds.height(); });
+
+        node.select("image")
+            .attr("x", function (d) {
+                if (d.showLabels) {
+                    // Move to the top-right corner
+                    return d.x + (d.width / 2) - (d.width * SMALL_IMG_SCALE_FACTOR);
+                } else {
+                    // Align with d.bounds.x
+                    return d.bounds.x;
+                }
+            })
+            .attr("y", function (d) {
+                if (d.showLabels) {
+                    // Align with the top edge
+                    return d.y - d.height / 2;
+                } else {
+                    // Align with d.bounds.y
+                    return d.bounds.y;
+                }
+            })
+
+        mostSpecificTypeLabel
+            .attr("x", function (d) { return d.x - d.width / 2 + 5; })
+            .attr("y", function (d) { return d.y - (d.height / 2) + 10; })
+            .raise();
+
+
+
+        label
+            .attr("x", d => d.x)
+            .attr("y", d => d.y)
+            .each(function (d) {
+                var y = 0; // Initialize y offset for tspans
+                d3.select(this).selectAll("tspan")
+                    .attr("x", d.x) // Align tspans with the node's x position
+                    .attr("dy", function () {
+                        y += 1; // Increment y for each tspan to create line spacing
+                        return y === 1 ? "0em" : "1em"; // Keep the first tspan in place, move others down
+                    });
+            })
+            .raise();
+
+        const linkGroups = svg.selectAll(".linkGroup");
+        linkGroups.select("path.link")
+            .attr("d", function (d) {
+
+                let source = d.source;
+                let target = d.target;
+
+                const sourceIndex = getNodeIndex(source);
+                const targetIndex = getNodeIndex(target);
+
+                let n = d.id;
+                if (n.startsWith("_g_")) {
+
+                    // First get the groupOn and addToGroup indices
+                    let { groupOnIndex, addToGroupIndex } = getGroupOnAndAddToGroupIndices(n);
+                    let addSourceToGroup = groupOnIndex >= addToGroupIndex;
+                    let addTargetToGroup = groupOnIndex < addToGroupIndex;
+
+
+                    if (addTargetToGroup) {
+
+                        let potentialGroups = getContainingGroups(groups, target);
+                        let targetGroup = potentialGroups.find(group => group.keyNode === sourceIndex);
+                        if (targetGroup) {
+                            target = targetGroup;
+                            target.innerBounds = targetGroup.bounds.inflate(-1 * targetGroup.padding);
+                        }
+                        else {
+                            console.log("Target group not found", potentialGroups, targetIndex);
+                        }
+                    }
+                    else if (addSourceToGroup) {
+
+                        let potentialGroups = getContainingGroups(groups, source);
+                        let sourceGroup = potentialGroups.find(group => group.keyNode === targetIndex);
+                        if (sourceGroup) {
+                            source = sourceGroup;
+                            source.innerBounds = sourceGroup.bounds.inflate(-1 * sourceGroup.padding);
+                        }
+                        else {
+                            console.log("Source group not found", potentialGroups, sourceIndex);
+                        }
+                    }
+                    else {
+                        console.log("This is a group edge (_on tick_), but neither source nor target is a group.", d);
+                    }
+                }
+                var route = cola.makeEdgeBetween(source.innerBounds, target.innerBounds, 5);
+                return lineFunction([route.sourceIntersection, route.arrowStart]);
+            })
+            .attr("marker-end", "url(#end-arrow)") // Ensure the marker-end attribute is set
+            .raise(); // Raise the path to the top
+
+        linkGroups.select("text.linklabel")
+            .attr("x", d => {
+                const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
+                return calculateNewPosition(d.x, pathElement, 'x');
+            })
+            .attr("y", d => {
+                const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
+                return calculateNewPosition(d.y, pathElement, 'y');
+            })
+            .raise();
+
+
+
+
+        groupLabel.attr("x", function (d) {
+            return d.bounds.x + d.bounds.width() / 2;
+
+        }) // Center horizontally
+            .attr("y", function (d) { return d.bounds.y + 12; })
+            .attr("text-anchor", "middle") // Center the text on its position
+            .lower();
+
+
+        linkGroups.select("text.linklabel").raise();
 
         // Can we get all end-arrow markers and raise them?
-        // svg.selectAll("marker").raise();
+        svg.selectAll("marker").raise();
         linkGroups.select("text.linklabel").raise(); // Ensure link labels are raised
+    }
 
+    
+    colaLayout.on("tick", function () {
+        if (layoutFormat === "grid") {
+            gridTickHandler();
+        }
+        if (layoutFormat === "freeform") {
+            freeformTickHandler();
+        }
     });
+
+
+    /*
+
+    */
 
     // Start the cola layout with the specified iterations
     colaLayout.start(
@@ -1245,6 +1441,12 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         initialAllConstraintsIterations,
         gridSnapIterations)
         .on("end", function () {
-            gridify(svg, 10, 25, 10);
+            if (layoutFormat === "grid") {
+                gridify(svg, 10, 25, 10);
+            }
+
+            if (layoutFormat === "freeform") {
+                routeEdges();
+            }
         });
 }
