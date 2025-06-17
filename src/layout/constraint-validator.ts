@@ -2,6 +2,7 @@ import { SimplexSolver, Variable, Expression, Strength, Inequality, LEQ, GEQ, LE
 import { intersection } from 'lodash';
 import { InstanceLayout, LayoutNode, LayoutEdge, LayoutGroup, LayoutConstraint, isLeftConstraint, isTopConstraint, isAlignmentConstraint, TopConstraint, LeftConstraint, AlignmentConstraint, ImplicitConstraint } from './interfaces';
 import { RelativeOrientationConstraint } from './layoutspec';
+import { v4 as uuidv4 } from 'uuid';
 
 
 import ejs from 'ejs';
@@ -272,65 +273,39 @@ class ConstraintValidator {
             this.added_constraints.push(constraint);
         }
         catch (e) {
-            let context = {};
 
-            //conflictingSourceConstraint
-            //musSourceConstraints
-
-            //conflictingIRConstraint
-            //musIRConstraints
-               
             const minimal_conflicting_constraints = this.getMinimalConflictingConstraints(this.added_constraints, constraint);
-            let previousSourceConstraintSet = new Set(minimal_conflicting_constraints.map((c) => c.sourceConstraint).map((c) => c.toHTML()));
-            let previousSourceConstraints = [...previousSourceConstraintSet];
 
+            // let previousSourceConstraintSet = new Set(minimal_conflicting_constraints.map((c) => c.sourceConstraint).map((c) => c.toHTML()));
+            // let previousSourceConstraints = [...previousSourceConstraintSet];
+
+
+            // Now I want a mapping of the constraints to their source constraints.
+
+            let previousLayoutConstraintToSourceConstraint = {};
+            minimal_conflicting_constraints.forEach((c) => {
+                let key = this.orientationConstraintToString(c);
+                let sourceConstraintHTML = c.sourceConstraint.toHTML();
+                let uid = uuidv4();
+
+
+                previousLayoutConstraintToSourceConstraint[key] = {
+                    sourceConstraint: sourceConstraintHTML,
+                    uid: uid
+                };
+            });
+
+            let conflictingConstraint = this.orientationConstraintToString(constraint);
             let conflictingSourceConstraint = constraint.sourceConstraint.toHTML();
             
-            context['conflictingSourceConstraint'] = conflictingSourceConstraint;
-            context['musSourceConstraints'] = previousSourceConstraints;
+            const context = {
+                conflictingConstraint: conflictingConstraint,
+                conflictingSourceConstraint: conflictingSourceConstraint,
+                previousLayoutConstraintToSourceConstraint: previousLayoutConstraintToSourceConstraint,
 
-            //let sourceLanguageError = `Constraint:<br> <code>${conflictingSourceConstraintString}</code><br> conflicts with one (or some) the following source constraints: <br>` + previousSourceConstraints.map((c) => `<code>${c}</code>`).join('<br>');
-
-            
-
-
-            let previousConstraintList = minimal_conflicting_constraints.map((c) => this.orientationConstraintToString(c));
-            let previousConstraintSet = new Set(previousConstraintList); 
-            previousConstraintList = [...previousConstraintSet];
-
-            let currentConstraintString = this.orientationConstraintToString(constraint);
-
-            context['conflictingIRConstraint'] = currentConstraintString;
-            context['musIRConstraints'] = previousConstraintList;
-
+            };
+               
             this.error = ejs.render(errorTemplate, context);
-
-
-//             this.error = `
-//   <div class="mb-3">
-//     <div style="display: flex; gap: 1rem; overflow-x: auto;">
-//       <div class="card flex-shrink-0" style="min-width: 320px; max-width: 100%;">
-//         <div class="card-header bg-light">
-//           <strong>In terms of CnD</strong>
-//         </div>
-//         <div class="card-body">
-//           ${sourceLanguageError}
-//         </div>
-//       </div>
-//       <div class="card flex-shrink-0" style="min-width: 320px; max-width: 100%;">
-//         <div class="card-header bg-light">
-//           <strong>In terms of diagram elements</strong>
-//         </div>
-//         <div class="card-body">
-//           ${intermediateReprError}
-//         </div>
-//       </div>
-//     </div>
-//   </div>
-// `;
-
-
-
             return;
         }
     }

@@ -1,3 +1,19 @@
+  <!-- Context looks like this:
+
+            const context = {
+                conflictingConstraint: conflictingConstraint,
+                conflictingSourceConstraint: conflictingSourceConstraint,
+                previousLayoutConstraintToSourceConstraint: previousLayoutConstraintToSourceConstraint,
+
+            };
+
+            Where 
+                            previousLayoutConstraintToSourceConstraint[key] = {
+                                sourceConstraint: sourceConstraintHTML,
+                                uid: uid
+                            };
+   -->
+  
   <div class="mb-3">
     <div style="display: flex; gap: 1rem; overflow-x: auto;">
       <div class="card flex-shrink-0" style="min-width: 320px; max-width: 100%;">
@@ -10,8 +26,8 @@
             following source constraints: <br>
 
 
-            <% musSourceConstraints.forEach(function(constraint) { %>
-                <code><%- constraint %></code>
+            <% Object.values(previousLayoutConstraintToSourceConstraint).forEach(function(item) { %>
+                <code class="highlight <%= item.uid %>"><%- item.sourceConstraint %></code>
                 <br>
             <% }); %>
 
@@ -27,12 +43,12 @@
         <div class="card-body">
           
 
-            Constraint: <br> <code> <%- conflictingIRConstraint%> </code><br> conflicts with one (or some) the 
+            Constraint: <br> <code> <%- conflictingConstraint%> </code><br> conflicts with the 
             following constraints: <br>
 
 
-            <% musIRConstraints.forEach(function(constraint) { %>
-                <code><%- constraint %></code>
+            <% Object.entries(previousLayoutConstraintToSourceConstraint).forEach(function([key, item]) { %>
+                <code class="highlight <%= item.uid %>"><%= key %></code>
                 <br>
             <% }); %>
 
