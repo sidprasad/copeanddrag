@@ -72,21 +72,21 @@ jobs:
           asset_name: cnd.zip
           asset_content_type: application/zip
 
-      ## TODO: Re-enable npm publishing steps if needed
-      # # Step 9: Check npm token presence
-      # - name: Check npm token presence
-      #   run: |
-      #     if [ -z "$NODE_AUTH_TOKEN" ]; then
-      #       echo "NODE_AUTH_TOKEN is NOT set"
-      #       exit 1
-      #     else
-      #       echo "NODE_AUTH_TOKEN is set"
-      #     fi
-      #   env:
-      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # TODO: Re-enable npm publishing steps if needed
+      # Step 9: Check npm token presence
+      - name: Check npm token presence
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "NODE_AUTH_TOKEN is NOT set"
+            exit 1
+          else
+            echo "NODE_AUTH_TOKEN is set"
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      # # Step 10: Publish to npm
-      # - name: Publish to npm
-      #   run: npm publish --access public
-      #   env:
-      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # Step 10: Publish to npm
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
