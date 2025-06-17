@@ -324,13 +324,14 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             d.routerNode = {
                 bounds: d.bounds.inflate(-groupMargin),
                 children: (typeof d.groups !== 'undefined' ? d.groups.map(c=> nodes.length + c.id) : [])
-                    .concat(typeof d.leaves !== 'undefined' ? d.leaves.map(c=> c.index) : [])
+                .concat(typeof d.leaves !== 'undefined' ? d.leaves.map(c=> c.index) : [])
             };
         });
         let gridRouterNodes = nodes.concat(groups).map((d, i) => {
             d.routerNode.id = i;
             return d.routerNode;
         });
+        // NOTE: Router nodes are nodes needed for grid routing, which include both nodes and groups
         return new cola.GridRouter(gridRouterNodes, {
             getChildren: (v) => v.children,
             getBounds: v => v.bounds
@@ -348,10 +349,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
         console.log("GridRouter routes: ", routes);
 
-        // return routes;
-
         // Clear existing paths; 
-        // NOTE: Why?? This is necessary to avoid node explosion when re-routing
+        // NOTE: This is crucial to avoid node explosion when re-routing
         svg.selectAll('.link-group').remove();
 
         // Create paths from GridRouter routes
@@ -384,38 +383,29 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 .lower();
         });
 
-        // Update node positions using router bounds;
-        // NOTE: what are the routerNode bounds?
+        // Update node positions
+        // NOTE: `transition()` gives the snap-to-grid effect
+        // NOTE: Uses absolute positioning to be compatible with pre-existing code (also easier to reason)
+        // NOTE: Use `d.bounds` to get the bounds of the node, `d.bounds.cx()` and `d.bounds.cy()` for center coordinates
         svg.selectAll(".node").transition()
-            // NOTE: the `transform` attribute moves the entire group; relative positions are now relative to the group center
-            // This should be easier to work with because you can use the center of the node group as the reference point
-            // Be careful of this when updating positions of labels, icons, etc.
-            // NOTE: There may be other places in the code that still use absolute positions; fix where necessary
-            .attr("transform", function (d) { 
-                return `translate(${d.routerNode.bounds.cx()}, ${d.routerNode.bounds.cy()})`;
-            });
+            .attr("x", function (d) { return d.bounds.x; })
+            .attr("y", function (d) { return d.bounds.y; })
+            .attr("width", function (d) { return d.bounds.width(); })
+            .attr("height", function (d) { return d.bounds.height(); });
         
         // Update group positions
-        var groupPadding = margin - groupMargin;
-        console.log("Group padding", groupPadding);
+        // var groupPadding = margin - groupMargin;
+        // console.log("Group padding", groupPadding);
         svg.selectAll(".group").transition()
-            .attr("x", function (d) { return d.routerNode.bounds.x - groupPadding; })
-            .attr('y', function (d) { return d.routerNode.bounds.y + 2 * groupPadding; })
-            .attr('width', function (d) { return d.routerNode.bounds.width() - groupPadding; })
-            .attr('height', function (d) { return d.routerNode.bounds.height() - groupPadding; });
-
+            .attr("x", function (d) { return d.bounds.x; })
+            .attr('y', function (d) { return d.bounds.y; })
+            .attr('width', function (d) { return d.bounds.width(); })
+            .attr('height', function (d) { return d.bounds.height(); });
         
-        // Update labels positions
+        // Update label positions
         svg.selectAll(".label").transition()
-            .attr("x", function (d) { 
-                // return d.routerNode.bounds.cx(); 
-                return 0;
-            })
-            .attr("y", function (d) {
-                var h = this.getBBox().height;
-                // return d.bounds.cy() + h / 3.5;
-                return 0;
-            });
+            .attr("x", function (d) { return d.bounds.cx(); })
+            .attr("y", function (d) { return d.bounds.cy(); });
         
         // Position link labels at route midpoints
         updateLinkLabels(routes, edges);
@@ -1112,30 +1102,33 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         console.log("tick");
 
         // UPDATE NODES AND NODE LABELS
+        // NOTE: The positioning here is only relative to the node group element.
+        // TODO: What if I make this absolute positioning? It should seem more dynamic as I drag??
         node.select("rect")
             .each(function (d) { d.innerBounds = d.bounds.inflate(-1); })
-            .attr("x", function (d) { return -d.bounds.width() / 2; })
-            .attr("y", function (d) { return -d.bounds.height() / 2; })
+            .attr("x", function (d) { return d.bounds.x; })
+            .attr("y", function (d) { return d.bounds.y; })
             .attr("width", function (d) { return d.bounds.width(); })
             .attr("height", function (d) { return d.bounds.height(); });
+        
 
         node.select("image")
         .attr("x", function (d) {
             if (d.showLabels) {
                 // Move to the top-right corner
-                return (d.width/2) - (d.width * SMALL_IMG_SCALE_FACTOR);
+                return d.x + (d.width/2) - (d.width * SMALL_IMG_SCALE_FACTOR);
             } else {
                 // Align with d.bounds.x
-                return -d.width / 2;
+                return d.bounds.x;
             }
         })
         .attr("y", function (d) {
             if (d.showLabels) {
                 // Align with the top edge
-                return -d.height / 2;
+                return d.y - d.height / 2;
             } else {
                 // Align with d.bounds.y
-                return -d.height / 2;
+                return d.bounds.y;
             }
         })
 
@@ -1145,12 +1138,12 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             .raise();
 
         label
-            .attr("x", 0)
-            .attr("y", 0)
+            .attr("x", d => d.x)
+            .attr("y", d => d.y)
             .each(function (d) {
                 var y = 0; // Initialize y offset for tspans
                 d3.select(this).selectAll("tspan")
-                    .attr("x", 0) // Align tspans with the node's x position
+                    .attr("x", d.x) // Align tspans with the node's x position
                     .attr("dy", function () {
                         y += 1; // Increment y for each tspan to create line spacing
                         return y === 1 ? "0em" : "1em"; // Keep the first tspan in place, move others down
@@ -1228,25 +1221,17 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         //     )
 
         // UPDATE GROUPS AND GROUP LABELS
-        group.attr("x", function (d) {
-                return d.bounds.x + (d.bounds.width() / 2);
-            })
-            .attr("y", function (d) {
-                return d.bounds.y + (d.bounds.height() / 2);
-            })
+        group.attr("x", function (d) { return d.bounds.x; })
+            .attr("y", function (d) { return d.bounds.y; })
             .attr("width", function (d) { return d.bounds.width(); })
             .attr("height", function (d) { return d.bounds.height(); })
             .lower();
 
         // Render group labels
-        groupLabel.attr("x", function (d) {
-            return d.bounds.x + d.bounds.width() / 2;
-
-        }) // Center horizontally
+        groupLabel.attr("x", function (d) { return d.bounds.x + d.bounds.width() / 2; }) // Center horizontally
             .attr("y", function (d) { return d.bounds.y + 12; })
             .attr("text-anchor", "middle") // Center the text on its position
             .raise();
-
 
         // linkGroups.select("text.linklabel").raise();
 
