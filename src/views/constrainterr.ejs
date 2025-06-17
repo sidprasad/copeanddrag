@@ -1,4 +1,4 @@
-  <!-- Context looks like this:
+<!-- Context looks like this:
 
             const context = {
                 conflictingConstraint: conflictingConstraint,
@@ -58,3 +58,32 @@
       </div>
     </div>
   </div>
+
+  <script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.highlight').forEach(function(el) {
+    el.addEventListener('mouseenter', function() {
+      // Get all classes except 'highlight'
+      const requiredClasses = Array.from(el.classList).filter(c => c !== 'highlight');
+      if (requiredClasses.length === 0) return;
+      // Highlight any element that has all requiredClasses (regardless of extras)
+      document.querySelectorAll('*').forEach(function(otherEl) {
+        if (requiredClasses.every(cls => otherEl.classList.contains(cls))) {
+          otherEl.classList.add('highlighted');
+        }
+      });
+    });
+    el.addEventListener('mouseleave', function() {
+      document.querySelectorAll('.highlighted').forEach(function(sharedEl) {
+        sharedEl.classList.remove('highlighted');
+      });
+    });
+  });
+});
+</script>
+
+<style>
+.highlighted {
+  background-color: yellow; /* or your highlight style */
+}
+</style>
