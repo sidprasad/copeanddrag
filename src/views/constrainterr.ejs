@@ -6,12 +6,12 @@
         </div>
         <div class="card-body">
 
-            Constraint: <br> <code> <% conflictingSourceConstraint | safe %> </code><br> conflicts with one (or some) the 
+            Constraint: <br> <code> <%- conflictingSourceConstraint%> </code><br> conflicts with one (or some) the 
             following source constraints: <br>
 
 
             <% musSourceConstraints.forEach(function(constraint) { %>
-                <code><%= constraint %> | safe </code>
+                <code><%- constraint %></code>
                 <br>
             <% }); %>
 
@@ -27,12 +27,12 @@
         <div class="card-body">
           
 
-            Constraint: <br> <code> <% conflictingIRConstraint %> </code><br> conflicts with one (or some) the 
+            Constraint: <br> <code> <%- conflictingIRConstraint%> </code><br> conflicts with one (or some) the 
             following constraints: <br>
 
 
             <% musIRConstraints.forEach(function(constraint) { %>
-                <code><%= constraint %> | safe </code>
+                <code><%- constraint %></code>
                 <br>
             <% }); %>
 
