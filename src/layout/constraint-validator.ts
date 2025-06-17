@@ -286,18 +286,24 @@ class ConstraintValidator {
             let sourceConstraintToLayoutConstraints = {};
 
             minimal_conflicting_constraints.forEach((c) => {
+
+
+                //// TODO: THIS IS WRONG!!
+
                 // Use a unique identifier for the source constraint as the key
                 let sourceKey = c.sourceConstraint.toHTML(); // or another unique property
                 let layoutConstraintHTML = this.orientationConstraintToString(c);
                 let uid = uuidv4();
 
+                
+
                 if (!sourceConstraintToLayoutConstraints[sourceKey]) {
-                    sourceConstraintToLayoutConstraints[sourceKey] = [];
+                    sourceConstraintToLayoutConstraints[sourceKey] = {
+                        uid : uid,
+                        layoutConstraints: []
+                    };
                 }
-                sourceConstraintToLayoutConstraints[sourceKey].push({
-                    layoutConstraint: layoutConstraintHTML,
-                    uid: uid
-                });
+                sourceConstraintToLayoutConstraints[sourceKey].layoutConstraints.push(layoutConstraintHTML);
             });
 
 

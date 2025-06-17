@@ -12,7 +12,7 @@
 
 
             <% Object.entries(previousSourceConstraintToLayoutConstraints).forEach(function([key, item]) { %>
-                <code class="highlight <%= item.uid %>"><%= key %></code>
+                <code class="highlight <%= item.uid %>"><%- key %></code>
                 <br>
             <% }); %>
 
@@ -32,22 +32,13 @@
             following constraints: <br>
 
 
-
-
-            <% Object.entries(previousSourceConstraintToLayoutConstraints).forEach(function([sourceKey, layoutArray]) { %>
-                <div class="card mb-3">
-                    <div class="card-header">
-                    <%- sourceKey %>
+            <% Object.entries(previousSourceConstraintToLayoutConstraints).forEach(function([sourceKey, value]) { %>
+                <% value.layoutConstraints.forEach(function(layoutConstraint) { %>
+                    <div class="highlight <%= value.uid %>">
+                    <code><%- layoutConstraint %></code>
                     </div>
-                    <div class="card-body">
-                    <% layoutArray.forEach(function(item) { %>
-                        <div class="highlight <%= item.uid %>">
-                        <code><%- item.layoutConstraint %></code>
-                        </div>
-                    <% }); %>
-                    </div>
-                </div>
                 <% }); %>
+            <% }); %>
 
         </div>
       </div>
