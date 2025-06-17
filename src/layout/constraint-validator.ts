@@ -4,6 +4,14 @@ import { InstanceLayout, LayoutNode, LayoutEdge, LayoutGroup, LayoutConstraint, 
 import { RelativeOrientationConstraint } from './layoutspec';
 
 
+import ejs from 'ejs';
+import fs from 'fs';
+import path from 'path';
+
+const templatePath = path.join(__dirname, '../views/constrainterr.ejs');
+const errorTemplate = fs.readFileSync(templatePath, 'utf8');
+
+
 class ConstraintValidator {
 
     private solver: SimplexSolver;
@@ -264,6 +272,13 @@ class ConstraintValidator {
             this.added_constraints.push(constraint);
         }
         catch (e) {
+            let context = {};
+
+            //conflictingSourceConstraint
+            //musSourceConstraints
+
+            //conflictingIRConstraint
+            //musIRConstraints
                
             const minimal_conflicting_constraints = this.getMinimalConflictingConstraints(this.added_constraints, constraint);
             let previousSourceConstraintSet = new Set(minimal_conflicting_constraints.map((c) => c.sourceConstraint).map((c) => c.toHTML()));
@@ -288,31 +303,32 @@ class ConstraintValidator {
             let intermediateReprError = `Constraint:<br> <code>${currentConstraintString}</code><br> conflicts with one (or some) the following constraints:` + previousConstraintString;
 
 
+            this.error = ejs.render(errorTemplate, context);
 
-            this.error = `
-  <div class="mb-3">
-    <div style="display: flex; gap: 1rem; overflow-x: auto;">
-      <div class="card flex-shrink-0" style="min-width: 320px; max-width: 100%;">
-        <div class="card-header bg-light">
-          <strong>In terms of CnD</strong>
-        </div>
-        <div class="card-body">
-          ${sourceLanguageError}
-        </div>
-      </div>
-      <div class="card flex-shrink-0" style="min-width: 320px; max-width: 100%;">
-        <div class="card-header bg-light">
-          <strong>In terms of diagram elements</strong>
-        </div>
-        <div class="card-body">
-          ${intermediateReprError}
-        </div>
-      </div>
-    </div>
-  </div>
-`;
 
-// MAybe we can do better with the errors here.
+//             this.error = `
+//   <div class="mb-3">
+//     <div style="display: flex; gap: 1rem; overflow-x: auto;">
+//       <div class="card flex-shrink-0" style="min-width: 320px; max-width: 100%;">
+//         <div class="card-header bg-light">
+//           <strong>In terms of CnD</strong>
+//         </div>
+//         <div class="card-body">
+//           ${sourceLanguageError}
+//         </div>
+//       </div>
+//       <div class="card flex-shrink-0" style="min-width: 320px; max-width: 100%;">
+//         <div class="card-header bg-light">
+//           <strong>In terms of diagram elements</strong>
+//         </div>
+//         <div class="card-body">
+//           ${intermediateReprError}
+//         </div>
+//       </div>
+//     </div>
+//   </div>
+// `;
+
 
 
             return;
