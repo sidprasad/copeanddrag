@@ -284,9 +284,9 @@ class ConstraintValidator {
             let previousSourceConstraintSet = new Set(minimal_conflicting_constraints.map((c) => c.sourceConstraint).map((c) => c.toHTML()));
             let previousSourceConstraints = [...previousSourceConstraintSet];
 
-            let conflictingSourceConstraint = constraint.sourceConstraint;
+            let conflictingSourceConstraint = constraint.sourceConstraint.toHTML();
             
-            context['conflictingSourceConstraint'] = conflictingSourceConstraint.toHTML();
+            context['conflictingSourceConstraint'] = conflictingSourceConstraint;
             context['musSourceConstraints'] = previousSourceConstraints;
 
             //let sourceLanguageError = `Constraint:<br> <code>${conflictingSourceConstraintString}</code><br> conflicts with one (or some) the following source constraints: <br>` + previousSourceConstraints.map((c) => `<code>${c}</code>`).join('<br>');
