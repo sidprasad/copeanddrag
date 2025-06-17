@@ -2,6 +2,15 @@ import { SimplexSolver, Variable, Expression, Strength, Inequality, LEQ, GEQ, LE
 import { intersection } from 'lodash';
 import { InstanceLayout, LayoutNode, LayoutEdge, LayoutGroup, LayoutConstraint, isLeftConstraint, isTopConstraint, isAlignmentConstraint, TopConstraint, LeftConstraint, AlignmentConstraint, ImplicitConstraint } from './interfaces';
 import { RelativeOrientationConstraint } from './layoutspec';
+import { v4 as uuidv4 } from 'uuid';
+
+
+import ejs from 'ejs';
+import fs from 'fs';
+import path from 'path';
+
+const templatePath = path.join(__dirname, '../views/constrainterr.ejs');
+const errorTemplate = fs.readFileSync(templatePath, 'utf8');
 
 
 class ConstraintValidator {
@@ -264,57 +273,52 @@ class ConstraintValidator {
             this.added_constraints.push(constraint);
         }
         catch (e) {
-               
+
             const minimal_conflicting_constraints = this.getMinimalConflictingConstraints(this.added_constraints, constraint);
-            let previousSourceConstraintSet = new Set(minimal_conflicting_constraints.map((c) => c.sourceConstraint).map((c) => c.toHTML()));
-            let previousSourceConstraints = [...previousSourceConstraintSet];
 
-            let conflictingSourceConstraint = constraint.sourceConstraint;
-            let conflictingSourceConstraintString = conflictingSourceConstraint.toHTML();
+            // let previousSourceConstraintSet = new Set(minimal_conflicting_constraints.map((c) => c.sourceConstraint).map((c) => c.toHTML()));
+            // let previousSourceConstraints = [...previousSourceConstraintSet];
 
 
-            let sourceLanguageError = `Constraint:<br> <code>${conflictingSourceConstraintString}</code><br> conflicts with one (or some) the following source constraints: <br>` + previousSourceConstraints.map((c) => `<code>${c}</code>`).join('<br>');
+            // TODO: We want to invert this mapping so 
+            // that we can map a source constraint to several layout constraints.
 
+            let sourceConstraintToLayoutConstraints = {};
+
+            minimal_conflicting_constraints.forEach((c) => {
+
+
+                //// TODO: THIS IS WRONG!!
+
+                // Use a unique identifier for the source constraint as the key
+                let sourceKey = c.sourceConstraint.toHTML(); // or another unique property
+                let layoutConstraintHTML = this.orientationConstraintToString(c);
+                let uid = uuidv4();
+
+                
+
+                if (!sourceConstraintToLayoutConstraints[sourceKey]) {
+                    sourceConstraintToLayoutConstraints[sourceKey] = {
+                        uid : uid,
+                        layoutConstraints: []
+                    };
+                }
+                sourceConstraintToLayoutConstraints[sourceKey].layoutConstraints.push(layoutConstraintHTML);
+            });
+
+
+
+            let conflictingConstraint = this.orientationConstraintToString(constraint);
+            let conflictingSourceConstraint = constraint.sourceConstraint.toHTML();
             
+            const context = {
+                conflictingConstraint: conflictingConstraint,
+                conflictingSourceConstraint: conflictingSourceConstraint,
+                previousSourceConstraintToLayoutConstraints: sourceConstraintToLayoutConstraints,
 
-
-            let previousConstraintList = minimal_conflicting_constraints.map((c) => this.orientationConstraintToString(c));
-            let previousConstraintSet = new Set(previousConstraintList); 
-            previousConstraintList = [...previousConstraintSet];
-
-            let previousConstraintString = "<br><br>" + previousConstraintList.map((c) => "<code>" + c + "</code>").join('<br>');
-
-            let currentConstraintString = this.orientationConstraintToString(constraint);
-            let intermediateReprError = `Constraint:<br> <code>${currentConstraintString}</code><br> conflicts with one (or some) the following constraints:` + previousConstraintString;
-
-
-
-            this.error = `
-  <div class="mb-3">
-    <div style="display: flex; gap: 1rem; overflow-x: auto;">
-      <div class="card flex-shrink-0" style="min-width: 320px; max-width: 100%;">
-        <div class="card-header bg-light">
-          <strong>In terms of CnD</strong>
-        </div>
-        <div class="card-body">
-          ${sourceLanguageError}
-        </div>
-      </div>
-      <div class="card flex-shrink-0" style="min-width: 320px; max-width: 100%;">
-        <div class="card-header bg-light">
-          <strong>In terms of diagram elements</strong>
-        </div>
-        <div class="card-body">
-          ${intermediateReprError}
-        </div>
-      </div>
-    </div>
-  </div>
-`;
-
-// MAybe we can do better with the errors here.
-
-
+            };
+               
+            this.error = ejs.render(errorTemplate, context);
             return;
         }
     }

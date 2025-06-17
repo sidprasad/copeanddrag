@@ -1,0 +1,75 @@
+  
+  <div class="mb-3">
+    <div style="display: flex; gap: 1rem; overflow-x: auto;">
+      <div class="card flex-shrink-0" style="min-width: 320px; max-width: 100%;">
+        <div class="card-header bg-light">
+          <strong>In terms of CnD</strong>
+        </div>
+        <div class="card-body">
+
+            Constraint: <br> <code> <%- conflictingSourceConstraint%> </code><br> conflicts with one (or some) the 
+            following source constraints: <br>
+
+
+            <% Object.entries(previousSourceConstraintToLayoutConstraints).forEach(function([key, item]) { %>
+                <code class="highlight <%= item.uid %>"><%- key %></code>
+                <br>
+            <% }); %>
+
+
+
+
+        </div>
+      </div>
+      <div class="card flex-shrink-0" style="min-width: 320px; max-width: 100%;">
+        <div class="card-header bg-light">
+          <strong>In terms of diagram elements</strong>
+        </div>
+        <div class="card-body">
+          
+
+            Constraint: <br> <code> <%- conflictingConstraint%> </code><br> conflicts with the 
+            following constraints: <br>
+
+
+            <% Object.entries(previousSourceConstraintToLayoutConstraints).forEach(function([sourceKey, value]) { %>
+                <% value.layoutConstraints.forEach(function(layoutConstraint) { %>
+                    <div class="highlight <%= value.uid %>">
+                    <code><%- layoutConstraint %></code>
+                    </div>
+                <% }); %>
+            <% }); %>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.highlight').forEach(function(el) {
+    el.addEventListener('mouseenter', function() {
+      // Get all classes except 'highlight'
+      const requiredClasses = Array.from(el.classList).filter(c => c !== 'highlight');
+      if (requiredClasses.length === 0) return;
+      // Highlight any element that has all requiredClasses (regardless of extras)
+      document.querySelectorAll('*').forEach(function(otherEl) {
+        if (requiredClasses.every(cls => otherEl.classList.contains(cls))) {
+          otherEl.classList.add('highlighted');
+        }
+      });
+    });
+    el.addEventListener('mouseleave', function() {
+      document.querySelectorAll('.highlighted').forEach(function(sharedEl) {
+        sharedEl.classList.remove('highlighted');
+      });
+    });
+  });
+});
+</script>
+
+<style>
+.highlighted {
+  background-color: yellow; /* or your highlight style */
+}
+</style>
