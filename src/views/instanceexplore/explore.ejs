@@ -26,8 +26,8 @@
         <div id="layoutControl" class="container">
             <div class="input-group">
                 <select title="Choose the Layout Format" class="form-control" id="layoutFormat" name="layoutFormat">
-                    <option value="grid" selected>Grid</option>
-                    <option value="freeform">Freeform</option>
+                    <option value="default" selected>Standard</option>
+                    <option value="grid">Grid</option>
                 </select>
             </div>
         </div>
@@ -150,6 +150,22 @@
                     this.classList.remove('unsaved-select');
                 }
             });
+        });
+
+        // Save and restore layout format selection on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const layoutFormatSelect = document.getElementById('layoutFormat');
+            
+            if (layoutFormatSelect) {
+                const savedLayoutFormat = localStorage.getItem('layoutFormat');
+                if (savedLayoutFormat) {
+                    layoutFormatSelect.value = savedLayoutFormat;
+                }
+                
+                layoutFormatSelect.addEventListener('change', function() {
+                    localStorage.setItem('layoutFormat', this.value);
+                });
+            }
         });
     </script>
     <div class="row mt-1">

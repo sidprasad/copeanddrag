@@ -5,6 +5,7 @@ const initialAllConstraintsIterations = 1000; // initial layout iterations with 
 const gridSnapIterations = 5; // iterations of "grid snap", which pulls nodes towards grid cell centers - grid of size node[0].width - only really makes sense if all nodes have the same width and heigh
 const margin = 10;
 const dy_for_linespacing = 5; // Adjust for spacing between lines
+const DEFAULT_FORMAT = "default";
 //////////
 
 /**
@@ -263,18 +264,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
     ///// Check whats up TODO ////
 
-    function runWebCola() {
-        colaLayout.constraints(scaledConstraints)
-            .start(
-                initialUnconstrainedIterations,
-                initialUserConstraintIterations,
-                initialAllConstraintsIterations,
-                gridSnapIterations)
-            .on("end", function () {
-                gridify(svg, 15, margin, 5);
-            });
-    }
-
     /*
 
         SCALE FACTOR INPUT
@@ -288,25 +277,15 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     if (scaleFactorInput) {
         // Add an event listener to the scale factor input to update the layout when the scale factor changes
         scaleFactorInput.addEventListener("change", function () {
-            scaleFactor = parseFloat(scaleFactorInput.value)    ;
-            
+            scaleFactor = parseFloat(scaleFactorInput.value);
 
             var { scaledConstraints, linkLength } = adjustLinkLengthsAndSeparationConstraintsToScaleFactor(constraints, scaleFactor);
 
             console.log("Link length", linkLength);
-
             colaLayout.symmetricDiffLinkLengths(linkLength);
-
-            // TODO: Refactor this to function
-            colaLayout.constraints(scaledConstraints)
-                .start(
-                    initialUnconstrainedIterations,
-                    initialUserConstraintIterations,
-                    initialAllConstraintsIterations,
-                    gridSnapIterations)
-                .on("end", function () {
-                    gridify(svg, 15, margin, 5);
-                });
+            colaLayout.constraints(scaledConstraints);
+            
+            layoutFormat ? startColaLayout(layoutFormat) : startColaLayout(DEFAULT_FORMAT);
         });
     }
 
@@ -332,28 +311,13 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     */
 
     let layoutFormatInput = document.getElementById("layoutFormat");
-    let layoutFormat = layoutFormatInput ? layoutFormatInput.value : "freeform";
+    let layoutFormat = layoutFormatInput ? layoutFormatInput.value : DEFAULT_FORMAT;
 
     if (layoutFormatInput) {
         // Add onChange event listener
         layoutFormatInput.addEventListener("change", function () {
             layoutFormat = layoutFormatInput.value;
-
-            colaLayout.start(
-                    initialUnconstrainedIterations,
-                    initialUserConstraintIterations,
-                    initialAllConstraintsIterations,
-                    gridSnapIterations)
-                .on("end", function () {
-                    if (layoutFormat === "grid") {
-                        console.log("running gridify");
-                        gridify(svg, 15, margin, 5);
-                    }
-                    if (layoutFormat === "freeform") {
-                        console.log("Running route edges")
-                        routeEdges();
-                    }
-                });
+            startColaLayout(layoutFormat);
         });
     }
 
@@ -1419,34 +1383,39 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         linkGroups.select("text.linklabel").raise(); // Ensure link labels are raised
     }
 
-    
-    colaLayout.on("tick", function () {
-        if (layoutFormat === "grid") {
-            gridTickHandler();
-        }
-        if (layoutFormat === "freeform") {
-            freeformTickHandler();
-        }
-    });
-
-
     /*
-
+        START COLA LAYOUT
     */
 
-    // Start the cola layout with the specified iterations
-    colaLayout.start(
-        initialUnconstrainedIterations,
-        initialUserConstraintIterations,
-        initialAllConstraintsIterations,
-        gridSnapIterations)
-        .on("end", function () {
+    function startColaLayout(layoutFormat) {
+        // Set the onTick handler
+        colaLayout.on("tick", function () {
             if (layoutFormat === "grid") {
-                gridify(svg, 10, 25, 10);
-            }
-
-            if (layoutFormat === "freeform") {
-                routeEdges();
+                gridTickHandler();
+            } else if (layoutFormat === "default") {
+                freeformTickHandler();
+            } else {
+                console.log("Unknown layout format:", layoutFormat);
             }
         });
+
+        // Start WebCola layout
+        colaLayout.start(
+            initialUnconstrainedIterations,
+            initialUserConstraintIterations,
+            initialAllConstraintsIterations,
+            gridSnapIterations)
+            .on("end", function () {
+                if (layoutFormat === "grid") {
+                    gridify(svg, 10, 25, 10);
+                } else if (layoutFormat === "default") {
+                    routeEdges();
+                } else {
+                    console.log("Unknown layout format:", layoutFormat);
+                }
+            });
+    }
+
+    // -- Start WebCola layout! --
+    startColaLayout(layoutFormat);
 }
