@@ -284,7 +284,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             console.log("Link length", linkLength);
             colaLayout.symmetricDiffLinkLengths(linkLength);
             colaLayout.constraints(scaledConstraints);
-            
+
             layoutFormat ? startColaLayout(layoutFormat) : startColaLayout(DEFAULT_FORMAT);
         });
     }
@@ -433,7 +433,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         // Position link labels at route midpoints
         updateLinkLabels(routes, edges);
 
-        // zoomToFit();
+        // Zoom to fit the SVG
+        zoomToFit();
     }
 
     // Helper function to update link labels
@@ -697,16 +698,11 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     route.splice(1, 0, midpoint);
                 }
 
-
-
-
                 // Determine the direction of the edge
                 var dx = route[1].x - route[0].x;
                 var dy = route[1].y - route[0].y;
                 var angle = Math.atan2(dy, dx);
                 var distance = Math.sqrt(dx * dx + dy * dy);
-
-
 
                 /** Here, we do some point of incidence adjustment IF the number of edges between the same nodes is greater than 1 */
                 if (allEdgesBetweenSourceAndTarget.length > 1) {
@@ -830,64 +826,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 })
                 .raise();
 
-            /**** This bit ensures we zoom to fit ***/
-            const bbox = svg.node().getBBox();
-            const padding = 10; // Padding in pixels
-
-            const viewBox = [
-                bbox.x - padding,
-                bbox.y - padding,
-                bbox.width + 2 * padding,
-                bbox.height + 2 * padding
-            ].join(' ');
-
-
-            const topSvg = d3.select("#svg");
-            topSvg.attr('viewBox', viewBox);
-            /*************************************/
-
-            function highlightRelation(relName) {
-                d3.selectAll(".link")
-                    .filter(link => link.relName === relName)
-                    .classed("highlighted", true);
-
-                d3.selectAll(".inferredLink")
-                    .filter(link => link.relName === relName)
-                    .classed("highlighted", true);
-            }
-
-            // Get a set of all relNames
-            const relNames = new Set(
-                edges
-                    .filter(edge => !isAlignmentEdge(edge))
-                    .map(edge => edge.relName)
-            );
-            // For each relName, add a LI element to the ul with id "relationList", with the relName as text and hover event to highlight the relation,
-            // also a mouseout event to remove the highlight
-
-
-            // Maybe these should be checkboxes instead of just text?
-            // I wory about the removal of the highlight on uncheck
-            const relationList = d3.select("#relationList");
-            relationList.selectAll("li")
-                .data(Array.from(relNames))
-                .enter()
-                .append("li")
-                .attr("class", "list-group-item")
-                .text(d => d)
-                .on("mouseover", function (d) {
-                    highlightRelation(d);
-                    // Also make the text bold
-                    d3.select(this).style("font-weight", "bold");
-                })
-                .on("mouseout", function (event, d) {
-                    d3.selectAll(".link")
-                        .classed("highlighted", false);
-                    d3.selectAll(".inferredLink")
-                        .classed("highlighted", false);
-                    // Also make the text normal
-                    d3.select(this).style("font-weight", "normal");
-                });
+            // Zoom to fit the SVG
+            zoomToFit();
         }
         finally {
 
@@ -916,15 +856,14 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         /**** This bit ensures we zoom to fit ***/
         const bbox = svg.node().getBBox();
         const padding = 10; // Padding in pixels
-    
+
         const viewBox = [
             bbox.x - padding,
             bbox.y - padding,
             bbox.width + 2 * padding,
             bbox.height + 2 * padding
         ].join(' ');
-    
-    
+
         const topSvg = d3.select("#svg");
         topSvg.attr('viewBox', viewBox);
     }
@@ -945,39 +884,41 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             .classed("highlighted", true);
     }
 
-    // // Get a set of all relNames
-    // const relNames = new Set(
-    //     edges
-    //         .filter(edge => !isAlignmentEdge(edge))
-    //         .map(edge => edge.relName)
-    // );
-    // console.log("Relation names:", relNames);
-    // // For each relName, add a LI element to the ul with id "relationList", with the relName as text and hover event to highlight the relation,
-    // // also a mouseout event to remove the highlight
+    // Get a set of all relNames
+    const relNames = new Set(
+        edges
+            .filter(edge => !isAlignmentEdge(edge))
+            .map(edge => edge.relName)
+    );
+    console.log("Relation names:", relNames);
 
-    // // TODO: Maybe these should be checkboxes instead of just text?
-    // // I wory about the removal of the highlight on uncheck
-    // const relationList = d3.select("#relationList");
-    // relationList.selectAll("li")
-    //     .data(Array.from(relNames))
-    //     .enter()
-    //     .append("li")
-    //     .attr("class", "list-group-item")
-    //     .text(d => d)
-    //     .on("mouseover", function (d) {
-    //         console.log("Highlighting relation", d);
-    //         highlightRelation(d);
-    //         // Also make the text bold
-    //         d3.select(this).style("font-weight", "bold");
-    //     })
-    //     .on("mouseout", function (event, d) {
-    //         d3.selectAll(".link")
-    //             .classed("highlighted", false);
-    //         d3.selectAll(".inferredLink")
-    //             .classed("highlighted", false);
-    //         // Also make the text normal
-    //         d3.select(this).style("font-weight", "normal");
-    //     });
+    // TODO: Maybe these should be checkboxes instead of just text?
+    // I wory about the removal of the highlight on uncheck
+    const relationList = d3.select("#relationList");
+    relationList.selectAll("li")
+        .data(Array.from(relNames))
+        .enter()
+        .append("li")
+        .attr("class", "list-group-item")
+        .text(d => d)
+        .on("mouseover", function (d) {
+            console.log("Highlighting relation", d);
+            highlightRelation(d);
+            // Also make the text bold
+            d3.select(this).style("font-weight", "bold");
+        })
+        .on("mouseout", function (event, d) {
+            d3.selectAll(".link")
+                .classed("highlighted", false);
+            d3.selectAll(".inferredLink")
+                .classed("highlighted", false);
+            // Also make the text normal
+            d3.select(this).style("font-weight", "normal");
+        });
+
+    /*
+        CREATING NODES
+    */
 
     function isHiddenNode(node) {
         return node.name.startsWith("_");
@@ -1055,44 +996,40 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .text(function (d) { return d.mostSpecificType; });
 
     // Add main label (name and attributes)
-    var label =
-        //svg.selectAll(".label")
-        //.data(nodes)
-        node.append("text")
-            //.enter().append("text")
-            .attr("class", "label")
-            .each(function (d) {
+    var label = node.append("text")
+        .attr("class", "label")
+        .each(function (d) {
 
-                if (isHiddenNode(d)) {
-                    return;
+            if (isHiddenNode(d)) {
+                return;
+            }
+
+
+            let shouldShowLabels = d.showLabels;
+            let displayLabel = shouldShowLabels ? d.name : "";
+
+
+            // Append tspan for d.name
+            d3.select(this).append("tspan")
+                .attr("x", 0) // Align with the parent text element
+                .attr("dy", "0em") // Start at the same vertical position
+                .style("font-weight", "bold")
+                .text(displayLabel);
+
+            if (shouldShowLabels) {
+                var y = 1; // Start from the next line for attributes
+
+                // Append tspans for each attribute
+                for (let key in d.attributes) {
+                    d3.select(this).append("tspan")
+                        .attr("x", 0) // Align with the parent text element
+                        .attr("dy", `${y}em`) // Move each attribute to a new line
+                        .text(key + ": " + d.attributes[key]);
+                    y += 1; // Increment for the next line
                 }
-
-
-                let shouldShowLabels = d.showLabels;
-                let displayLabel = shouldShowLabels ? d.name : "";
-
-
-                // Append tspan for d.name
-                d3.select(this).append("tspan")
-                    .attr("x", 0) // Align with the parent text element
-                    .attr("dy", "0em") // Start at the same vertical position
-                    .style("font-weight", "bold")
-                    .text(displayLabel);
-
-                if (shouldShowLabels) {
-                    var y = 1; // Start from the next line for attributes
-
-                    // Append tspans for each attribute
-                    for (let key in d.attributes) {
-                        d3.select(this).append("tspan")
-                            .attr("x", 0) // Align with the parent text element
-                            .attr("dy", `${y}em`) // Move each attribute to a new line
-                            .text(key + ": " + d.attributes[key]);
-                        y += 1; // Increment for the next line
-                    }
-                }
-            })
-            .call(colaLayout.drag);
+            }
+        })
+        .call(colaLayout.drag);
 
 
     // Helper function to calculate new position along the path
@@ -1387,6 +1324,10 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         START COLA LAYOUT
     */
 
+    /**
+     * Sets the onTick handler and starts the WebCola layout, based on the specified layout format.
+     * @param {string} layoutFormat - value of the layoutFormat dropdown (e.g. "grid", "default")
+     */
     function startColaLayout(layoutFormat) {
         // Set the onTick handler
         colaLayout.on("tick", function () {
