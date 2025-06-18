@@ -222,7 +222,7 @@ function getContainingGroups(groups, node) {
  */
 function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
-
+    let hasErrored = false;
     let edgeRouteIdx = 0;
 
     // Start measuring client-side execution time
@@ -281,9 +281,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
             var { scaledConstraints, linkLength } = adjustLinkLengthsAndSeparationConstraintsToScaleFactor(constraints, scaleFactor);
 
-            console.log("Link length", linkLength);
-            colaLayout.symmetricDiffLinkLengths(linkLength);
             colaLayout.constraints(scaledConstraints);
+            colaLayout.symmetricDiffLinkLengths(linkLength);
 
             layoutFormat ? startColaLayout(layoutFormat) : startColaLayout(DEFAULT_FORMAT);
         });
@@ -301,8 +300,9 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .constraints(scaledConstraints)
         .groups(groups)
         .groupCompactness(1e-3)
-        // .symmetricDiffLinkLengths(linkLength); // FIXME: The default link length is too large for small graphs
-        .linkDistance(100);
+        .symmetricDiffLinkLengths(linkLength); // FIXME: The default link length is too large for small graphs
+        // .symmetricDiffLinkLengths(1500);
+        // .linkDistance(100);
 
     /*
 
@@ -360,7 +360,31 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         var gridrouter = route(nodes, groups, margin, groupMargin);
 
         // Route all edges using the GridRouter
-        var routes = gridrouter.routeEdges(edges, nudgeGap, function (e) { return e.source.routerNode.id; }, function (e) { return e.target.routerNode.id; });
+        try {
+            var routes = gridrouter.routeEdges(edges, nudgeGap, function (e) { return e.source.routerNode.id; }, function (e) { return e.target.routerNode.id; });
+        } catch (e) {
+            console.log("Error routing edges in GridRouter");
+            console.error(e);
+
+
+            let runtimeMessages = document.getElementById("runtime_messages");
+            let dismissableAlert = document.createElement("div");
+            dismissableAlert.className = "alert alert-danger alert-dismissible fade show";
+            dismissableAlert.setAttribute("role", "alert");
+            dismissableAlert.innerHTML = `Runtime (WebCola) error when gridifying edges. You may have to click and drag these nodes slightly to un-stick layout.`;
+
+            // Make sure we don't have duplicate alerts
+            let existingAlerts = runtimeMessages.querySelectorAll(".alert");
+            existingAlerts.forEach(alert => {
+                if (alert.innerHTML === dismissableAlert.innerHTML) {
+                    alert.remove();
+                }
+            });
+
+            runtimeMessages.appendChild(dismissableAlert);
+            hasErrored = true;
+            return;
+        }
 
         console.log("GridRouter routes: ", routes);
 
@@ -432,9 +456,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         
         // Position link labels at route midpoints
         updateLinkLabels(routes, edges);
-
-        // Zoom to fit the SVG
-        zoomToFit();
     }
 
     // Helper function to update link labels
@@ -538,6 +559,13 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 try {
                     var route = colaLayout.routeEdge(d);
 
+                    // Error check the route
+                    // NOTE: Conditional written by Copilot, may not cover all cases
+                    if (!route || !Array.isArray(route) || route.length < 2 || 
+                        !route[0] || !route[1] || route[0].x === undefined || route[0].y === undefined) {
+                            throw new Error(`WebCola failed to route edge ${d.id} from ${d.source.id} to ${d.target.id}`);
+                    }
+
                     if (d.source.id === d.target.id) {
                         const source = d.source;
 
@@ -594,6 +622,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     });
 
                     runtimeMessages.appendChild(dismissableAlert);
+                    hasErrored = true;
                     return lineFunction([{ x: d.source.x, y: d.source.y }, { x: d.target.x, y: d.target.y }]);
                 }
 
@@ -825,9 +854,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     }
                 })
                 .raise();
-
-            // Zoom to fit the SVG
-            zoomToFit();
         }
         finally {
 
@@ -848,25 +874,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             }
         }
     };
-
-    /**
-     * Function meant to be run AFTER layout is completed to zoom the SVG to fit
-     */
-    function zoomToFit() {
-        /**** This bit ensures we zoom to fit ***/
-        const bbox = svg.node().getBBox();
-        const padding = 10; // Padding in pixels
-
-        const viewBox = [
-            bbox.x - padding,
-            bbox.y - padding,
-            bbox.width + 2 * padding,
-            bbox.height + 2 * padding
-        ].join(' ');
-
-        const topSvg = d3.select("#svg");
-        topSvg.attr('viewBox', viewBox);
-    }
 
     /*
         HIGHLIGHT RELATIONS
@@ -890,7 +897,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             .filter(edge => !isAlignmentEdge(edge))
             .map(edge => edge.relName)
     );
-    console.log("Relation names:", relNames);
 
     // TODO: Maybe these should be checkboxes instead of just text?
     // I wory about the removal of the highlight on uncheck
@@ -1176,14 +1182,9 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         linkGroups.select("text.linklabel").raise(); // Ensure link labels are raised
     }
 
-    function freeformTickHandler() {
-        group.attr("x", function (d) {
-            return d.bounds.x;
-        })
-            .attr("y", function (d) {
-                return d.bounds.y;
-            })
-
+    function defaultTickHandler() {
+        group.attr("x", function (d) { return d.bounds.x; })
+            .attr("y", function (d) { return d.bounds.y; })
             .attr("width", function (d) { return d.bounds.width(); })
             .attr("height", function (d) { return d.bounds.height(); })
             .lower();
@@ -1334,7 +1335,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             if (layoutFormat === "grid") {
                 gridTickHandler();
             } else if (layoutFormat === "default") {
-                freeformTickHandler();
+                defaultTickHandler();
             } else {
                 console.log("Unknown layout format:", layoutFormat);
             }
@@ -1346,6 +1347,9 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             initialUserConstraintIterations,
             initialAllConstraintsIterations,
             gridSnapIterations)
+            .on("start", function () {
+                hasErrored = false;
+            })
             .on("end", function () {
                 if (layoutFormat === "grid") {
                     gridify(svg, 10, 25, 10);
@@ -1354,6 +1358,28 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 } else {
                     console.log("Unknown layout format:", layoutFormat);
                 }
+
+                // Remove runtime error messages, if layout completed successfully
+                if (!hasErrored) {
+                    let runtimeMessages = document.getElementById("runtime_messages");
+                    if (runtimeMessages) { 
+                        runtimeMessages.remove(); 
+                    }
+                }
+
+                /**** This bit ensures we zoom to fit ***/
+                const bbox = svg.node().getBBox();
+                const padding = 10; // Padding in pixels
+
+                const viewBox = [
+                    bbox.x - padding,
+                    bbox.y - padding,
+                    bbox.width + 2 * padding,
+                    bbox.height + 2 * padding
+                ].join(' ');
+
+                const topSvg = d3.select("#svg");
+                topSvg.attr('viewBox', viewBox);
             });
     }
 
