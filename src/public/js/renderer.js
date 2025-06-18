@@ -5,8 +5,14 @@ const initialAllConstraintsIterations = 1000; // initial layout iterations with 
 const gridSnapIterations = 5; // iterations of "grid snap", which pulls nodes towards grid cell centers - grid of size node[0].width - only really makes sense if all nodes have the same width and heigh
 const margin = 10;
 const dy_for_linespacing = 5; // Adjust for spacing between lines
+const DEFAULT_FORMAT = "default";
 //////////
 
+/**
+ * Determines if an edge is an inferred edge by checking for the helper prefix.
+ * @param {Object} edge - The edge object to check
+ * @returns {boolean} True if the edge is an inferred edge, false otherwise
+ */
 function isInferredEdge(edge) {
 
     const helperPrefix = "_inferred_";
@@ -16,6 +22,11 @@ function isInferredEdge(edge) {
 
 }
 
+/**
+ * Determines if an edge is a group edge by checking for the group prefix.
+ * @param {Object} edge - The edge object to check
+ * @returns {boolean} True if the edge is a group edge, false otherwise
+ */
 function isGroupEdge(edge) {
     const groupPrefix = "_g_";
     return edge.id.startsWith(groupPrefix);
@@ -60,7 +71,12 @@ function adjustLinkLengthsAndSeparationConstraintsToScaleFactor(constraints, sca
         linkLength: linkLength
     }
 }
-
+/**
+ * Obtains the groupOn and addToGroup indices from the edge ID.
+ * @param {string} edgeId - The edge ID in format "_g_{groupOnIndex}_{addToGroupIndex}_"
+ * @returns {{groupOnIndex: number, addToGroupIndex: number}} Object containing the parsed indices
+ * @throws {Error} If the edge ID doesn't match the expected pattern
+ */
 function getGroupOnAndAddToGroupIndices(edgeId) {
 
 
@@ -77,8 +93,12 @@ function getGroupOnAndAddToGroupIndices(edgeId) {
     }
 }
 
-
-
+/**
+ * Adjusts a point to remain on the perimeter of a rectangle with padding.
+ * @param {Object} point - The point to adjust
+ * @param {Object} rect - The rectangle bounds
+ * @returns {Object} The adjusted point with x and y coordinates
+ */
 function adjustPointToRectanglePerimeter(point, rect) {
     const { x, y, width, height } = rect;
     const padding = 3; // Padding in pixels
@@ -104,18 +124,31 @@ function adjustPointToRectanglePerimeter(point, rect) {
     return point;
 }
 
-// Function to generate a random offset along the path
+/**
+ * Generates a random offset value for positioning elements along a path.
+ * @returns {number} Random offset value between -10 and 10
+ */
 function getRandomOffsetAlongPath() {
     return (Math.random() - 0.5) * 20; // Random value between -10 and 10
 }
 
-
+/**
+ * Calculates the overlapping area between two bounding boxes.
+ * @param {Object} bbox1 - First bounding box
+ * @param {Object} bbox2 - Second bounding box
+ * @returns {number} The area of overlap between the two boxes
+ */
 function calculateOverlapArea(bbox1, bbox2) {
     const x_overlap = Math.max(0, Math.min(bbox1.x + bbox1.width, bbox2.x + bbox2.width) - Math.max(bbox1.x, bbox2.x));
     const y_overlap = Math.max(0, Math.min(bbox1.y + bbox1.height, bbox2.y + bbox2.height) - Math.max(bbox1.y, bbox2.y));
     return x_overlap * y_overlap;
 }
 
+/**
+ * Minimizes overlap between a label and other overlapping labels by finding the best position.
+ * @param {SVGTextElement} currentLabel - The label element to reposition
+ * @param {SVGTextElement[]} overlapsWith - Array of labels that overlap with the current label
+ */
 function minimizeOverlap(currentLabel, overlapsWith) {
     const originalBBox = currentLabel.getBBox();
     let minOverlapArea = Infinity;
@@ -153,8 +186,12 @@ function minimizeOverlap(currentLabel, overlapsWith) {
         .attr('text-anchor', bestPosition.textAnchor);
 }
 
-// Goes through the groups and finds ALL groups that contain the node
-
+/**
+ * Finds all groups that contain a given node, including nested groups.
+ * @param {Object[]} groups - Array of group objects
+ * @param {Object} node - The node to find containing groups for
+ * @returns {Object[]} Array of all groups that contain the node
+ */
 function getContainingGroups(groups, node) {
     const containingGroups = [];
 
@@ -173,10 +210,19 @@ function getContainingGroups(groups, node) {
 }
 
 
-
+/**
+ * Main function for the renderer. Sets up the layout for the graph using D3 and WebCola.
+ * @param {*} d3 
+ * @param {*} nodes 
+ * @param {*} edges 
+ * @param {*} constraints 
+ * @param {*} groups 
+ * @param {*} width 
+ * @param {*} height 
+ */
 function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
-
+    let hasErrored = false;
     let edgeRouteIdx = 0;
 
     // Start measuring client-side execution time
@@ -185,14 +231,15 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
 
     // Create a zoom behavior
+    function zoomed() {
+        d3.select(".zoomable").attr("transform", d3.event.transform);
+    }
+    
     var zoom = d3.zoom()
         .scaleExtent([0.5, 5]) // Set the zoom scale limits
         .on("zoom", zoomed);
 
-    function zoomed() {
-        d3.select(".zoomable").attr("transform", d3.event.transform);
-    }
-
+    // Helper function to get the index of a node by its ID
     function getNodeIndex(n) {
         const nodeId = typeof n === 'string' ? n : n.id;
         return nodes.findIndex(node => node.id === nodeId);
@@ -216,27 +263,28 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
 
     ///// Check whats up TODO ////
+
+    /*
+
+        SCALE FACTOR INPUT
+
+    */
+
+    // Adjust the graph by the scale factor
     let scaleFactorInput = document.getElementById("scaleFactor");
     let scaleFactor = scaleFactorInput ? parseFloat(scaleFactorInput.value) : 1;
 
     if (scaleFactorInput) {
+        // Add an event listener to the scale factor input to update the layout when the scale factor changes
         scaleFactorInput.addEventListener("change", function () {
-            scaleFactor = parseFloat(scaleFactorInput.value)    ;
-            
+            scaleFactor = parseFloat(scaleFactorInput.value);
 
-            let { scaledConstraints, linkLength } = adjustLinkLengthsAndSeparationConstraintsToScaleFactor(constraints, scaleFactor);
+            var { scaledConstraints, linkLength } = adjustLinkLengthsAndSeparationConstraintsToScaleFactor(constraints, scaleFactor);
 
-            console.log("Link length", linkLength);
-
+            colaLayout.constraints(scaledConstraints);
             colaLayout.symmetricDiffLinkLengths(linkLength);
 
-            colaLayout.constraints(scaledConstraints)
-                .start(
-                    initialUnconstrainedIterations,
-                    initialUserConstraintIterations,
-                    initialAllConstraintsIterations,
-                    gridSnapIterations)
-                .on("end", routeEdges);
+            layoutFormat ? startColaLayout(layoutFormat) : startColaLayout(DEFAULT_FORMAT);
         });
     }
 
@@ -252,7 +300,26 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .constraints(scaledConstraints)
         .groups(groups)
         .groupCompactness(1e-3)
-        .symmetricDiffLinkLengths(linkLength);
+        .symmetricDiffLinkLengths(linkLength); // FIXME: The default link length is too large for small graphs
+        // .symmetricDiffLinkLengths(1500);
+        // .linkDistance(100);
+
+    /*
+
+        LAYOUT FORMAT
+
+    */
+
+    let layoutFormatInput = document.getElementById("layoutFormat");
+    let layoutFormat = layoutFormatInput ? layoutFormatInput.value : DEFAULT_FORMAT;
+
+    if (layoutFormatInput) {
+        // Add onChange event listener
+        layoutFormatInput.addEventListener("change", function () {
+            layoutFormat = layoutFormatInput.value;
+            startColaLayout(layoutFormat);
+        });
+    }
 
 
     var lineFunction = d3.line()
@@ -260,7 +327,197 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .y(function (d) { return d.y; })
         .curve(d3.curveBasis);
 
+    
+    function route(nodes, groups, margin, groupMargin) {
+        nodes.forEach(d => {
+            d.routerNode = {
+                name: d.name,
+                bounds: d.bounds || d.innerBounds
+            };
+        });
+        groups.forEach(d => {
+            d.routerNode = {
+                bounds: d.bounds.inflate(-groupMargin),
+                children: (typeof d.groups !== 'undefined' ? d.groups.map(c=> nodes.length + c.id) : [])
+                .concat(typeof d.leaves !== 'undefined' ? d.leaves.map(c=> c.index) : [])
+            };
+        });
+        let gridRouterNodes = nodes.concat(groups).map((d, i) => {
+            d.routerNode.id = i;
+            return d.routerNode;
+        });
+        // NOTE: Router nodes are nodes needed for grid routing, which include both nodes and groups
+        return new cola.GridRouter(gridRouterNodes, {
+            getChildren: (v) => v.children,
+            getBounds: v => v.bounds
+        }, margin - groupMargin);
+    }
+
+    // NOTE: The introduction of alignment edges might be the cause of some issues when using GridRouter
+    function gridify(svg, nudgeGap, margin, groupMargin) {
+        console.log("Gridify");
+        // Create the grid router
+        var gridrouter = route(nodes, groups, margin, groupMargin);
+
+        // Route all edges using the GridRouter
+        try {
+            var routes = gridrouter.routeEdges(edges, nudgeGap, function (e) { return e.source.routerNode.id; }, function (e) { return e.target.routerNode.id; });
+        } catch (e) {
+            console.log("Error routing edges in GridRouter");
+            console.error(e);
+
+
+            let runtimeMessages = document.getElementById("runtime_messages");
+            let dismissableAlert = document.createElement("div");
+            dismissableAlert.className = "alert alert-danger alert-dismissible fade show";
+            dismissableAlert.setAttribute("role", "alert");
+            dismissableAlert.innerHTML = `Runtime (WebCola) error when gridifying edges. You may have to click and drag these nodes slightly to un-stick layout.`;
+
+            // Make sure we don't have duplicate alerts
+            let existingAlerts = runtimeMessages.querySelectorAll(".alert");
+            existingAlerts.forEach(alert => {
+                if (alert.innerHTML === dismissableAlert.innerHTML) {
+                    alert.remove();
+                }
+            });
+
+            runtimeMessages.appendChild(dismissableAlert);
+            hasErrored = true;
+            return;
+        }
+
+        console.log("GridRouter routes: ", routes);
+
+        // Clear existing paths; 
+        // NOTE: This is crucial to avoid node explosion when re-routing
+        svg.selectAll('.link-group').remove();
+
+        // Create paths from GridRouter routes
+        routes.forEach(function (route, index) {
+            var cornerradius = 5;
+            var arrowwidth = 3; // Abitrary value (see note below)
+            var arrowheight = 7; // Abitrary value (see note below)
+
+            // Get the corresponding edge data
+            // Assumption: edges are in the same order as routes
+            var edgeData = edges[index];
+
+            // Calculate the route path using the GridRouter
+            // NOTE: Arrow width/height not used in our implementation
+            var p = cola.GridRouter.getRoutePath(route, cornerradius, arrowwidth, arrowheight);
+
+            // Create the link groups
+            const linkGroup = svg.append('g')
+                .attr("class", "link-group")
+                .datum(edgeData);
+
+            // Create the link
+            linkGroup.append('path')
+                .attr("class", function () {
+                    if (isAlignmentEdge(edgeData)) return "alignmentLink";
+                    if (isInferredEdge(edgeData)) return "inferredLink";
+                    return "link";
+                })
+                .attr('data-link-id', edgeData.id)
+                .attr('d', p.routepath)
+                .lower();
+            
+            // Create the link labels
+            linkGroup
+                .filter(d => !isAlignmentEdge(d))
+                .append("text")
+                .attr("class", "linklabel")
+                .text(d => d.label);
+        });
+
+        // Update node positions
+        // NOTE: `transition()` gives the snap-to-grid effect
+        // NOTE: Uses absolute positioning to be compatible with pre-existing code (also easier to reason)
+        // NOTE: Use `d.bounds` to get the bounds of the node, `d.bounds.cx()` and `d.bounds.cy()` for center coordinates
+        svg.selectAll(".node").transition()
+            .attr("x", function (d) { return d.bounds.x; })
+            .attr("y", function (d) { return d.bounds.y; })
+            .attr("width", function (d) { return d.bounds.width(); })
+            .attr("height", function (d) { return d.bounds.height(); });
+        
+        // Update group positions
+        // var groupPadding = margin - groupMargin;
+        // console.log("Group padding", groupPadding);
+        svg.selectAll(".group").transition()
+            .attr("x", function (d) { return d.bounds.x; })
+            .attr('y', function (d) { return d.bounds.y; })
+            .attr('width', function (d) { return d.bounds.width(); })
+            .attr('height', function (d) { return d.bounds.height(); });
+        
+        // Update label positions
+        svg.selectAll(".label").transition()
+            .attr("x", function (d) { return d.bounds.cx(); })
+            .attr("y", function (d) { return d.bounds.cy(); });
+        
+        // Position link labels at route midpoints
+        updateLinkLabels(routes, edges);
+    }
+
+    // Helper function to update link labels
+    // TODO: Improve label placement to avoid overlap with other labels
+    function updateLinkLabels(routes, edges) {
+        console.log("Updating link labels");
+        routes.forEach(function(route, index) {
+            var edgeData = edges[index];
+            
+            // Calculate midpoint of the route
+            let combinedSegment = [];
+            let direction = []; // 'L' for left, 'R' for right, 'U' for up, 'D' for down
+            route.forEach(function(segment) {
+                combinedSegment = combinedSegment.concat(segment);
+            });
+            // console.log("Combined segment", combinedSegment);
+            const midpointIndex = Math.floor(combinedSegment.length / 2); // NOTE: Length should be even
+            const midpoint = {
+                x: (combinedSegment[midpointIndex - 1].x + combinedSegment[midpointIndex].x) / 2,
+                y: (combinedSegment[midpointIndex - 1].y + combinedSegment[midpointIndex].y) / 2
+            };
+
+            // TODO: Compute the direction of the angle
+            // This is useful for determining where to place padding around the label
+            // Currently, the label is directly on the line, which can be hard to read
+
+            // console.log(`Midpoint for edge ${edgeData.id}:`, midpoint);
+            
+            // Update corresponding label
+            const linkGroups = svg.selectAll(".link-group");
+            linkGroups.filter(function(d) { return d.id === edgeData.id; })
+                .select("text.linklabel")
+                .attr("x", midpoint.x)
+                .attr("y", midpoint.y)
+                .attr("text-anchor", "middle");
+        });
+    }
+
     var routeEdges = function () {
+
+        // Clear all existing links
+        svg.selectAll('.link-group').remove();
+
+        const linkGroups = svg.selectAll(".link-group")
+            .data(edges)
+            .enter()
+            .append("g")
+            .attr("class", "link-group");
+
+        const link = linkGroups.append("path")
+            .attr("class", d => {
+                if (isAlignmentEdge(d)) return "alignmentLink";
+                if (isInferredEdge(d)) return "inferredLink";
+                return "link";
+            }) // Dynamically assign class
+            .attr("data-link-id", d => d.id);
+
+        linkGroups
+            .filter(d => !isAlignmentEdge(d))
+            .append("text")
+            .attr("class", "linklabel")
+            .text(d => d.label);
 
         try {
             colaLayout.prepareEdgeRouting(margin / 3);
@@ -301,6 +558,13 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
                 try {
                     var route = colaLayout.routeEdge(d);
+
+                    // Error check the route
+                    // NOTE: Conditional written by Copilot, may not cover all cases
+                    if (!route || !Array.isArray(route) || route.length < 2 || 
+                        !route[0] || !route[1] || route[0].x === undefined || route[0].y === undefined) {
+                            throw new Error(`WebCola failed to route edge ${d.id} from ${d.source.id} to ${d.target.id}`);
+                    }
 
                     if (d.source.id === d.target.id) {
                         const source = d.source;
@@ -358,6 +622,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     });
 
                     runtimeMessages.appendChild(dismissableAlert);
+                    hasErrored = true;
                     return lineFunction([{ x: d.source.x, y: d.source.y }, { x: d.target.x, y: d.target.y }]);
                 }
 
@@ -462,16 +727,11 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     route.splice(1, 0, midpoint);
                 }
 
-
-
-
                 // Determine the direction of the edge
                 var dx = route[1].x - route[0].x;
                 var dy = route[1].y - route[0].y;
                 var angle = Math.atan2(dy, dx);
                 var distance = Math.sqrt(dx * dx + dy * dy);
-
-
 
                 /** Here, we do some point of incidence adjustment IF the number of edges between the same nodes is greater than 1 */
                 if (allEdgesBetweenSourceAndTarget.length > 1) {
@@ -594,68 +854,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     }
                 })
                 .raise();
-
-            /**** This bit ensures we zoom to fit ***/
-            const bbox = svg.node().getBBox();
-            const padding = 10; // Padding in pixels
-
-            const viewBox = [
-                bbox.x - padding,
-                bbox.y - padding,
-                bbox.width + 2 * padding,
-                bbox.height + 2 * padding
-            ].join(' ');
-
-
-            const topSvg = d3.select("#svg");
-            topSvg.attr('viewBox', viewBox);
-            /*************************************/
-
-            function highlightRelation(relName) {
-                d3.selectAll(".link")
-                    .filter(link => link.relName === relName)
-                    .classed("highlighted", true);
-
-                d3.selectAll(".inferredLink")
-                    .filter(link => link.relName === relName)
-                    .classed("highlighted", true);
-            }
-
-            // Get a set of all relNames
-            const relNames = new Set(
-                edges
-                    .filter(edge => !isAlignmentEdge(edge))
-                    .map(edge => edge.relName)
-            );
-            // For each relName, add a LI element to the ul with id "relationList", with the relName as text and hover event to highlight the relation,
-            // also a mouseout event to remove the highlight
-
-
-            // Maybe these should be checkboxes instead of just text?
-            // I wory about the removal of the highlight on uncheck
-            const relationList = d3.select("#relationList");
-            relationList.selectAll("li")
-                .data(Array.from(relNames))
-                .enter()
-                .append("li")
-                .attr("class", "list-group-item")
-                .text(d => d)
-                .on("mouseover", function (d) {
-                    highlightRelation(d);
-                    // Also make the text bold
-                    d3.select(this).style("font-weight", "bold");
-                })
-                .on("mouseout", function (event, d) {
-                    d3.selectAll(".link")
-                        .classed("highlighted", false);
-                    d3.selectAll(".inferredLink")
-                        .classed("highlighted", false);
-                    // Also make the text normal
-                    d3.select(this).style("font-weight", "normal");
-                });
         }
         finally {
-
 
             // Only record timing data for the first edge route
             if (edgeRouteIdx === 1) {
@@ -675,27 +875,56 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         }
     };
 
+    /*
+        HIGHLIGHT RELATIONS
+    */
 
-    const linkGroups = svg.selectAll(".link-group")
-        .data(edges)
+    /*************************************/
+
+    function highlightRelation(relName) {
+        d3.selectAll("path.link")
+            .filter(link => link.relName === relName)
+            .classed("highlighted", true);
+
+        d3.selectAll("path.inferredLink")
+            .filter(link => link.relName === relName)
+            .classed("highlighted", true);
+    }
+
+    // Get a set of all relNames
+    const relNames = new Set(
+        edges
+            .filter(edge => !isAlignmentEdge(edge))
+            .map(edge => edge.relName)
+    );
+
+    // TODO: Maybe these should be checkboxes instead of just text?
+    // I wory about the removal of the highlight on uncheck
+    const relationList = d3.select("#relationList");
+    relationList.selectAll("li")
+        .data(Array.from(relNames))
         .enter()
-        .append("g")
-        .attr("class", "link-group");
+        .append("li")
+        .attr("class", "list-group-item")
+        .text(d => d)
+        .on("mouseover", function (d) {
+            console.log("Highlighting relation", d);
+            highlightRelation(d);
+            // Also make the text bold
+            d3.select(this).style("font-weight", "bold");
+        })
+        .on("mouseout", function (event, d) {
+            d3.selectAll(".link")
+                .classed("highlighted", false);
+            d3.selectAll(".inferredLink")
+                .classed("highlighted", false);
+            // Also make the text normal
+            d3.select(this).style("font-weight", "normal");
+        });
 
-    const link = linkGroups.append("path")
-        .attr("class", d => {
-            if (isAlignmentEdge(d)) return "alignmentLink";
-            if (isInferredEdge(d)) return "inferredLink";
-            return "link";
-        }) // Dynamically assign class
-        .attr("data-link-id", d => d.id);
-
-    linkGroups
-        .filter(d => !isAlignmentEdge(d))
-        .append("text")
-        .attr("class", "linklabel")
-        .text(d => d.label);
-
+    /*
+        CREATING NODES
+    */
 
     function isHiddenNode(node) {
         return node.name.startsWith("_");
@@ -704,8 +933,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     function isAlignmentEdge(edge) {
         return edge.id.startsWith("_alignment_");
     }
-
-
 
     var node = svg.selectAll(".node")
         .data(nodes)
@@ -729,8 +956,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
     const SMALL_IMG_SCALE_FACTOR = 0.3;
 
-
-
+    // Add icon images to nodes if available
     node.filter(d => d.icon) // Filter nodes that have an icon
         .append("image")
         .attr("xlink:href", d => d.icon)
@@ -769,54 +995,47 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             console.error(`Failed to load icon for node ${d.id}: ${d.icon}`);
         });
 
-
-
-
     // Add most specific type label
     var mostSpecificTypeLabel = node.append("text")
         .attr("class", "mostSpecificTypeLabel")
         .style("fill", function (d) { return d.color; }) // Set the font color to d.color
         .text(function (d) { return d.mostSpecificType; });
 
+    // Add main label (name and attributes)
+    var label = node.append("text")
+        .attr("class", "label")
+        .each(function (d) {
 
-    var label =
-        //svg.selectAll(".label")
-        //.data(nodes)
-        node.append("text")
-            //.enter().append("text")
-            .attr("class", "label")
-            .each(function (d) {
+            if (isHiddenNode(d)) {
+                return;
+            }
 
-                if (isHiddenNode(d)) {
-                    return;
+
+            let shouldShowLabels = d.showLabels;
+            let displayLabel = shouldShowLabels ? d.name : "";
+
+
+            // Append tspan for d.name
+            d3.select(this).append("tspan")
+                .attr("x", 0) // Align with the parent text element
+                .attr("dy", "0em") // Start at the same vertical position
+                .style("font-weight", "bold")
+                .text(displayLabel);
+
+            if (shouldShowLabels) {
+                var y = 1; // Start from the next line for attributes
+
+                // Append tspans for each attribute
+                for (let key in d.attributes) {
+                    d3.select(this).append("tspan")
+                        .attr("x", 0) // Align with the parent text element
+                        .attr("dy", `${y}em`) // Move each attribute to a new line
+                        .text(key + ": " + d.attributes[key]);
+                    y += 1; // Increment for the next line
                 }
-
-
-                let shouldShowLabels = d.showLabels;
-                let displayLabel = shouldShowLabels ? d.name : "";
-
-
-                // Append tspan for d.name
-                d3.select(this).append("tspan")
-                    .attr("x", 0) // Align with the parent text element
-                    .attr("dy", "0em") // Start at the same vertical position
-                    .style("font-weight", "bold")
-                    .text(displayLabel);
-
-                if (shouldShowLabels) {
-                    var y = 1; // Start from the next line for attributes
-
-                    // Append tspans for each attribute
-                    for (let key in d.attributes) {
-                        d3.select(this).append("tspan")
-                            .attr("x", 0) // Align with the parent text element
-                            .attr("dy", `${y}em`) // Move each attribute to a new line
-                            .text(key + ": " + d.attributes[key]);
-                        y += 1; // Increment for the next line
-                    }
-                }
-            })
-            .call(colaLayout.drag);
+            }
+        })
+        .call(colaLayout.drag);
 
 
     // Helper function to calculate new position along the path
@@ -838,6 +1057,10 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     node.append("title")
         .text(function (d) { return d.name; });
 
+    
+    /*
+        GROUP RENDERING 
+    */
 
     // Add a rectangle for each group and a label at the top of the group
     const DISCONNECTED_NODE_GROUP = "_d_";
@@ -883,15 +1106,85 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         })
         .call(colaLayout.drag);
 
-    colaLayout.on("tick", function () {
+    /*
 
-        group.attr("x", function (d) {
-            return d.bounds.x;
-        })
+        TICK FUNCTIONS
+
+    */
+
+    function gridTickHandler() {
+        console.log("tick");
+
+        // UPDATE NODES AND NODE LABELS
+        // NOTE: The positioning here is only relative to the node group element.
+        // TODO: What if I make this absolute positioning? It should seem more dynamic as I drag??
+        node.select("rect")
+            .each(function (d) { d.innerBounds = d.bounds.inflate(-1); })
+            .attr("x", function (d) { return d.bounds.x; })
+            .attr("y", function (d) { return d.bounds.y; })
+            .attr("width", function (d) { return d.bounds.width(); })
+            .attr("height", function (d) { return d.bounds.height(); });
+        
+
+        node.select("image")
+            .attr("x", function (d) {
+                if (d.showLabels) {
+                    // Move to the top-right corner
+                    return d.x + (d.width / 2) - (d.width * SMALL_IMG_SCALE_FACTOR);
+                } else {
+                    // Align with d.bounds.x
+                    return d.bounds.x;
+                }
+            })
             .attr("y", function (d) {
-                return d.bounds.y;
+                if (d.showLabels) {
+                    // Align with the top edge
+                    return d.y - d.height / 2;
+                } else {
+                    // Align with d.bounds.y
+                    return d.bounds.y;
+                }
             })
 
+        mostSpecificTypeLabel
+            .attr("x", function (d) { return d.bounds.x + 5; })
+            .attr("y", function (d) { return d.bounds.y + 10; })
+            .raise();
+
+        label
+            .attr("x", d => d.x)
+            .attr("y", d => d.y)
+            .each(function (d) {
+                var y = 0; // Initialize y offset for tspans
+                d3.select(this).selectAll("tspan")
+                    .attr("x", d.x) // Align tspans with the node's x position
+                    .attr("dy", function () {
+                        y += 1; // Increment y for each tspan to create line spacing
+                        return y === 1 ? "0em" : "1em"; // Keep the first tspan in place, move others down
+                    });
+            })
+            .raise();
+
+        // UPDATE GROUPS AND GROUP LABELS
+        group.attr("x", function (d) { return d.bounds.x; })
+            .attr("y", function (d) { return d.bounds.y; })
+            .attr("width", function (d) { return d.bounds.width(); })
+            .attr("height", function (d) { return d.bounds.height(); })
+            .lower();
+
+        // Render group labels
+        groupLabel.attr("x", function (d) { return d.bounds.x + d.bounds.width() / 2; }) // Center horizontally
+            .attr("y", function (d) { return d.bounds.y + 12; })
+            .attr("text-anchor", "middle") // Center the text on its position
+            .raise();
+
+        const linkGroups = svg.selectAll(".linkGroup");
+        linkGroups.select("text.linklabel").raise(); // Ensure link labels are raised
+    }
+
+    function defaultTickHandler() {
+        group.attr("x", function (d) { return d.bounds.x; })
+            .attr("y", function (d) { return d.bounds.y; })
             .attr("width", function (d) { return d.bounds.width(); })
             .attr("height", function (d) { return d.bounds.height(); })
             .lower();
@@ -945,7 +1238,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             })
             .raise();
 
-
+        const linkGroups = svg.selectAll(".linkGroup");
         linkGroups.select("path.link")
             .attr("d", function (d) {
 
@@ -1026,13 +1319,70 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         // Can we get all end-arrow markers and raise them?
         svg.selectAll("marker").raise();
         linkGroups.select("text.linklabel").raise(); // Ensure link labels are raised
+    }
 
-    });
+    /*
+        START COLA LAYOUT
+    */
 
-    colaLayout.start(
-        initialUnconstrainedIterations,
-        initialUserConstraintIterations,
-        initialAllConstraintsIterations,
-        gridSnapIterations)
-        .on("end", routeEdges);
+    /**
+     * Sets the onTick handler and starts the WebCola layout, based on the specified layout format.
+     * @param {string} layoutFormat - value of the layoutFormat dropdown (e.g. "grid", "default")
+     */
+    function startColaLayout(layoutFormat) {
+        // Set the onTick handler
+        colaLayout.on("tick", function () {
+            if (layoutFormat === "grid") {
+                gridTickHandler();
+            } else if (layoutFormat === "default") {
+                defaultTickHandler();
+            } else {
+                console.log("Unknown layout format:", layoutFormat);
+            }
+        });
+
+        // Start WebCola layout
+        colaLayout.start(
+            initialUnconstrainedIterations,
+            initialUserConstraintIterations,
+            initialAllConstraintsIterations,
+            gridSnapIterations)
+            .on("start", function () {
+                hasErrored = false;
+            })
+            .on("end", function () {
+                if (layoutFormat === "grid") {
+                    gridify(svg, 10, 25, 10);
+                } else if (layoutFormat === "default") {
+                    routeEdges();
+                } else {
+                    console.log("Unknown layout format:", layoutFormat);
+                }
+
+                // Remove runtime error messages, if layout completed successfully
+                if (!hasErrored) {
+                    let runtimeMessages = document.getElementById("runtime_messages");
+                    if (runtimeMessages) { 
+                        runtimeMessages.remove(); 
+                    }
+                }
+
+                /**** This bit ensures we zoom to fit ***/
+                const bbox = svg.node().getBBox();
+                const padding = 10; // Padding in pixels
+
+                const viewBox = [
+                    bbox.x - padding,
+                    bbox.y - padding,
+                    bbox.width + 2 * padding,
+                    bbox.height + 2 * padding
+                ].join(' ');
+
+                const topSvg = d3.select("#svg");
+                topSvg.attr('viewBox', viewBox);
+            });
+    }
+
+    // -- Start WebCola layout! --
+    startColaLayout(layoutFormat);
 }
