@@ -27,8 +27,6 @@ import { WrappedForgeEvaluator } from '../forge-util/evaluatorUtil';
 import { ColorPicker } from './colorpicker';
 import { ConstraintValidator } from './constraint-validator';
 import { SingleValue } from 'forge-expr-evaluator/dist/ForgeExprEvaluator';
-import { Layout } from 'webcola';
-
 const UNIVERSAL_TYPE = "univ";
 
 
