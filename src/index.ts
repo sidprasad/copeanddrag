@@ -156,7 +156,7 @@ function getTableFromRequest(req: any) {
 }
 
 
-function generateDiagram (req, res)  {
+function generateDiagramConstraints(req) {
     const alloyDatum = req.body.alloydatum;
     const cope = req.body.cope;
     let error = "";
@@ -173,13 +173,9 @@ function generateDiagram (req, res)  {
         }
 
     }
-
-    let scaleFactor = parseFloat(req.body.scaleFactor) || 5; // Default scale factor is 5
-
     
 
     try {
-        var tables = getTableFromRequest(req) || {};
         var { instances, li, instanceNumber, loopBack, projections, command } = getFormContents(req);
         var num_instances = instances.length;
 
@@ -190,13 +186,10 @@ function generateDiagram (req, res)  {
                 loopBack = 0;
             }
         } finally {
-
             var parsingTime = performance.now() - startTime;
             logEventTime(startTime, "Parse and Static Checks", PERF_LOGGING_LEVELS.verbose);
         }
 
-
-        var instAsString = instanceToInst(instances[instanceNumber]);
         try{
             var { layout, projectionData } = li.generateLayout(instances[instanceNumber], projections);
         }
@@ -204,7 +197,6 @@ function generateDiagram (req, res)  {
             throw new Error("<p>The instance being visualized is inconsistent with the Cope and Drag spec.<p> " + e.message);
         }
         finally {
-            //var layoutGen = performance.now() - startTime;
             logEventTime(parsingTime, "Layout Validation + Translation", PERF_LOGGING_LEVELS.verbose);
         }
 
@@ -247,6 +239,60 @@ function generateDiagram (req, res)  {
 
 
 
+    return {
+        'colaNodes': colaNodes,
+        'colaEdges': colaEdges,
+        'colaConstraints': colaConstraints || [],
+        'colaGroups': colaGroups || [],
+        projectionData,
+        errors: error,
+        height: height !== undefined ? height : 0,
+        width: width !== undefined ? width : 0,
+        loggingEnabled: loggingEnabled
+    };
+}
+
+
+
+function generateDiagram (req, res)  {
+    const alloyDatum = req.body.alloydatum;
+    const cope = req.body.cope;
+    
+
+
+
+
+
+    try {
+        var {
+        colaNodes,
+        colaEdges,
+        colaConstraints,
+        colaGroups,
+        projectionData,
+        errors,
+        height,
+        width, loggingEnabled } = generateDiagramConstraints(req);
+
+
+
+
+        var scaleFactor = parseFloat(req.body.scaleFactor) || 5; // Default scale factor is 5
+        var tables = getTableFromRequest(req) || {};
+        var { instances, li, instanceNumber, loopBack, projections, command } = getFormContents(req);
+        var instAsString = instanceToInst(instances[instanceNumber]);  
+        var num_instances = instances.length;
+    }
+    catch (e) {
+        errors = e.message;
+    }
+
+  
+   
+
+
+
+
     res.render('diagram', {
         'height': height !== undefined ? height : 0,
         'width': width !== undefined ? width : 0,
@@ -261,7 +307,7 @@ function generateDiagram (req, res)  {
         cope,
         projectionData,
         instAsString,
-        errors: error,//.replace(/\n/g, "<br>"),
+        errors: errors,
         loggingEnabled,
         tables : tables,
         scaleFactor : scaleFactor, // Default. 
@@ -421,6 +467,67 @@ app.get('/', (req, res) => {
 });
 
 app.post('/', generateDiagram);
+
+
+
+/**
+ * @openapi
+ * /: *   post:
+ *     summary: Generate diagram in headless mode
+ *     tags:
+ *      - Diagramming
+ *     description: Generates a diagram based on the provided Alloy instance and layout specification in headless mode. 
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               alloydatum:
+ *                 type: string
+ *                 description: The Alloy instance in XML format.
+ *              cope:
+ *                type: string
+ *                description: The Cope and Drag specification in YAML format.
+ *              instancenumber:
+ *                type: integer
+ *               description: Optional. The temporal instance number (default is 0).
+ * *               loggingEnabled:
+ *                 type: string
+ *                 description: Optional. Set to "enabled" or "disabled" (default is "enabled").
+ *     responses:
+ *      200:
+ *        description: JSON data representing the webcola configuration for the diagram.
+ *        content:
+ * 
+ *         
+ * 
+ */
+app.post('/headless', (req, res) => {
+    // This is a headless version of the diagram generation.
+    // It will not render a page, but will return the data as JSON.
+
+
+    try {
+        const alloyDatum = req.body.alloydatum;
+        const cope = req.body.cope;
+
+        if (!alloyDatum || !cope) {
+            return res.status(400).json({ error: 'Alloy datum and Cope specification are required.' });
+        }
+
+        // Set loggingEnabled to false for headless mode
+        req.body.loggingEnabled = 'disabled';
+
+        // Call the generateDiagram function
+        generateDiagram(req, res);
+    } catch (error) {
+        console.error('Error generating headless diagram:', error);
+        res.status(500).json({ error: 'Failed to generate headless diagram' });
+    }
+
+});
 
 
 
