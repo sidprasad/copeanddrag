@@ -50,10 +50,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
 
-            Split(['#exploreCol', '#instanceCol', '#controlsCol']);
+        document.addEventListener('DOMContentLoaded', () => {
+            Split(['#exploreCol', '#instanceCol', '#controlsCol'], {
+                sizes: [ <%= exploreColWidth %>, <%= instanceColWidth %>,  <%= constrolsCol %>],   // default percentages
+            });
         });
+
 
         window.addEventListener('load', function () {
             var width = <%- width %>, height = <%- height %>;

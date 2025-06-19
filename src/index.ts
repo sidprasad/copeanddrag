@@ -41,7 +41,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.json({ limit: '50mb' }));
 
 // This is a hack. I'm not sure how to encode the version number.
-const version = "3.4.6";
+const version = "3.4.7";
 
 const secretKey = "cope-and-drag-logging-key";
 
@@ -246,6 +246,12 @@ function generateDiagram (req, res)  {
 
 
 
+    let instanceColWidth = DIAGRAM_WIDTH;
+    let exploreColWidth = (100 - DIAGRAM_WIDTH) / 2; // Remaining width for the explore column
+    let constrolsCol = (100 - DIAGRAM_WIDTH) / 2; // Remaining width for the controls column
+
+
+
     res.render('diagram', {
         'height': height !== undefined ? height : 0,
         'width': width !== undefined ? width : 0,
@@ -265,6 +271,10 @@ function generateDiagram (req, res)  {
         tables : tables,
         scaleFactor : scaleFactor, // Default. 
         command : command || "",
+        instanceColWidth,
+        exploreColWidth,
+        constrolsCol
+
     });
 }
 
@@ -276,15 +286,18 @@ const server = http.createServer(app);
 const argv = require('minimist')(process.argv.slice(2), {
     boolean: ['alignment-edges'],
     string: ['port', 'perf-logging'],
+    number: ['diagramWidth'],
     alias: {
         p: 'port',
         a: 'alignment-edges',
-        l: 'perf-logging'
+        l: 'perf-logging',
+        w: 'diagramWidth'
     },
     default: {
         port: process.env.PORT || 3000,
         'alignment-edges': true,
-        'perf-logging': process.env.PERF_LOGGING || 'none' // default to 'info'
+        'perf-logging': process.env.PERF_LOGGING || 'none', // default to 'info',
+        'diagramWidth': 50 // Default width for the diagram
     }
 });
 
@@ -300,6 +313,8 @@ const PERF_LOGGING_LEVELS = {
     info: 1,
     verbose: 2
 };
+
+const DIAGRAM_WIDTH = parseInt(argv.diagramWidth, 10) || 50; // Default width for the diagram
 
 const pll = (argv['perf-logging'] || 'none').toLowerCase();
 const PERF_LOGGING_LEVEL = PERF_LOGGING_LEVELS[pll] ?? PERF_LOGGING_LEVELS.none;
