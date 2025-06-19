@@ -716,9 +716,11 @@ export class LayoutInstance {
                     );
                 }
             }
+
             if(currentLayoutError) {
                 throw new Error(`${currentLayoutError}`);
             }
+            throw new Error(`Failed to find a satisfying layout for cyclic constraints.`);
            
         }
 
