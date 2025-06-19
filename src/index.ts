@@ -246,11 +246,6 @@ function generateDiagram (req, res)  {
 
 
 
-    let instanceColWidth = DIAGRAM_WIDTH;
-    let exploreColWidth = (100 - DIAGRAM_WIDTH) / 2; // Remaining width for the explore column
-    let constrolsCol = (100 - DIAGRAM_WIDTH) / 2; // Remaining width for the controls column
-
-
 
     res.render('diagram', {
         'height': height !== undefined ? height : 0,
@@ -273,7 +268,7 @@ function generateDiagram (req, res)  {
         command : command || "",
         instanceColWidth,
         exploreColWidth,
-        constrolsCol
+        controlsColWidth
 
     });
 }
@@ -315,6 +310,12 @@ const PERF_LOGGING_LEVELS = {
 };
 
 const DIAGRAM_WIDTH = parseInt(argv.diagramWidth, 10) || 50; // Default width for the diagram
+
+let instanceColWidth = DIAGRAM_WIDTH;
+let exploreColWidth = (100 - DIAGRAM_WIDTH) / 2; // Remaining width for the explore column
+let controlsColWidth = (100 - DIAGRAM_WIDTH) / 2; // Remaining width for the controls column
+console.log(`Widths: instanceColWidth: ${instanceColWidth}, exploreColWidth: ${exploreColWidth}, constrolsCol: ${constrolsCol}`);
+
 
 const pll = (argv['perf-logging'] || 'none').toLowerCase();
 const PERF_LOGGING_LEVEL = PERF_LOGGING_LEVELS[pll] ?? PERF_LOGGING_LEVELS.none;
@@ -411,6 +412,10 @@ app.get('/', (req, res) => {
         errors: "",
         tables: instanceToTables,
         scaleFactor: 5, // Default scale factor
+        instanceColWidth,
+        exploreColWidth,
+        controlsColWidth
+
     });
 });
 
