@@ -500,6 +500,9 @@ app.post('/', generateDiagram);
  *      200:
  *        description: JSON data representing the webcola configuration for the diagram.
  *        content:
+ *         application/json:
+ *       schema:
+ *          type: object
  * 
  *         
  * 
@@ -508,24 +511,7 @@ app.post('/headless', (req, res) => {
     // This is a headless version of the diagram generation.
     // It will not render a page, but will return the data as JSON.
 
-
-    try {
-        const alloyDatum = req.body.alloydatum;
-        const cope = req.body.cope;
-
-        if (!alloyDatum || !cope) {
-            return res.status(400).json({ error: 'Alloy datum and Cope specification are required.' });
-        }
-
-        // Set loggingEnabled to false for headless mode
-        req.body.loggingEnabled = 'disabled';
-
-        // Call the generateDiagram function
-        generateDiagram(req, res);
-    } catch (error) {
-        console.error('Error generating headless diagram:', error);
-        res.status(500).json({ error: 'Failed to generate headless diagram' });
-    }
+    res.returns.json(generateDiagramConstraints(req));
 
 });
 
