@@ -308,13 +308,14 @@ export class WrappedForgeEvaluator {
         // How do I get the <source> element from the XML document?
         const sourceElement = xmlDoc.getElementsByTagName("source")[0];
         if (!sourceElement) {
-            throw new Error("No <source> element found in XML");
+            console.error("No <source> element found in XML");
+            return "";
         }
 
         // Also, how do I get the content attribute from the <source> element?
-        const content = sourceElement.getAttribute("content");
+        const content = sourceElement.getAttribute("content") || "";
         if (!content) {
-            throw new Error("No content attribute found in <source> element");
+            console.error("No content attribute found in <source> element");
         }
 
         return content;
