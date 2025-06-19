@@ -40,6 +40,11 @@ function adjustLinkLengthsAndSeparationConstraintsToScaleFactor(constraints, sca
     const min_sep = 150;
     const default_node_width = 100;
 
+
+    const default_group_compactness = 1e-4; // Default group compactness for cola layout
+
+    let groupCompactness = default_group_compactness * adjustedScaleFactor;
+
     let linkLength = (min_sep + default_node_width) / adjustedScaleFactor;
 
 
@@ -68,7 +73,8 @@ function adjustLinkLengthsAndSeparationConstraintsToScaleFactor(constraints, sca
 
     return {
         scaledConstraints: getScaledConstraints(constraints),
-        linkLength: linkLength
+        linkLength: linkLength,
+        groupCompactness: groupCompactness
     }
 }
 /**
@@ -279,12 +285,14 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         scaleFactorInput.addEventListener("change", function () {
             scaleFactor = parseFloat(scaleFactorInput.value);
 
-            let { scaledConstraints, linkLength } = adjustLinkLengthsAndSeparationConstraintsToScaleFactor(constraints, scaleFactor);
+            let { scaledConstraints, linkLength, groupCompactness } = adjustLinkLengthsAndSeparationConstraintsToScaleFactor(constraints, scaleFactor);
 
             console.log("Link length", linkLength);
             console.log("Scaled constraints", scaledConstraints);
+            console.log("Group compactness", groupCompactness);
 
             colaLayout.linkDistance(linkLength);
+            colaLayout.groupCompactness(groupCompactness);
 
             layoutFormat ? startColaLayout(layoutFormat) : startColaLayout(DEFAULT_FORMAT);
         });
@@ -294,14 +302,14 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     // I think having directly above/ below makes it impossible to have flow layout 'y' *unless we have heirarchy*
 
     const currentScaleFactor = scaleFactorInput ? parseFloat(scaleFactorInput.value) : 1;
-    let { scaledConstraints, linkLength } = adjustLinkLengthsAndSeparationConstraintsToScaleFactor(constraints, currentScaleFactor);
+    let { scaledConstraints, linkLength, groupCompactness } = adjustLinkLengthsAndSeparationConstraintsToScaleFactor(constraints, currentScaleFactor);
 
     colaLayout
         .nodes(nodes)
         .links(edges)
         .constraints(scaledConstraints)
         .groups(groups)
-        .groupCompactness(1e-3)
+        .groupCompactness(groupCompactness)
         .linkDistance(linkLength); // FIXME: The default link length is too large for small graphs
         // .symmetricDiffLinkLengths(1500);
         // .linkDistance(100);
