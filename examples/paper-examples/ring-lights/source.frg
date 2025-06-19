@@ -42,35 +42,31 @@ option min_tracelength 5
 // We need more than 5 states to find a solution
 option max_tracelength 10 
 
+// option verbose 5
+run {
+    -- well-formedness constraints
+    ring
+    -- start in an initial state
+    init 
 
-run {ring} for exactly 3 Light
+    -- transition predicate: either flip a single light, or we're done
+    always {        
+        -- Do nothing for a solved board. Otherwise, flip a switch
+        {            
+            solved -- guard
+            Lit = Lit' -- action
+        } or {
+            not solved -- guard
+            one l: Light | flip[l] -- action
+        }        
+    }
 
-// // option verbose 5
-// run {
-//     -- well-formedness constraints
-//     ring
-//     -- start in an initial state
-//     init 
+    -- find a trace that leads to a solved state
+    eventually solved
 
-//     -- transition predicate: either flip a single light, or we're done
-//     always {        
-//         -- Do nothing for a solved board. Otherwise, flip a switch
-//         {            
-//             solved -- guard
-//             Lit = Lit' -- action
-//         } or {
-//             not solved -- guard
-//             one l: Light | flip[l] -- action
-//         }        
-//     }
-
-//     -- find a trace that leads to a solved state
-//     eventually solved
-
-//     -- If we wanted, we could exclude some unproductive behavior by adding, e.g.:
-//     -- Loopback can't be to the beginning
-//     --next_state { always { some Lit }}    
+    -- If we wanted, we could exclude some unproductive behavior by adding, e.g.:
+    -- Loopback can't be to the beginning
+    --next_state { always { some Lit }}    
     
-// } 
-// for exactly 3 Light, 5 Lit, 5 Unlit
-
+} 
+for exactly 5 Light, 5 Lit, 5 Unlit
