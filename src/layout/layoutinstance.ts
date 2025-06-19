@@ -727,12 +727,6 @@ export class LayoutInstance {
 
         const finalConstraints: LayoutConstraint[] = backtrackSolveFragments(layoutWithoutCyclicConstraints.constraints, 0);
 
-
-
-
-
-
-
         return finalConstraints;
     }
 
