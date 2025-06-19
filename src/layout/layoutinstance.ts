@@ -689,7 +689,7 @@ export class LayoutInstance {
             let currentLayoutError = "";
             if (fragmentIdx >= constraintFragments.length) {
                 // Base case: All fragments have been processed
-                return [];
+                return layoutConstraints;
             }
 
             let fragment = constraintFragments[fragmentIdx].fragmentList;
