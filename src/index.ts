@@ -41,7 +41,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.json({ limit: '50mb' }));
 
 // This is a hack. I'm not sure how to encode the version number.
-const version = "3.4.5";
+const version = "3.4.6";
 
 const secretKey = "cope-and-drag-logging-key";
 
@@ -120,10 +120,13 @@ function getFormContents(req: any) {
 
     try {
         var ad: AlloyDatum = parseAlloyXML(alloyDatum);
+
     }
     catch (e) {
         throw new Error("Error parsing Forge instance. Is it well formed? <br> <pre>" + e.message + "</pre>");
     }
+
+    let command = ad.command || "";
     let instances = ad.instances;
     let loopBack = ad.loopBack || -1;
     let evaluator = new WrappedForgeEvaluator(alloyDatum);
@@ -134,7 +137,7 @@ function getFormContents(req: any) {
     
 
     let li = new LayoutInstance(layoutSpec, evaluator, instanceNumber, ENABLE_ALIGNMENT_EDGES);
-    return { instances, li, instanceNumber, loopBack, projections };
+    return { instances, li, instanceNumber, loopBack, projections, command };
 }
 
 function getTableFromRequest(req: any) {
@@ -173,9 +176,11 @@ function generateDiagram (req, res)  {
 
     let scaleFactor = parseFloat(req.body.scaleFactor) || 5; // Default scale factor is 5
 
+    
+
     try {
         var tables = getTableFromRequest(req) || {};
-        var { instances, li, instanceNumber, loopBack, projections } = getFormContents(req);
+        var { instances, li, instanceNumber, loopBack, projections, command } = getFormContents(req);
         var num_instances = instances.length;
 
         try {
@@ -258,7 +263,8 @@ function generateDiagram (req, res)  {
         errors: error,//.replace(/\n/g, "<br>"),
         loggingEnabled,
         tables : tables,
-        scaleFactor : scaleFactor // Default. 
+        scaleFactor : scaleFactor, // Default. 
+        command : command || "",
     });
 }
 
