@@ -174,7 +174,7 @@ function getContainingGroups(groups, node) {
 
 
 
-function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
+function setupLayout(svg, d3, nodes, edges, constraints, groups, width, height) {
 
 
     let edgeRouteIdx = 0;
@@ -182,16 +182,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     // Start measuring client-side execution time
     const clientStartTime = performance.now();
 
-
-
-    // Create a zoom behavior
-    var zoom = d3.zoom()
-        .scaleExtent([0.5, 5]) // Set the zoom scale limits
-        .on("zoom", zoomed);
-
-    function zoomed() {
-        d3.select(".zoomable").attr("transform", d3.event.transform);
-    }
 
     function getNodeIndex(n) {
         const nodeId = typeof n === 'string' ? n : n.id;
@@ -204,8 +194,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         node.name = node.id;
     });
 
-    var svg_top = d3.select("#svg").call(zoom);
-    var svg = d3.select(".zoomable");
+
 
     var colaLayout = cola.d3adaptor(d3)
         .convergenceThreshold(1e-3)

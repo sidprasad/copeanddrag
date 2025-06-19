@@ -65,8 +65,19 @@
             var constraints = <%- JSON.stringify(colaConstraints) %>;
             var groups = <%- JSON.stringify(colaGroups) %>;
 
+                // Create a zoom behavior
+            var zoom = d3.zoom()
+                .scaleExtent([0.5, 5]) // Set the zoom scale limits
+                .on("zoom", zoomed);
+
+            function zoomed() {
+                d3.select(".zoomable").attr("transform", d3.event.transform);
+            }
+            var svg_top = d3.select("#svg").call(zoom);
+            var svg = d3.select(".zoomable");
+
             if (width && height && nodes && edges && constraints && groups) {
-                setupLayout(d3, nodes, edges, constraints, groups, width, height);
+                setupLayout(svg, d3, nodes, edges, constraints, groups, width, height);
             } else {
                 console.error('Missing required data for layout');
             }
