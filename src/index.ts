@@ -314,7 +314,7 @@ const DIAGRAM_WIDTH = parseInt(argv.diagramWidth, 10) || 50; // Default width fo
 let instanceColWidth = DIAGRAM_WIDTH;
 let exploreColWidth = (100 - DIAGRAM_WIDTH) / 2; // Remaining width for the explore column
 let controlsColWidth = (100 - DIAGRAM_WIDTH) / 2; // Remaining width for the controls column
-console.log(`Widths: instanceColWidth: ${instanceColWidth}, exploreColWidth: ${exploreColWidth}, constrolsCol: ${constrolsCol}`);
+console.log(`Widths: instanceColWidth: ${instanceColWidth}, exploreColWidth: ${exploreColWidth}, controlsColWidth: ${controlsColWidth}`);
 
 
 const pll = (argv['perf-logging'] || 'none').toLowerCase();
@@ -414,7 +414,8 @@ app.get('/', (req, res) => {
         scaleFactor: 5, // Default scale factor
         instanceColWidth,
         exploreColWidth,
-        controlsColWidth
+        controlsColWidth,
+        command : "",
 
     });
 });
