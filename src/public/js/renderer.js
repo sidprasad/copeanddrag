@@ -279,10 +279,12 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         scaleFactorInput.addEventListener("change", function () {
             scaleFactor = parseFloat(scaleFactorInput.value);
 
-            var { scaledConstraints, linkLength } = adjustLinkLengthsAndSeparationConstraintsToScaleFactor(constraints, scaleFactor);
+            let { scaledConstraints, linkLength } = adjustLinkLengthsAndSeparationConstraintsToScaleFactor(constraints, scaleFactor);
 
-            colaLayout.constraints(scaledConstraints);
-            colaLayout.symmetricDiffLinkLengths(linkLength);
+            console.log("Link length", linkLength);
+            console.log("Scaled constraints", scaledConstraints);
+
+            colaLayout.linkDistance(linkLength);
 
             layoutFormat ? startColaLayout(layoutFormat) : startColaLayout(DEFAULT_FORMAT);
         });
@@ -300,7 +302,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .constraints(scaledConstraints)
         .groups(groups)
         .groupCompactness(1e-3)
-        .symmetricDiffLinkLengths(linkLength); // FIXME: The default link length is too large for small graphs
+        .linkDistance(linkLength); // FIXME: The default link length is too large for small graphs
         // .symmetricDiffLinkLengths(1500);
         // .linkDistance(100);
 
