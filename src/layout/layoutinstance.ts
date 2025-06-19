@@ -27,6 +27,7 @@ import { WrappedForgeEvaluator } from '../forge-util/evaluatorUtil';
 import { ColorPicker } from './colorpicker';
 import { ConstraintValidator } from './constraint-validator';
 import { SingleValue } from 'forge-expr-evaluator/dist/ForgeExprEvaluator';
+import { Layout } from 'webcola';
 
 const UNIVERSAL_TYPE = "univ";
 
@@ -105,7 +106,7 @@ export class LayoutInstance {
      * @param a - The ORIGINAL (pre-projection) Alloy instance.
      * @returns A record of groups.
      */
-    private generateGroups(g: Graph, a : AlloyInstance): LayoutGroup[] {
+    private generateGroups(g: Graph, a: AlloyInstance): LayoutGroup[] {
 
         //let groupingConstraints : GroupingConstraint[] = this._layoutSpec.constraints.grouping;
 
@@ -182,7 +183,7 @@ export class LayoutInstance {
             }
             else {
                 let selectedElements: string[] = selectorRes.selectedAtoms();
-                
+
                 // Nothing to do if there are no selected elements, or 
                 // if things are typed weirdly.
                 if (selectedElements.length === 0) {
@@ -199,7 +200,7 @@ export class LayoutInstance {
                     showLabel: true
                 };
                 groups.push(newGroup);
-            }            
+            }
         }
 
 
@@ -237,19 +238,19 @@ export class LayoutInstance {
 
 
                 const potentialTuples = this.getFieldTuplesForSourceAndTarget(a, relName, edge.v, edge.w);
-                if(!potentialTuples || potentialTuples.length === 0) {
+                if (!potentialTuples || potentialTuples.length === 0) {
                     return;
                 }
-                
-  
+
+
                 for (var thisTuple of potentialTuples) {
                     let arity = thisTuple?.length || 0;
                     if (arity < 2 || (groupOn < 0 || groupOn >= arity) || (addToGroup < 0 || addToGroup >= arity)) {
                         throw new Error(`Invalid grouping. groupOn=${groupOn} and addToGroup=${addToGroup} for ${arity}-ary relation ${relName}. These must be between 0 and ${arity - 1}.`);
                     }
                     // Now get the element of edge
-                
-                
+
+
                     let sourceInGraph = thisTuple[0];
                     let targetInGraph = thisTuple[arity - 1];
 
@@ -503,7 +504,7 @@ export class LayoutInstance {
             let showLabels = iconDetails.showLabels;
 
             let { height, width } = nodeSizeMap[nodeId] || { height: this.DEFAULT_NODE_HEIGHT, width: this.DEFAULT_NODE_WIDTH };
-            
+
             const mostSpecificType = this.getMostSpecificType(nodeId, a);
             const allTypes = this.getNodeTypes(nodeId, a);
 
@@ -621,118 +622,85 @@ export class LayoutInstance {
      */
     applyCyclicConstraints(layoutNodes: LayoutNode[], layoutWithoutCyclicConstraints: InstanceLayout): LayoutConstraint[] {
 
+        // TODO: There is a bug here. There are equivalent cyclic constraints
+        // that are NOT being applied.
+        // The bug here is that constraint solver MAY come up with solutions for ALL cyclic constraints 
+        // separately, but in a way that they don't work together.
+
+
+        // Either: Backtracking in applyCyclicConstraints OR 
+        // Smush ALL together, and then try and put things together.
+
         const cyclicConstraints = this._layoutSpec.constraints.orientation.cyclic;
 
-        let constraints = cyclicConstraints.map((c) => {
-            return this.applyCyclicConstraint(c, layoutNodes, layoutWithoutCyclicConstraints);
-        });
-        return constraints.flat();
-    }
 
-    applyCyclicConstraint(c: CyclicOrientationConstraint, layoutNodes: LayoutNode[], layoutWithoutCyclicConstraints: InstanceLayout): LayoutConstraint[] {
+        // First, for each, get the tuples / fragments.
 
-        let direction = c.direction;
-        let direction_mult: number = 0;
-        if (direction === "clockwise") {
-            direction_mult = 1;
-        }
-        else if (direction === "counterclockwise") {
-            direction_mult = -1;
-        }
+        let constraintFragments = [];
 
-        let selectedTuples: string[][] = this.evaluator.evaluate(c.selector, this.instanceNum).selectedTwoples();
-        let nextNodeMap: Map<LayoutNode, LayoutNode[]> = new Map<LayoutNode, LayoutNode[]>();
+        for (const [index, c] of cyclicConstraints.entries()) {
 
+            let selectedTuples: string[][] = this.evaluator.evaluate(c.selector, this.instanceNum).selectedTwoples();
+            let nextNodeMap: Map<LayoutNode, LayoutNode[]> = new Map<LayoutNode, LayoutNode[]>();
+            // For each tuple, add to the nextNodeMap
+            selectedTuples.forEach((tuple) => {
+                let sourceNodeId = tuple[0];
+                let targetNodeId = tuple[1];
 
-        // For each tuple, add to the nextNodeMap
-        selectedTuples.forEach((tuple) => {
-            let sourceNodeId = tuple[0];
-            let targetNodeId = tuple[1];
+                let srcN = layoutNodes.find((node) => node.id === sourceNodeId);
+                let tgtN = layoutNodes.find((node) => node.id === targetNodeId);
 
-            let srcN = layoutNodes.find((node) => node.id === sourceNodeId);
-            let tgtN = layoutNodes.find((node) => node.id === targetNodeId);
-
-            if (nextNodeMap.has(srcN)) {
-                nextNodeMap.get(srcN).push(tgtN);
-            }
-            else {
-                nextNodeMap.set(srcN, [tgtN]);
-            }
-        });
-
-        let relatedNodeFragments = this.getFragmentsToConstrain(nextNodeMap);
-
-        // Here, we want to validate constraints EACH time a
-        // fragment is added, trying at least a few angle steps each time.
-
-        let constraints: LayoutConstraint[] = [];
-        relatedNodeFragments.forEach((relatedNodesPath) => {
-            const minRadius = 100; // Example fixed distance. 
-            let relatedNodes = relatedNodesPath.Path.map((node) => node.id);
-
-            // TODO: One thing we dont have here is PREVENTING FRAGMENTS FROM OVERLAPPING
-
-            const angleStep = (direction_mult * 2 * Math.PI) / relatedNodes.length;
-
-            // So first lay out all nodes in the fragment
-            let fragmentNodePositions = {};
-
-            let offset = 0;
-            let satisfyingAssignmentFound = false;
-
-            let finalFragmentConstraints: LayoutConstraint[] = [];
-            let currentLayoutError = null;
-            while (!satisfyingAssignmentFound && offset < relatedNodes.length) {
-                currentLayoutError = null;
-                let fragmentConstraintsForCurrentOffset: LayoutConstraint[] = [];
-
-                for (var i = 0; i < relatedNodes.length; i++) {
-                    let theta = (i + offset) * angleStep;
-                    let x = minRadius * Math.cos(theta);
-                    let y = minRadius * Math.sin(theta);
-                    fragmentNodePositions[relatedNodes[i]] = { x: x, y: y };
+                if (nextNodeMap.has(srcN)) {
+                    nextNodeMap.get(srcN).push(tgtN);
                 }
-
-                // Now we determine the constraints
-
-                for (var i = 0; i < relatedNodes.length; i++) {
-
-                    for (var j = 0; j < relatedNodes.length; j++) {
-                        if (i !== j) {
-                            let node1 = relatedNodes[i];
-                            let node2 = relatedNodes[j];
-                            let node1_pos = fragmentNodePositions[node1];
-                            let node2_pos = fragmentNodePositions[node2];
-
-                            if (node1_pos.x > node2_pos.x) {
-                                fragmentConstraintsForCurrentOffset.push(this.leftConstraint(node2, node1, this.minSepWidth, layoutNodes, c));
-                            }
-                            else if (node1_pos.x < node2_pos.x) {
-                                fragmentConstraintsForCurrentOffset.push(this.leftConstraint(node1, node2, this.minSepWidth, layoutNodes, c));
-                            }
-                            else {
-                                // If they are on the same x-axis, we need to ensure that they are not on top of each other
-                                fragmentConstraintsForCurrentOffset.push(this.ensureSameXConstraint(node1, node2, layoutNodes, c));
-                            }
-
-                            if (node1_pos.y > node2_pos.y) {
-                                fragmentConstraintsForCurrentOffset.push(this.topConstraint(node2, node1, this.minSepHeight, layoutNodes, c));
-                            }
-                            else if (node1_pos.y < node2_pos.y) {
-                                fragmentConstraintsForCurrentOffset.push(this.topConstraint(node1, node2, this.minSepHeight, layoutNodes, c));
-                            }
-                            else {
-                                // If they are on the same y-axis, we need to ensure that they are not on top of each other
-                                fragmentConstraintsForCurrentOffset.push(this.ensureSameYConstraint(node1, node2, layoutNodes, c));
-                            }
-                        }
-                    }
+                else {
+                    nextNodeMap.set(srcN, [tgtN]);
                 }
+            });
 
-                finalFragmentConstraints = fragmentConstraintsForCurrentOffset;
+            let relatedNodeFragments = this.getFragmentsToConstrain(nextNodeMap);
 
-                let allConstraintsForFragment: LayoutConstraint[] = fragmentConstraintsForCurrentOffset.concat(layoutWithoutCyclicConstraints.constraints);
+            let relatedNodeIds = relatedNodeFragments.map((p) => p.Path.map((node) => node.id));
+            // Now we have the related node fragments for this constraint.
 
+            if (c.direction === "counterclockwise") {
+                // Reverse each fragment
+                relatedNodeIds = relatedNodeIds.map((fragment) => fragment.reverse());
+            }
+
+            relatedNodeIds.forEach((fragment) => {
+                constraintFragments.push({
+                    source : c,
+                    fragmentList: fragment
+                });
+            });
+
+
+
+        }
+
+        const minRadius = 100; // Example fixed distance.
+
+        // Now this is where we **WOULD** typically do a variation.
+
+
+       const backtrackSolveFragments = (  layoutConstraints : LayoutConstraint[], fragmentIdx: number) : LayoutConstraint[] => {
+
+            let currentLayoutError = "";
+            if (fragmentIdx >= constraintFragments.length) {
+                // Base case: All fragments have been processed
+                return [];
+            }
+
+            let fragment = constraintFragments[fragmentIdx].fragmentList;
+            let sourceConstraint = constraintFragments[fragmentIdx].source;
+            let fragmentLength = fragment.length;
+            for(var perturbation = 0; perturbation < fragmentLength; perturbation++) {
+                // For each fragment, we try a perturbation
+                let fragmentConstraints = this.getCyclicConstraintForFragment(fragment, layoutNodes, perturbation, sourceConstraint);
+
+                let allConstraintsForFragment: LayoutConstraint[] = layoutConstraints.concat(fragmentConstraints);
+            
                 let instanceLayout: InstanceLayout = {
                     nodes: layoutWithoutCyclicConstraints.nodes,
                     constraints: allConstraintsForFragment,
@@ -741,21 +709,95 @@ export class LayoutInstance {
                 };
                 let validator = new ConstraintValidator(instanceLayout);
                 currentLayoutError = validator.validateConstraints();
-                // If we don't find anything, its done.
-                satisfyingAssignmentFound = currentLayoutError == null || currentLayoutError === "";
-                offset++;
-            }
 
-            if (!satisfyingAssignmentFound) {
-                throw new Error(currentLayoutError);
+                if (!currentLayoutError || currentLayoutError === "") {
+                    // If we found a satisfying assignment, we can return the constraints.
+                    return backtrackSolveFragments(
+                        allConstraintsForFragment, 
+                        fragmentIdx + 1
+                    );
+                }
             }
-            else {
-                constraints = constraints.concat(finalFragmentConstraints);
+            if(currentLayoutError) {
+                throw new Error(`${currentLayoutError}`);
             }
-        });
+           
+        }
 
-        return constraints;
+
+        const finalConstraints: LayoutConstraint[] = backtrackSolveFragments(layoutWithoutCyclicConstraints.constraints, 0);
+
+
+
+
+
+
+
+        return finalConstraints;
     }
+
+
+    private getCyclicConstraintForFragment(fragment: string[], 
+        layoutNodes: LayoutNode[],
+        perturbationIdx: number,
+        c : RelativeOrientationConstraint | CyclicOrientationConstraint | ImplicitConstraint): LayoutConstraint[] {
+        const minRadius = 100;
+
+
+        if (fragment.length <= 2) {
+            return []; // No constraints needed for a two-node fragment.
+        }
+
+        const angleStep = (2 * Math.PI) / fragment.length;
+
+        let fragmentNodePositions: Record<string, { x: number, y: number }> = {};
+
+        for (var i = 0; i < fragment.length; i++) {
+            let theta = (i + perturbationIdx) * angleStep;
+            let x = minRadius * Math.cos(theta);
+            let y = minRadius * Math.sin(theta);
+            fragmentNodePositions[fragment[i]] = { x: x, y: y };
+        }
+
+        let fragmentConstraintsForCurrentOffset: LayoutConstraint[] = [];
+        for (var i = 0; i <fragment.length; i++) {
+            for (var j = 0; j < fragment.length; j++) {
+                if (i !== j) {
+                    let node1 = fragment[i];
+                    let node2 = fragment[j];
+                    let node1_pos = fragmentNodePositions[node1];
+                    let node2_pos = fragmentNodePositions[node2];
+
+                    if (node1_pos.x > node2_pos.x) {
+                        fragmentConstraintsForCurrentOffset.push(this.leftConstraint(node2, node1, this.minSepWidth, layoutNodes, c));
+                    }
+                    else if (node1_pos.x < node2_pos.x) {
+                        fragmentConstraintsForCurrentOffset.push(this.leftConstraint(node1, node2, this.minSepWidth, layoutNodes, c));
+                    }
+                    else {
+                        // If they are on the same x-axis, we need to ensure that they are not on top of each other
+                        fragmentConstraintsForCurrentOffset.push(this.ensureSameXConstraint(node1, node2, layoutNodes, c));
+                    }
+
+                    if (node1_pos.y > node2_pos.y) {
+                        fragmentConstraintsForCurrentOffset.push(this.topConstraint(node2, node1, this.minSepHeight, layoutNodes, c));
+                    }
+                    else if (node1_pos.y < node2_pos.y) {
+                        fragmentConstraintsForCurrentOffset.push(this.topConstraint(node1, node2, this.minSepHeight, layoutNodes, c));
+                    }
+                    else {
+                        // If they are on the same y-axis, we need to ensure that they are not on top of each other
+                        fragmentConstraintsForCurrentOffset.push(this.ensureSameYConstraint(node1, node2, layoutNodes, c));
+                    }
+                }
+            }
+
+        }
+
+        return fragmentConstraintsForCurrentOffset;
+    }
+
+
 
 
     private getAllPaths(nextNodeMap: Map<LayoutNode, LayoutNode[]>): LayoutNodePath[] {
@@ -851,7 +893,7 @@ export class LayoutInstance {
 
         let nonSubsumedPaths: LayoutNodePath[] = nonEquivalentPaths.filter((p, i) => {
             let isSubsumed = nonEquivalentPaths.some((p2, j) => {
-                
+
                 return i !== j && isSubpath(p2, p);
             });
             return !isSubsumed;
@@ -865,7 +907,7 @@ export class LayoutInstance {
      * @param layoutNodes - The layout nodes to which the constraints will be applied.
      * @returns An array of layout constraints.
      */
-    applyRelatativeOrientationConstraints(layoutNodes: LayoutNode[], g : Graph): LayoutConstraint[] {
+    applyRelatativeOrientationConstraints(layoutNodes: LayoutNode[], g: Graph): LayoutConstraint[] {
 
         let constraints: LayoutConstraint[] = [];
         let relativeOrientationConstraints = this._layoutSpec.constraints.orientation.relative;
@@ -930,83 +972,83 @@ export class LayoutInstance {
 
 
     private getDisconnectedNodes(g: Graph): string[] {
-            let inNodes = g.edges().map(edge => edge.w);
-            let outNodes = g.edges().map(edge => edge.v);
+        let inNodes = g.edges().map(edge => edge.w);
+        let outNodes = g.edges().map(edge => edge.v);
 
-            // All nodes in the graph
-            let allNodes = new Set(g.nodes());
-            let allConnectedNodes = new Set([...inNodes, ...outNodes]);
-            let disconnectedNodes =[...allNodes].filter(node => !allConnectedNodes.has(node));
-            return disconnectedNodes;
-        }
+        // All nodes in the graph
+        let allNodes = new Set(g.nodes());
+        let allConnectedNodes = new Set([...inNodes, ...outNodes]);
+        let disconnectedNodes = [...allNodes].filter(node => !allConnectedNodes.has(node));
+        return disconnectedNodes;
+    }
 
 
 
     private getNodeFromId(nodeId: string, layoutNodes: LayoutNode[]): LayoutNode {
-            let node = layoutNodes.find((node) => node.id === nodeId);
-            if (!node) {
-                throw new Error(`Node ${nodeId} not found in graph. Did you hide it? If this is a built-in type, try removing any visibility flags.`);
-            }
-            return node;
+        let node = layoutNodes.find((node) => node.id === nodeId);
+        if (!node) {
+            throw new Error(`Node ${nodeId} not found in graph. Did you hide it? If this is a built-in type, try removing any visibility flags.`);
+        }
+        return node;
     }
 
 
-    private leftConstraint(leftId: string, rightId: string, minDistance: number, layoutNodes: LayoutNode[], sourceConstraint : RelativeOrientationConstraint | CyclicOrientationConstraint | ImplicitConstraint): LeftConstraint {
+    private leftConstraint(leftId: string, rightId: string, minDistance: number, layoutNodes: LayoutNode[], sourceConstraint: RelativeOrientationConstraint | CyclicOrientationConstraint | ImplicitConstraint): LeftConstraint {
 
-            let left = this.getNodeFromId(leftId, layoutNodes);
-            let right = this.getNodeFromId(rightId, layoutNodes);
-            return { left: left, right: right, minDistance: minDistance, sourceConstraint: sourceConstraint };
-        }
+        let left = this.getNodeFromId(leftId, layoutNodes);
+        let right = this.getNodeFromId(rightId, layoutNodes);
+        return { left: left, right: right, minDistance: minDistance, sourceConstraint: sourceConstraint };
+    }
 
-    private topConstraint(topId: string, bottomId: string, minDistance: number, layoutNodes: LayoutNode[], sourceConstraint : RelativeOrientationConstraint | CyclicOrientationConstraint | ImplicitConstraint): TopConstraint {
+    private topConstraint(topId: string, bottomId: string, minDistance: number, layoutNodes: LayoutNode[], sourceConstraint: RelativeOrientationConstraint | CyclicOrientationConstraint | ImplicitConstraint): TopConstraint {
 
-            let top = this.getNodeFromId(topId, layoutNodes);
-            let bottom = this.getNodeFromId(bottomId, layoutNodes);
+        let top = this.getNodeFromId(topId, layoutNodes);
+        let bottom = this.getNodeFromId(bottomId, layoutNodes);
 
-            return { top: top, bottom: bottom, minDistance: minDistance, sourceConstraint: sourceConstraint };
-        }
+        return { top: top, bottom: bottom, minDistance: minDistance, sourceConstraint: sourceConstraint };
+    }
 
-    private ensureSameYConstraint(node1Id: string, node2Id: string, layoutNodes: LayoutNode[], sourceConstraint : RelativeOrientationConstraint | CyclicOrientationConstraint | ImplicitConstraint): AlignmentConstraint {
-
-            let node1 = this.getNodeFromId(node1Id, layoutNodes);
-            let node2 = this.getNodeFromId(node2Id, layoutNodes);
-
-            return { axis: "y", node1: node1, node2: node2, sourceConstraint: sourceConstraint };
-        }
-
-    private ensureSameXConstraint(node1Id: string, node2Id: string, layoutNodes: LayoutNode[], sourceConstraint : RelativeOrientationConstraint | ImplicitConstraint | CyclicOrientationConstraint): AlignmentConstraint {
+    private ensureSameYConstraint(node1Id: string, node2Id: string, layoutNodes: LayoutNode[], sourceConstraint: RelativeOrientationConstraint | CyclicOrientationConstraint | ImplicitConstraint): AlignmentConstraint {
 
         let node1 = this.getNodeFromId(node1Id, layoutNodes);
         let node2 = this.getNodeFromId(node2Id, layoutNodes);
 
-            return { axis: "x", node1: node1, node2: node2, sourceConstraint: sourceConstraint };
-        }
+        return { axis: "y", node1: node1, node2: node2, sourceConstraint: sourceConstraint };
+    }
+
+    private ensureSameXConstraint(node1Id: string, node2Id: string, layoutNodes: LayoutNode[], sourceConstraint: RelativeOrientationConstraint | ImplicitConstraint | CyclicOrientationConstraint): AlignmentConstraint {
+
+        let node1 = this.getNodeFromId(node1Id, layoutNodes);
+        let node2 = this.getNodeFromId(node2Id, layoutNodes);
+
+        return { axis: "x", node1: node1, node2: node2, sourceConstraint: sourceConstraint };
+    }
 
     private singletonGroup(nodeId: string): LayoutGroup {
 
-            let groupName = `${LayoutInstance.DISCONNECTED_PREFIX}${nodeId}`;
+        let groupName = `${LayoutInstance.DISCONNECTED_PREFIX}${nodeId}`;
 
-            return {
-                name: groupName,
-                nodeIds: [nodeId],
-                keyNodeId: nodeId,
-                showLabel: false
-            }
+        return {
+            name: groupName,
+            nodeIds: [nodeId],
+            keyNodeId: nodeId,
+            showLabel: false
         }
+    }
 
 
 
     private getNodeSizeMap(g: Graph): Record<string, { width: number; height: number }> {
         let nodeSizeMap: Record<string, { width: number; height: number }> = {};
         const DEFAULT_SIZE = { width: this.DEFAULT_NODE_WIDTH, height: this.DEFAULT_NODE_HEIGHT };
-    
+
         // Apply size directives first
         let sizeDirectives = this._layoutSpec.directives.sizes;
         sizeDirectives.forEach((sizeDirective) => {
             let selectedNodes = this.evaluator.evaluate(sizeDirective.selector, this.instanceNum).selectedAtoms();
             let width = sizeDirective.width;
             let height = sizeDirective.height;
-    
+
             selectedNodes.forEach((nodeId) => {
 
                 if (nodeSizeMap[nodeId]) {
@@ -1021,7 +1063,7 @@ export class LayoutInstance {
                 nodeSizeMap[nodeId] = { width: width, height: height };
             });
         });
-    
+
         // Set default sizes for nodes that do not have a size set
         let graphNodes = [...g.nodes()];
         graphNodes.forEach((nodeId) => {
@@ -1029,23 +1071,23 @@ export class LayoutInstance {
                 nodeSizeMap[nodeId] = DEFAULT_SIZE;
             }
         });
-    
+
         return nodeSizeMap;
     }
 
 
     private getNodeColorMap(g: Graph, a: AlloyInstance): Record<string, string> {
         let nodeColorMap: Record<string, string> = {};
-    
+
         // Start by getting the default signature colors
         let sigColors = this.getSigColors(a);
-    
+
         // Apply color directives first
         let colorDirectives = this._layoutSpec.directives.colors;
         colorDirectives.forEach((colorDirective) => {
             let selected = this.evaluator.evaluate(colorDirective.selector, this.instanceNum).selectedAtoms();
             let color = colorDirective.color;
-    
+
             selected.forEach((nodeId) => {
                 if (nodeColorMap[nodeId]) {
                     throw new Error(`Color Conflict: "${nodeId}" cannot have multiple colors:  ${nodeColorMap[nodeId]}, ${color}.`);
@@ -1053,7 +1095,7 @@ export class LayoutInstance {
                 nodeColorMap[nodeId] = color;
             });
         });
-    
+
         // Set default colors for nodes that do not have a color set
         let graphNodes = [...g.nodes()];
         graphNodes.forEach((nodeId) => {
@@ -1062,12 +1104,12 @@ export class LayoutInstance {
                 nodeColorMap[nodeId] = sigColors[mostSpecificType];
             }
         });
-    
+
         return nodeColorMap;
     }
 
-    private getNodeIconMap(g: Graph): Record<string, { path : string, showLabels : boolean }> {
-        let nodeIconMap: Record<string, { path : string, showLabels : boolean }> = {};
+    private getNodeIconMap(g: Graph): Record<string, { path: string, showLabels: boolean }> {
+        let nodeIconMap: Record<string, { path: string, showLabels: boolean }> = {};
         const DEFAULT_ICON = this.DEFAULT_NODE_ICON_PATH;
 
         // Apply icon directives first
@@ -1096,18 +1138,18 @@ export class LayoutInstance {
     }
 
 
-    private getSigColors(ai : AlloyInstance) : Record < string, string > {
-            let sigColors = {};
+    private getSigColors(ai: AlloyInstance): Record<string, string> {
+        let sigColors = {};
 
-            let types = getInstanceTypes(ai);
-            let colorPicker = new ColorPicker(types.length);
-            types.forEach((type) => {
-                sigColors[type.id] = colorPicker.getNextColor();
-            });
-            return sigColors;
-        }
+        let types = getInstanceTypes(ai);
+        let colorPicker = new ColorPicker(types.length);
+        types.forEach((type) => {
+            sigColors[type.id] = colorPicker.getNextColor();
+        });
+        return sigColors;
+    }
 
-    private getFieldTuples(a : AlloyInstance, fieldName: string): string[][] {
+    private getFieldTuples(a: AlloyInstance, fieldName: string): string[][] {
 
 
         let field = Object.values(a.relations).find((rel) => rel.name === fieldName);
@@ -1123,7 +1165,7 @@ export class LayoutInstance {
         return fieldTuples;
     }
 
-    private getFieldTuplesForSourceAndTarget(a : AlloyInstance, fieldName: string, src : string, tgt : string): string[][] {
+    private getFieldTuplesForSourceAndTarget(a: AlloyInstance, fieldName: string, src: string, tgt: string): string[][] {
 
         let fieldTuples = this.getFieldTuples(a, fieldName);
         let filteredTuples = fieldTuples.filter((tuple) => {
@@ -1131,7 +1173,7 @@ export class LayoutInstance {
             if (arity < 1) {
                 return false;
             }
-            return tuple[0] === src && tuple[arity-1] === tgt;
+            return tuple[0] === src && tuple[arity - 1] === tgt;
         });
 
         return filteredTuples;
