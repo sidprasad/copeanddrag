@@ -470,43 +470,7 @@ app.post('/', generateDiagram);
 
 
 
-/**
- * @openapi
- * /: *   post:
- *     summary: Generate diagram in headless mode
- *     tags:
- *      - Diagramming
- *     description: Generates a diagram based on the provided Alloy instance and layout specification in headless mode. 
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               alloydatum:
- *                 type: string
- *                 description: The Alloy instance in XML format.
- *              cope:
- *                type: string
- *                description: The Cope and Drag specification in YAML format.
- *              instancenumber:
- *                type: integer
- *               description: Optional. The temporal instance number (default is 0).
- * *               loggingEnabled:
- *                 type: string
- *                 description: Optional. Set to "enabled" or "disabled" (default is "enabled").
- *     responses:
- *      200:
- *        description: JSON data representing the webcola configuration for the diagram.
- *        content:
- *         application/json:
- *       schema:
- *          type: object
- * 
- *         
- * 
- */
+
 app.post('/headless', (req, res) => {
     // This is a headless version of the diagram generation.
     // It will not render a page, but will return the data as JSON.
