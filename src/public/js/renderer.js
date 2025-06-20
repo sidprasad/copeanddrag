@@ -523,9 +523,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 return "link";
             }) // Dynamically assign class
             .attr("stroke", d => d.color)
-            .attr("marker-end", d => {
-                
-            })
             .attr("data-link-id", d => d.id);
 
         linkGroups
