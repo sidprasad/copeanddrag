@@ -194,26 +194,20 @@ export interface InferredEdgeDirective extends VisualManipulation {
 
 
 // Right now, we don't support applies To on these.
-export interface HidingDirective extends Operation {}
-
-
-export interface AttributeDirective extends HidingDirective {
+export interface FieldDirective extends Operation {
     field: string;
 }
 
-export interface FieldHidingDirective extends HidingDirective {
-    field: string;
-}
 
-// FIXME: This isn't really a hiding directive, but it is a visual manipulation.
-// However, it doesn't have a selector, so it doesn't fit the VisualManipulation interface.
-export interface EdgeColorDirective extends HidingDirective {
-    field: string;
+export interface AttributeDirective extends FieldDirective {}
+
+export interface FieldHidingDirective extends FieldDirective {}
+
+export interface EdgeColorDirective extends FieldDirective {
     color: string;
 }
 
-
-export interface ProjectionDirective extends HidingDirective {
+export interface ProjectionDirective extends Operation {
     sig : string;
 }
 
