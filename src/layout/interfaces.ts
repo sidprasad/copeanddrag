@@ -35,6 +35,7 @@ interface LayoutEdge {
     label: string;
     relationName : string;
     id : string;
+    color: string;
 }
 
 export class ImplicitConstraint {

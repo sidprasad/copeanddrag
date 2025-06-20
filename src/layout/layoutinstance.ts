@@ -481,7 +481,7 @@ export class LayoutInstance {
         let nodeIconMap = this.getNodeIconMap(g);
         let nodeColorMap = this.getNodeColorMap(g, ai);
         let nodeSizeMap = this.getNodeSizeMap(g);
-
+        let edgeColorMap = this.getEdgeColorMap(g, ai);
 
         // This is where we add the inferred edges to the graph.
         this.addinferredEdges(g);
@@ -537,6 +537,7 @@ export class LayoutInstance {
             let source = layoutNodes.find((node) => node.id === edge.v);
             let target = layoutNodes.find((node) => node.id === edge.w);
             let relName = this.getRelationName(g, edge);
+            let color = edgeColorMap[relName] || "black";
 
             let relTuples = this.getFieldTuplesForSourceAndTarget(a, relName, edge.v, edge.w);
             // But what if there are multiple tuples?
@@ -547,7 +548,8 @@ export class LayoutInstance {
                 target: target,
                 label: edgeLabel,
                 relationName: relName,
-                id: edgeId
+                id: edgeId,
+                color: color,
             };
             return e;
         });
@@ -1041,7 +1043,7 @@ export class LayoutInstance {
         let sigColors = this.getSigColors(a);
     
         // Apply color directives first
-        let colorDirectives = this._layoutSpec.directives.colors;
+        let colorDirectives = this._layoutSpec.directives.atomColors;
         colorDirectives.forEach((colorDirective) => {
             let selected = this.evaluator.evaluate(colorDirective.selector, this.instanceNum).selectedAtoms();
             let color = colorDirective.color;
@@ -1095,17 +1097,45 @@ export class LayoutInstance {
         return nodeIconMap;
     }
 
+    /**
+     * Maps edge fields to their colors based on the directives in the layout specification.
+     * @param g - The graph to get the edge color map from.
+     * @param a - The Alloy instance to get the edge colors for.
+     * @returns A Record mapping edge fields to their colors.
+     */
+    private getEdgeColorMap(g: Graph, a: AlloyInstance): Record<string, string> {
+        let edgeColorMap: Record<string, string> = {};
 
+        let colorDirectives = this._layoutSpec.directives.edgeColors;
+        colorDirectives.forEach((colorDirective) => {
+            let color = colorDirective.color;
+            let field = colorDirective.field;
+
+            if (edgeColorMap[field]) {
+                throw new Error(`Color Conflict: "${field}" cannot have multiple colors:  ${edgeColorMap[field]}, ${color}.`);
+            }
+            edgeColorMap[field] = color;
+        });
+    
+        return edgeColorMap;
+    }
+
+
+    /**
+     * Obtains the default sig colors for each sig type.
+     * @param ai - The Alloy instance to get the sig colors for.
+     * @returns a Record mapping sig types to their colors.
+     */
     private getSigColors(ai : AlloyInstance) : Record < string, string > {
-            let sigColors = {};
+        let sigColors = {};
 
-            let types = getInstanceTypes(ai);
-            let colorPicker = new ColorPicker(types.length);
-            types.forEach((type) => {
-                sigColors[type.id] = colorPicker.getNextColor();
-            });
-            return sigColors;
-        }
+        let types = getInstanceTypes(ai);
+        let colorPicker = new ColorPicker(types.length);
+        types.forEach((type) => {
+            sigColors[type.id] = colorPicker.getNextColor();
+        });
+        return sigColors;
+    }
 
     private getFieldTuples(a : AlloyInstance, fieldName: string): string[][] {
 

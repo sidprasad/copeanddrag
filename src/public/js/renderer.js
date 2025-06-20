@@ -219,12 +219,12 @@ function getContainingGroups(groups, node) {
 /**
  * Main function for the renderer. Sets up the layout for the graph using D3 and WebCola.
  * @param {*} d3 
- * @param {*} nodes 
- * @param {*} edges 
- * @param {*} constraints 
- * @param {*} groups 
- * @param {*} width 
- * @param {*} height 
+ * @param {NodeWithMetadata[]} nodes 
+ * @param {EdgeWithMetadata[]} edges 
+ * @param {any[]} constraints 
+ * @param {any} groups 
+ * @param {number} width 
+ * @param {number} height 
  */
 function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
@@ -429,6 +429,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     return "link";
                 })
                 .attr('data-link-id', edgeData.id)
+                .attr('stroke', d => d.color)
                 .attr('d', p.routepath)
                 .lower();
             
@@ -521,6 +522,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 if (isInferredEdge(d)) return "inferredLink";
                 return "link";
             }) // Dynamically assign class
+            .attr("stroke", d => d.color)
             .attr("data-link-id", d => d.id);
 
         linkGroups

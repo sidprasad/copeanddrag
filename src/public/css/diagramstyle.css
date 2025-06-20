@@ -35,7 +35,7 @@
 }
 
 .link {
-    stroke: #333330;
+    /* stroke: #333330; */
     fill: none;
     stroke-width: 1px;
     stroke-opacity: 1;
