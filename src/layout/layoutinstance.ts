@@ -27,16 +27,58 @@ import { WrappedForgeEvaluator } from '../forge-util/evaluatorUtil';
 import { ColorPicker } from './colorpicker';
 import { ConstraintValidator } from './constraint-validator';
 import { SingleValue } from 'forge-expr-evaluator/dist/ForgeExprEvaluator';
+import { all } from 'axios';
 const UNIVERSAL_TYPE = "univ";
 
 
 
+class LayoutNodePath {
+    constructor(
+        public Path: LayoutNode[],
+        public LoopsTo: LayoutNode | undefined
+    ) {}
 
-interface LayoutNodePath {
-    Path: LayoutNode[]
-    LoopsTo: LayoutNode | undefined
-};
+    /**
+     * Expands the path by unrolling the loop `repeat` times.
+     * If there is no loop, returns the plain path.
+     */
+    expand(repeat: number): string[] {
+        const ids = this.Path.map(n => n.id);
 
+        if (!this.LoopsTo) return ids;
+
+        const loopStart = ids.findIndex(id => id === this.LoopsTo!.id);
+        if (loopStart === -1) return ids;
+
+        const prefix = ids.slice(0, loopStart);
+        const loop = ids.slice(loopStart);
+        return prefix.concat(...Array(repeat).fill(loop));
+    }
+
+    /**
+     * Returns true if `this` is a superpath that contains `other` as a subpath (after unrolling).
+     */
+    isSubpathOf(other: LayoutNodePath): boolean {
+        const thisUnrolled = this.expand(2);
+        const otherUnrolled = other.expand(1);
+
+        if (otherUnrolled.length > thisUnrolled.length) return false;
+
+        for (let i = 0; i <= thisUnrolled.length - otherUnrolled.length; i++) {
+            if (otherUnrolled.every((v, j) => v === thisUnrolled[i + j])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if two paths are equivalent (each is a subpath of the other).
+     */
+    static areEquivalent(p1: LayoutNodePath, p2: LayoutNodePath): boolean {
+        return p1.isSubpathOf(p2) && p2.isSubpathOf(p1);
+    }
+}
 
 
 export class LayoutInstance {
@@ -806,7 +848,9 @@ export class LayoutInstance {
 
             // If the current node has no outgoing edges, add the path to allPaths
             if (!nextNodeMap.has(currentNode) || nextNodeMap.get(currentNode).length === 0) {
-                allPaths.push({ Path: [...path], LoopsTo: undefined });
+
+                let lnp = new LayoutNodePath(path, undefined);
+                allPaths.push(lnp);
             } else {
                 // Recursively visit all neighbors
                 for (const neighbor of nextNodeMap.get(currentNode)) {
@@ -814,8 +858,10 @@ export class LayoutInstance {
                         // Continue DFS if the neighbor is not already in the path
                         dfs(neighbor, [...path]); // Pass a copy of the path to avoid mutation
                     } else {
-                        // If the neighbor is already in the path, it's a cycle
-                        allPaths.push({ Path: [...path], LoopsTo: neighbor });
+
+                        let lnp = new LayoutNodePath(path, neighbor);
+                        // If the neighbor is already in the path, we have a cycle
+                        allPaths.push(lnp);
                     }
                 }
             }
@@ -831,69 +877,23 @@ export class LayoutInstance {
         return allPaths;
     }
 
-    // TODO: This doesn't deal with rotations :(
     private getFragmentsToConstrain(nextNodeMap: Map<LayoutNode, LayoutNode[]>): LayoutNodePath[] {
+        // Ensure allPaths are instances of the LayoutNodePath class
         const allPaths: LayoutNodePath[] = this.getAllPaths(nextNodeMap);
 
-
-        function expandPath(p: LayoutNodePath, repeat: number): string[] {
-            const ids = p.Path.map(n => n.id);
-
-            if (!p.LoopsTo) return ids;
-
-            const loopStart = ids.findIndex(id => id === p.LoopsTo!.id);
-            if (loopStart === -1) {
-                return ids; // fallback to base path
-            }
-
-            const prefix = ids.slice(0, loopStart);
-            const loop = ids.slice(loopStart);
-
-            return prefix.concat(...Array(repeat).fill(loop));
-        }
-
-        function isSubpath(longer: LayoutNodePath, shorter: LayoutNodePath): boolean {
-
-            let longerUnrolled = expandPath(longer, 2);
-            let shorterUnrolled = expandPath(shorter, 1);
-
-            // If shorterUnrolled is longer than longerUnrolled, it cannot be a sub-array
-            if (shorterUnrolled.length > longerUnrolled.length) {
-                return false;
-            }
-
-            // Sliding window approach
-            for (let i = 0; i <= longerUnrolled.length - shorterUnrolled.length; i++) {
-                // Check if the sub-array starting at index `i` matches shorterUnrolled
-                if (shorterUnrolled.every((value, j) => value === longerUnrolled[i + j])) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-
-        function equivalentPaths(p1: LayoutNodePath, p2: LayoutNodePath): boolean {
-            return isSubpath(p1, p2) && isSubpath(p2, p1);
-        }
-
-
-        // First dedup allPaths
-        let nonEquivalentPaths: LayoutNodePath[] = allPaths.filter((p, i) => {
-            // Check if there is any earlier path in the array that is equivalent to the current path
-            return !allPaths.some((p2, j) => j < i && equivalentPaths(p, p2));
+        // Step 1: Remove equivalent paths (keep only one representative per equivalence class)
+        const nonEquivalentPaths: LayoutNodePath[] = allPaths.filter((p, i) => {
+            return !allPaths.some((p2, j) => j < i && LayoutNodePath.areEquivalent(p, p2));
         });
 
-        let nonSubsumedPaths: LayoutNodePath[] = nonEquivalentPaths.filter((p, i) => {
-            let isSubsumed = nonEquivalentPaths.some((p2, j) => {
-
-                return i !== j && isSubpath(p2, p);
-            });
-            return !isSubsumed;
+        // Step 2: Remove paths that are strict subpaths of others
+        const nonSubsumedPaths: LayoutNodePath[] = nonEquivalentPaths.filter((p, i) => {
+            return !nonEquivalentPaths.some((p2, j) => i !== j && p2.isSubpathOf(p));
         });
+
         return nonSubsumedPaths;
     }
+
 
 
     /**
