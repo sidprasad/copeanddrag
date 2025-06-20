@@ -114,7 +114,8 @@ const DIRECTIVE_SELECT = `
             <option value="attribute">Attribute</option>
             <option value="hideField">Hide Field</option>
             <option value="icon">Icon</option>
-            <option value="color">Color</option>
+            <option value="atomColor">Color (Atom)</option>
+            <option value="edgeColor">Color (Edge)</option>
             <option value="size">Size</option>
             <option value="projection">Projection</option>
             <option value="inferredEdge">Inferred Edge</option>
@@ -143,12 +144,23 @@ const PROJECTION_SELECTOR = `
 </div>
 `;
 
-const COLOR_SELECTOR = `
+const COLOR_ATOM_SELECTOR = `
 <div class="input-group">
     <div class="input-group-prepend">
         <span class="input-group-text infolabel" title="${UNARY_SELECTOR_TEXT}">Selector</span>
     </div>
     <input type="text" name="selector" class="form-control" required>
+</div>
+<div class="input-group">
+    <div class="input-group-prepend"><span class="input-group-text">Color</span></div>
+    <input type="color" name="value" class="form-control" required>
+</div>
+`;
+
+const COLOR_EDGE_SELECTOR = `
+<div class="input-group">
+    <div class="input-group-prepend"> <span class="input-group-text">Field</span></div>
+    <input type="text" name="field" class="form-control" required>
 </div>
 <div class="input-group">
     <div class="input-group-prepend"><span class="input-group-text">Color</span></div>
@@ -260,19 +272,17 @@ function updateFields(select) {
     // Directive Fields
     if (type === "attribute") {
         paramsDiv.innerHTML = ATTRIBUTE_SELECTOR;
-    }
-    else if (type === "hideField") {
+    } else if (type === "hideField") {
         paramsDiv.innerHTML = HIDE_FIELD_SELECTOR;
-    }
-     else if (type === "icon") {
+    } else if (type === "icon") {
         paramsDiv.innerHTML = ICON_SELECTOR;
-    } else if (type === "color") {
-        paramsDiv.innerHTML = COLOR_SELECTOR;
-    } 
-    else if (type === "size") { 
+    } else if (type === "atomColor") {
+        paramsDiv.innerHTML = COLOR_ATOM_SELECTOR;
+    } else if (type === "edgeColor") {
+        paramsDiv.innerHTML = COLOR_EDGE_SELECTOR;
+    } else if (type === "size") { 
         paramsDiv.innerHTML = SIZE_SELECTOR;
-    }
-    else if (type === "projection") {
+    } else if (type === "projection") {
         paramsDiv.innerHTML = PROJECTION_SELECTOR;
     } else if (type === "flag") {
         paramsDiv.innerHTML = FLAG_SELECTOR;

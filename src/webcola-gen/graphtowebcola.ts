@@ -22,6 +22,7 @@ type EdgeWithMetadata = {
   relName: string, // This is the name of the relation for the edge
   id: string, // Unique identifier for the edge
   label: string // This is what is displayed on the edge
+  color: string, // Color of the edge
 };
 
 export { NodeWithMetadata, EdgeWithMetadata };
@@ -184,14 +185,13 @@ export class WebColaLayout {
     let sourceIndex = this.getNodeIndex(edge.source.id);
     let targetIndex = this.getNodeIndex(edge.target.id);
 
-
-
     return {
       source: sourceIndex,
       target: targetIndex,
       relName: edge.relationName,
       id: edge.id,
-      label: edge.label
+      label: edge.label,
+      color: edge.color,
     }
   }
 

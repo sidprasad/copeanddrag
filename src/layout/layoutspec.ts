@@ -205,7 +205,12 @@ export interface FieldHidingDirective extends HidingDirective {
     field: string;
 }
 
-
+// FIXME: This isn't really a hiding directive, but it is a visual manipulation.
+// However, it doesn't have a selector, so it doesn't fit the VisualManipulation interface.
+export interface EdgeColorDirective extends HidingDirective {
+    field: string;
+    color: string;
+}
 
 
 export interface ProjectionDirective extends HidingDirective {
@@ -227,6 +232,19 @@ interface ConstraintsBlock
 
 }
 
+interface DirectivesBlock {
+    atomColors: AtomColorDirective[];
+    sizes: AtomSizeDirective[];
+    icons: AtomIconDirective[];
+    edgeColors: EdgeColorDirective[];
+    projections: ProjectionDirective[];
+    attributes: AttributeDirective[];
+    hiddenFields: FieldHidingDirective[];
+    inferredEdges: InferredEdgeDirective[];
+    hideDisconnected : boolean;
+    hideDisconnectedBuiltIns : boolean;
+}
+
 
 
 
@@ -234,17 +252,7 @@ export interface LayoutSpec {
 
     constraints: ConstraintsBlock
 
-    directives : {
-        colors: AtomColorDirective[];
-        sizes: AtomSizeDirective[];
-        icons: AtomIconDirective[];
-        projections: ProjectionDirective[];
-        attributes: AttributeDirective[];
-        hiddenFields: FieldHidingDirective[];
-        inferredEdges: InferredEdgeDirective[];
-        hideDisconnected : boolean;
-        hideDisconnectedBuiltIns : boolean;
-    }
+    directives: DirectivesBlock
 }
 
 function DEFAULT_LAYOUT() : LayoutSpec 
@@ -262,9 +270,10 @@ function DEFAULT_LAYOUT() : LayoutSpec
             }
         },
         directives: {
-            colors: [],
+            atomColors: [],
             sizes: [],
             icons: [],
+            edgeColors: [],
             projections: [],
             attributes: [],
             hiddenFields: [],
@@ -289,6 +298,12 @@ function DEFAULT_LAYOUT() : LayoutSpec
 
 
 /////////
+
+/**
+ * Parses a YAML string into a LayoutSpec object.
+ * @param s YAML string to parse into a LayoutSpec.
+ * @returns LayoutSpec object containing constraints and directives.
+ */
 export function parseLayoutSpec(s: string): LayoutSpec {
 
     if (!s) {
@@ -343,7 +358,11 @@ export function parseLayoutSpec(s: string): LayoutSpec {
     return layoutSpec;
 }
 
-
+/**
+ * Parses the constraints from the YAML specification.
+ * @param constraints List of constraints from the YAML specification.
+ * @returns List of CnD constraints
+ */
 function parseConstraints(constraints: any[]):   ConstraintsBlock
 {
 
@@ -463,17 +482,12 @@ function parseConstraints(constraints: any[]):   ConstraintsBlock
 
 }
 
-function parseDirectives(directives: any[]): {
-                            colors: AtomColorDirective[];
-                            sizes: AtomSizeDirective[];
-                            icons: AtomIconDirective[];
-                            projections: ProjectionDirective[];
-                            attributes: AttributeDirective[];
-                            hiddenFields: FieldHidingDirective[];
-                            inferredEdges: InferredEdgeDirective[];
-                            hideDisconnected : boolean;
-                            hideDisconnectedBuiltIns : boolean;
-                        } 
+/**
+ * Parses the directives from the YAML specification.
+ * @param directives List of directives from the YAML specification.
+ * @returns List of CnD directives
+ */
+function parseDirectives(directives: any[]): DirectivesBlock 
 {
 
     // CURRENTLY NO SUGAR HERE!
@@ -487,11 +501,11 @@ function parseDirectives(directives: any[]): {
                         showLabels: d.icon.showLabels || false 
                     }
                 });
-    let colors : AtomColorDirective[] = directives.filter(d => d.color)
+    let atomColors : AtomColorDirective[] = directives.filter(d => d.atomColor)
                 .map(d => {
                     return {
-                        color: d.color.value,
-                        selector: d.color.selector
+                        color: d.atomColor.value,
+                        selector: d.atomColor.selector
                     }
                 });
 
@@ -501,6 +515,14 @@ function parseDirectives(directives: any[]): {
                         height: d.size.height,
                         width: d.size.width,
                         selector: d.size.selector
+                    }
+                });
+    
+    let edgeColors : EdgeColorDirective[] = directives.filter(d => d.edgeColor)
+                .map(d => {
+                    return {
+                        color: d.edgeColor.value,
+                        field: d.edgeColor.field,
                     }
                 });
 
@@ -535,9 +557,10 @@ function parseDirectives(directives: any[]): {
     });
 
     return {
-        colors,
+        atomColors,
         sizes,
         icons,
+        edgeColors,
         projections,
         attributes,
         hiddenFields,
