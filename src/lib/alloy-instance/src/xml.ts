@@ -1,4 +1,4 @@
-import { JSDOM , Element} from 'jsdom';
+import { JSDOM } from 'jsdom';
 import { AlloyDatum } from './datum';
 import { instanceFromElement } from './instance';
 

@@ -8,24 +8,35 @@
   "license": "ISC",
   "devDependencies": {
     "@types/firebase": "^2.4.32",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20.14.12",
     "@vercel/ncc": "^0.38.3",
     "chokidar": "^4.0.3",
     "cpy": "^11.1.0",
     "cpy-cli": "^5.0.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "nodemon": "^3.1.9",
     "puppeteer": "^24.2.1",
     "rimraf": "^6.0.1",
+    "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4"
   },
   "scripts": {
     "dev": "nodemon --exec ts-node src/index.ts",
+    "dev:server": "nodemon --exec ts-node src/server/index.ts",
     "clean": "rimraf dist",
-    "build": "npm run clean && ncc build src/index.ts -o dist && npm run copy-files && npm run copy-swagger",
-    "copy-files": "cpy \"views/**/*\" dist/views && cpy \"public/**/*\" dist/public",
-    "copy-swagger": "cpy \"node_modules/swagger-ui-dist/**/*\" dist/public/swagger-ui-dist",
-    "start": "node dist/index.js",
+    "build": "npm run clean && npm run build:server && npm run build:client && npm run copy-files && npm run copy-swagger",
+    "build:server": "ncc build src/server/index.ts -o dist/server",
+    "build:client": "ncc build src/client/index.ts -o dist/client",
+    "build:lib": "tsc --project tsconfig.lib.json",
+    "copy-files": "cpy \"src/server/views/**/*\" dist/server/views && cpy \"src/client/public/**/*\" dist/client/public",
+    "copy-swagger": "cpy \"node_modules/swagger-ui-dist/**/*\" dist/client/public/swagger-ui-dist",
+    "start": "node dist/server/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "prepublishOnly": "npm run build",
     "publish-docs": "mkdocs gh-deploy",
     "docs-local": "mkdocs serve"
@@ -61,12 +72,12 @@
   "files": [
     "dist/**/*",
     "src/**/*",
-    "public/**/*",
-    "views/**/*",
+    "src/client/public/**/*",
+    "src/server/views/**/*",
     "package.json",
     "README.md"
   ],
   "bin": {
-    "copeanddrag": "./dist/index.js"
+    "copeanddrag": "./dist/server/index.js"
   }
 }
