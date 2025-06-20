@@ -675,7 +675,7 @@ export class LayoutInstance {
 
 
         // First, for each, get the tuples / fragments.
-
+        let layoutNodePaths: LayoutNodePath[] = [];
         let constraintFragments = [];
 
         for (const [index, c] of cyclicConstraints.entries()) {
@@ -701,9 +701,10 @@ export class LayoutInstance {
             let relatedNodeFragments = this.getFragmentsToConstrain(nextNodeMap);
 
 
-            // TODO: Keep the existing fragments, not just their ids for now.
+            // TODO: An optimization: Keep the existing fragments, not just their ids for now.
             // Move the counterclockwise reversal to LATER.
             // AFTER we dedup layoutNodePaths.
+
 
 
             let relatedNodeIds = relatedNodeFragments.map((p) => p.Path.map((node) => node.id));
@@ -720,8 +721,6 @@ export class LayoutInstance {
                     fragmentList: fragment
                 });
             });
-
-
 
         }
 
