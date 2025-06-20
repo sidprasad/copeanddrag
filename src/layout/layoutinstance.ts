@@ -700,6 +700,12 @@ export class LayoutInstance {
 
             let relatedNodeFragments = this.getFragmentsToConstrain(nextNodeMap);
 
+
+            // TODO: Keep the existing fragments, not just their ids for now.
+            // Move the counterclockwise reversal to LATER.
+            // AFTER we dedup layoutNodePaths.
+
+
             let relatedNodeIds = relatedNodeFragments.map((p) => p.Path.map((node) => node.id));
             // Now we have the related node fragments for this constraint.
 
@@ -718,6 +724,9 @@ export class LayoutInstance {
 
 
         }
+
+
+
 
         const minRadius = 100; // Example fixed distance.
 
