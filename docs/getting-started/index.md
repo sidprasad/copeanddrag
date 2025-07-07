@@ -2,7 +2,7 @@
 
 > CnD is integrated into the [Forge](https://forge-fm.org) pedagogic model finder, which is heavily inspired by the [Alloy](https://alloytools.org) tool and language. 
 > This guide assumes you have a basic understanding of Forge or Alloy. If you need an introduction to Forge,
-> check out the [Forge language documentation](https://csci1710.github.io/forge-documentation/getting-started/installation.html).
+> check out the [Forge documentation](https://forge-fm.github.io/forge-documentation/).
 
 ## Installing CnD
 
