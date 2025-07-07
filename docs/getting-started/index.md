@@ -1,13 +1,10 @@
 # Getting Started
 
-
-> This guide assumes you have a basic understanding of the Forge language. If you need an introduction to Forge,
-> check out the [Forge language documentation](https://csci1710.github.io/forge-documentation/getting-started/installation.html).
-
-
+> CnD is integrated into the [Forge](https://forge-fm.org) pedagogic model finder, which is heavily inspired by the [Alloy](https://alloytools.org) tool and language. 
+> This guide assumes you have a basic understanding of Forge or Alloy. If you need an introduction to Forge,
+> check out the [Forge documentation](https://forge-fm.github.io/forge-documentation/).
 
 ## Installing CnD
-
 
 You can install CnD in one of the following ways:
 
@@ -58,6 +55,23 @@ If you are just starting with `CnD`, we recommend beginning with the No Code int
 </figure>
 
 4. Once you have clicked 'Apply Layout', `CnD` will apply your specification to generate a new diagram.
+
+## Running CnD with Alloy
+
+For the moment, the best way to use CnD with Alloy is by pasting the instance XML that Alloy produces into CnD directly. To do this:
+
+1. From within Alloy's instance visualizer, select the `File -> Export To -> XML` menu option.
+
+<figure>
+    <img src="img/alloy-xml-export.png" alt="Alloy XML-Export Screenshot" style="max-height: 500px; width: auto; border: 1px solid #ccc; padding: 5px;">
+    <figcaption style="text-align: center; margin-top: 5px;">Exporting an Alloy instance as XML</figcaption>
+</figure>
+
+2. Open the XML file in a text editor and copy its entire contents to clipboard. 
+
+3. Click the `Edit Datum` button in the `CnD` Layout pane, then paste the XML into the edit box. 
+
+4. Click `Apply Layout`. The instance will be displayed and `CnD` constraints and directives will be available for visualization. This includes selectors that use the (substantial) set of operators shared by both Forge and Alloy: join, set comprehension, cardinality, and so on.
 
 
 ## Next Steps
