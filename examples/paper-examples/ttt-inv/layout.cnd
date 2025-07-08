@@ -1,6 +1,19 @@
 constraints:
-  - orientation: { field: down, directions: [directlyBelow] }
-  - orientation: { field: right, directions: [directlyRight] }
+  - orientation:
+      selector: down
+      directions:
+        - directlyBelow
+  - orientation:
+      selector: right
+      directions:
+        - directlyRight
 directives:
-  - attribute: { field: mark }
+  - atomColor:
+      selector: '{ hw: Cell | wins[hw.*right + *right.hw] }.*right'
+      value: '#00f900'
+  - atomColor:
+      selector: '{ vw: Cell | wins[vw.*down + *down.vw] }.*down'
+      value: '#00f900'
+  - attribute:
+      field: mark
   - flag: hideDisconnected
