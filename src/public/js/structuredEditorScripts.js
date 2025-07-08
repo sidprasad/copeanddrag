@@ -1,3 +1,5 @@
+// TODO: Remove this file
+
 const TUPLE_SELECTOR_TEXT = `Forge expression yielding tuples (arity ≥ 2); constraint applies from first to last element.`;
 const UNARY_SELECTOR_TEXT = `Forge expression yielding singletons.`;
 
