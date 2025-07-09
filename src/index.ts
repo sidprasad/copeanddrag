@@ -1,14 +1,9 @@
 #!/usr/bin/env node
 
 import * as http from 'http';
-import { AlloyAtom, AlloyDatum, AlloyInstance, AlloyType, parseAlloyXML } from './alloy-instance';
-
-import { LayoutInstance } from './layout/layoutinstance';
+import { parseAlloyXML, AlloyDatum, LayoutInstance, LayoutSpec, parseLayoutSpec } from 'cnd-core';
 
 import { WebColaLayout } from './webcola-gen/graphtowebcola';
-import { ConstraintValidator } from './layout/constraint-validator';
-import { InstanceLayout } from './layout/interfaces';
-import { LayoutSpec, parseLayoutSpec } from './layout/layoutspec';
 import { instanceToInst, instanceToTables } from './forge-util/instanceToInst';
 import { Event, Logger, LogLevel } from './logging/logger';
 import * as os from 'os';
@@ -20,16 +15,11 @@ const express = require('express');
 const path = require('path');
 import * as fs from 'fs';
 
-// import axios
-const axios = require('axios');
-
 import multer from 'multer';
 import AdmZip from 'adm-zip';
 
 import swaggerUi from 'swagger-ui-express';
 import swaggerJSDoc from 'swagger-jsdoc';
-import swaggerUiDist from 'swagger-ui-dist';
-import { log } from 'console';
 
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));

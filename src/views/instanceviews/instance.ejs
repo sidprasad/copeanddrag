@@ -15,7 +15,14 @@
 
     <!-- Tab Content -->
     <div id="svggraphview" class="tab-content">
-        <%- include('diagramsvg') %>
+        <!-- Use the webcola-cnd-graph custom element -->
+        <webcola-cnd-graph 
+            id="graph-container"
+            width="800" 
+            height="600"
+            layoutFormat="default"
+            aria-label="Interactive graph visualization">
+        </webcola-cnd-graph>
     </div>
     <div id="tableview" class="tab-content" style="display: none;">
         <%- include('tableview') %>

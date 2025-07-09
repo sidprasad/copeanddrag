@@ -48,11 +48,11 @@
     <script src="/js/imgdownload.js" defer></script>
 
     <!-- Complete CND-Core browser bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/cnd-core@1.0.11/dist/browser/cnd-core-complete.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cnd-core@1.0.17/dist/browser/cnd-core-complete.global.js"></script>
 
     <!-- Demo components bundle (includes InstanceBuilder integration) -->
-    <script src="https://cdn.jsdelivr.net/npm/cnd-core@1.0.11/dist/components/react-component-integration.global.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cnd-core@1.0.11/dist/components/react-component-integration.css">
+    <script src="https://cdn.jsdelivr.net/npm/cnd-core@1.0.17/dist/components/react-component-integration.global.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cnd-core@1.0.17/dist/components/react-component-integration.css">
 
     <!-- Include Split.js -->
     <script src="https://cdn.jsdelivr.net/npm/split.js/dist/split.min.js"></script>
@@ -64,20 +64,6 @@
         document.addEventListener('DOMContentLoaded', function () {
 
             Split(['#exploreCol', '#instanceCol', '#controlsCol']);
-        });
-
-        window.addEventListener('load', function () {
-            var width = <%- width %>, height = <%- height %>;
-            var nodes = <%- JSON.stringify(colaNodes) %>;
-            var edges = <%- JSON.stringify(colaEdges) %>;
-            var constraints = <%- JSON.stringify(colaConstraints) %>;
-            var groups = <%- JSON.stringify(colaGroups) %>;
-
-            if (width && height && nodes && edges && constraints && groups) {
-                setupLayout(d3, nodes, edges, constraints, groups, width, height);
-            } else {
-                console.error('Missing required data for layout');
-            }
         });
     </script>
 
@@ -112,23 +98,6 @@
         <div class="row w-100">
             <div class="col">
                 <h4 class="navbar-brand">Cope and Drag</h4>
-            </div>
-            <div class="col-auto">
-                <!-- Logging Control Section -->
-                <div class="input-group" id="loggingControlSection">
-                    <div class="input-group-prepend">
-                        <label for="loggingEnabled" class="form-check-label">
-                            <span class="input-group-text">Logging</span>
-                        </label>
-                    </div>
-                    <select class="form-control" id="loggingEnabled" name="loggingEnabled">
-                        <option value="enabled" <%= typeof loggingEnabled === 'undefined' || loggingEnabled ? 'selected' : '' %>>Enabled</option>
-                        <option value="disabled" <%= typeof loggingEnabled !== 'undefined' && !loggingEnabled ? 'selected' : '' %>>Disabled</option>
-                    </select>
-                    <div class="input-group-append">
-                        <button type="button" class="btn btn-sm btn-outline-info float-right" data-toggle="modal" data-target="#loggingInfoModal" id="loggingmoreinfo">?</button>
-                    </div>
-                </div>
             </div>
 
             <div class="col">

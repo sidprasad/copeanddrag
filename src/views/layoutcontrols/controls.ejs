@@ -1,7 +1,9 @@
 <div id="controls" class="col">
-    <form id="controlsForm" method="post" action="/" class="d-flex flex-column gap- p-1">
-        <button type="submit" id='cola' class="btn btn-primary btn-lg m-auto px-4">Apply Layout</button>
+    <div class="d-flex flex-column gap-2 p-1">
+        <button id='cola' class="btn btn-primary btn-lg m-1 px-4">Apply Layout</button>
         <hr>
+
+        <div id="status" class="status info">Ready to load Alloy graph...</div>
         
         <div id="webcola-cnd-container">
             <!-- React component mounted here -->
@@ -10,17 +12,18 @@
         <!-- And here, we are in actual controls terroir. -->
 
         <br>
-        <div class="form-group" id="alloyDatumControlSection">
+        <div id="alloyDatumControlSection">
             <label for="alloydatum" class="btn btn-outline-dark btn-sm" id="alloyinstancelabel"
                 style="cursor: pointer;">Edit Datum</label>
-            <textarea class="form-control" id="alloydatum" rows="5" name="alloydatum"
+            <textarea id="alloydatum" rows="5" name="alloydatum"
                 style="display: none;"><%= alloyDatum ? alloyDatum : '' %></textarea>
         </div>
         <br>
         
-        <div class="form-group d-none" id="temporalInstanceNumberControl">
+        <!-- TODO: Revisit whether this is needed -->
+        <div class="d-none" id="temporalInstanceNumberControl">
             <label for="instancenumber">Temporal Instance Number</label>
-            <input type="number" class="form-control" id="instancenumber" name="instancenumber"
+            <input type="number" id="instancenumber" name="instancenumber"
                 value="<%- instanceNumber %>">
         </div>
 
@@ -29,36 +32,308 @@
         If projections is non-empty, then show each type as a form input  and projectedAtom as the selected element of atoms
         -->
 
-    </form>
-
-    <!-- Modal for logging info.-->
-    <div class="modal fade" id="loggingInfoModal" tabindex="-1" role="dialog"
-        aria-labelledby="loggingInfoModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="loggingInfoModalLabel">Logging Information</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    By enabling logging, you allow us to examine your <b>anonymized</b>
-                    specifications and diagrams in order
-                    to improve Cope and Drag, and understand its effectiveness.
-                    <br><br>
-                    Have questions? <a
-                        href="https://docs.google.com/forms/d/e/1FAIpQLSdQcAlnW86OLlpmFovEiviToq5WMU10N4U_pz01N-9LUJ4qzQ/viewform?usp=dialog"
-                        target="_blank">Fill out this form</a>.
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
+<script src="./graphScripts.js"></script>
 <script>
+
+    // Variables to store data
+    let currentInstanceLayout = null;
+
+    /**
+     * Get current Alloy XML from input field
+     * @returns {string} Alloy XML specification
+     */
+    function getCurrentAlloyXml() {
+        return document.getElementById('alloydatum').value.trim();
+    }
+
+    /**
+     * Get current CND specification from input field  
+     * @returns {string} CND layout specification
+     */
+    function getCurrentCNDSpec() {
+        // Try to get value from React component first
+        console.log('Getting current CND spec from React', window.getCurrentCNDSpecFromReact);
+        return window.getCurrentCNDSpecFromReact ? 
+            window.getCurrentCNDSpecFromReact() : 
+            document.getElementById('webcola-cnd')?.value?.trim();
+    }
+
+    /**
+     * Update status display with proper styling
+     * @param {string} message - Status message to display
+     * @param {string} type - Status type: 'info', 'success', 'error'
+     */
+    function updateStatus(message, type = 'info') {
+        const statusElement = document.getElementById('status');
+        statusElement.textContent = message;
+        statusElement.className = `status ${type}`;
+    }
+
+    /**
+     * Initialize the Alloy pipeline components
+     * @returns {boolean} Success status
+     */
+    async function initializePipeline() {
+        try {
+            console.log('Complete CND-Core browser bundle loaded successfully');
+            console.log('Available on global CndCore:', Object.keys(CndCore));
+            
+            // Check for Alloy-specific components
+            console.log('parseAlloyXML available:', !!CndCore.AlloyInstance.parseAlloyXML);
+            console.log('ForgeEvaluator available:', !!CndCore.ForgeEvaluator);
+            console.log('LayoutInstance available:', !!CndCore.LayoutInstance);
+            console.log('parseLayoutSpec available:', !!CndCore.parseLayoutSpec);
+            
+            updateStatus('Alloy pipeline ready! Enter Alloy XML and CND specifications now.', 'success');
+            
+            return true;
+        } catch (error) {
+            console.error('Failed to initialize Alloy pipeline:', error);
+            updateStatus(`Pipeline init failed: ${error.message}`, 'error');
+            return false;
+        }
+    }
+
+    /**
+     * Process Alloy data using the complete Alloy → ForgeEvaluator → Layout pipeline
+     */
+    async function loadAlloyData() {
+        try {
+            updateStatus('Processing Alloy data with ForgeEvaluator...', 'info');
+
+            // Get Alloy XML from input field
+            const alloyXml = getCurrentAlloyXml();
+            if (!alloyXml) {
+                throw new Error('Please enter an Alloy XML instance')   ;
+            }
+
+            // Get CND specification from input field
+            const cndSpec = getCurrentCNDSpec() || "";
+            // if (!cndSpec) {
+            //     throw new Error('Please enter a CND layout specification');
+            // }
+
+            console.log('Using Alloy XML:', alloyXml.substring(0, 200) + '...');
+            console.log('Using CND Spec:', cndSpec.substring(0, 200) + '...');
+
+            // Step 1: Parse Alloy XML
+            updateStatus('Parsing Alloy XML...', 'info');
+            const alloyDatum = CndCore.AlloyInstance.parseAlloyXML(alloyXml);
+            console.log('Parsed Alloy Datum:', alloyDatum);
+            
+            if (!alloyDatum.instances || alloyDatum.instances.length === 0) {
+                throw new Error('No instances found in Alloy XML');
+            }
+
+            const alloyDataInstance = new CndCore.AlloyDataInstance(alloyDatum.instances[0]);
+            // Now we need to convert thi
+
+            console.log('Using Alloy Data Instance:', alloyDataInstance);
+            console.log('Types via Alloy IDataInstance:', alloyDataInstance.getTypes().length);
+            console.log('Atoms via Alloy IDataInstance:', alloyDataInstance.getAtoms().length);
+            console.log('Relations via Alloy IDataInstance:', alloyDataInstance.getRelations().length);
+
+            // Step 2: Create ForgeEvaluator with Alloy data
+            updateStatus('Creating ForgeEvaluator...', 'info');
+
+
+            let evaluationContext = {
+                sourceData: alloyXml,
+            }; //alloyDatum
+            const forgeEvaluator = new CndCore.ForgeEvaluator();
+            forgeEvaluator.initialize(evaluationContext);
+
+            console.log('Created ForgeEvaluator:', forgeEvaluator);
+
+            // Step 3: Parse layout specification
+            updateStatus('Parsing layout specification...', 'info');
+            let layoutSpec = null;
+            try {
+                layoutSpec = CndCore.parseLayoutSpec(cndSpec);
+                if (window.clearAllErrors) {
+                    window.clearAllErrors();
+                }
+            } catch (error) {
+                console.error('Layout spec parse error:', error);
+                if (window.showParseError) {
+                    window.showParseError(error.message, 'Layout Specification');
+                } else {
+                    updateStatus(`Layout spec parse error: ${error.message}`, 'error');
+                }
+                return;
+            }
+            console.log('Parsed Layout Spec:', layoutSpec);
+
+            // Step 4: Create LayoutInstance with ForgeEvaluator
+            updateStatus('Creating layout instance with ForgeEvaluator...', 'info');
+            const ENABLE_ALIGNMENT_EDGES = true;
+            const instanceNumber = 0;
+            
+            
+            const layoutInstance = new CndCore.LayoutInstance(
+                layoutSpec, 
+                forgeEvaluator, 
+                instanceNumber, 
+                ENABLE_ALIGNMENT_EDGES
+            );
+            console.log('Created Layout Instance with ForgeEvaluator:', layoutInstance);
+
+            // Step 5: Generate layout using Alloy data instance
+            updateStatus('Generating layout with Alloy data...', 'info');
+            const projections = {};
+            const layoutResult = layoutInstance.generateLayout(alloyDataInstance, projections);
+            currentInstanceLayout = layoutResult.layout;
+
+            if (layoutResult.error) {
+                console.error('Layout generation error:', layoutResult.error);
+
+                // Check if this is a constraint conflict error
+                if (layoutResult.error.errorMessages) {
+                    if (window.showPositionalError) {
+                        window.showPositionalError(layoutResult.error.errorMessages);
+                    } else {
+                        updateStatus(`Positional constraint conflict: ${layoutResult.error.message}`, 'error');
+                    }
+                } else if (layoutResult.error.overlappingNodes) {
+                    if (window.showGroupOverlapError) {
+                        window.showGroupOverlapError(layoutResult.error.message);
+                    } else {
+                        updateStatus(`Group overlap error: ${layoutResult.error.message}`, 'error');
+                    }
+                } else {
+                    if (window.showGeneralError) {
+                        window.showGeneralError(`Layout generation error: ${layoutResult.error.message}`);
+                    } else {
+                        updateStatus(`Layout generation error: ${layoutResult.error.message}`, 'error');
+                    }
+                }
+                return;
+            }
+
+            // Clear errors on successful layout generation
+            if (window.clearAllErrors) {
+                window.clearAllErrors();
+            }
+
+            console.log('Generated Instance Layout using Alloy pipeline:', currentInstanceLayout);
+
+            updateStatus('Alloy pipeline complete with ForgeEvaluator! Ready to render.', 'success');
+            
+        } catch (error) {
+            console.error('Failed to load Alloy data:', error);
+            updateStatus(`Alloy data loading failed: ${error.message}`, 'error');
+        }
+    }
+
+    /**
+     * Render the graph using the webcola-cnd-graph custom element
+     */
+    async function renderGraph() {
+        clearGraph(); // Clear existing graph first
+        const graphElement = document.getElementById('graph-container');
+        
+        try {
+            if (!currentInstanceLayout) {
+                updateStatus('No layout data available. Processing Alloy data first...', 'info');
+                await loadAlloyData();
+                if (!currentInstanceLayout) {
+                    throw new Error('Failed to generate layout data from Alloy');
+                }
+            }
+
+            updateStatus('Rendering Alloy graph with WebCola...', 'info');
+            
+            // Use the real InstanceLayout data with WebCola custom element
+            await graphElement.renderLayout(currentInstanceLayout);
+            
+            updateStatus('Alloy graph rendered successfully!', 'success');
+        } catch (error) {
+            console.error('Error rendering Alloy graph:', error);
+            updateStatus(`Alloy render error: ${error.message}`, 'error');
+        }
+    }
+
+    /**
+     * Clear the graph and reset state
+     */
+    function clearGraph() {
+        const graphElement = document.getElementById('graph-container');
+        
+        // Clear the graph
+        if (graphElement.clear) {
+            // FIXME: The graphElement needs a clear() method
+            graphElement.clear();
+        } else {
+            // Fallback: remove all SVG content
+            const svg = graphElement.shadowRoot?.querySelector('svg');
+            if (svg) {
+                const container = svg.querySelector('.zoomable');
+                if (container) {
+                    container.innerHTML = '';
+                }
+            }
+        }
+        
+        // Clear stored layout
+        currentInstanceLayout = null;
+        
+        updateStatus('Graph cleared.', 'info');
+    }
+
+    /**
+     * Load and render Alloy graph in one step
+     */
+    async function loadGraph() {
+        try {
+            await loadAlloyData();
+            await renderGraph();
+        } catch (error) {
+            console.error('Failed to load and render Alloy graph:', error);
+            updateStatus(`Failed to load Alloy graph: ${error.message}`, 'error');
+        }
+    }
+
+    async function changeLayoutFormat() {
+        const graphElement = document.getElementById('graph-container');
+        const layoutFormat = document.getElementById('layoutFormat').value;
+        graphElement.setAttribute('layoutFormat', layoutFormat);
+        console.log(`Layout format changed to: ${layoutFormat}`);
+
+        // Re-render the graph with the new layout format
+        try {
+            if (!currentInstanceLayout) {
+                throw new Error('No layout data available. Please load an Alloy graph first.');
+            }
+            await graphElement.renderLayout(currentInstanceLayout);
+            updateStatus('Graph layout changed successfully!', 'success');
+        } catch (error) {
+            console.error('Error rendering graph:', error);
+            updateStatus(`Render error: ${error.message}`, 'error');
+        }
+    }
+
+    // Auto-initialize when page loads
+    window.addEventListener('load', () => {
+        initializePipeline();
+        // Mount React component if available
+        if (window.mountCndLayoutInterface) {
+            window.mountCndLayoutInterface();
+        }
+
+        // Mount error message system
+        if (window.mountErrorMessageModal) {
+            window.mountErrorMessageModal();
+        }
+    });
+
+    // Expose functions globally for buttons
+    window.loadGraph = loadGraph;
+    window.loadAlloyData = loadAlloyData;
+    window.renderGraph = renderGraph;
+    window.clearGraph = clearGraph;
+
     document.addEventListener('DOMContentLoaded', function () {
 
         // This is the text area input for the Alloy datum.
@@ -73,55 +348,50 @@
             }
         });
 
-        /** Form submission handling **/
-        const form = document.getElementById('controlsForm');
+        // Add onClick event listener to the button
         const submitButton = document.getElementById('cola');
-        const loggingEnabled = document.getElementById('loggingEnabled'); // Reference the loggingEnabled element
-
-        // Add a submit event listener to the form
-        form.addEventListener('submit', function (event) {
-            event.preventDefault(); // Prevent the default form submission
-
+        submitButton.addEventListener('click', async function (event) {
+            console.log('Apply Layout button clicked');
             // Set the class of the button to spinner
             submitButton.classList.add('spinner-border', 'spinner-border-sm');
             submitButton.setAttribute('disabled', 'disabled'); // Disable the button
 
-            // Find all form controls with IDs ending in "_projection"
-            const projectionControls = document.querySelectorAll('[id$="_projection"]');
-
             // Add each projection control's value as a hidden input to the form
-            projectionControls.forEach(control => {
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = control.name; // Use the control's name as the input name
-                hiddenInput.value = control.value; // Use the control's value as the input value
-                form.appendChild(hiddenInput);
-            });
+            // const projectionControls = document.querySelectorAll('[id$="_projection"]');
 
-            // Add the loggingEnabled value to the logging object
-            const loggingObject = {
-                loggingEnabled: loggingEnabled.value // Get the value of the loggingEnabled select element
-            };
+            // projectionControls.forEach(control => {
+            //     const hiddenInput = document.createElement('input');
+            //     hiddenInput.type = 'hidden';
+            //     hiddenInput.name = control.name; // Use the control's name as the input name
+            //     hiddenInput.value = control.value; // Use the control's value as the input value
+            //     form.appendChild(hiddenInput);
+            // });
 
-            form.appendChild(loggingEnabled); // Append the loggingEnabled element to the form
+            await renderGraph();
 
-            // I also want the value of the scale factor to be read.
-            const scaleFactorInput = document.getElementById('scaleFactor');
-            let scaleFactorValue = 5; // Default to 5
-            if (scaleFactorInput) {
-                scaleFactorValue = scaleFactorInput.value || 5;
-            }
-            const scaleFactorHiddenInput = document.createElement('input');
-            scaleFactorHiddenInput.type = 'hidden';
-            scaleFactorHiddenInput.name = 'scaleFactor';
-            scaleFactorHiddenInput.value = scaleFactorValue;
-            form.appendChild(scaleFactorHiddenInput);
-
-            form.submit(); // Submit the form
+            // Set the class of the button to spinner
+            submitButton.classList.remove('spinner-border', 'spinner-border-sm');
+            submitButton.removeAttribute('disabled', 'disabled'); // Disable the button
         });
     });
 
+    /** 
+     * TODO:
+     * - Retrieve the CnD spec from the component to render in the diagram
+    */
+
     window.addEventListener('load', () => {
+
+        // Check for existence of global functions from cnd-core CDN
+        if (window.CnDCore) {
+            window.DataAPI = CnDCore.DataAPI;
+            window.ErrorAPI = CnDCore.ErrorAPI;
+            console.log('CnDCore loaded successfully.');
+        } else {
+            console.error('Error: CnDCore is not loaded. Please check that the proper version of cnd-core CDN (1.0.14 and above) is included.');
+            return;
+        }
+
         if (window.mountCndLayoutInterface) {
             window.mountCndLayoutInterface();
         }

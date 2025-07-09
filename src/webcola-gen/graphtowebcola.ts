@@ -1,7 +1,15 @@
 import { Node } from 'webcola';
 import * as dagre from 'dagre';
-import { InstanceLayout, LayoutNode, LayoutEdge, LayoutConstraint, LayoutGroup, LeftConstraint, TopConstraint, AlignmentConstraint, isLeftConstraint, isTopConstraint, isAlignmentConstraint } from '../layout/interfaces';
-import { LayoutInstance } from '../layout/layoutinstance';
+import { InstanceLayout, 
+  LayoutInstance,
+  LayoutNode, 
+  LayoutEdge, 
+  LayoutConstraint, 
+  LayoutGroup, 
+  isLeftConstraint, 
+  isTopConstraint, 
+  isAlignmentConstraint 
+} from 'cnd-core';
 
 
 

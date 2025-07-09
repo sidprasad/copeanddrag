@@ -1,4 +1,4 @@
-import { AlloyInstance } from "../alloy-instance";
+import { AlloyInstance } from "cnd-core";
 
 
 
