@@ -13,6 +13,7 @@
     "chokidar": "^4.0.3",
     "cpy": "^11.1.0",
     "cpy-cli": "^5.0.0",
+    "http-server": "^14.1.1",
     "nodemon": "^3.1.9",
     "puppeteer": "^24.2.1",
     "rimraf": "^6.0.1",
@@ -20,12 +21,12 @@
     "typescript": "^5.5.4"
   },
   "scripts": {
-    "dev": "nodemon --exec ts-node src/index.ts",
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
     "clean": "rimraf dist",
     "build": "npm run clean && ncc build src/index.ts -o dist && npm run copy-files && npm run copy-swagger",
     "copy-files": "cpy \"views/**/*\" dist/views && cpy \"public/**/*\" dist/public",
     "copy-swagger": "cpy \"node_modules/swagger-ui-dist/**/*\" dist/public/swagger-ui-dist",
-    "start": "node dist/index.js",
     "prepublishOnly": "npm run build",
     "publish-docs": "mkdocs gh-deploy",
     "docs-local": "mkdocs serve"
@@ -38,7 +39,7 @@
     "axios": "^1.7.9",
     "cassowary": "^0.0.2",
     "chroma-js": "^3.1.1",
-    "cnd-core": "^1.0.14",
+    "cnd-core": "^1.1.4",
     "d3": "^7.9.0",
     "dagre": "^0.8.5",
     "ejs": "^3.1.10",

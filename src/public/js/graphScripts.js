@@ -4,7 +4,7 @@
  */
 
 // Variables to store data
-let currentInstanceLayout = null;
+window.currentInstanceLayout = null;
 
 /**
  * Get current Alloy XML from input field
@@ -66,9 +66,6 @@ async function loadAlloyData() {
 
         // Get CND specification from input field
         const cndSpec = getCurrentCNDSpec() || "";
-        // if (!cndSpec) {
-        //     throw new Error('Please enter a CND layout specification');
-        // }
 
         console.log('Using Alloy XML:', alloyXml.substring(0, 200) + '...');
         console.log('Using CND Spec:', cndSpec.substring(0, 200) + '...');
@@ -136,7 +133,7 @@ async function loadAlloyData() {
         updateStatus('Generating layout with Alloy data...', 'info');
         const projections = {};
         const layoutResult = layoutInstance.generateLayout(alloyDataInstance, projections);
-        currentInstanceLayout = layoutResult.layout;
+        window.currentInstanceLayout = layoutResult.layout;
 
         if (layoutResult.error) {
             console.error('Layout generation error:', layoutResult.error);
@@ -169,7 +166,7 @@ async function loadAlloyData() {
             window.clearAllErrors();
         }
 
-        console.log('Generated Instance Layout using Alloy pipeline:', currentInstanceLayout);
+        console.log('Generated Instance Layout using Alloy pipeline:', window.currentInstanceLayout);
 
         updateStatus('Alloy pipeline complete with ForgeEvaluator! Ready to render.', 'success');
         
@@ -182,23 +179,31 @@ async function loadAlloyData() {
 /**
  * Render the graph using the webcola-cnd-graph custom element
  */
-async function renderGraph() {
+async function renderGraph(width, height) {
     clearGraph(); // Clear existing graph first
     const graphElement = document.getElementById('graph-container');
     
     try {
-        if (!currentInstanceLayout) {
+        if (!window.currentInstanceLayout) {
             updateStatus('No layout data available. Processing Alloy data first...', 'info');
             await loadAlloyData();
-            if (!currentInstanceLayout) {
+            if (!window.currentInstanceLayout) {
                 throw new Error('Failed to generate layout data from Alloy');
             }
         }
 
         updateStatus('Rendering Alloy graph with WebCola...', 'info');
         
+        const graphWidth = width || graphElement.getAttribute('width') || 800;
+        const graphHeight = height || graphElement.getAttribute('height') || 600;
+
+        console.log(`Rendering graph with width=${graphWidth}, height=${graphHeight}`);
+
+        graphElement.setAttribute('width', graphWidth);
+        graphElement.setAttribute('height', graphHeight);
+
         // Use the real InstanceLayout data with WebCola custom element
-        await graphElement.renderLayout(currentInstanceLayout);
+        await graphElement.renderLayout(window.currentInstanceLayout);
         
         updateStatus('Alloy graph rendered successfully!', 'success');
     } catch (error) {
@@ -229,7 +234,7 @@ function clearGraph() {
     }
     
     // Clear stored layout
-    currentInstanceLayout = null;
+    window.currentInstanceLayout = null;
     
     updateStatus('Graph cleared.', 'info');
 }
@@ -258,10 +263,10 @@ async function changeLayoutFormat() {
 
     // Re-render the graph with the new layout format
     try {
-        if (!currentInstanceLayout) {
+        if (!window.currentInstanceLayout) {
             throw new Error('No layout data available. Please load an Alloy graph first.');
         }
-        await graphElement.renderLayout(currentInstanceLayout);
+        await graphElement.renderLayout(window.currentInstanceLayout);
         updateStatus('Graph layout changed successfully!', 'success');
     } catch (error) {
         console.error('Error rendering graph:', error);
@@ -281,7 +286,7 @@ window.GraphAPI = {
     getCurrentCNDSpec,
     
     // Getter for current layout (useful for external access)
-    getCurrentLayout: () => currentInstanceLayout
+    getCurrentLayout: () => window.currentInstanceLayout
 };
 
 // Also expose individual functions globally for backward compatibility
@@ -290,3 +295,59 @@ window.loadAlloyData = loadAlloyData;
 window.renderGraph = renderGraph;
 window.clearGraph = clearGraph;
 window.changeLayoutFormat = changeLayoutFormat;
+
+
+/**
+ * Client-side equivalent of generateDiagram function
+ * Processes form data and renders diagram without server roundtrip
+ */
+async function generateDiagram() {
+    try {
+        updateStatus('Generating diagram...', 'info');
+        
+        // Get form data (equivalent to req.body)
+        const formData = getClientFormData();
+        
+        // Validate required data
+        if (!formData.alloydatum || (!formData.cope && formData.cope !== '')) {
+            throw new Error('Both Alloy XML and CnD specification are required');
+        }
+        
+        // Process the data using existing pipeline
+        await loadAlloyData();
+        
+        if (!window.currentInstanceLayout) {
+            throw new Error('Failed to generate layout from provided data');
+        }
+        
+        // Calculate dimensions (equivalent to WebColaLayout logic)
+        const scaleFactor = parseFloat(formData.scaleFactor) || 5;
+        const width = 800 * scaleFactor;
+        const height = 600 * scaleFactor;
+        
+        // Render the graph
+        await renderGraph(width, height);
+        
+        updateStatus('Diagram generated successfully!', 'success');
+        
+    } catch (error) {
+        console.error('Client-side diagram generation failed:', error);
+        updateStatus(`Diagram generation failed: ${error.message}`, 'error');
+    }
+}
+
+/**
+ * Get form data from current page
+ */
+function getClientFormData() {
+    return {
+        alloydatum: getCurrentAlloyXml(),
+        cope: getCurrentCNDSpec(),
+        instancenumber: parseInt(document.getElementById('instancenumber')?.value) || 0,
+        scaleFactor: parseFloat(document.getElementById('scaleFactor')?.value) || 5,
+        loggingEnabled: document.getElementById('loggingEnabled')?.value || 'enabled'
+    };
+}
+
+// Add to GraphAPI
+window.GraphAPI.generateDiagram = generateDiagram;

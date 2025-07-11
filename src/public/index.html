@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Cope and Drag</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+    <!-- Include Bootstrap CSS, JQuery, etc -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+
+    <link rel="icon" type="image/svg+xml" href="/img/logo.svg">
+    <link rel="stylesheet" href="/css/diagramstyle.css">
+
+    <script>
+        function loadLocalGraphlib() {
+            console.warn("CDN for graphlib-dot.min.js failed. Loading local copy...");
+            const script = document.createElement("script");
+            script.src = "/js/libs/graphlib-dot.min.js"; // Path to your local copy
+            document.head.appendChild(script);
+        }
+
+        function loadLocalCola() {
+            console.warn("CDN for cola.min.js failed. Loading local copy...");
+            const script = document.createElement("script");
+            script.src = "/js/libs/cola.js"; // Path to your local copy
+            document.head.appendChild(script);
+        }
+    </script>
+    <!-- Primary CDN -->
+    <script src="https://marvl.infotech.monash.edu/webcola/extern/graphlib-dot.min.js" onerror="loadLocalGraphlib()"></script>
+    <script src="https://cdn.jsdelivr.net/npm/webcola@3.4.0/WebCola/cola.min.js" onerror="loadLocalCola()"></script>
+
+    <!-- Include d3 here -->
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+
+    <!-- React for components -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Include your custom JavaScript file -->
+    <script src="/js/imgdownload.js" defer></script>
+    <script src="/js/graphScripts.js" onerror="console.error('Failed to load graphScripts.js')"></script>
+
+    <!-- Complete CND-Core browser bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/cnd-core@1.1.4/dist/browser/cnd-core-complete.global.js"></script>
+
+    <!-- Demo components bundle (includes InstanceBuilder integration) -->
+    <script src="https://cdn.jsdelivr.net/npm/cnd-core@1.1.4/dist/components/react-component-integration.global.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cnd-core@1.1.4/dist/components/react-component-integration.css">
+
+    <!-- Include Split.js -->
+    <script src="https://cdn.jsdelivr.net/npm/split.js/dist/split.min.js"></script>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <script>
+        /**
+         * Update status display with proper styling
+         * @param {string} message - Status message to display
+         * @param {string} type - Status type: 'info', 'success', 'error'
+         */
+        function updateStatus(message, type = 'info') {
+            const statusElement = document.getElementById('status');
+            statusElement.textContent = message;
+            statusElement.className = `status ${type}`;
+        }
+
+        /**
+         * Receive data from Sterling
+         * @param {string} sessionId - Sterling session ID
+         * @returns {Promise<void>}
+         */
+        async function handleSessionData(sessionId) {
+            try {
+                const response = await fetch(`/api/sterling-data/${sessionId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Populate forms with Sterling data
+                    const alloyTextarea = document.getElementById('alloydatum');
+                    if (alloyTextarea) {
+                        alloyTextarea.value = data.alloydatum;
+                    }
+
+                    if (window.mountCnDLayoutInterface) {
+                        const config = {
+                            initialYamlValue: data.cope,
+                            initialIsNoCodeView: false
+                        };
+                        window.mountCnDLayoutInterface("webcola-cnd-container", config);
+                        console.log('CnDLayoutInterface mounted.');
+                    } else {
+                        console.error('Error: mountCnDLayoutInterface is not available.');
+                    }
+                    
+                    // Clean URL
+                    window.history.replaceState({}, '', '/');
+                }
+            } catch (error) {
+                console.error('Failed to load Sterling data:', error);
+            }
+        }
+
+        window.addEventListener('load', async () => {
+            // Check for Sterling session data
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionId = urlParams.get('session');
+            
+            if (sessionId) {
+                await handleSessionData(sessionId);
+            }
+
+            // Check for existence of global functions from cnd-core CDN
+            if (window.CnDCore) {
+                window.DataAPI = CnDCore.DataAPI;
+                window.ErrorAPI = CnDCore.ErrorAPI;
+                console.log('CnDCore loaded successfully.');
+            } else {
+                console.error('Error: CnDCore is not loaded. Please check that the proper version of cnd-core CDN (1.0.14 and above) is included.');
+                return;
+            }
+            
+            // Initialize the pipeline
+            if (window.GraphAPI) {
+                window.GraphAPI.initializePipeline();
+                console.log('GraphAPI initialized.');
+            }
+
+            // Mount the Error Message Modal component
+            if (window.mountErrorMessageModal) {
+                window.mountErrorMessageModal('error_messages');
+                console.log('ErrorMessageModal mounted.');
+            } else {
+                console.warn('Warning: mountErrorMessageModal is not available.');
+            }
+
+            // Auto-generate diagram
+            setTimeout(async () => {
+                if (window.GraphAPI?.generateDiagram) {
+                    await window.GraphAPI.generateDiagram();
+                }
+            }, 1000);
+        });
+
+        document.addEventListener('DOMContentLoaded', async function () {
+            // Split the screen into two resizable columns
+            Split(['#instanceCol', '#controlsCol']);
+
+            // This is the text area input for the Alloy datum.
+            var alloyInstanceLabel = document.getElementById('alloyinstancelabel');
+            var alloyDatumTextarea = document.getElementById('alloydatum');
+
+            alloyInstanceLabel.addEventListener('click', function () {
+                if (alloyDatumTextarea.style.display === 'none') {
+                    alloyDatumTextarea.style.display = 'block';
+                } else {
+                    alloyDatumTextarea.style.display = 'none';
+                }
+            });
+
+            // Add onClick event listener to the button
+            const submitButton = document.getElementById('cola');
+            submitButton.addEventListener('click', async function (event) {
+                console.log('Apply Layout button clicked');
+                // Set the class of the button to spinner
+                submitButton.classList.add('spinner-border', 'spinner-border-sm');
+                submitButton.setAttribute('disabled', 'disabled'); // Disable the button
+
+                // Add each projection control's value as a hidden input to the form
+                // const projectionControls = document.querySelectorAll('[id$="_projection"]');
+
+                // projectionControls.forEach(control => {
+                //     const hiddenInput = document.createElement('input');
+                //     hiddenInput.type = 'hidden';
+                //     hiddenInput.name = control.name; // Use the control's name as the input name
+                //     hiddenInput.value = control.value; // Use the control's value as the input value
+                //     form.appendChild(hiddenInput);
+                // });
+
+                try {
+                    // Use client-side generation instead of server submission
+                    await window.GraphAPI.generateDiagram();    
+                    updateStatus('Diagram generated successfully', 'success');
+                } catch (error) {
+                    console.error('Diagram generation failed:', error);
+                    updateStatus(`Generation failed: ${error.message}`, 'error');
+                } finally {
+                    submitButton.classList.remove('spinner-border', 'spinner-border-sm');
+                    submitButton.removeAttribute('disabled');
+                }
+            });
+        });
+    </script>
+
+    <!-- instance.ejs script -->
+    <!-- <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tabs = document.querySelectorAll('#instanceTabs .nav-link');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                // Remove active class from all tabs
+                tabs.forEach(t => t.classList.remove('active'));
+
+                // Hide all tab contents
+                tabContents.forEach(content => content.style.display = 'none');
+
+                // Add active class to the clicked tab
+                this.classList.add('active');
+
+                // Show the corresponding tab content
+                const target = document.querySelector(this.dataset.target);
+                if (target) {
+                    target.style.display = 'block';
+                }
+            });
+        });
+    });
+    </script> -->
+
+    <style>
+        /* Hide elements with the hidden class */
+        .hidden {
+            display: none !important;
+        }
+
+
+        .split {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .gutter {
+            background-color: #eee;
+            background-repeat: no-repeat;
+            background-position: 50%;
+
+        }
+
+        .gutter.gutter-horizontal {
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+            cursor: col-resize;
+        }
+    </style>
+
+    <!-- tables.ejs style -->
+    <style>
+        /* Flexbox for compact layout */
+        .d-flex {
+            display: flex;
+            flex-wrap: wrap; /* Allow wrapping to the next line if tables don't fit */
+            gap: 1rem; /* Add spacing between tables */
+        }
+
+        .table-wrapper {
+            flex: 1 1 auto; /* Allow tables to shrink and grow as needed */
+            max-width: 300px; /* Optional: Set a max width for each table */
+        }
+
+        /* Compact table styling */
+        .compact-table th,
+        .compact-table td {
+            padding: 0.25rem; /* Reduce padding inside cells */
+            font-size: 0.9rem; /* Slightly smaller font size */
+        }
+
+        .compact-table {
+            margin-bottom: 0.5rem; /* Reduce space between tables */
+            border-collapse: collapse;
+        }
+
+        .compact-table th,
+        .compact-table td {
+            border: 1px solid #ddd; /* Light border for better readability */
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-light bg-light">
+        <div class="row w-100">
+            <div class="col">
+                <h4 class="navbar-brand">Cope and Drag</h4>
+            </div>
+
+            <div class="col">
+                <!-- Button Group -->
+                <div class="btn-group mp-2" role="group">
+                    <!-- Download Diagram Button -->
+                    <button id="diagramDownloadButton" class="btn btn-outline-secondary" onclick="downloadBundle();" title="Export Diagram">
+                        Export Diagram
+                    </button>
+
+                    <!-- Docs Button -->
+                    <a href="https://sidprasad.github.io/copeanddrag/" target="_blank" class="btn btn-outline-secondary mp-2" title="Docs">
+                        Docs
+                    </a>
+
+                    <!-- Docs Button -->
+                    <a href="/openapi" target="_blank" class="btn btn-outline-secondary mp-2" title="API Details">
+                        API Details
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="container m4" id="error_container">
+        <div id="error_messages">
+            <!-- <h4 style="color: darkred">Could not produce a diagram</h4>
+            <%- errors %> -->
+            <!-- React component mounted here -->
+        </div>
+    </div>
+
+    <div class="split" id="contentcontainer">
+        <!-- Columns for Split.js -->
+        <!-- TODO: Explore col -->
+        <!-- <div id="exploreCol">
+            <%- include('instanceexplore/explore') %>
+        </div> -->
+        <div id="instanceCol">
+            <div class="container-fluid" id="instanceviews">
+                <!-- Nav Tabs -->
+                <ul class="nav nav-tabs" id="instanceTabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-target="#svggraphview" href="#!">Diagram</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-target="#tableview" href="#!">Table</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-target="#forgeinstview" href="#!">Forge Instance</a>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div id="svggraphview" class="tab-content">
+                    <!-- Use the webcola-cnd-graph custom element -->
+                    <webcola-cnd-graph 
+                        id="graph-container"
+                        width="800" 
+                        height="600"
+                        layoutFormat="default"
+                        aria-label="Interactive graph visualization">
+                    </webcola-cnd-graph>
+                </div>
+                <!-- TODO: Table view -->
+                <div id="tableview"></div>
+                <div id="forgeinstview" class="tab-content" style="display: none;">
+                    <div class="container-fluid">
+                        <% if (instAsString) { %>
+                            <code style="white-space: pre-wrap;"><%- JSON.stringify(instAsString).trim().replace(/^"|"$/g, '').replace(/\\n/g, '\n') %></code>
+                        <% } else { %>
+                            <p> Instance Not Available </p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="controlsCol">
+            <div id="controls" class="col">
+                <div class="d-flex flex-column gap-2 p-1">
+                    <button id='cola' class="btn btn-primary btn-lg m-1 px-4">Apply Layout</button>
+                    <hr>
+
+                    <div id="status" class="status info">Ready to load Alloy graph...</div>
+                    
+                    <div id="webcola-cnd-container">
+                        <!-- React component mounted here -->
+                    </div>
+
+                    <!-- And here, we are in actual controls terroir. -->
+
+                    <br>
+                    <div id="alloyDatumControlSection">
+                        <label for="alloydatum" class="btn btn-outline-dark btn-sm" id="alloyinstancelabel"
+                            style="cursor: pointer;">Edit Datum</label>
+                        <textarea id="alloydatum" rows="5" name="alloydatum"
+                            style="display: none;"></textarea>
+                    </div>
+                    <br>
+                    
+                    <!-- TODO: Revisit whether this is needed -->
+                    <div class="d-none" id="temporalInstanceNumberControl">
+                        <label for="instancenumber">Temporal Instance Number</label>
+                        <input type="number" id="instancenumber" name="instancenumber"
+                            value="<%- instanceNumber %>">
+                    </div>
+
+
+                    <!-- Here, projections is a list of type { type : string, projectedAtom : string, atoms : string[]} 
+                    If projections is non-empty, then show each type as a form input  and projectedAtom as the selected element of atoms
+                    -->
+
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
