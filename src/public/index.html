@@ -132,6 +132,14 @@
                 console.log('GraphAPI initialized.');
             }
 
+            // Mount the CnDLayoutInterface component
+            if (window.mountCnDLayoutInterface) {
+                window.mountCnDLayoutInterface("webcola-cnd-container");
+                console.log('CnDLayoutInterface mounted.');
+            } else {
+                console.error('Error: mountCnDLayoutInterface is not available.');
+            }
+
             // Mount the Error Message Modal component
             if (window.mountErrorMessageModal) {
                 window.mountErrorMessageModal('error_messages');
