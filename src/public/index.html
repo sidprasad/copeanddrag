@@ -88,15 +88,15 @@
                         alloyTextarea.value = data.alloydatum;
                     }
 
-                    if (window.mountCnDLayoutInterface) {
+                    if (window.mountCndLayoutInterface) {
                         const config = {
                             initialYamlValue: data.cope,
                             initialIsNoCodeView: false
                         };
-                        window.mountCnDLayoutInterface("webcola-cnd-container", config);
+                        window.mountCndLayoutInterface("webcola-cnd-container", config);
                         console.log('CnDLayoutInterface mounted.');
                     } else {
-                        console.error('Error: mountCnDLayoutInterface is not available.');
+                        console.error('Error: mountCndLayoutInterface is not available.');
                     }
                     
                     // Clean URL
@@ -133,11 +133,11 @@
             }
 
             // Mount the CnDLayoutInterface component
-            if (window.mountCnDLayoutInterface) {
-                window.mountCnDLayoutInterface("webcola-cnd-container");
+            if (window.mountCndLayoutInterface) {
+                window.mountCndLayoutInterface("webcola-cnd-container");
                 console.log('CnDLayoutInterface mounted.');
             } else {
-                console.error('Error: mountCnDLayoutInterface is not available.');
+                console.error('Error: mountCndLayoutInterface is not available.');
             }
 
             // Mount the Error Message Modal component
