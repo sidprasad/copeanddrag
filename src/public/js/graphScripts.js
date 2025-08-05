@@ -53,8 +53,9 @@ async function initializePipeline() {
 
 /**
  * Process Alloy data using the complete Alloy → ForgeEvaluator → Layout pipeline
+ * @param {number} instanceNumber - Instance number to process (default 0)
  */
-async function loadAlloyData() {
+async function loadAlloyData(instanceNumber = 0) {
     try {
         updateStatus('Processing Alloy data with ForgeEvaluator...', 'info');
 
@@ -79,7 +80,7 @@ async function loadAlloyData() {
             throw new Error('No instances found in Alloy XML');
         }
 
-        const alloyDataInstance = new CndCore.AlloyDataInstance(alloyDatum.instances[0]);
+        const alloyDataInstance = new CndCore.AlloyDataInstance(alloyDatum.instances[instanceNumber]);
 
         console.log('Using Alloy Data Instance:', alloyDataInstance);
         console.log('Types via Alloy IDataInstance:', alloyDataInstance.getTypes().length);
@@ -119,7 +120,6 @@ async function loadAlloyData() {
         // Step 4: Create LayoutInstance with ForgeEvaluator
         updateStatus('Creating layout instance with ForgeEvaluator...', 'info');
         const ENABLE_ALIGNMENT_EDGES = true;
-        const instanceNumber = 0;
         
         const layoutInstance = new CndCore.LayoutInstance(
             layoutSpec, 
@@ -300,8 +300,9 @@ window.changeLayoutFormat = changeLayoutFormat;
 /**
  * Client-side equivalent of generateDiagram function
  * Processes form data and renders diagram without server roundtrip
+ * @param {number} instanceNumber - Instance number to render (default 0)
  */
-async function generateDiagram() {
+async function generateDiagram(instanceNumber = 0) {
     try {
         updateStatus('Generating diagram...', 'info');
         
@@ -309,13 +310,13 @@ async function generateDiagram() {
         const formData = getClientFormData();
         
         // Validate required data
-        if (!formData.alloydatum || (!formData.cope && formData.cope !== '')) {
-            console.error('Missing required data:', formData);
-            throw new Error('Both Alloy XML and CnD specification are required');
+        if (!formData.alloydatum) {
+            console.error('Missing Alloy XML data:', formData.alloydatum);
+            throw new Error('Needs an Alloy instance to generate a diagram');
         }
         
         // Process the data using existing pipeline
-        await loadAlloyData();
+        await loadAlloyData(instanceNumber);
         
         if (!window.currentInstanceLayout) {
             throw new Error('Failed to generate layout from provided data');
@@ -327,7 +328,7 @@ async function generateDiagram() {
         const height = 600 * scaleFactor;
         
         // Render the graph
-        await renderGraph(width, height);
+        await renderGraph(width, height, instanceNumber);
         
         updateStatus('Diagram generated successfully!', 'success');
         
@@ -344,9 +345,6 @@ function getClientFormData() {
     return {
         alloydatum: getCurrentAlloyXml(),
         cope: getCurrentCNDSpec(),
-        instancenumber: parseInt(document.getElementById('instancenumber')?.value) || 0,
-        scaleFactor: parseFloat(document.getElementById('scaleFactor')?.value) || 5,
-        loggingEnabled: document.getElementById('loggingEnabled')?.value || 'enabled'
     };
 }
 

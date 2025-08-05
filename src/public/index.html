@@ -55,11 +55,10 @@
     <script src="https://cdn.jsdelivr.net/npm/cnd-core@1.1.9/dist/components/react-component-integration.global.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cnd-core@1.1.9/dist/components/react-component-integration.css">
 
-    <!-- Include Split.js -->
+    <!-- Include other JS libraries -->
     <script src="https://cdn.jsdelivr.net/npm/split.js/dist/split.min.js"></script>
-
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- Mermaid loaded dynamically when needed -->
 
     <script>
         /** GLOBAL VARIABLES **/
@@ -96,7 +95,12 @@
                     if (!CndCore.AlloyInstance.parseAlloyXML) {
                         throw new Error('AlloyInstance.parseAlloyXML is not available in CndCore');
                     }
+
+                    // Initialize global variables
+                    console.log('Parsing Alloy XML...');
                     parsedAlloyXML = CndCore.AlloyInstance.parseAlloyXML(alloyXML);
+                    instanceNumber = 0; // Reset to first instance
+                    console.log('Parsed Alloy XML:', parsedAlloyXML);
                     
                     // Populate forms with Sterling data
                     const alloyTextarea = document.getElementById('alloydatum');
@@ -104,6 +108,7 @@
                         alloyTextarea.value = alloyXML;
                     }
 
+                    // Mount the CnDLayoutInterface component with initial YAML value
                     if (window.mountCndLayoutInterface) {
                         const config = {
                             initialYamlValue: data.cope,
@@ -114,6 +119,10 @@
                     } else {
                         console.error('Error: mountCndLayoutInterface is not available.');
                     }
+
+                    // Render temporal minimap after data is loaded
+                    await renderTemporalMinimap();
+                    renderNavigationButtons();
                     
                     // Clean URL
                     window.history.replaceState({}, '', '/');
@@ -122,6 +131,103 @@
                 console.error('Failed to load Sterling data:', error);
             }
         }
+
+        document.addEventListener('DOMContentLoaded', async function () {
+            // Split the screen into two resizable columns
+            Split(['#exploreCol', '#instanceCol', '#controlsCol']);
+
+            // This is the text area input for the Alloy datum.
+            var alloyInstanceLabel = document.getElementById('alloyinstancelabel');
+            var alloyDatumTextarea = document.getElementById('alloydatum');
+
+            // Fill the Alloy datum textarea with the current Alloy datum
+            if (alloyDatumTextarea) {
+                alloyDatumTextarea.value = localStorage.getItem('alloyDatum') || '';
+            }
+
+            // Add onClick event listener to the Alloy Instance label
+            alloyInstanceLabel.addEventListener('click', function () {
+                if (alloyDatumTextarea.style.display === 'none') {
+                    alloyDatumTextarea.style.display = 'block';
+                } else {
+                    alloyDatumTextarea.style.display = 'none';
+                }
+            });
+
+            // Add onClick event listener to the "Apply Layout" button
+            const submitButton = document.getElementById('cola');
+            submitButton.addEventListener('click', async function (event) {
+                console.log('Apply Layout button clicked');
+                // Set the class of the button to spinner
+                submitButton.classList.add('spinner-border', 'spinner-border-sm');
+                submitButton.setAttribute('disabled', 'disabled'); // Disable the button
+
+                // Add each projection control's value as a hidden input to the form
+                // const projectionControls = document.querySelectorAll('[id$="_projection"]');
+
+                // projectionControls.forEach(control => {
+                //     const hiddenInput = document.createElement('input');
+                //     hiddenInput.type = 'hidden';
+                //     hiddenInput.name = control.name; // Use the control's name as the input name
+                //     hiddenInput.value = control.value; // Use the control's value as the input value
+                //     form.appendChild(hiddenInput);
+                // });
+
+                try {
+                    // Use client-side generation instead of server submission
+                    await window.GraphAPI.generateDiagram(instanceNumber);
+                    
+                    // Update temporal minimap after diagram generation
+                    await renderTemporalMinimap();
+                    renderNavigationButtons();
+
+                    updateStatus('Diagram generated successfully', 'success');
+                } catch (error) {
+                    console.error('Diagram generation failed:', error);
+                    updateStatus(`Generation failed: ${error.message}`, 'error');
+                } finally {
+                    submitButton.classList.remove('spinner-border', 'spinner-border-sm');
+                    submitButton.removeAttribute('disabled');
+                }
+            });
+
+            // Add event listeners to the tab views
+            const tabs = document.querySelectorAll('#instanceTabs .nav-link');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    // Remove active class from all tabs
+                    tabs.forEach(t => t.classList.remove('active'));
+                    
+                    // Hide all tab contents
+                    tabContents.forEach(content => content.style.display = 'none');
+                    
+                    // Add active class to the clicked tab
+                    this.classList.add('active');
+
+                    // Render the content of the tab
+                    switch (this.getAttribute('data-target')) {
+                        case '#svggraphview':
+                            break;
+                        case '#tableview':
+                            renderTable(); // Render table when the tab is clicked
+                            break;
+                        case '#forgeinstview':
+                            renderForgeInstance(); // Render Forge Instance when the tab is clicked
+                            break;
+                    }
+                    
+                    // Show the corresponding tab content
+                    const target = document.querySelector(this.dataset.target);
+                    if (target) {
+                        target.style.display = 'block';
+                    }
+                });
+            });
+        });
 
         window.addEventListener('load', async () => {
             // Check for existence of global functions from cnd-core CDN
@@ -174,11 +280,18 @@
                 await handleSessionData(sessionId);
                 if (window.GraphAPI?.generateDiagram) {
                     // Auto-generate diagram if session data is available
-                    await window.GraphAPI.generateDiagram();
+                    await window.GraphAPI.generateDiagram(instanceNumber);
                 } else {
                     console.warn('GraphAPI.generateDiagram is not available.');
                 }
             }
+
+            // Render the active tab on page load
+            renderActiveTab();
+
+            // Attempt to render temporal minimap on page load
+            await renderTemporalMinimap();
+            renderNavigationButtons();
         });
 
         window.addEventListener('beforeunload', (event) => {
@@ -190,95 +303,33 @@
 
             // Save the current instance number to localStorage
             localStorage.setItem('instanceNumber', instanceNumber);
-        })
-
-        document.addEventListener('DOMContentLoaded', async function () {
-            // Split the screen into two resizable columns
-            Split(['#exploreCol', '#instanceCol', '#controlsCol']);
-
-            // This is the text area input for the Alloy datum.
-            var alloyInstanceLabel = document.getElementById('alloyinstancelabel');
-            var alloyDatumTextarea = document.getElementById('alloydatum');
-
-            alloyInstanceLabel.addEventListener('click', function () {
-                if (alloyDatumTextarea.style.display === 'none') {
-                    alloyDatumTextarea.style.display = 'block';
-                } else {
-                    alloyDatumTextarea.style.display = 'none';
-                }
-            });
-
-            // Add onClick event listener to the "Apply Layout" button
-            const submitButton = document.getElementById('cola');
-            submitButton.addEventListener('click', async function (event) {
-                console.log('Apply Layout button clicked');
-                // Set the class of the button to spinner
-                submitButton.classList.add('spinner-border', 'spinner-border-sm');
-                submitButton.setAttribute('disabled', 'disabled'); // Disable the button
-
-                // Add each projection control's value as a hidden input to the form
-                // const projectionControls = document.querySelectorAll('[id$="_projection"]');
-
-                // projectionControls.forEach(control => {
-                //     const hiddenInput = document.createElement('input');
-                //     hiddenInput.type = 'hidden';
-                //     hiddenInput.name = control.name; // Use the control's name as the input name
-                //     hiddenInput.value = control.value; // Use the control's value as the input value
-                //     form.appendChild(hiddenInput);
-                // });
-
-                try {
-                    // Use client-side generation instead of server submission
-                    await window.GraphAPI.generateDiagram();    
-                    updateStatus('Diagram generated successfully', 'success');
-                } catch (error) {
-                    console.error('Diagram generation failed:', error);
-                    updateStatus(`Generation failed: ${error.message}`, 'error');
-                } finally {
-                    submitButton.classList.remove('spinner-border', 'spinner-border-sm');
-                    submitButton.removeAttribute('disabled');
-                }
-            });
-
-            // Add event listeners to the tab views
-            const tabs = document.querySelectorAll('#instanceTabs .nav-link');
-            const tabContents = document.querySelectorAll('.tab-content');
-
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function (e) {
-                    e.preventDefault();
-
-                    // Remove active class from all tabs
-                    tabs.forEach(t => t.classList.remove('active'));
-                    
-                    // Hide all tab contents
-                    tabContents.forEach(content => content.style.display = 'none');
-                    
-                    // Add active class to the clicked tab
-                    this.classList.add('active');
-
-                    // MAIN: Render the content of the tab
-                    switch (this.getAttribute('data-target')) {
-                        case '#svggraphview':
-                            break;
-                        case '#tableview':
-                            renderTable(); // Render table when the tab is clicked
-                            break;
-                        case '#forgeinstview':
-                            renderForgeInstance(); // Render Forge Instance when the tab is clicked
-                            break;
-                    }
-                    
-                    // Show the corresponding tab content
-                    const target = document.querySelector(this.dataset.target);
-                    if (target) {
-                        target.style.display = 'block';
-                    }
-                });
-            });
         });
 
         /** HELPER FUNCTIONS **/
+
+        /**
+         * Render the currently active tab based on the selected tab
+         */
+        function renderActiveTab() {
+            const activeTab = document.querySelector('#instanceTabs .nav-link.active');
+            if (activeTab) {
+                const target = activeTab.getAttribute('data-target');
+                switch (target) {
+                    case '#svggraphview':
+                        if (window.GraphAPI?.generateDiagram) {
+                            console.log(`Rendering SVG graph view for instance ${instanceNumber}`);
+                            window.GraphAPI.generateDiagram(instanceNumber);
+                        }
+                        break;
+                    case '#tableview':
+                        renderTable();
+                        break;
+                    case '#forgeinstview':
+                        renderForgeInstance();
+                        break;
+                }
+            }
+        }
 
         /**
          * Render the Forge Instance as a String based on parsed Alloy XML.
@@ -413,6 +464,131 @@
             }
         }
 
+        /**
+         * Render temporal minimap only when multiple instances exist
+         */
+        async function renderTemporalMinimap() {
+            const mermaidContainer = document.querySelector('.mermaid');
+            if (!mermaidContainer) return;
+        
+            // Only render if multiple instances exist
+            if (!parsedAlloyXML?.instances || parsedAlloyXML.instances.length <= 1) {
+                mermaidContainer.innerHTML = '';
+                return;
+            }
+        
+            // Load Mermaid dynamically if not available
+            if (!window.mermaid) {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
+                await new Promise((resolve, reject) => {
+                    script.onload = () => {
+                        mermaid.initialize({ startOnLoad: false, securityLevel: 'loose' });
+                        resolve();
+                    };
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                });
+            }
+        
+            const numInstances = parsedAlloyXML.instances.length;
+            const loopBack = parsedAlloyXML.loopBack || -1; // Default to -1 if not defined
+
+            let mermaidCode = 'graph LR;\n';
+            
+            // Generate nodes and connections
+            for (let i = 0; i < numInstances; i++) {
+                // Highlight the current instance
+                const isHighlighted = i === instanceNumber;
+                mermaidCode += `    A${i}((${i}))${isHighlighted ? ':::highlight' : ''};\n`;
+                
+                // Connect to the next instance
+                if (i < numInstances - 1) {
+                    mermaidCode += `    A${i} --> A${i + 1};\n`;
+                }
+                
+                // Add click event for each node
+                mermaidCode += `    click A${i} call stateclick("${i}");\n`;
+            }
+            
+            if (loopBack >= 0 && loopBack < numInstances) {
+                mermaidCode += `    A${numInstances - 1} --> A${loopBack};\n`;
+            }
+            
+            // Add styling
+            mermaidCode += '    classDef highlight fill:#f96,stroke:#333,stroke-width:2px;\n';
+            
+            // Clear existing content
+            mermaidContainer.innerHTML = '';
+            mermaidContainer.removeAttribute('data-processed');
+            
+            // Render the Mermaid diagram
+            try {
+                if (mermaid.render) {
+                    const { svg } = await mermaid.render(`mermaid-temporal-map-${Date.now()}`, mermaidCode);
+                    mermaidContainer.innerHTML = svg;
+                } else {
+                    mermaidContainer.innerHTML = mermaidCode;
+                    mermaid.init(undefined, mermaidContainer);
+                }
+            } catch (error) {
+                mermaidContainer.innerHTML = '<p class="text-danger">Rendering failed</p>';
+            }
+
+            mermaidContainer.hidden = false; // Ensure the container is visible
+        }
+        
+        /**
+         * Handle state click in temporal minimap
+         */
+        window.stateclick = async function(instanceIndex) {
+            const newInstanceNumber = parseInt(instanceIndex, 10);
+            
+            if (newInstanceNumber >= 0 && parsedAlloyXML?.instances && newInstanceNumber < parsedAlloyXML.instances.length) {
+                instanceNumber = newInstanceNumber;
+                await renderTemporalMinimap();
+                renderNavigationButtons();
+                
+                // Regenerate the current view
+                renderActiveTab();
+            }
+        };
+        
+        function renderNavigationButtons() {
+            const prevButton = document.getElementById('previnstance');
+            const nextButton = document.getElementById('nextinstance');
+            
+            if (!parsedAlloyXML?.instances) {
+                if (prevButton) prevButton.disabled = true;
+                if (nextButton) nextButton.disabled = true;
+                return;
+            }
+            
+            const numInstances = parsedAlloyXML.instances.length;
+            
+            if (prevButton) {
+                prevButton.disabled = instanceNumber <= 0;
+                prevButton.hidden = numInstances <= 1; // Hide if only one instance
+                prevButton.innerHTML = '&lt;&lt;';
+                prevButton.onclick = () => {
+                    if (instanceNumber > 0) {
+                        window.stateclick(instanceNumber - 1);
+                    }
+                };
+            }
+            
+            if (nextButton) {
+                nextButton.disabled = instanceNumber >= numInstances - 1;
+                nextButton.hidden = numInstances <= 1; // Hide if only one instance
+                nextButton.innerHTML = '&gt;&gt;';
+                nextButton.onclick = () => {
+                    if (instanceNumber < numInstances - 1) {
+                        window.stateclick(instanceNumber + 1);
+                    }
+                };
+            }
+        }
+
     </script>
 
     <style>
@@ -443,6 +619,8 @@
 
         /** Explore Column Styles **/
         .temporalminimap-scroll-container {
+            display: flex;
+            flex-direction: column;
             width: 100%;
             overflow-x: auto;
             background: #fff;
@@ -452,9 +630,21 @@
         .mermaid {
             display: inline-block;
             min-width: max-content;
-            min-height: 120px;
+            margin: 1rem;
             background: #fff;
             box-sizing: border-box;
+            white-space: wrap;
+        }
+
+        /* Additional styles for navigation buttons */
+        #previnstance, #nextinstance {
+            margin: 0 5px;
+            padding: 5px 10px;
+        }
+
+        #previnstance:disabled, #nextinstance:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
     
         /** Table Styles **/
@@ -530,23 +720,13 @@
         <div id="exploreCol">
             <div class="row mt-1">
                 <div class="temporalminimap-scroll-container">
-                    <table style="width:100%; border-collapse:separate; border-spacing:0 0.5rem;">
-                        <tr>
-                            <td>
-                                <div class="btn-group" role="group" aria-label="Instance navigation">
-                                    <button id="previnstance"></button>
-                                    <button id="nextinstance"></button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="mermaid" style="min-height:120px;" title="Click on any trace state to see its graph.">
-                                    <!-- Mermaid diagram will be rendered here -->
-                                </div>
-                            </td>
-                        </tr>
-                    </table>
+                    <div class="btn-group" role="group" aria-label="Instance navigation">
+                        <button id="previnstance" disabled hidden></button>
+                        <button id="nextinstance" disabled hidden></button>
+                    </div>
+                    <div class="mermaid" title="Click on any trace state to see its graph." hidden>
+                        <!-- Mermaid diagram will be rendered here -->
+                    </div>
                 </div>
             </div>
 
@@ -638,13 +818,6 @@
                             style="display: none;"></textarea>
                     </div>
                     <br>
-                    
-                    <!-- TODO: Revisit whether this is needed -->
-                    <div class="d-none" id="temporalInstanceNumberControl">
-                        <label for="instancenumber">Temporal Instance Number</label>
-                        <input type="number" id="instancenumber" name="instancenumber"
-                            value="<%- instanceNumber %>">
-                    </div>
 
 
                     <!-- Here, projections is a list of type { type : string, projectedAtom : string, atoms : string[]} 
