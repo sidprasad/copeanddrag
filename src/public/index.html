@@ -46,6 +46,7 @@
     <!-- Include your custom JavaScript file -->
     <script src="/js/imgdownload.js" defer></script>
     <script src="/js/graphScripts.js" onerror="console.error('Failed to load graphScripts.js')"></script>
+    <script src="/js/index.js" onerror="console.error('Failed to load index.js')"></script>
 
     <!-- Complete CND-Core browser bundle -->
     <script src="https://cdn.jsdelivr.net/npm/cnd-core@1.1.9/dist/browser/cnd-core-complete.global.js"></script>
@@ -61,6 +62,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
     <script>
+        /** GLOBAL VARIABLES **/
+        let parsedAlloyXML = null; // Parsed Alloy XML from Sterling data
+        let instanceNumber = 0; // Zero-indexed number representing the instance being shown
+
         /**
          * Update status display with proper styling
          * @param {string} message - Status message to display
@@ -83,10 +88,20 @@
                 if (response.ok) {
                     const data = await response.json();
                     
+                    // Parse the current Alloy XML
+                    const alloyXML = data.alloydatum;
+                    if (!alloyXML) {
+                        throw new Error('Alloy datum not found in Sterling data');
+                    }
+                    if (!CndCore.AlloyInstance.parseAlloyXML) {
+                        throw new Error('AlloyInstance.parseAlloyXML is not available in CndCore');
+                    }
+                    parsedAlloyXML = CndCore.AlloyInstance.parseAlloyXML(alloyXML);
+                    
                     // Populate forms with Sterling data
                     const alloyTextarea = document.getElementById('alloydatum');
                     if (alloyTextarea) {
-                        alloyTextarea.value = data.alloydatum;
+                        alloyTextarea.value = alloyXML;
                     }
 
                     if (window.mountCndLayoutInterface) {
@@ -123,6 +138,16 @@
             if (window.GraphAPI) {
                 window.GraphAPI.initializePipeline();
                 console.log('GraphAPI initialized.');
+
+                // Initialize global variables
+                if (localStorage.getItem('alloyDatum')) {
+                    const alloyDatum = localStorage.getItem('alloyDatum');
+                    parsedAlloyXML = CndCore.AlloyInstance.parseAlloyXML(alloyDatum);
+                }
+
+                if (localStorage.getItem('instanceNumber')) {
+                    instanceNumber = parseInt(localStorage.getItem('instanceNumber'), 10);
+                }
             }
 
             // Mount the CnDLayoutInterface component
@@ -156,6 +181,17 @@
             }
         });
 
+        window.addEventListener('beforeunload', (event) => {
+            // Save the current Alloy datum to localStorage
+            const alloyDatum = document.getElementById('alloydatum');
+            if (alloyDatum) {
+                localStorage.setItem('alloyDatum', alloyDatum.value);
+            }
+
+            // Save the current instance number to localStorage
+            localStorage.setItem('instanceNumber', instanceNumber);
+        })
+
         document.addEventListener('DOMContentLoaded', async function () {
             // Split the screen into two resizable columns
             Split(['#instanceCol', '#controlsCol']);
@@ -172,7 +208,7 @@
                 }
             });
 
-            // Add onClick event listener to the button
+            // Add onClick event listener to the "Apply Layout" button
             const submitButton = document.getElementById('cola');
             submitButton.addEventListener('click', async function (event) {
                 console.log('Apply Layout button clicked');
@@ -203,37 +239,181 @@
                     submitButton.removeAttribute('disabled');
                 }
             });
-        });
-    </script>
 
-    <!-- instance.ejs script -->
-    <!-- <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const tabs = document.querySelectorAll('#instanceTabs .nav-link');
-        const tabContents = document.querySelectorAll('.tab-content');
+            // Add event listeners to the tab views
+            const tabs = document.querySelectorAll('#instanceTabs .nav-link');
+            const tabContents = document.querySelectorAll('.tab-content');
 
-        tabs.forEach(tab => {
-            tab.addEventListener('click', function (e) {
-                e.preventDefault();
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function (e) {
+                    e.preventDefault();
 
-                // Remove active class from all tabs
-                tabs.forEach(t => t.classList.remove('active'));
+                    // Remove active class from all tabs
+                    tabs.forEach(t => t.classList.remove('active'));
+                    
+                    // Hide all tab contents
+                    tabContents.forEach(content => content.style.display = 'none');
+                    
+                    // Add active class to the clicked tab
+                    this.classList.add('active');
 
-                // Hide all tab contents
-                tabContents.forEach(content => content.style.display = 'none');
-
-                // Add active class to the clicked tab
-                this.classList.add('active');
-
-                // Show the corresponding tab content
-                const target = document.querySelector(this.dataset.target);
-                if (target) {
-                    target.style.display = 'block';
-                }
+                    // MAIN: Render the content of the tab
+                    switch (this.getAttribute('data-target')) {
+                        case '#svggraphview':
+                            break;
+                        case '#tableview':
+                            renderTable(); // Render table when the tab is clicked
+                            break;
+                        case '#forgeinstview':
+                            renderForgeInstance(); // Render Forge Instance when the tab is clicked
+                            break;
+                    }
+                    
+                    // Show the corresponding tab content
+                    const target = document.querySelector(this.dataset.target);
+                    if (target) {
+                        target.style.display = 'block';
+                    }
+                });
             });
         });
-    });
-    </script> -->
+
+        /** HELPER FUNCTIONS **/
+
+        /**
+         * Render the Forge Instance as a String based on parsed Alloy XML.
+         */
+        function renderForgeInstance() {
+            const forgeInstContainer = document.getElementById('forge-inst-container');
+            forgeInstContainer.innerHTML = ''; // Clear previous content
+
+            // Default element - when Forge Instance is not available, or empty
+            const defaultElement = document.createElement('p');
+            defaultElement.textContent = 'Instance Not Available';
+            
+            // Check if parsedAlloyXML is available and has instances
+            if (!parsedAlloyXML || !parsedAlloyXML.instances || parsedAlloyXML.instances.length === 0) {
+                forgeInstContainer.appendChild(defaultElement);
+                return;
+            }
+            
+            // Get the Forge Instance
+            const instances = parsedAlloyXML.instances;
+            if (!window.instanceToInst) {
+                console.error('Error: instanceToInst function is not available.');
+                forgeInstContainer.appendChild(defaultElement);
+                return;
+            }
+            const forgeInstance = window.instanceToInst(instances[instanceNumber]);
+            
+            // Render the Forge Instance
+            if (forgeInstance) {
+                const forgeInstElement = document.createElement('code');
+                forgeInstElement.style.whiteSpace = 'pre-wrap';
+                const instAsString = JSON.stringify(forgeInstance).trim().replace(/^"|"$/g, '').replace(/\\n/g, '\n');
+                forgeInstElement.textContent = instAsString;
+                forgeInstContainer.appendChild(forgeInstElement);
+            } else {
+                forgeInstContainer.appendChild(defaultElement);
+            }
+        }
+
+        /**
+         * Render an HTML table based on parsed Alloy XML.
+         */
+        function renderTable() {
+            const tableViewContainer = document.getElementById('table-view-container');
+            tableViewContainer.innerHTML = ''; // Clear previous content
+
+            // Default element - when table is not available, or empty
+            const defaultElement = document.createElement('p');
+            defaultElement.textContent = 'Table Not Available';
+
+            // Check if parsedAlloyXML is available and has instances
+            if (!parsedAlloyXML || !parsedAlloyXML.instances || parsedAlloyXML.instances.length === 0) {
+                tableViewContainer.appendChild(defaultElement);
+                return;
+            }
+
+            // Get the Forge Instance
+            const instances = parsedAlloyXML.instances;
+            if (!window.instanceToTables) {
+                console.error('Error: instanceToTables function is not available.');
+                tableViewContainer.appendChild(defaultElement);
+                return;
+            }
+            const forgeTable = window.instanceToTables(instances[instanceNumber]);
+
+            // Render the Forge Table
+            if (forgeTable) {
+                // Atoms section
+                const atomsSection = document.createElement('div');
+                atomsSection.className = "d-flex flex-wrap";
+                Object.keys(forgeTable.atoms).forEach(atomType => {
+                    if (Array.isArray(forgeTable.atoms[atomType])) {
+                        const atomDiv = document.createElement('div');
+                        atomDiv.className = 'table-wrapper';
+                        
+                        // Create table structure using DOM methods
+                        const table = document.createElement('table');
+                        table.className = 'compact-table';
+                        
+                        const thead = document.createElement('thead');
+                        const headerRow = document.createElement('tr');
+                        const headerCell = document.createElement('th');
+                        headerCell.textContent = atomType;
+                        headerRow.appendChild(headerCell);
+                        thead.appendChild(headerRow);
+                        table.appendChild(thead);
+                        
+                        const tbody = document.createElement('tbody');
+                        forgeTable.atoms[atomType].forEach(a => {
+                            const row = document.createElement('tr');
+                            const cell = document.createElement('td');
+                            cell.textContent = a;
+                            row.appendChild(cell);
+                            tbody.appendChild(row);
+                        });
+                        table.appendChild(tbody);
+                        
+                        atomDiv.appendChild(table);
+                        atomsSection.appendChild(atomDiv);
+                    } else {
+                        const defaultMessage = document.createElement('p');
+                        defaultMessage.textContent = `No data available for atom type: ${atomType}`;
+                        atomsSection.appendChild(defaultMessage);
+                    }
+                });
+                tableViewContainer.appendChild(atomsSection);
+
+                // Relations section
+                const relationsSection = document.createElement('div', { class: "d-flex flex-wrap" });
+                Object.keys(forgeTable.relations).forEach(relationType => {
+                    if (forgeTable.relations[relationType] && forgeTable.relations[relationType].length > 0) {
+                        const relationDiv = document.createElement('div');
+                        relationDiv.className = 'table-wrapper';
+
+                        let tableHTML = `<table class="compact-table"><thead><tr><th>${relationType}</th></tr></thead><tbody>`;
+                        forgeTable.relations[relationType].forEach(r => {
+                            tableHTML += `<tr><td>${r}</td></tr>`;
+                        });
+                        tableHTML += '</tbody></table>';
+                        relationDiv.innerHTML = tableHTML;
+
+                        relationsSection.appendChild(relationDiv);
+                    } else {
+                        const defaultMessage = document.createElement('p');
+                        defaultMessage.textContent = `No data available for relation type: ${relationType}`;
+                        relationsSection.appendChild(defaultMessage);
+                    }
+                })
+                tableViewContainer.appendChild(relationsSection);
+            } else {
+                tableViewContainer.appendChild(defaultElement);
+            }
+        }
+
+    </script>
 
     <style>
         /* Hide elements with the hidden class */
@@ -323,8 +503,6 @@
     </nav>
     <div class="container m4" id="error_container">
         <div id="error_messages">
-            <!-- <h4 style="color: darkred">Could not produce a diagram</h4>
-            <%- errors %> -->
             <!-- React component mounted here -->
         </div>
     </div>
@@ -363,15 +541,15 @@
                 </div>
 
                 <!-- TODO: Table view -->
-                <div id="tableview"></div>
+                <div id="tableview" class="tab-content" style="display: none;">
+                    <div id="table-view-container" class="container-fluid">
+                        <!-- Table will be rendered here -->
+                    </div>
+                </div>
                 <!-- TODO: Forge Instance View -->
                 <div id="forgeinstview" class="tab-content" style="display: none;">
-                    <div class="container-fluid">
-                        <% if (instAsString) { %>
-                            <code style="white-space: pre-wrap;"><%- JSON.stringify(instAsString).trim().replace(/^"|"$/g, '').replace(/\\n/g, '\n') %></code>
-                        <% } else { %>
-                            <p> Instance Not Available </p>
-                        <% } %>
+                    <div id="forge-inst-container" class="container-fluid">
+                        <!-- Forge Instance will be rendered here -->
                     </div>
                 </div>
             </div>
