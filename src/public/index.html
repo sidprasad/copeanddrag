@@ -15,6 +15,7 @@
 
     <link rel="icon" type="image/svg+xml" href="/img/logo.svg">
     <link rel="stylesheet" href="/css/diagramstyle.css">
+    <link rel="stylesheet" href="/css/index.css">
 
     <script>
         function loadLocalGraphlib() {
@@ -47,11 +48,11 @@
     <script src="/js/graphScripts.js" onerror="console.error('Failed to load graphScripts.js')"></script>
 
     <!-- Complete CND-Core browser bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/cnd-core@1.1.4/dist/browser/cnd-core-complete.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cnd-core@1.1.9/dist/browser/cnd-core-complete.global.js"></script>
 
     <!-- Demo components bundle (includes InstanceBuilder integration) -->
-    <script src="https://cdn.jsdelivr.net/npm/cnd-core@1.1.4/dist/components/react-component-integration.global.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cnd-core@1.1.4/dist/components/react-component-integration.css">
+    <script src="https://cdn.jsdelivr.net/npm/cnd-core@1.1.9/dist/components/react-component-integration.global.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cnd-core@1.1.9/dist/components/react-component-integration.css">
 
     <!-- Include Split.js -->
     <script src="https://cdn.jsdelivr.net/npm/split.js/dist/split.min.js"></script>
@@ -108,14 +109,6 @@
         }
 
         window.addEventListener('load', async () => {
-            // Check for Sterling session data
-            const urlParams = new URLSearchParams(window.location.search);
-            const sessionId = urlParams.get('session');
-            
-            if (sessionId) {
-                await handleSessionData(sessionId);
-            }
-
             // Check for existence of global functions from cnd-core CDN
             if (window.CnDCore) {
                 window.DataAPI = CnDCore.DataAPI;
@@ -148,12 +141,19 @@
                 console.warn('Warning: mountErrorMessageModal is not available.');
             }
 
-            // Auto-generate diagram
-            setTimeout(async () => {
+            // Check for Sterling session data
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionId = urlParams.get('session');
+            
+            if (sessionId) {
+                await handleSessionData(sessionId);
                 if (window.GraphAPI?.generateDiagram) {
+                    // Auto-generate diagram if session data is available
                     await window.GraphAPI.generateDiagram();
+                } else {
+                    console.warn('GraphAPI.generateDiagram is not available.');
                 }
-            }, 1000);
+            }
         });
 
         document.addEventListener('DOMContentLoaded', async function () {
@@ -304,7 +304,7 @@
                 <!-- Button Group -->
                 <div class="btn-group mp-2" role="group">
                     <!-- Download Diagram Button -->
-                    <button id="diagramDownloadButton" class="btn btn-outline-secondary" onclick="downloadBundle();" title="Export Diagram">
+                    <button id="diagramDownloadButton" class="btn btn-outline-secondary m-0" onclick="downloadBundle();" title="Export Diagram">
                         Export Diagram
                     </button>
 
@@ -361,8 +361,10 @@
                         aria-label="Interactive graph visualization">
                     </webcola-cnd-graph>
                 </div>
+
                 <!-- TODO: Table view -->
                 <div id="tableview"></div>
+                <!-- TODO: Forge Instance View -->
                 <div id="forgeinstview" class="tab-content" style="display: none;">
                     <div class="container-fluid">
                         <% if (instAsString) { %>

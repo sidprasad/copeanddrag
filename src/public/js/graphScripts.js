@@ -310,6 +310,7 @@ async function generateDiagram() {
         
         // Validate required data
         if (!formData.alloydatum || (!formData.cope && formData.cope !== '')) {
+            console.error('Missing required data:', formData);
             throw new Error('Both Alloy XML and CnD specification are required');
         }
         
