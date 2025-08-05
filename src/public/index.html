@@ -194,7 +194,7 @@
 
         document.addEventListener('DOMContentLoaded', async function () {
             // Split the screen into two resizable columns
-            Split(['#instanceCol', '#controlsCol']);
+            Split(['#exploreCol', '#instanceCol', '#controlsCol']);
 
             // This is the text area input for the Alloy datum.
             var alloyInstanceLabel = document.getElementById('alloyinstancelabel');
@@ -416,11 +416,14 @@
     </script>
 
     <style>
+        body {
+            padding: 0.5rem;
+        }
+
         /* Hide elements with the hidden class */
         .hidden {
             display: none !important;
         }
-
 
         .split {
             display: flex;
@@ -431,17 +434,31 @@
             background-color: #eee;
             background-repeat: no-repeat;
             background-position: 50%;
-
         }
 
         .gutter.gutter-horizontal {
             background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
             cursor: col-resize;
         }
-    </style>
 
-    <!-- tables.ejs style -->
-    <style>
+        /** Explore Column Styles **/
+        .temporalminimap-scroll-container {
+            width: 100%;
+            overflow-x: auto;
+            background: #fff;
+            box-sizing: border-box;
+        }
+
+        .mermaid {
+            display: inline-block;
+            min-width: max-content;
+            min-height: 120px;
+            background: #fff;
+            box-sizing: border-box;
+        }
+    
+        /** Table Styles **/
+
         /* Flexbox for compact layout */
         .d-flex {
             display: flex;
@@ -510,9 +527,56 @@
     <div class="split" id="contentcontainer">
         <!-- Columns for Split.js -->
         <!-- TODO: Explore col -->
-        <!-- <div id="exploreCol">
-            <%- include('instanceexplore/explore') %>
-        </div> -->
+        <div id="exploreCol">
+            <div class="row mt-1">
+                <div class="temporalminimap-scroll-container">
+                    <table style="width:100%; border-collapse:separate; border-spacing:0 0.5rem;">
+                        <tr>
+                            <td>
+                                <div class="btn-group" role="group" aria-label="Instance navigation">
+                                    <button id="previnstance"></button>
+                                    <button id="nextinstance"></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="mermaid" style="min-height:120px;" title="Click on any trace state to see its graph.">
+                                    <!-- Mermaid diagram will be rendered here -->
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="row mt-1">
+                <div id="compactnessControl" class="container">
+                    <input
+                        title="Select the Diagram Compactness"
+                        type="range"
+                        class="form-control-range"
+                        id="scaleFactor"
+                        name="scaleFactor"
+                        min="0.5"
+                        max="10"
+                        step="0.5"
+                        value="<%= typeof scaleFactor !== 'undefined' ? scaleFactor : 5 %>">
+                </div>
+            </div>
+
+            <div class="row mt-1">
+                <div id="layoutControl" class="container">
+                    <div class="input-group">
+                        <pre class="input-group-text">Layout Strategy</pre>
+                        <select title="Choose the Layout Format" class="form-control" id="layoutFormat" name="layoutFormat">
+                            <option value="default" selected>Standard</option>
+                            <option value="grid">Grid (Beta)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div id="instanceCol">
             <div class="container-fluid" id="instanceviews">
                 <!-- Nav Tabs -->
@@ -540,13 +604,11 @@
                     </webcola-cnd-graph>
                 </div>
 
-                <!-- TODO: Table view -->
                 <div id="tableview" class="tab-content" style="display: none;">
                     <div id="table-view-container" class="container-fluid">
                         <!-- Table will be rendered here -->
                     </div>
                 </div>
-                <!-- TODO: Forge Instance View -->
                 <div id="forgeinstview" class="tab-content" style="display: none;">
                     <div id="forge-inst-container" class="container-fluid">
                         <!-- Forge Instance will be rendered here -->
