@@ -133,8 +133,8 @@
         }
 
         document.addEventListener('DOMContentLoaded', async function () {
-            // Split the screen into two resizable columns
-            Split(['#exploreCol', '#instanceCol', '#controlsCol']);
+            // Split only main columns (controlsCol becomes overlay drawer)
+            Split(['#exploreCol', '#instanceCol']);
 
             // This is the text area input for the Alloy datum.
             var alloyInstanceLabel = document.getElementById('alloyinstancelabel');
@@ -596,6 +596,41 @@
             padding: 0.5rem;
         }
 
+        /* Drawer trigger button */
+        #controlsDrawerTrigger {
+            position: fixed;
+            top: 40%;
+            right: 0.25rem;
+            z-index: 2100;
+            padding: 0.5rem 0.6rem;
+            border-top-right-radius: 0.25rem;
+            border-bottom-right-radius: 0.25rem;
+            transition: background-color .2s ease;
+        }
+        #controlsDrawerTrigger:focus { outline: 2px solid #fff; }
+
+        /* Drawer panel overlay */
+        #controlsCol.drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100vh;
+            width: 320px; /* default adjustable */
+            max-width: 90vw;
+            background: #fff;
+            box-shadow: -4px 0 12px rgba(0,0,0,0.15);
+            transform: translateX(100%);
+            transition: transform .28s ease-in-out;
+            z-index: 2000;
+            border-left: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+        }
+        #controlsCol.drawer.open { transform: translateX(0); }
+
+        /* When hovering trigger and not pinned/open yet */
+        #controlsCol.drawer.hover-peek { transform: translateX(calc(100% - 40px)); }
+
         /* Hide elements with the hidden class */
         .hidden {
             display: none !important;
@@ -681,6 +716,10 @@
 </head>
 
 <body>
+    <!-- Drawer trigger (tools icon) -->
+    <button id="controlsDrawerTrigger" type="button" class="btn btn-primary" title="Show controls" aria-label="Show controls">
+        <i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i>
+    </button>
     <nav class="navbar navbar-light bg-light">
         <div class="row w-100">
             <div class="col">
@@ -796,7 +835,7 @@
                 </div>
             </div>
         </div>
-        <div id="controlsCol">
+    <div id="controlsCol" class="drawer">
             <div id="controls" class="col">
                 <div class="d-flex flex-column gap-2 p-1">
                     <button id='cola' class="btn btn-primary btn-lg m-1 px-4">Apply Layout</button>
@@ -829,5 +868,69 @@
         </div>
     </div>
 </body>
+
+<script>
+// Drawer logic (minimal; class toggle + persistence)
+(function(){
+    const drawer = document.getElementById('controlsCol');
+    const trigger = document.getElementById('controlsDrawerTrigger');
+    if(!drawer || !trigger) return;
+
+    const LS_KEY = 'controlsDrawerPinned';
+    let pinned = localStorage.getItem(LS_KEY) === 'true';
+    if(pinned) drawer.classList.add('open');
+
+    let hoverActive = false; // track transient hover state
+
+    function openTransient(){
+        if(pinned) return; // already open
+        drawer.classList.add('open');
+        hoverActive = true;
+    }
+    function closeTransient(){
+        if(pinned) return; // keep if pinned
+        drawer.classList.remove('open');
+        hoverActive = false;
+    }
+    function togglePinned(){
+        pinned = !pinned;
+        localStorage.setItem(LS_KEY, pinned);
+        if(pinned){
+            drawer.classList.add('open');
+        } else if(!hoverActive){
+            drawer.classList.remove('open');
+        }
+    }
+
+    // Hover open on trigger
+    trigger.addEventListener('mouseenter', openTransient);
+    // Hover when moving directly into drawer from trigger
+    drawer.addEventListener('mouseenter', () => { if(hoverActive || pinned) drawer.classList.add('open'); });
+    // Mouse leave entire drawer area (including trigger region)
+    drawer.addEventListener('mouseleave', () => { if(!pinned) closeTransient(); });
+    trigger.addEventListener('mouseleave', (e) => {
+        // if pointer not entering drawer
+        const rel = e.relatedTarget;
+        if(!drawer.contains(rel) && !pinned) closeTransient();
+    });
+
+    // Click trigger toggles pin (persisted)
+    trigger.addEventListener('click', (e) => { e.preventDefault(); togglePinned(); });
+
+    // Outside click closes if not pinned and open
+    document.addEventListener('click', (e) => {
+        if(!drawer.classList.contains('open') || pinned) return;
+        if(drawer.contains(e.target) || trigger.contains(e.target)) return;
+        closeTransient();
+    });
+
+    // ESC closes when not pinned
+    document.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape' && drawer.classList.contains('open') && !pinned){
+            closeTransient();
+        }
+    });
+})();
+</script>
 
 </html>
