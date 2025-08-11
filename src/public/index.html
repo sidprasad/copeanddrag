@@ -55,9 +55,9 @@
     <script src="https://cdn.jsdelivr.net/npm/cnd-core@1.1.9/dist/components/react-component-integration.global.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cnd-core@1.1.9/dist/components/react-component-integration.css">
 
-    <!-- Include other JS libraries (Split.js removed: drawers overlay instead) -->
+    <!-- Include other JS libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <!-- Mermaid loaded dynamically when needed -->
+    <script src="https://cdn.jsdelivr.net/npm/split.js/dist/split.min.js"></script>
 
     <script>
         /** GLOBAL VARIABLES **/
@@ -119,8 +119,7 @@
                         console.error('Error: mountCndLayoutInterface is not available.');
                     }
 
-                    // Render temporal minimap after data is loaded
-                    await renderTemporalMinimap();
+                    // Update the navigation buttons
                     renderNavigationButtons();
                     
                     // Clean URL
@@ -132,7 +131,8 @@
         }
 
         document.addEventListener('DOMContentLoaded', async function () {
-            // Split removed (exploreCol now also overlay drawer)
+            // Split columns
+            // Split(['#instanceCol', '#controlsCol']);
 
             // This is the text area input for the Alloy datum.
             var alloyInstanceLabel = document.getElementById('alloyinstancelabel');
@@ -175,8 +175,7 @@
                     // Use client-side generation instead of server submission
                     await window.GraphAPI.generateDiagram(instanceNumber);
                     
-                    // Update temporal minimap after diagram generation
-                    await renderTemporalMinimap();
+                    // Update the navigation buttons
                     renderNavigationButtons();
 
                     updateStatus('Diagram generated successfully', 'success');
@@ -252,11 +251,20 @@
                 if (localStorage.getItem('instanceNumber')) {
                     instanceNumber = parseInt(localStorage.getItem('instanceNumber'), 10);
                 }
+
+                if (localStorage.getItem('cndSpec')) {
+                    const cndSpec = localStorage.getItem('cndSpec');
+                    document.getElementById('cndSpec').textContent = cndSpec;
+                }
             }
 
             // Mount the CnDLayoutInterface component
             if (window.mountCndLayoutInterface) {
-                window.mountCndLayoutInterface("webcola-cnd-container");
+                const config = {
+                    initialYamlValue: document.getElementById('cndSpec').textContent || '',
+                    initialIsNoCodeView: false
+                };
+                window.mountCndLayoutInterface("webcola-cnd-container", config);
                 console.log('CnDLayoutInterface mounted.');
             } else {
                 console.error('Error: mountCndLayoutInterface is not available.');
@@ -287,8 +295,7 @@
             // Render the active tab on page load
             renderActiveTab();
 
-            // Attempt to render temporal minimap on page load
-            await renderTemporalMinimap();
+            // Update the navigation buttons on page load
             renderNavigationButtons();
         });
 
@@ -301,6 +308,10 @@
 
             // Save the current instance number to localStorage
             localStorage.setItem('instanceNumber', instanceNumber);
+
+            // Save the current CND spec to localStorage
+            const currentCndSpec = window.GraphAPI.getCurrentCNDSpec();
+            localStorage.setItem('cndSpec', currentCndSpec || '');
         });
 
         /** HELPER FUNCTIONS **/
@@ -461,80 +472,6 @@
                 tableViewContainer.appendChild(defaultElement);
             }
         }
-
-        /**
-         * Render temporal minimap only when multiple instances exist
-         */
-        async function renderTemporalMinimap() {
-            const mermaidContainer = document.querySelector('.mermaid');
-            if (!mermaidContainer) return;
-        
-            // Only render if multiple instances exist
-            if (!parsedAlloyXML?.instances || parsedAlloyXML.instances.length <= 1) {
-                mermaidContainer.innerHTML = '';
-                return;
-            }
-        
-            // Load Mermaid dynamically if not available
-            if (!window.mermaid) {
-                const script = document.createElement('script');
-                script.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
-                await new Promise((resolve, reject) => {
-                    script.onload = () => {
-                        mermaid.initialize({ startOnLoad: false, securityLevel: 'loose' });
-                        resolve();
-                    };
-                    script.onerror = reject;
-                    document.head.appendChild(script);
-                });
-            }
-        
-            const numInstances = parsedAlloyXML.instances.length;
-            const loopBack = parsedAlloyXML.loopBack || -1; // Default to -1 if not defined
-
-            let mermaidCode = 'graph LR;\n';
-            
-            // Generate nodes and connections
-            for (let i = 0; i < numInstances; i++) {
-                // Highlight the current instance
-                const isHighlighted = i === instanceNumber;
-                mermaidCode += `    A${i}((${i}))${isHighlighted ? ':::highlight' : ''};\n`;
-                
-                // Connect to the next instance
-                if (i < numInstances - 1) {
-                    mermaidCode += `    A${i} --> A${i + 1};\n`;
-                }
-                
-                // Add click event for each node
-                mermaidCode += `    click A${i} call stateclick("${i}");\n`;
-            }
-            
-            if (loopBack >= 0 && loopBack < numInstances) {
-                mermaidCode += `    A${numInstances - 1} --> A${loopBack};\n`;
-            }
-            
-            // Add styling
-            mermaidCode += '    classDef highlight fill:#f96,stroke:#333,stroke-width:2px;\n';
-            
-            // Clear existing content
-            mermaidContainer.innerHTML = '';
-            mermaidContainer.removeAttribute('data-processed');
-            
-            // Render the Mermaid diagram
-            try {
-                if (mermaid.render) {
-                    const { svg } = await mermaid.render(`mermaid-temporal-map-${Date.now()}`, mermaidCode);
-                    mermaidContainer.innerHTML = svg;
-                } else {
-                    mermaidContainer.innerHTML = mermaidCode;
-                    mermaid.init(undefined, mermaidContainer);
-                }
-            } catch (error) {
-                mermaidContainer.innerHTML = '<p class="text-danger">Rendering failed</p>';
-            }
-
-            mermaidContainer.hidden = false; // Ensure the container is visible
-        }
         
         /**
          * Handle state click in temporal minimap
@@ -544,7 +481,6 @@
             
             if (newInstanceNumber >= 0 && parsedAlloyXML?.instances && newInstanceNumber < parsedAlloyXML.instances.length) {
                 instanceNumber = newInstanceNumber;
-                await renderTemporalMinimap();
                 renderNavigationButtons();
                 
                 // Regenerate the current view
@@ -626,7 +562,7 @@
             top: 0;
             right: 0;
             height: 100vh;
-            width: 320px; /* default adjustable */
+            width: 540px;
             max-width: 90vw;
             background: #fff;
             box-shadow: -4px 0 12px rgba(0,0,0,0.15);
@@ -683,26 +619,7 @@
             cursor: col-resize;
         }
 
-        /** Explore Column Styles **/
-        .temporalminimap-scroll-container {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            overflow-x: auto;
-            background: #fff;
-            box-sizing: border-box;
-        }
-
-        .mermaid {
-            display: inline-block;
-            /* min-width: max-content; */
-            margin: 1rem;
-            background: #fff;
-            box-sizing: border-box;
-            white-space: wrap;
-        }
-
-        /* Additional styles for navigation buttons */
+        /* Navigation buttons */
         #previnstance, #nextinstance {
             margin: 0 5px;
             padding: 5px 10px;
@@ -712,7 +629,12 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
-    
+
+        /** Tab Content Styles **/
+        #instanceCol {
+            width: 100%;
+        }
+
         /** Table Styles **/
 
         /* Flexbox for compact layout */
@@ -788,36 +710,8 @@
     </div>
 
     <div class="split" id="contentcontainer">
-        <!-- Columns for Split.js -->
     <!-- Explore drawer (overlay) -->
     <div id="exploreCol" class="drawer">
-            <div class="row mt-1">
-                <div class="temporalminimap-scroll-container">
-                    <div class="btn-group" role="group" aria-label="Instance navigation">
-                        <button id="previnstance" disabled hidden></button>
-                        <button id="nextinstance" disabled hidden></button>
-                    </div>
-                    <div class="mermaid" title="Click on any trace state to see its graph." hidden>
-                        <!-- Mermaid diagram will be rendered here -->
-                    </div>
-                </div>
-            </div>
-
-            <div class="row mt-1">
-                <div id="compactnessControl" class="container">
-                    <input
-                        title="Select the Diagram Compactness"
-                        type="range"
-                        class="form-control-range"
-                        id="scaleFactor"
-                        name="scaleFactor"
-                        min="0.5"
-                        max="10"
-                        step="0.5"
-                        value="<%= typeof scaleFactor !== 'undefined' ? scaleFactor : 5 %>">
-                </div>
-            </div>
-
             <div class="row mt-1">
                 <div id="layoutControl" class="container">
                     <div class="input-group">
@@ -832,6 +726,10 @@
         </div>
         <div id="instanceCol">
             <div class="container-fluid" id="instanceviews">
+                <div class="btn-group" role="group" aria-label="Instance navigation">
+                    <button id="previnstance" disabled hidden></button>
+                    <button id="nextinstance" disabled hidden></button>
+                </div>
                 <!-- Nav Tabs -->
                 <ul class="nav nav-tabs" id="instanceTabs">
                     <li class="nav-item">
@@ -850,9 +748,9 @@
                     <!-- Use the webcola-cnd-graph custom element -->
                     <webcola-cnd-graph 
                         id="graph-container"
-                        width="800" 
-                        height="600"
                         layoutFormat="default"
+                        width="800"
+                        height="600"
                         aria-label="Interactive graph visualization">
                     </webcola-cnd-graph>
                 </div>
@@ -892,6 +790,8 @@
                     </div>
                     <br>
 
+                    <div id="cndSpec" class="hidden"></div>
+
 
                     <!-- Here, projections is a list of type { type : string, projectedAtom : string, atoms : string[]} 
                     If projections is non-empty, then show each type as a form input  and projectedAtom as the selected element of atoms
@@ -905,6 +805,7 @@
 
 <script>
 // Drawer logic (minimal; class toggle + persistence)
+// TODO: Refactor into the script above
 (function(){
     const drawer = document.getElementById('controlsCol');
     const trigger = document.getElementById('controlsDrawerTrigger');

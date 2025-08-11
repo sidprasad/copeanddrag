@@ -56,6 +56,7 @@ async function initializePipeline() {
  * @param {number} instanceNumber - Instance number to process (default 0)
  */
 async function loadAlloyData(instanceNumber = 0) {
+    console.log(`Loading Alloy data for instance number ${instanceNumber}...`);
     try {
         updateStatus('Processing Alloy data with ForgeEvaluator...', 'info');
 
@@ -179,7 +180,7 @@ async function loadAlloyData(instanceNumber = 0) {
 /**
  * Render the graph using the webcola-cnd-graph custom element
  */
-async function renderGraph(width, height) {
+async function renderGraph() {
     clearGraph(); // Clear existing graph first
     const graphElement = document.getElementById('graph-container');
     
@@ -193,16 +194,9 @@ async function renderGraph(width, height) {
         }
 
         updateStatus('Rendering Alloy graph with WebCola...', 'info');
-        
-        const graphWidth = width || graphElement.getAttribute('width') || 800;
-        const graphHeight = height || graphElement.getAttribute('height') || 600;
-
-        console.log(`Rendering graph with width=${graphWidth}, height=${graphHeight}`);
-
-        graphElement.setAttribute('width', graphWidth);
-        graphElement.setAttribute('height', graphHeight);
 
         // Use the real InstanceLayout data with WebCola custom element
+        console.log('Using Instance Layout for rendering:', window.currentInstanceLayout);
         await graphElement.renderLayout(window.currentInstanceLayout);
         
         updateStatus('Alloy graph rendered successfully!', 'success');
@@ -213,7 +207,7 @@ async function renderGraph(width, height) {
 }
 
 /**
- * Clear the graph and reset state
+ * Clear the graph SVG content
  */
 function clearGraph() {
     const graphElement = document.getElementById('graph-container');
@@ -233,23 +227,7 @@ function clearGraph() {
         }
     }
     
-    // Clear stored layout
-    window.currentInstanceLayout = null;
-    
     updateStatus('Graph cleared.', 'info');
-}
-
-/**
- * Load and render Alloy graph in one step
- */
-async function loadGraph() {
-    try {
-        await loadAlloyData();
-        await renderGraph();
-    } catch (error) {
-        console.error('Failed to load and render Alloy graph:', error);
-        updateStatus(`Failed to load Alloy graph: ${error.message}`, 'error');
-    }
 }
 
 /**
@@ -280,7 +258,6 @@ window.GraphAPI = {
     loadAlloyData,
     renderGraph,
     clearGraph,
-    loadGraph,
     changeLayoutFormat,
     getCurrentAlloyXml,
     getCurrentCNDSpec,
@@ -290,7 +267,6 @@ window.GraphAPI = {
 };
 
 // Also expose individual functions globally for backward compatibility
-window.loadGraph = loadGraph;
 window.loadAlloyData = loadAlloyData;
 window.renderGraph = renderGraph;
 window.clearGraph = clearGraph;
@@ -303,6 +279,7 @@ window.changeLayoutFormat = changeLayoutFormat;
  * @param {number} instanceNumber - Instance number to render (default 0)
  */
 async function generateDiagram(instanceNumber = 0) {
+    console.log(`Starting client-side diagram generation for instance number ${instanceNumber}...`);
     try {
         updateStatus('Generating diagram...', 'info');
         
@@ -322,13 +299,8 @@ async function generateDiagram(instanceNumber = 0) {
             throw new Error('Failed to generate layout from provided data');
         }
         
-        // Calculate dimensions (equivalent to WebColaLayout logic)
-        const scaleFactor = parseFloat(formData.scaleFactor) || 5;
-        const width = 800 * scaleFactor;
-        const height = 600 * scaleFactor;
-        
         // Render the graph
-        await renderGraph(width, height, instanceNumber);
+        await renderGraph(instanceNumber);
         
         updateStatus('Diagram generated successfully!', 'success');
         
