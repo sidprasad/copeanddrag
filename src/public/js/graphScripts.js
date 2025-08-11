@@ -20,7 +20,6 @@ function getCurrentAlloyXml() {
  */
 function getCurrentCNDSpec() {
     // Try to get value from React component first
-    console.log('Getting current CND spec from React', window.getCurrentCNDSpecFromReact);
     return window.getCurrentCNDSpecFromReact ? 
         window.getCurrentCNDSpecFromReact() : 
         document.getElementById('webcola-cnd')?.value?.trim();
@@ -132,31 +131,41 @@ async function loadAlloyData(instanceNumber = 0) {
         // Step 5: Generate layout using Alloy data instance
         updateStatus('Generating layout with Alloy data...', 'info');
         const projections = {};
-        const layoutResult = layoutInstance.generateLayout(alloyDataInstance, projections);
-        window.currentInstanceLayout = layoutResult.layout;
 
-        if (layoutResult.error) {
-            console.error('Layout generation error:', layoutResult.error);
-
-            // Check if this is a constraint conflict error
-            if (layoutResult.error.errorMessages) {
-                if (window.showPositionalError) {
-                    window.showPositionalError(layoutResult.error.errorMessages);
+        try {
+            const layoutResult = layoutInstance.generateLayout(alloyDataInstance, projections);
+            window.currentInstanceLayout = layoutResult.layout;
+    
+            if (layoutResult.error) {
+                console.error('Layout generation error:', layoutResult.error);
+    
+                // Check if this is a constraint conflict error
+                if (layoutResult.error.errorMessages) {
+                    if (window.showPositionalError) {
+                        window.showPositionalError(layoutResult.error.errorMessages);
+                    } else {
+                        updateStatus(`Positional constraint conflict: ${layoutResult.error.message}`, 'error');
+                    }
+                } else if (layoutResult.error.overlappingNodes) {
+                    if (window.showGroupOverlapError) {
+                        window.showGroupOverlapError(layoutResult.error.message);
+                    } else {
+                        updateStatus(`Group overlap error: ${layoutResult.error.message}`, 'error');
+                    }
                 } else {
-                    updateStatus(`Positional constraint conflict: ${layoutResult.error.message}`, 'error');
+                    if (window.showGeneralError) {
+                        window.showGeneralError(`Layout generation error: ${layoutResult.error.message}`);
+                    } else {
+                        updateStatus(`Layout generation error: ${layoutResult.error.message}`, 'error');
+                    }
                 }
-            } else if (layoutResult.error.overlappingNodes) {
-                if (window.showGroupOverlapError) {
-                    window.showGroupOverlapError(layoutResult.error.message);
-                } else {
-                    updateStatus(`Group overlap error: ${layoutResult.error.message}`, 'error');
-                }
+                return;
+            }
+        } catch (error) {
+            if (window.showGeneralError) {
+                window.showGeneralError(`Layout generation failed: ${error.message}`);
             } else {
-                if (window.showGeneralError) {
-                    window.showGeneralError(`Layout generation error: ${layoutResult.error.message}`);
-                } else {
-                    updateStatus(`Layout generation error: ${layoutResult.error.message}`, 'error');
-                }
+                updateStatus(`Layout generation failed: ${error.message}`, 'error');
             }
             return;
         }
@@ -179,14 +188,14 @@ async function loadAlloyData(instanceNumber = 0) {
 /**
  * Render the graph using the webcola-cnd-graph custom element
  */
-async function renderGraph() {
+async function renderGraph(instanceNumber = 0) {
     clearGraph(); // Clear existing graph first
     const graphElement = document.getElementById('graph-container');
     
     try {
         if (!window.currentInstanceLayout) {
             updateStatus('No layout data available. Processing Alloy data first...', 'info');
-            await loadAlloyData();
+            await loadAlloyData(instanceNumber);
             if (!window.currentInstanceLayout) {
                 throw new Error('Failed to generate layout data from Alloy');
             }
@@ -225,6 +234,9 @@ function clearGraph() {
             }
         }
     }
+
+    // Clear stored layout data
+    window.currentInstanceLayout = null;
     
     updateStatus('Graph cleared.', 'info');
 }
@@ -290,12 +302,9 @@ async function generateDiagram(instanceNumber = 0) {
             throw new Error('Needs an Alloy instance to generate a diagram');
         }
         
-        // Process the data using existing pipeline
-        await loadAlloyData(instanceNumber);
-        
-        if (!window.currentInstanceLayout) {
-            throw new Error('Failed to generate layout from provided data');
-        }
+        // if (!window.currentInstanceLayout) {
+        //     throw new Error('Failed to generate layout from provided data');
+        // }
         
         // Render the graph
         await renderGraph(instanceNumber);
