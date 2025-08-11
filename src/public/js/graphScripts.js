@@ -56,7 +56,6 @@ async function initializePipeline() {
  * @param {number} instanceNumber - Instance number to process (default 0)
  */
 async function loadAlloyData(instanceNumber = 0) {
-    console.log(`Loading Alloy data for instance number ${instanceNumber}...`);
     try {
         updateStatus('Processing Alloy data with ForgeEvaluator...', 'info');
 
@@ -279,7 +278,6 @@ window.changeLayoutFormat = changeLayoutFormat;
  * @param {number} instanceNumber - Instance number to render (default 0)
  */
 async function generateDiagram(instanceNumber = 0) {
-    console.log(`Starting client-side diagram generation for instance number ${instanceNumber}...`);
     try {
         updateStatus('Generating diagram...', 'info');
         
