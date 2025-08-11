@@ -220,9 +220,7 @@
                     }
                 });
             });
-        });
 
-        window.addEventListener('load', async () => {
             // Check for existence of global functions from cnd-core CDN
             if (window.CnDCore) {
                 window.DataAPI = CnDCore.DataAPI;
@@ -232,7 +230,7 @@
                 console.error('Error: CnDCore is not loaded. Please check that the proper version of cnd-core CDN (1.0.14 and above) is included.');
                 return;
             }
-            
+
             // Initialize the pipeline
             if (window.GraphAPI) {
                 window.GraphAPI.initializePipeline();
@@ -287,7 +285,9 @@
                     console.warn('GraphAPI.generateDiagram is not available.');
                 }
             }
+        });
 
+        window.addEventListener('load', () => {
             // Render the active tab on page load
             renderActiveTab();
 
@@ -732,20 +732,20 @@
     </div>
 
     <div id="contentcontainer">
-    <!-- Explore drawer (overlay) -->
-    <div id="exploreCol" class="drawer">
-            <div class="row mt-1">
-                <div id="layoutControl" class="container">
-                    <div class="input-group">
-                        <pre class="input-group-text">Layout Strategy</pre>
-                        <select title="Choose the Layout Format" class="form-control" id="layoutFormat" name="layoutFormat">
-                            <option value="default" selected>Standard</option>
-                            <option value="grid">Grid (Beta)</option>
-                        </select>
+        <!-- Explore drawer (overlay) -->
+        <div id="exploreCol" class="drawer">
+                <div class="row mt-1">
+                    <div id="layoutControl" class="container">
+                        <div class="input-group">
+                            <pre class="input-group-text">Layout Strategy</pre>
+                            <select title="Choose the Layout Format" class="form-control" id="layoutFormat" name="layoutFormat">
+                                <option value="default" selected>Standard</option>
+                                <option value="grid">Grid (Beta)</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
         <div id="instanceCol">
             <div class="container-fluid" id="instanceviews">
                 <div class="btn-group" role="group" aria-label="Instance navigation">
@@ -789,7 +789,7 @@
                 </div>
             </div>
         </div>
-    <div id="controlsCol" class="drawer">
+        <div id="controlsCol" class="drawer">
             <div id="controls" class="col">
                 <div class="d-flex flex-column gap-2 p-1">
                     <button id='cola' class="btn btn-primary btn-lg m-1 px-4">Apply Layout</button>
