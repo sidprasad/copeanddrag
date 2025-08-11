@@ -402,18 +402,18 @@
 
             // Render the Forge Table
             if (forgeTable) {
-                // Atoms section
-                const atomsSection = document.createElement('div');
-                atomsSection.className = "d-flex flex-wrap";
+                // Single flex container for atoms + relations
+                const merged = document.createElement('div');
+                merged.className = 'tables-merged';
+
+                // Atoms
                 Object.keys(forgeTable.atoms).forEach(atomType => {
-                    if (Array.isArray(forgeTable.atoms[atomType])) {
-                        const atomDiv = document.createElement('div');
-                        atomDiv.className = 'table-wrapper';
-                        
-                        // Create table structure using DOM methods
+                    const values = forgeTable.atoms[atomType];
+                    if (Array.isArray(values)) {
+                        const wrap = document.createElement('div');
+                        wrap.className = 'table-wrapper';
                         const table = document.createElement('table');
                         table.className = 'compact-table';
-                        
                         const thead = document.createElement('thead');
                         const headerRow = document.createElement('tr');
                         const headerCell = document.createElement('th');
@@ -421,49 +421,49 @@
                         headerRow.appendChild(headerCell);
                         thead.appendChild(headerRow);
                         table.appendChild(thead);
-                        
                         const tbody = document.createElement('tbody');
-                        forgeTable.atoms[atomType].forEach(a => {
+                        values.forEach(v => {
                             const row = document.createElement('tr');
                             const cell = document.createElement('td');
-                            cell.textContent = a;
+                            cell.textContent = v;
                             row.appendChild(cell);
                             tbody.appendChild(row);
                         });
                         table.appendChild(tbody);
-                        
-                        atomDiv.appendChild(table);
-                        atomsSection.appendChild(atomDiv);
-                    } else {
-                        const defaultMessage = document.createElement('p');
-                        defaultMessage.textContent = `No data available for atom type: ${atomType}`;
-                        atomsSection.appendChild(defaultMessage);
+                        wrap.appendChild(table);
+                        merged.appendChild(wrap);
                     }
                 });
-                tableViewContainer.appendChild(atomsSection);
 
-                // Relations section
-                const relationsSection = document.createElement('div', { class: "d-flex flex-wrap" });
+                // Relations
                 Object.keys(forgeTable.relations).forEach(relationType => {
-                    if (forgeTable.relations[relationType] && forgeTable.relations[relationType].length > 0) {
-                        const relationDiv = document.createElement('div');
-                        relationDiv.className = 'table-wrapper';
-
-                        let tableHTML = `<table class="compact-table"><thead><tr><th>${relationType}</th></tr></thead><tbody>`;
-                        forgeTable.relations[relationType].forEach(r => {
-                            tableHTML += `<tr><td>${r}</td></tr>`;
+                    const relVals = forgeTable.relations[relationType];
+                    if (relVals && relVals.length > 0) {
+                        const wrap = document.createElement('div');
+                        wrap.className = 'table-wrapper';
+                        // Determine max columns for proper header spanning
+                        let maxCols = 1;
+                        relVals.forEach(r => {
+                            if (Array.isArray(r)) {
+                                maxCols = Math.max(maxCols, r.length);
+                            }
                         });
-                        tableHTML += '</tbody></table>';
-                        relationDiv.innerHTML = tableHTML;
-
-                        relationsSection.appendChild(relationDiv);
-                    } else {
-                        const defaultMessage = document.createElement('p');
-                        defaultMessage.textContent = `No data available for relation type: ${relationType}`;
-                        relationsSection.appendChild(defaultMessage);
+                        let html = `<table class=\"compact-table\"><thead><tr><th colspan=\"${maxCols}\">${relationType}</th></tr></thead><tbody>`;
+                        relVals.forEach(r => {
+                            if (Array.isArray(r)) {
+                                const cells = r.map(value => `<td>${String(value).trim()}</td>`).join('');
+                                html += `<tr>${cells}</tr>`;
+                            } else {
+                                html += `<tr><td>${String(r).trim()}</td></tr>`;
+                            }
+                        });
+                        html += '</tbody></table>';
+                        wrap.innerHTML = html;
+                        merged.appendChild(wrap);
                     }
-                })
-                tableViewContainer.appendChild(relationsSection);
+                });
+
+                tableViewContainer.appendChild(merged);
             } else {
                 tableViewContainer.appendChild(defaultElement);
             }
@@ -654,19 +654,29 @@
         .d-flex {
             display: flex;
             flex-wrap: wrap; /* Allow wrapping to the next line if tables don't fit */
-            gap: 1rem; /* Add spacing between tables */
+            gap: 1rem; /* Legacy spacing (not used by merged container) */
+        }
+
+        /* New merged container for atoms + relations */
+        .tables-merged {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem; /* Reduced inter-table gap (priority) */
+            align-items: flex-start;
         }
 
         .table-wrapper {
-            flex: 1 1 auto; /* Allow tables to shrink and grow as needed */
-            max-width: 300px; /* Optional: Set a max width for each table */
+            flex: 0 0 auto; /* Natural width – prevents over-stretch causing whitespace */
+            max-width: 260px; /* Slightly narrower to fit more per row */
         }
 
         /* Compact table styling */
         .compact-table th,
         .compact-table td {
-            padding: 0.25rem; /* Reduce padding inside cells */
-            font-size: 0.9rem; /* Slightly smaller font size */
+            padding: 0.18rem 0.3rem; /* Tighter vertical padding */
+            font-size: 0.85rem; /* Still readable */
+            line-height: 1.1; /* Reduce cell height */
+            border: 1px solid #ddd; /* Light border for better readability */
         }
 
         .compact-table {
@@ -674,9 +684,8 @@
             border-collapse: collapse;
         }
 
-        .compact-table th,
-        .compact-table td {
-            border: 1px solid #ddd; /* Light border for better readability */
+        .compact-table th {
+            text-align: center; /* Center header text; cells inherit acceptable */
         }
     </style>
 </head>
