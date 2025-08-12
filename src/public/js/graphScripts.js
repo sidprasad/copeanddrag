@@ -79,6 +79,10 @@ async function loadAlloyData(instanceNumber = 0) {
             throw new Error('No instances found in Alloy XML');
         }
 
+        if (instanceNumber < 0 || instanceNumber >= alloyDatum.instances.length) {
+            throw new Error(`Invalid instance number: ${instanceNumber}. Must be between 0 and ${alloyDatum.instances.length - 1}`);
+        }
+
         const alloyDataInstance = new CndCore.AlloyDataInstance(alloyDatum.instances[instanceNumber]);
 
         console.log('Using Alloy Data Instance:', alloyDataInstance);
@@ -96,6 +100,13 @@ async function loadAlloyData(instanceNumber = 0) {
         forgeEvaluator.initialize(evaluationContext);
 
         console.log('Created ForgeEvaluator:', forgeEvaluator);
+
+        // NOTE: Mount the Evaluator REPL component
+        if (window.mountEvaluatorRepl) {
+            window.mountEvaluatorRepl('evaluator-repl-mount', forgeEvaluator, instanceNumber);
+        } else {
+            console.warn('Evaluator REPL mounting function not available, skipping REPL mount');
+        }
 
         // Step 3: Parse layout specification
         updateStatus('Parsing layout specification...', 'info');
@@ -189,7 +200,7 @@ async function loadAlloyData(instanceNumber = 0) {
  * Render the graph using the webcola-cnd-graph custom element
  */
 async function renderGraph(instanceNumber = 0) {
-    clearGraph(); // Clear existing graph first
+    clearGraph(); // Clear existing graph first; sets window.currentInstanceLayout to null
     const graphElement = document.getElementById('graph-container');
     
     try {
@@ -301,10 +312,6 @@ async function generateDiagram(instanceNumber = 0) {
             console.error('Missing Alloy XML data:', formData.alloydatum);
             throw new Error('Needs an Alloy instance to generate a diagram');
         }
-        
-        // if (!window.currentInstanceLayout) {
-        //     throw new Error('Failed to generate layout from provided data');
-        // }
         
         // Render the graph
         await renderGraph(instanceNumber);
