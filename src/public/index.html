@@ -49,11 +49,11 @@
     <script src="/js/index.js" onerror="console.error('Failed to load index.js')"></script>
 
     <!-- Complete CND-Core browser bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/cnd-core@1.1.9-beta.8/dist/browser/cnd-core-complete.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cnd-core@1.1.9-beta.10/dist/browser/cnd-core-complete.global.js"></script>
 
     <!-- Demo components bundle (includes InstanceBuilder integration) -->
-    <script src="https://cdn.jsdelivr.net/npm/cnd-core@1.1.9-beta.8/dist/components/react-component-integration.global.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cnd-core@1.1.9-beta.8/dist/components/react-component-integration.css">
+    <script src="https://cdn.jsdelivr.net/npm/cnd-core@1.1.9-beta.10/dist/components/react-component-integration.global.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cnd-core@1.1.9-beta.10/dist/components/react-component-integration.css">
 
     <!-- Include other JS libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -252,6 +252,8 @@
                 }
             }
 
+            /** Mount React components */
+
             // Mount the CnDLayoutInterface component
             if (window.mountCndLayoutInterface) {
                 const config = {
@@ -270,6 +272,14 @@
                 console.log('ErrorMessageModal mounted.');
             } else {
                 console.warn('Warning: mountErrorMessageModal is not available.');
+            }
+
+            // Mount the RelationHighlighter component
+            if (window.mountRelationHighlighter) {
+                window.mountRelationHighlighter('relation-highlighter-mount', 'graph-container');
+                console.log('RelationHighlighter mounted.');
+            } else {
+                console.warn('Warning: mountRelationHighlighter is not available.');
             }
 
             // Check for Sterling session data
@@ -745,6 +755,7 @@
                             </select>
                         </div>
                     </div>
+                    <div id="relation-highlighter-mount"></div>
                     <div id="evaluator-repl-mount"></div>
                 </div>
             </div>
