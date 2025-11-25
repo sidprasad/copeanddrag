@@ -21,7 +21,7 @@ directives:
 
 #### Parameters
 
-- `selector` : A Forge expression that determines which elements upon which the constraint acts. This expression must return a set of elements of arity >= 2, and the first and last of each tuple will be used. If multiple closed relations are returned, multiple cycles are  generated. For example, a selector evaluating to `{(A, B), (B, C), (C,A), (E,F), (F,E)}` will construct two independent shapes -- one relating `A, B, C` and another relating `E,F`.
+- `selector` : A Forge expression that determines which elements upon which the constraint acts. This expression must return a set of elements of arity >= 2, and the first and last of each tuple will be used. If multiple closed relations are returned, multiple cycles are  generated. For example, a selector evaluating to `{(A, B), (B, C), (C,D), (E,F), (F,E)}` will construct two independent shapes -- one relating `A, B, C` and another relating `E,F`.
 - `direction` : [Optional] Direction in which elements will be laid out. One of `clockwise` or `counterclockwise`. Defaults to `clockwise`
 
 

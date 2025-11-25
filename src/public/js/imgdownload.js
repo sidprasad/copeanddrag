@@ -79,12 +79,11 @@ async function downloadBundle() {
     zip.file("cnd.png", pngData.split(",")[1], { base64: true });
 
     // 2. Add the .cnd file (YAML content)
-    const yamlContent = window.editor.getValue();
+    const yamlContent = getCurrentCNDSpec() || "";
     zip.file("layout.cnd", yamlContent);
 
     // 3. Add the datum.xml file
-    const datumElement = document.getElementById("alloydatum");
-    const datumContent = datumElement ? datumElement.textContent : "<empty/>";
+    const datumContent = getCurrentAlloyXml() || "<empty/>";
     zip.file("datum.xml", datumContent);
 
     // Generate the ZIP file and trigger download

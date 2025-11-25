@@ -6,10 +6,10 @@
         <%- include('temporalminimap') %>
     </div>
 
-    <div class="row mt-1 ">
+    <div class="row mt-1">
         <div id="compactnessControl" class="container">
             <input
-                title="Diagram Compactness"
+                title="Select the Diagram Compactness"
                 type="range"
                 class="form-control-range"
                 id="scaleFactor"
@@ -20,6 +20,18 @@
                 value="<%= typeof scaleFactor !== 'undefined' ? scaleFactor : 5 %>">
         </div>
         <hr>
+    </div>
+
+    <div class="row mt-1">
+        <div id="layoutControl" class="container">
+            <div class="input-group">
+                <pre class="input-group-text">Layout Strategy</pre>
+                <select title="Choose the Layout Format" class="form-control" id="layoutFormat" name="layoutFormat">
+                    <option value="default" selected>Standard</option>
+                    <option value="grid">Grid (Beta)</option>
+                </select>
+            </div>
+        </div>
     </div>
 
     <!-- Here, projections is a list of type { type : string, projectedAtom : string, atoms : string[]} 
@@ -139,6 +151,22 @@
                     this.classList.remove('unsaved-select');
                 }
             });
+        });
+
+        // Save and restore layout format selection on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const layoutFormatSelect = document.getElementById('layoutFormat');
+            
+            if (layoutFormatSelect) {
+                const savedLayoutFormat = localStorage.getItem('layoutFormat');
+                if (savedLayoutFormat) {
+                    layoutFormatSelect.value = savedLayoutFormat;
+                }
+                
+                layoutFormatSelect.addEventListener('change', function() {
+                    localStorage.setItem('layoutFormat', this.value);
+                });
+            }
         });
     </script>
     <div class="row mt-1">

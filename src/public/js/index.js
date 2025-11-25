@@ -1,8 +1,4 @@
-import { AlloyInstance } from "cnd-core";
-
-
-
-export function instanceToInst(instance: AlloyInstance): string {
+function instanceToInst(instance) {
     let inst = "";
 
 
@@ -16,7 +12,7 @@ export function instanceToInst(instance: AlloyInstance): string {
 
     
     // Create a dict where the key is the type id and the value is the atoms
-    let typeAtoms : Record<string, string[]> = {};
+    let typeAtoms = {};
     for (let typeId in instanceTypes) {
         let type = instanceTypes[typeId];
         let atoms = type.atoms;
@@ -25,7 +21,7 @@ export function instanceToInst(instance: AlloyInstance): string {
 
     // Then declare all the relations
     let instanceRelations = instance.relations;
-    let relationDecls : Record<string, string[]> = {};
+    let relationDecls= {};
 
     for (let relationId in instanceRelations) {
         let relation = instanceRelations[relationId];
@@ -68,15 +64,12 @@ export function instanceToInst(instance: AlloyInstance): string {
     return `${PREFIX}\n${inst}\n${POSTFIX}`;
 }
 
-export function instanceToTables(instance: AlloyInstance) : {
-    atoms: Record<string, string[]>,
-    relations: Record<string, string[][]>
-} {
+function instanceToTables(instance) {
     let instanceTypes = instance.types;
     let instanceRelations = instance.relations;
 
     // Create a dict where the key is the type id and the value is the atoms
-    let atomsTable : Record<string, string[]> = {};
+    let atomsTable = {};
     for (let typeId in instanceTypes) {
         let type = instanceTypes[typeId];
         let atoms = type.atoms;
@@ -92,7 +85,7 @@ export function instanceToTables(instance: AlloyInstance) : {
 
 
 
-    let relationTable : Record<string, string[][]> = {};
+    let relationTable = {};
 
     for (let relationId in instanceRelations) {
         let relation = instanceRelations[relationId];
@@ -117,5 +110,5 @@ export function instanceToTables(instance: AlloyInstance) : {
     };
 }
 
-
-
+window.instanceToInst = instanceToInst;
+window.instanceToTables = instanceToTables;

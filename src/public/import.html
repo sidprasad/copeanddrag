@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import CnD Diagram</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Import CnD Diagram</h1>
+
+        <div id="uploadForm" class="text-center">
+            <div class="mb-3">
+                <label for="fileInput" class="form-label">Select a ZIP file to upload:</label>
+                <input type="file" id="fileInput" name="file" accept=".zip" class="form-control" required>
+            </div>
+            <button type="button" id="uploadButton" class="btn btn-primary">Upload</button>
+        </div>
+
+        <!-- Status message -->
+        <div id="status" class="alert mt-3" style="display: none;"></div>
+    </div>
+
+    <!-- Minimal client-side ZIP processing -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('fileInput');
+            const uploadButton = document.getElementById('uploadButton');
+            const statusDiv = document.getElementById('status');
+
+            uploadButton.addEventListener('click', handleUpload);
+
+            function showStatus(message, type = 'info') {
+                statusDiv.textContent = message;
+                statusDiv.className = `alert alert-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info'}`;
+                statusDiv.style.display = 'block';
+            }
+
+            async function handleUpload() {
+                const file = fileInput.files[0];
+                if (!file) {
+                    showStatus('Please select a ZIP file', 'error');
+                    return;
+                }
+
+                showStatus('Processing ZIP file...', 'info');
+
+                try {
+                    // Load ZIP file
+                    const zip = await JSZip.loadAsync(file);
+
+                    // Extract datum.xml
+                    const datumFile = zip.file('datum.xml');
+                    if (!datumFile) {
+                        throw new Error('datum.xml not found in ZIP file');
+                    }
+                    const datumContent = await datumFile.async('text');
+
+                    // Extract layout.cnd
+                    const layoutFile = zip.file('layout.cnd');
+                    if (!layoutFile) {
+                        throw new Error('layout.cnd not found in ZIP file');
+                    }
+                    const layoutContent = await layoutFile.async('text');
+
+                    // POST to the same endpoint that Sterling uses
+                    const response = await fetch('/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            alloydatum: datumContent,
+                            cope: layoutContent
+                        }),
+                    });
+
+                    if (response.redirected) {
+                        // Server will redirect us to /?session=<sessionId>
+                        showStatus('Upload successful! Redirecting...', 'success');
+                        window.location.href = response.url;
+                    } else {
+                        throw new Error('Server did not redirect as expected');
+                    }
+                    
+                } catch (error) {
+                    showStatus(`Error: ${error.message}`, 'error');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 import { DOMParser } from '@xmldom/xmldom';
 
 import { ForgeExprEvaluatorUtil, EvaluationResult, ErrorResult } from 'forge-expr-evaluator';
-import { AlloyDatum, AlloyRelation, parseAlloyXML, AlloyTuple, AlloyInstance, AlloyType } from '../alloy-instance';
+import { AlloyDatum, AlloyRelation, parseAlloyXML, AlloyTuple, AlloyInstance, AlloyType } from 'cnd-core';
 import { DatumParsed, ParsedValue, Relation, Sig, InstanceData, ForgeTuple, BuiltinType } from 'forge-expr-evaluator/dist/types';
 import {EvalResult, SingleValue, Tuple} from 'forge-expr-evaluator/dist/ForgeExprEvaluator';
 

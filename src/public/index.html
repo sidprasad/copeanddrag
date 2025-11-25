@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Cope and Drag</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+    <!-- Include Bootstrap CSS, JQuery, etc -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+
+    <link rel="icon" type="image/svg+xml" href="/img/logo.svg">
+    <link rel="stylesheet" href="/css/diagramstyle.css">
+    <link rel="stylesheet" href="/css/index.css">
+
+    <script>
+        function loadLocalGraphlib() {
+            console.warn("CDN for graphlib-dot.min.js failed. Loading local copy...");
+            const script = document.createElement("script");
+            script.src = "/js/libs/graphlib-dot.min.js"; // Path to your local copy
+            document.head.appendChild(script);
+        }
+
+        function loadLocalCola() {
+            console.warn("CDN for cola.min.js failed. Loading local copy...");
+            const script = document.createElement("script");
+            script.src = "/js/libs/cola.js"; // Path to your local copy
+            document.head.appendChild(script);
+        }
+    </script>
+    <!-- Primary CDN -->
+    <script src="https://marvl.infotech.monash.edu/webcola/extern/graphlib-dot.min.js" onerror="loadLocalGraphlib()"></script>
+    <script src="https://cdn.jsdelivr.net/npm/webcola@3.4.0/WebCola/cola.min.js" onerror="loadLocalCola()"></script>
+
+    <!-- Include d3 here -->
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+
+    <!-- React for components -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Include your custom JavaScript file -->
+    <script src="/js/imgdownload.js" defer></script>
+    <script src="/js/graphScripts.js" onerror="console.error('Failed to load graphScripts.js')"></script>
+    <script src="/js/index.js" onerror="console.error('Failed to load index.js')"></script>
+
+    <!-- Complete CND-Core browser bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/cnd-core@1.1.9-beta.10/dist/browser/cnd-core-complete.global.js"></script>
+
+    <!-- Demo components bundle (includes InstanceBuilder integration) -->
+    <script src="https://cdn.jsdelivr.net/npm/cnd-core@1.1.9-beta.10/dist/components/react-component-integration.global.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cnd-core@1.1.9-beta.10/dist/components/react-component-integration.css">
+
+    <!-- Include other JS libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <script>
+        /** GLOBAL VARIABLES **/
+        let parsedAlloyXML = null; // Parsed Alloy XML from Sterling data
+        let instanceNumber = 0; // Zero-indexed number representing the instance being shown
+
+        /**
+         * Update status display with proper styling
+         * @param {string} message - Status message to display
+         * @param {string} type - Status type: 'info', 'success', 'error'
+         */
+        function updateStatus(message, type = 'info') {
+            const statusElement = document.getElementById('status');
+            statusElement.textContent = message;
+            statusElement.className = `status ${type}`;
+        }
+
+        /**
+         * Receive data from Sterling
+         * @param {string} sessionId - Sterling session ID
+         * @returns {Promise<void>}
+         */
+        async function handleSessionData(sessionId) {
+            try {
+                const response = await fetch(`/api/sterling-data/${sessionId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Parse the current Alloy XML
+                    const alloyXML = data.alloydatum;
+                    if (!alloyXML) {
+                        throw new Error('Alloy datum not found in Sterling data');
+                    }
+                    if (!CndCore.AlloyInstance.parseAlloyXML) {
+                        throw new Error('AlloyInstance.parseAlloyXML is not available in CndCore');
+                    }
+
+                    // Initialize global variables
+                    console.log('Parsing Alloy XML...');
+                    parsedAlloyXML = CndCore.AlloyInstance.parseAlloyXML(alloyXML);
+                    instanceNumber = 0; // Reset to first instance
+                    console.log('Parsed Alloy XML:', parsedAlloyXML);
+                    
+                    // Populate forms with Sterling data
+                    const alloyTextarea = document.getElementById('alloydatum');
+                    if (alloyTextarea) {
+                        alloyTextarea.value = alloyXML;
+                    }
+
+                    // Mount the CnDLayoutInterface component with initial YAML value
+                    if (window.mountCndLayoutInterface) {
+                        const config = {
+                            initialYamlValue: data.cope,
+                            initialIsNoCodeView: false
+                        };
+                        window.mountCndLayoutInterface("webcola-cnd-container", config);
+                        console.log('CnDLayoutInterface mounted.');
+                    } else {
+                        console.error('Error: mountCndLayoutInterface is not available.');
+                    }
+
+                    // Update the navigation buttons
+                    renderNavigationButtons();
+                    
+                    // Clean URL
+                    window.history.replaceState({}, '', '/');
+                }
+            } catch (error) {
+                console.error('Failed to load Sterling data:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async function () {
+            // This is the text area input for the Alloy datum.
+            var alloyInstanceLabel = document.getElementById('alloyinstancelabel');
+            var alloyDatumTextarea = document.getElementById('alloydatum');
+
+            // Fill the Alloy datum textarea with the current Alloy datum
+            if (alloyDatumTextarea) {
+                alloyDatumTextarea.value = localStorage.getItem('alloyDatum') || '';
+            }
+
+            // Add onClick event listener to the Alloy Instance label
+            alloyInstanceLabel.addEventListener('click', function () {
+                if (alloyDatumTextarea.style.display === 'none') {
+                    alloyDatumTextarea.style.display = 'block';
+                } else {
+                    alloyDatumTextarea.style.display = 'none';
+                }
+            });
+
+            // Add onClick event listener to the "Apply Layout" button
+            const submitButton = document.getElementById('cola');
+            submitButton.addEventListener('click', async function (event) {
+                console.log('Apply Layout button clicked');
+                // Set the class of the button to spinner
+                submitButton.classList.add('spinner-border', 'spinner-border-sm');
+                submitButton.setAttribute('disabled', 'disabled'); // Disable the button
+
+                // Add each projection control's value as a hidden input to the form
+                // const projectionControls = document.querySelectorAll('[id$="_projection"]');
+
+                // projectionControls.forEach(control => {
+                //     const hiddenInput = document.createElement('input');
+                //     hiddenInput.type = 'hidden';
+                //     hiddenInput.name = control.name; // Use the control's name as the input name
+                //     hiddenInput.value = control.value; // Use the control's value as the input value
+                //     form.appendChild(hiddenInput);
+                // });
+
+                try {
+                    // Use client-side generation instead of server submission
+                    await window.GraphAPI.generateDiagram(instanceNumber);
+                    
+                    // Update the navigation buttons
+                    renderNavigationButtons();
+
+                    updateStatus('Diagram generated successfully', 'success');
+                } catch (error) {
+                    console.error('Diagram generation failed:', error);
+                    updateStatus(`Generation failed: ${error.message}`, 'error');
+                } finally {
+                    submitButton.classList.remove('spinner-border', 'spinner-border-sm');
+                    submitButton.removeAttribute('disabled');
+                }
+            });
+
+            // Add event listeners to the tab views
+            const tabs = document.querySelectorAll('#instanceTabs .nav-link');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    // Remove active class from all tabs
+                    tabs.forEach(t => t.classList.remove('active'));
+                    
+                    // Hide all tab contents
+                    tabContents.forEach(content => content.style.display = 'none');
+                    
+                    // Add active class to the clicked tab
+                    this.classList.add('active');
+
+                    // Render the content of the tab
+                    switch (this.getAttribute('data-target')) {
+                        case '#svggraphview':
+                            break;
+                        case '#tableview':
+                            renderTable(); // Render table when the tab is clicked
+                            break;
+                        case '#forgeinstview':
+                            renderForgeInstance(); // Render Forge Instance when the tab is clicked
+                            break;
+                    }
+                    
+                    // Show the corresponding tab content
+                    const target = document.querySelector(this.dataset.target);
+                    if (target) {
+                        target.style.display = 'block';
+                    }
+                });
+            });
+
+            // Check for existence of global functions from cnd-core CDN
+            if (window.CnDCore) {
+                window.DataAPI = CnDCore.DataAPI;
+                window.ErrorAPI = CnDCore.ErrorAPI;
+                console.log('CnDCore loaded successfully.');
+            } else {
+                console.error('Error: CnDCore is not loaded. Please check that the proper version of cnd-core CDN (1.0.14 and above) is included.');
+                return;
+            }
+
+            // Initialize the pipeline
+            if (window.GraphAPI) {
+                window.GraphAPI.initializePipeline();
+                console.log('GraphAPI initialized.');
+
+                // Initialize global variables
+                if (localStorage.getItem('alloyDatum')) {
+                    const alloyDatum = localStorage.getItem('alloyDatum');
+                    parsedAlloyXML = CndCore.AlloyInstance.parseAlloyXML(alloyDatum);
+                }
+
+                if (localStorage.getItem('instanceNumber')) {
+                    instanceNumber = parseInt(localStorage.getItem('instanceNumber'), 10);
+                }
+
+                if (localStorage.getItem('cndSpec')) {
+                    const cndSpec = localStorage.getItem('cndSpec');
+                    document.getElementById('cndSpec').textContent = cndSpec;
+                }
+            }
+
+            /** Mount React components */
+
+            // Mount the CnDLayoutInterface component
+            if (window.mountCndLayoutInterface) {
+                const config = {
+                    initialYamlValue: document.getElementById('cndSpec').textContent || '',
+                    initialIsNoCodeView: false
+                };
+                window.mountCndLayoutInterface("webcola-cnd-container", config);
+                console.log('CnDLayoutInterface mounted.');
+            } else {
+                console.error('Error: mountCndLayoutInterface is not available.');
+            }
+
+            // Mount the Error Message Modal component
+            if (window.mountErrorMessageModal) {
+                window.mountErrorMessageModal('error_messages');
+                console.log('ErrorMessageModal mounted.');
+            } else {
+                console.warn('Warning: mountErrorMessageModal is not available.');
+            }
+
+            // Mount the RelationHighlighter component
+            if (window.mountRelationHighlighter) {
+                window.mountRelationHighlighter('relation-highlighter-mount', 'graph-container');
+                console.log('RelationHighlighter mounted.');
+            } else {
+                console.warn('Warning: mountRelationHighlighter is not available.');
+            }
+
+            // Check for Sterling session data
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionId = urlParams.get('session');
+            
+            if (sessionId) {
+                await handleSessionData(sessionId);
+                if (window.GraphAPI?.generateDiagram) {
+                    // Auto-generate diagram if session data is available
+                    await window.GraphAPI.generateDiagram(instanceNumber);
+                } else {
+                    console.warn('GraphAPI.generateDiagram is not available.');
+                }
+            }
+        });
+
+        window.addEventListener('load', () => {
+            // Render the active tab on page load
+            renderActiveTab();
+
+            // Update the navigation buttons on page load
+            renderNavigationButtons();
+        });
+
+        window.addEventListener('beforeunload', (event) => {
+            // Save the current Alloy datum to localStorage
+            const alloyDatum = document.getElementById('alloydatum');
+            if (alloyDatum) {
+                localStorage.setItem('alloyDatum', alloyDatum.value);
+            }
+
+            // Save the current instance number to localStorage
+            localStorage.setItem('instanceNumber', instanceNumber);
+
+            // Save the current CND spec to localStorage
+            const currentCndSpec = window.GraphAPI.getCurrentCNDSpec();
+            localStorage.setItem('cndSpec', currentCndSpec || '');
+        });
+
+        /** HELPER FUNCTIONS **/
+
+        /**
+         * Render the currently active tab based on the selected tab
+         */
+        function renderActiveTab() {
+            const activeTab = document.querySelector('#instanceTabs .nav-link.active');
+            if (activeTab) {
+                const target = activeTab.getAttribute('data-target');
+                switch (target) {
+                    case '#svggraphview':
+                        if (window.GraphAPI?.generateDiagram) {
+                            console.log(`Rendering SVG graph view for instance ${instanceNumber}`);
+                            window.GraphAPI.generateDiagram(instanceNumber);
+                        }
+                        break;
+                    case '#tableview':
+                        renderTable();
+                        break;
+                    case '#forgeinstview':
+                        renderForgeInstance();
+                        break;
+                }
+            }
+        }
+
+        /**
+         * Render the Forge Instance as a String based on parsed Alloy XML.
+         */
+        function renderForgeInstance() {
+            const forgeInstContainer = document.getElementById('forge-inst-container');
+            forgeInstContainer.innerHTML = ''; // Clear previous content
+
+            // Default element - when Forge Instance is not available, or empty
+            const defaultElement = document.createElement('p');
+            defaultElement.textContent = 'Instance Not Available';
+            
+            // Check if parsedAlloyXML is available and has instances
+            if (!parsedAlloyXML || !parsedAlloyXML.instances || parsedAlloyXML.instances.length === 0) {
+                forgeInstContainer.appendChild(defaultElement);
+                return;
+            }
+            
+            // Get the Forge Instance
+            const instances = parsedAlloyXML.instances;
+            if (!window.instanceToInst) {
+                console.error('Error: instanceToInst function is not available.');
+                forgeInstContainer.appendChild(defaultElement);
+                return;
+            }
+            const forgeInstance = window.instanceToInst(instances[instanceNumber]);
+            
+            // Render the Forge Instance
+            if (forgeInstance) {
+                const forgeInstElement = document.createElement('code');
+                forgeInstElement.style.whiteSpace = 'pre-wrap';
+                const instAsString = JSON.stringify(forgeInstance).trim().replace(/^"|"$/g, '').replace(/\\n/g, '\n');
+                forgeInstElement.textContent = instAsString;
+                forgeInstContainer.appendChild(forgeInstElement);
+            } else {
+                forgeInstContainer.appendChild(defaultElement);
+            }
+        }
+
+        /**
+         * Render an HTML table based on parsed Alloy XML.
+         */
+        function renderTable() {
+            const tableViewContainer = document.getElementById('table-view-container');
+            tableViewContainer.innerHTML = ''; // Clear previous content
+
+            // Default element - when table is not available, or empty
+            const defaultElement = document.createElement('p');
+            defaultElement.textContent = 'Table Not Available';
+
+            // Check if parsedAlloyXML is available and has instances
+            if (!parsedAlloyXML || !parsedAlloyXML.instances || parsedAlloyXML.instances.length === 0) {
+                tableViewContainer.appendChild(defaultElement);
+                return;
+            }
+
+            // Get the Forge Instance
+            const instances = parsedAlloyXML.instances;
+            if (!window.instanceToTables) {
+                console.error('Error: instanceToTables function is not available.');
+                tableViewContainer.appendChild(defaultElement);
+                return;
+            }
+            const forgeTable = window.instanceToTables(instances[instanceNumber]);
+
+            // Render the Forge Table
+            if (forgeTable) {
+                // Single flex container for atoms + relations
+                const merged = document.createElement('div');
+                merged.className = 'tables-merged';
+
+                // Atoms
+                Object.keys(forgeTable.atoms).forEach(atomType => {
+                    const values = forgeTable.atoms[atomType];
+                    if (Array.isArray(values)) {
+                        const wrap = document.createElement('div');
+                        wrap.className = 'table-wrapper';
+                        const table = document.createElement('table');
+                        table.className = 'compact-table';
+                        const thead = document.createElement('thead');
+                        const headerRow = document.createElement('tr');
+                        const headerCell = document.createElement('th');
+                        headerCell.textContent = atomType;
+                        headerRow.appendChild(headerCell);
+                        thead.appendChild(headerRow);
+                        table.appendChild(thead);
+                        const tbody = document.createElement('tbody');
+                        values.forEach(v => {
+                            const row = document.createElement('tr');
+                            const cell = document.createElement('td');
+                            cell.textContent = v;
+                            row.appendChild(cell);
+                            tbody.appendChild(row);
+                        });
+                        table.appendChild(tbody);
+                        wrap.appendChild(table);
+                        merged.appendChild(wrap);
+                    }
+                });
+
+                // Relations
+                Object.keys(forgeTable.relations).forEach(relationType => {
+                    const relVals = forgeTable.relations[relationType];
+                    if (relVals && relVals.length > 0) {
+                        const wrap = document.createElement('div');
+                        wrap.className = 'table-wrapper';
+                        // Determine max columns for proper header spanning
+                        let maxCols = 1;
+                        relVals.forEach(r => {
+                            if (Array.isArray(r)) {
+                                maxCols = Math.max(maxCols, r.length);
+                            }
+                        });
+                        let html = `<table class=\"compact-table\"><thead><tr><th colspan=\"${maxCols}\">${relationType}</th></tr></thead><tbody>`;
+                        relVals.forEach(r => {
+                            if (Array.isArray(r)) {
+                                const cells = r.map(value => `<td>${String(value).trim()}</td>`).join('');
+                                html += `<tr>${cells}</tr>`;
+                            } else {
+                                html += `<tr><td>${String(r).trim()}</td></tr>`;
+                            }
+                        });
+                        html += '</tbody></table>';
+                        wrap.innerHTML = html;
+                        merged.appendChild(wrap);
+                    }
+                });
+
+                tableViewContainer.appendChild(merged);
+            } else {
+                tableViewContainer.appendChild(defaultElement);
+            }
+        }
+        
+        /**
+         * Handle state click in temporal minimap
+         */
+        window.stateclick = async function(instanceIndex) {
+            const newInstanceNumber = parseInt(instanceIndex, 10);
+            
+            if (newInstanceNumber >= 0 && parsedAlloyXML?.instances && newInstanceNumber < parsedAlloyXML.instances.length) {
+                instanceNumber = newInstanceNumber;
+                renderNavigationButtons();
+                
+                // Regenerate the current view
+                renderActiveTab();
+            }
+        };
+        
+        function renderNavigationButtons() {
+            const prevButton = document.getElementById('previnstance');
+            const nextButton = document.getElementById('nextinstance');
+            
+            if (!parsedAlloyXML?.instances) {
+                if (prevButton) prevButton.disabled = true;
+                if (nextButton) nextButton.disabled = true;
+                return;
+            }
+            
+            const numInstances = parsedAlloyXML.instances.length;
+            
+            if (prevButton) {
+                prevButton.disabled = instanceNumber <= 0;
+                prevButton.hidden = numInstances <= 1; // Hide if only one instance
+                prevButton.innerHTML = '&lt;&lt;';
+                prevButton.onclick = () => {
+                    if (instanceNumber > 0) {
+                        window.stateclick(instanceNumber - 1);
+                    }
+                };
+            }
+            
+            if (nextButton) {
+                nextButton.disabled = instanceNumber >= numInstances - 1;
+                nextButton.hidden = numInstances <= 1; // Hide if only one instance
+                nextButton.innerHTML = '&gt;&gt;';
+                nextButton.onclick = () => {
+                    if (instanceNumber < numInstances - 1) {
+                        window.stateclick(instanceNumber + 1);
+                    }
+                };
+            }
+        }
+
+    </script>
+
+    <style>
+        body {
+            padding: 0.5rem;
+            overflow-x: hidden;
+        }
+
+        /* === Minimal layout flex adjustments to fit #instanceCol in viewport === */
+        /** GPT-5 OUTPUT **/
+        html, body { height: 100vh; }
+        body { display: flex; flex-direction: column; overflow: hidden; }
+        nav.navbar, #error_container { flex: 0 0 auto; }
+        #contentcontainer { flex: 1 1 auto; display: flex; min-height: 0; overflow: hidden; width: 100%; }
+        /* Instance column fills remaining space */
+        #instanceCol { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+        #instanceviews { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+        /* Tab header groups do not grow */
+        #instanceviews > .btn-group, #instanceTabs { flex: 0 0 auto; }
+        /* Each tab panel can occupy remaining space */
+        #instanceviews > .tab-content { flex: 1 1 auto; min-height: 0; overflow: hidden; }
+        /* Scroll only inside non-graph tabs */
+        #tableview, #forgeinstview { overflow: auto !important; }
+        /* Ensure custom element does not trigger horizontal scroll */
+        webcola-cnd-graph#graph-container { max-width: 100%; height: 100%; display: block; }
+        /* Prevent horizontal page scroll */
+        body { overflow-x: hidden; }
+        /* === End minimal flex adjustments === */
+
+        /* LEFT explore drawer trigger */
+        #exploreDrawerTrigger {
+            position: fixed;
+            top: 25%;
+            left: 0.25rem;
+            z-index: 2100;
+            padding: 0.5rem 0.6rem;
+            border-top-left-radius: 0.25rem;
+            border-bottom-left-radius: 0.25rem;
+            transition: background-color .2s ease;
+        }
+        #exploreDrawerTrigger:focus { outline: 2px solid #fff; }
+
+        /* Drawer trigger button */
+        #controlsDrawerTrigger {
+            position: fixed;
+            top: 40%;
+            right: 0.25rem;
+            z-index: 2100;
+            padding: 0.5rem 0.6rem;
+            border-top-right-radius: 0.25rem;
+            border-bottom-right-radius: 0.25rem;
+            transition: background-color .2s ease;
+        }
+        #controlsDrawerTrigger:focus { outline: 2px solid #fff; }
+
+        /* Drawer panel overlay */
+        #controlsCol.drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100vh;
+            width: 540px;
+            max-width: 90vw;
+            background: #fff;
+            box-shadow: -4px 0 12px rgba(0,0,0,0.15);
+            transform: translateX(100%);
+            transition: transform .28s ease-in-out;
+            z-index: 2000;
+            border-left: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+        }
+        #controlsCol.drawer.open { transform: translateX(0); }
+
+        /* When hovering trigger and not pinned/open yet */
+        #controlsCol.drawer.hover-peek { transform: translateX(calc(100% - 40px)); }
+
+        /* LEFT explore drawer panel overlay */
+        #exploreCol.drawer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 320px; /* mirrors controls drawer */
+            max-width: 90vw;
+            background: #fff;
+            box-shadow: 4px 0 12px rgba(0,0,0,0.15);
+            transform: translateX(-100%);
+            transition: transform .28s ease-in-out;
+            z-index: 2000;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+        }
+        #exploreCol.drawer.open { transform: translateX(0); }
+        #exploreCol.drawer.hover-peek { transform: translateX(calc(-100% + 40px)); }
+
+        /* Hide elements with the hidden class */
+        .hidden {
+            display: none !important;
+        }
+
+        .gutter {
+            background-color: #eee;
+            background-repeat: no-repeat;
+            background-position: 50%;
+        }
+
+        .gutter.gutter-horizontal {
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+            cursor: col-resize;
+        }
+
+        /* Navigation buttons */
+        #previnstance, #nextinstance {
+            margin: 0 5px;
+            padding: 5px 10px;
+        }
+
+        #previnstance:disabled, #nextinstance:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /** Tab Content Styles **/
+        #instanceCol {
+            width: 100%;
+        }
+
+        /** Table Styles **/
+
+        /* Flexbox for compact layout */
+        .d-flex {
+            display: flex;
+            flex-wrap: wrap; /* Allow wrapping to the next line if tables don't fit */
+            gap: 1rem; /* Legacy spacing (not used by merged container) */
+        }
+
+        /* New merged container for atoms + relations */
+        .tables-merged {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem; /* Reduced inter-table gap (priority) */
+            align-items: flex-start;
+        }
+
+        .table-wrapper {
+            flex: 0 0 auto; /* Natural width – prevents over-stretch causing whitespace */
+            max-width: 260px; /* Slightly narrower to fit more per row */
+        }
+
+        /* Compact table styling */
+        .compact-table th,
+        .compact-table td {
+            padding: 0.18rem 0.3rem; /* Tighter vertical padding */
+            font-size: 0.85rem; /* Still readable */
+            line-height: 1.1; /* Reduce cell height */
+            border: 1px solid #ddd; /* Light border for better readability */
+        }
+
+        .compact-table {
+            margin-bottom: 0.5rem; /* Reduce space between tables */
+            border-collapse: collapse;
+        }
+
+        .compact-table th {
+            text-align: center; /* Center header text; cells inherit acceptable */
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Drawer triggers -->
+    <button id="exploreDrawerTrigger" type="button" class="btn btn-primary" title="Show explorer" aria-label="Show explorer">
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+    </button>
+    <button id="controlsDrawerTrigger" type="button" class="btn btn-primary" title="Show controls" aria-label="Show controls">
+        <i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i>
+    </button>
+    <nav class="navbar navbar-light bg-light">
+        <div class="row w-100">
+            <div class="col">
+                <h4 class="navbar-brand">Cope and Drag</h4>
+            </div>
+
+            <div class="col">
+                <!-- Button Group -->
+                <div class="btn-group mp-2" role="group">
+                    <!-- Download Diagram Button -->
+                    <button id="diagramDownloadButton" class="btn btn-outline-secondary m-0" onclick="downloadBundle();" title="Export Diagram">
+                        Export Diagram
+                    </button>
+
+                    <!-- Docs Button -->
+                    <a href="https://sidprasad.github.io/copeanddrag/" target="_blank" class="btn btn-outline-secondary mp-2" title="Docs">
+                        Docs
+                    </a>
+
+                    <!-- Docs Button -->
+                    <a href="/openapi" target="_blank" class="btn btn-outline-secondary mp-2" title="API Details">
+                        API Details
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="container m4" id="error_container">
+        <div id="error_messages">
+            <!-- React component mounted here -->
+        </div>
+    </div>
+
+    <div id="contentcontainer">
+        <!-- Explore drawer (overlay) -->
+        <div id="exploreCol" class="drawer">
+                <div class="row mt-1">
+                    <div id="layoutControl" class="container">
+                        <div class="input-group">
+                            <pre class="input-group-text">Layout Strategy</pre>
+                            <select title="Choose the Layout Format" class="form-control" id="layoutFormat" name="layoutFormat">
+                                <option value="default" selected>Standard</option>
+                                <option value="grid">Grid (Beta)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="relation-highlighter-mount"></div>
+                    <div id="evaluator-repl-mount"></div>
+                </div>
+            </div>
+        <div id="instanceCol">
+            <div class="container-fluid" id="instanceviews">
+                <div class="btn-group" role="group" aria-label="Instance navigation">
+                    <button id="previnstance" disabled hidden></button>
+                    <button id="nextinstance" disabled hidden></button>
+                </div>
+                <!-- Nav Tabs -->
+                <ul class="nav nav-tabs" id="instanceTabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-target="#svggraphview" href="#!">Diagram</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-target="#tableview" href="#!">Table</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-target="#forgeinstview" href="#!">Forge Instance</a>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div id="svggraphview" class="tab-content">
+                    <!-- Use the webcola-cnd-graph custom element -->
+                    <webcola-cnd-graph 
+                        id="graph-container"
+                        layoutFormat="default"
+                        width="800"
+                        height="600"
+                        aria-label="Interactive graph visualization">
+                    </webcola-cnd-graph>
+                </div>
+
+                <div id="tableview" class="tab-content" style="display: none;">
+                    <div id="table-view-container" class="container-fluid">
+                        <!-- Table will be rendered here -->
+                    </div>
+                </div>
+                <div id="forgeinstview" class="tab-content" style="display: none;">
+                    <div id="forge-inst-container" class="container-fluid">
+                        <!-- Forge Instance will be rendered here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="controlsCol" class="drawer">
+            <div id="controls" class="col">
+                <div class="d-flex flex-column gap-2 p-1">
+                    <button id='cola' class="btn btn-primary btn-lg m-1 px-4">Apply Layout</button>
+                    <hr>
+
+                    <div id="status" class="status info">Ready to load Alloy graph...</div>
+                    
+                    <div id="webcola-cnd-container">
+                        <!-- React component mounted here -->
+                    </div>
+
+                    <!-- And here, we are in actual controls terroir. -->
+
+                    <br>
+                    <div id="alloyDatumControlSection">
+                        <label for="alloydatum" class="btn btn-outline-dark btn-sm" id="alloyinstancelabel"
+                            style="cursor: pointer;">Edit Datum</label>
+                        <textarea id="alloydatum" rows="5" name="alloydatum"
+                            style="display: none;"></textarea>
+                    </div>
+                    <br>
+
+                    <div id="cndSpec" class="hidden"></div>
+
+
+                    <!-- Here, projections is a list of type { type : string, projectedAtom : string, atoms : string[]} 
+                    If projections is non-empty, then show each type as a form input  and projectedAtom as the selected element of atoms
+                    -->
+
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+
+/** Drawer logic **/
+
+// Drawer logic (minimal; class toggle + persistence)
+// TODO: Refactor into the script above
+(function(){
+    const drawer = document.getElementById('controlsCol');
+    const trigger = document.getElementById('controlsDrawerTrigger');
+    if(!drawer || !trigger) return;
+
+    const LS_KEY = 'controlsDrawerPinned';
+    let pinned = localStorage.getItem(LS_KEY) === 'true';
+    if(pinned) drawer.classList.add('open');
+
+    let hoverActive = false; // track transient hover state
+
+    function openTransient(){
+        if(pinned) return; // already open
+        drawer.classList.add('open');
+        hoverActive = true;
+    }
+    function closeTransient(){
+        if(pinned) return; // keep if pinned
+        drawer.classList.remove('open');
+        hoverActive = false;
+    }
+    function togglePinned(){
+        pinned = !pinned;
+        localStorage.setItem(LS_KEY, pinned);
+        if(pinned){
+            drawer.classList.add('open');
+        } else if(!hoverActive){
+            drawer.classList.remove('open');
+        }
+    }
+
+    // Hover open on trigger
+    trigger.addEventListener('mouseenter', openTransient);
+    // Hover when moving directly into drawer from trigger
+    drawer.addEventListener('mouseenter', () => { if(hoverActive || pinned) drawer.classList.add('open'); });
+    // Mouse leave entire drawer area (including trigger region)
+    drawer.addEventListener('mouseleave', () => { if(!pinned) closeTransient(); });
+    trigger.addEventListener('mouseleave', (e) => {
+        // if pointer not entering drawer
+        const rel = e.relatedTarget;
+        if(!drawer.contains(rel) && !pinned) closeTransient();
+    });
+
+    // Click trigger toggles pin (persisted)
+    trigger.addEventListener('click', (e) => { e.preventDefault(); togglePinned(); });
+
+    // Outside click closes if not pinned and open
+    document.addEventListener('click', (e) => {
+        if(!drawer.classList.contains('open') || pinned) return;
+        if(drawer.contains(e.target) || trigger.contains(e.target)) return;
+        closeTransient();
+    });
+
+    // ESC closes when not pinned
+    document.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape' && drawer.classList.contains('open') && !pinned){
+            closeTransient();
+        }
+    });
+})();
+
+// Explore drawer logic (mirrors controls drawer)
+(function(){
+    const drawer = document.getElementById('exploreCol');
+    const trigger = document.getElementById('exploreDrawerTrigger');
+    if(!drawer || !trigger) return;
+
+    const LS_KEY = 'exploreDrawerPinned';
+    let pinned = localStorage.getItem(LS_KEY) === 'true';
+    if(pinned) drawer.classList.add('open');
+
+    let hoverActive = false;
+    function openTransient(){ if(pinned) return; drawer.classList.add('open'); hoverActive = true; }
+    function closeTransient(){ if(pinned) return; drawer.classList.remove('open'); hoverActive = false; }
+    function togglePinned(){
+        pinned = !pinned; localStorage.setItem(LS_KEY, pinned);
+        if(pinned) drawer.classList.add('open'); else if(!hoverActive) drawer.classList.remove('open');
+    }
+    trigger.addEventListener('mouseenter', openTransient);
+    drawer.addEventListener('mouseenter', () => { if(hoverActive || pinned) drawer.classList.add('open'); });
+    drawer.addEventListener('mouseleave', () => { if(!pinned) closeTransient(); });
+    trigger.addEventListener('mouseleave', (e) => { const rel = e.relatedTarget; if(!drawer.contains(rel) && !pinned) closeTransient(); });
+    trigger.addEventListener('click', (e) => { e.preventDefault(); togglePinned(); });
+    document.addEventListener('click', (e) => { if(!drawer.classList.contains('open') || pinned) return; if(drawer.contains(e.target) || trigger.contains(e.target)) return; closeTransient(); });
+    document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && drawer.classList.contains('open') && !pinned) closeTransient(); });
+})();
+</script>
+
+</html>
