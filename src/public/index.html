@@ -373,6 +373,34 @@
             return match ? parseInt(match[1], 10) : -1;
         }
 
+        function toggleTemporalTabVisibility(shouldShow) {
+            const temporalTab = document.querySelector('#instanceTabs .nav-link[data-target="#temporalview"]');
+            const temporalTabItem = temporalTab?.closest('li');
+            const temporalContent = document.getElementById('temporalview');
+
+            if (!shouldShow) {
+                temporalTabItem?.classList.add('d-none');
+
+                if (temporalTab?.classList.contains('active')) {
+                    temporalTab.classList.remove('active');
+                    const defaultTab = document.querySelector('#instanceTabs .nav-link[data-target="#svggraphview"]');
+                    defaultTab?.classList.add('active');
+
+                    const tabContents = document.querySelectorAll('.tab-content');
+                    tabContents.forEach(content => content.style.display = 'none');
+                    const defaultContent = document.getElementById('svggraphview');
+                    if (defaultContent) defaultContent.style.display = 'block';
+                }
+
+                if (temporalContent) {
+                    temporalContent.style.display = 'none';
+                }
+                return;
+            }
+
+            temporalTabItem?.classList.remove('d-none');
+        }
+
         function renderTemporalOverview() {
             const overviewCard = document.getElementById('temporal-overview');
             const mapContainer = document.getElementById('temporal-map');
@@ -384,10 +412,12 @@
 
             const numInstances = parsedAlloyXML?.instances?.length || 0;
             if (numInstances <= 1) {
+                toggleTemporalTabVisibility(false);
                 overviewCard.classList.add('d-none');
                 return;
             }
 
+            toggleTemporalTabVisibility(true);
             const loopBack = getLoopBackIndex();
             if (loopLabel) {
                 loopLabel.textContent = loopBack >= 0 ? `Loop to state ${loopBack}` : 'No loopback detected';
