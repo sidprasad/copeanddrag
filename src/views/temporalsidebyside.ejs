@@ -1,0 +1,42 @@
+<div id="diagram-column" class="col">
+    <div class="row">
+        <div class="col-lg-6 col-md-12 mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <h4 class="lead mb-0">State <%= instanceNumber %></h4>
+                <span class="badge badge-primary">current</span>
+            </div>
+            <div class="temporal-diagram">
+                <svg id="svg-primary" width="<%- width %>" height="<%- height %>" class="svg-border">
+                    <defs>
+                        <marker id="end-arrow" markerWidth="15" markerHeight="10" refX="12" refY="5" orient="auto">
+                            <polygon points="0 0, 15 5, 0 10" />
+                        </marker>
+                    </defs>
+                    <g class="zoomable"></g>
+                </svg>
+            </div>
+        </div>
+        <% if (temporalNeighbor && temporalNeighbor.colaNodes && temporalNeighbor.colaNodes.length > 0) { %>
+            <div class="col-lg-6 col-md-12 mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h4 class="lead mb-0">State <%= temporalNeighbor.instanceNumber %></h4>
+                    <% if (temporalNeighbor.isLoopBack) { %>
+                        <span class="badge badge-warning">loop</span>
+                    <% } else { %>
+                        <span class="badge badge-secondary">next</span>
+                    <% } %>
+                </div>
+                <div class="temporal-diagram">
+                    <svg id="svg-next" width="<%- temporalNeighbor.width %>" height="<%- temporalNeighbor.height %>" class="svg-border">
+                        <defs>
+                            <marker id="end-arrow" markerWidth="15" markerHeight="10" refX="12" refY="5" orient="auto">
+                                <polygon points="0 0, 15 5, 0 10" />
+                            </marker>
+                        </defs>
+                        <g class="zoomable"></g>
+                    </svg>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</div>

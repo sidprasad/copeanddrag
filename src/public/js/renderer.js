@@ -106,7 +106,7 @@ function getContainingGroups(groups, node) {
 
 
 
-function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
+function setupLayout(d3, nodes, edges, constraints, groups, width, height, svgId = "svg") {
 
 
     let edgeRouteIdx = 0;
@@ -121,8 +121,11 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .scaleExtent([0.5, 5]) // Set the zoom scale limits
         .on("zoom", zoomed);
 
+    const svgTop = d3.select(`#${svgId}`).call(zoom);
+    const zoomTarget = svgTop.select(".zoomable");
+
     function zoomed() {
-        d3.select(".zoomable").attr("transform", d3.event.transform);
+        zoomTarget.attr("transform", d3.event.transform);
     }
 
     function getNodeIndex(n) {
@@ -136,8 +139,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         node.name = node.id;
     });
 
-    var svg_top = d3.select("#svg").call(zoom);
-    var svg = d3.select(".zoomable");
+    var svg = svgTop.select(".zoomable");
 
     var colaLayout = cola.d3adaptor(d3)
         .convergenceThreshold(1e-3)
@@ -442,13 +444,13 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             // Update label positions after routing edges
             linkGroups.select("text.linklabel")
                 .attr("x", function (d) {
-                    const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
+                    const pathElement = svg.node().querySelector(`path[data-link-id="${d.id}"]`);
                     const pathLength = pathElement.getTotalLength();
                     const midpoint = pathElement.getPointAtLength(pathLength / 2);
                     return midpoint.x;
                 })
                 .attr("y", function (d) {
-                    const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
+                    const pathElement = svg.node().querySelector(`path[data-link-id="${d.id}"]`);
                     const pathLength = pathElement.getTotalLength();
                     const midpoint = pathElement.getPointAtLength(pathLength / 2);
                     return midpoint.y;
@@ -458,7 +460,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     const currentLabel = this;
                     const overlapsWith = [];
 
-                    d3.selectAll("text.linklabel").each(function () {
+                    svg.selectAll("text.linklabel").each(function () {
                         if (this !== currentLabel && isOverlapping(currentLabel, this)) {
                             overlapsWith.push(this);
                         }
@@ -482,12 +484,12 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             ].join(' ');
 
 
-            const topSvg = d3.select("#svg");
+            const topSvg = d3.select(`#${svgId}`);
             topSvg.attr('viewBox', viewBox);
             /*************************************/
 
             function highlightRelation(relName) {
-                d3.selectAll(".link")
+                svg.selectAll(".link")
                     .filter(link => link.relName === relName)
                     .classed("highlighted", true);
             }
@@ -784,11 +786,11 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
         linkGroups.select("text.linklabel")
             .attr("x", d => {
-                const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
+                const pathElement = svg.node().querySelector(`path[data-link-id="${d.id}"]`);
                 return calculateNewPosition(d.x, pathElement, 'x');
             })
             .attr("y", d => {
-                const pathElement = document.querySelector(`path[data-link-id="${d.id}"]`);
+                const pathElement = svg.node().querySelector(`path[data-link-id="${d.id}"]`);
                 return calculateNewPosition(d.y, pathElement, 'y');
             })
             .raise();

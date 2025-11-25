@@ -26,16 +26,32 @@
     <script>
         window.addEventListener('load', function () {
 
-            var width = <%- width %>, height = <%- height %>;
-            var nodes = <%- JSON.stringify(colaNodes) %>;
-            var edges = <%- JSON.stringify(colaEdges) %>;
-            var constraints = <%- JSON.stringify(colaConstraints) %>;
-            var groups = <%- JSON.stringify(colaGroups) %>;
+            const primary = {
+                width: <%- width %>,
+                height: <%- height %>,
+                nodes: <%- JSON.stringify(colaNodes) %>,
+                edges: <%- JSON.stringify(colaEdges) %>,
+                constraints: <%- JSON.stringify(colaConstraints) %>,
+                groups: <%- JSON.stringify(colaGroups) %>,
+            };
 
-            if (width && height && nodes && edges && constraints && groups) {
-                setupLayout(d3, nodes, edges, constraints, groups, width, height);
+            const neighbor = {
+                width: <%- temporalNeighbor ? temporalNeighbor.width : 0 %>,
+                height: <%- temporalNeighbor ? temporalNeighbor.height : 0 %>,
+                nodes: <%- temporalNeighbor ? JSON.stringify(temporalNeighbor.colaNodes) : '[]' %>,
+                edges: <%- temporalNeighbor ? JSON.stringify(temporalNeighbor.colaEdges) : '[]' %>,
+                constraints: <%- temporalNeighbor ? JSON.stringify(temporalNeighbor.colaConstraints) : '[]' %>,
+                groups: <%- temporalNeighbor ? JSON.stringify(temporalNeighbor.colaGroups) : '[]' %>,
+            };
+
+            if (primary.width && primary.height && primary.nodes && primary.edges && primary.constraints && primary.groups) {
+                setupLayout(d3, primary.nodes, primary.edges, primary.constraints, primary.groups, primary.width, primary.height, "svg-primary");
             } else {
                 console.error('Missing required data for layout');
+            }
+
+            if (neighbor.width && neighbor.height && neighbor.nodes && neighbor.nodes.length > 0) {
+                setupLayout(d3, neighbor.nodes, neighbor.edges, neighbor.constraints, neighbor.groups, neighbor.width, neighbor.height, "svg-next");
             }
         });
     </script>
@@ -87,7 +103,7 @@
 
         <div class="row">
             <%- include('relationTable') %>
-            <%- include('diagramsvg') %>
+            <%- include('temporalsidebyside') %>
 
             <%- include('controls') %>
         </div>

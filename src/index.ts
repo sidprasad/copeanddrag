@@ -125,7 +125,8 @@ app.get('/', (req, res) => {
         source_content: "", //HACK
         sourceFileName: "",
         instAsString: "",
-        errors: ""
+        errors: "",
+        temporalNeighbor: null,
     });
 
 
@@ -137,6 +138,26 @@ app.post('/', (req, res) => {
     const alloyDatum = req.body.alloydatum;
     const cope = req.body.cope;
     let error = "";
+
+    let temporalNeighbor: {
+        colaNodes: any[];
+        colaEdges: any[];
+        colaConstraints: any[];
+        colaGroups: any[];
+        height: number;
+        width: number;
+        instanceNumber: number | null;
+        isLoopBack: boolean;
+    } = {
+        colaNodes: [],
+        colaEdges: [],
+        colaConstraints: [],
+        colaGroups: [],
+        height: 0,
+        width: 0,
+        instanceNumber: null,
+        isLoopBack: false,
+    };
 
     // Should this move elsewhere?
     var loggingEnabled = (req.body.loggingEnabled == undefined) ? true : (req.body.loggingEnabled.toLowerCase() === 'enabled');
@@ -178,6 +199,49 @@ app.post('/', (req, res) => {
         var colaGroups = cl.groupDefinitions;
         var height = cl.FIG_HEIGHT;
         var width = cl.FIG_WIDTH;
+
+        const nextInstanceIndex = (() => {
+            if (num_instances <= 1) {
+                return null;
+            }
+
+            if (instanceNumber < num_instances - 1) {
+                return instanceNumber + 1;
+            }
+
+            if (loopBack >= 0 && loopBack < num_instances) {
+                return loopBack;
+            }
+
+            return null;
+        })();
+
+        if (nextInstanceIndex !== null) {
+            try {
+                const { layout: nextLayout } = li.generateLayout(instances[nextInstanceIndex], projections);
+                const nextConstraintValidator = new ConstraintValidator(nextLayout);
+                const nextError = nextConstraintValidator.validateConstraints();
+
+                if (nextError) {
+                    throw new Error(nextError);
+                }
+
+                const nextLayoutGen = new WebColaLayout(nextLayout);
+                temporalNeighbor = {
+                    colaNodes: nextLayoutGen.colaNodes,
+                    colaEdges: nextLayoutGen.colaEdges,
+                    colaConstraints: nextLayoutGen.colaConstraints,
+                    colaGroups: nextLayoutGen.groupDefinitions,
+                    height: nextLayoutGen.FIG_HEIGHT,
+                    width: nextLayoutGen.FIG_WIDTH,
+                    instanceNumber: nextInstanceIndex,
+                    isLoopBack: instanceNumber === num_instances - 1 && nextInstanceIndex !== instanceNumber + 1,
+                };
+            }
+            catch (e) {
+                console.error("Error generating next temporal layout", e);
+            }
+        }
     }
     catch (e) {
         error = e.message;
@@ -221,7 +285,8 @@ app.post('/', (req, res) => {
         sourceFileName: "",
         instAsString,
         errors: error.replace(/\n/g, "<br>"),
-        loggingEnabled
+        loggingEnabled,
+        temporalNeighbor,
     });
 });
 
@@ -338,6 +403,60 @@ app.get('/example/:name', (req, res) => {
     let height = cl.FIG_HEIGHT;
     let width = cl.FIG_WIDTH;
 
+    let temporalNeighbor = {
+        colaNodes: [],
+        colaEdges: [],
+        colaConstraints: [],
+        colaGroups: [],
+        height: 0,
+        width: 0,
+        instanceNumber: null,
+        isLoopBack: false,
+    };
+
+    const nextInstanceIndex = (() => {
+        if (num_instances <= 1) {
+            return null;
+        }
+
+        if (instanceNumber < num_instances - 1) {
+            return instanceNumber + 1;
+        }
+
+        if (loopBack >= 0 && loopBack < num_instances) {
+            return loopBack;
+        }
+
+        return null;
+    })();
+
+    if (nextInstanceIndex !== null) {
+        try {
+            const { layout: nextLayout } = li.generateLayout(instances[nextInstanceIndex], projections);
+            const nextConstraintValidator = new ConstraintValidator(nextLayout);
+            const nextError = nextConstraintValidator.validateConstraints();
+
+            if (nextError) {
+                throw new Error(nextError);
+            }
+
+            const nextLayoutGen = new WebColaLayout(nextLayout);
+            temporalNeighbor = {
+                colaNodes: nextLayoutGen.colaNodes,
+                colaEdges: nextLayoutGen.colaEdges,
+                colaConstraints: nextLayoutGen.colaConstraints,
+                colaGroups: nextLayoutGen.groupDefinitions,
+                height: nextLayoutGen.FIG_HEIGHT,
+                width: nextLayoutGen.FIG_WIDTH,
+                instanceNumber: nextInstanceIndex,
+                isLoopBack: instanceNumber === num_instances - 1 && nextInstanceIndex !== instanceNumber + 1,
+            };
+        }
+        catch (e) {
+            console.error("Error generating next temporal layout", e);
+        }
+    }
+
     res.render('diagram', {
         'height': height,
         'width': width,
@@ -356,7 +475,8 @@ app.get('/example/:name', (req, res) => {
         sourceFileName,
         instAsString,
         errors: "",
-        loggingEnabled: true
+        loggingEnabled: true,
+        temporalNeighbor,
     });
 
 

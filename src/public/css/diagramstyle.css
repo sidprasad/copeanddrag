@@ -105,3 +105,13 @@
     stroke-width: 3px; /* Change this to your desired highlight width */
 }
 
+.temporal-diagram {
+    background: #fafafa;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+#diagram-column h4.lead {
+    font-weight: 600;
+}
+
