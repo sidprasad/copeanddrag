@@ -54,131 +54,125 @@ async function initializePipeline() {
  * Process Alloy data using the complete Alloy → ForgeEvaluator → Layout pipeline
  * @param {number} instanceNumber - Instance number to process (default 0)
  */
-async function loadAlloyData(instanceNumber = 0) {
+async function generateLayoutForInstance(instanceNumber = 0, { storeLayout = true } = {}) {
+    updateStatus('Processing Alloy data with ForgeEvaluator...', 'info');
+
+    // Get Alloy XML from input field
+    const alloyXml = getCurrentAlloyXml();
+    if (!alloyXml) {
+        throw new Error('Please enter an Alloy XML instance');
+    }
+
+    // Get CND specification from input field
+    const cndSpec = getCurrentCNDSpec() || "";
+
+    console.log('Using Alloy XML:', alloyXml.substring(0, 200) + '...');
+    console.log('Using CND Spec:', cndSpec.substring(0, 200) + '...');
+
+    // Step 1: Parse Alloy XML
+    updateStatus('Parsing Alloy XML...', 'info');
+    const alloyDatum = CndCore.AlloyInstance.parseAlloyXML(alloyXml);
+    window.parsedAlloyXML = alloyDatum;
+    console.log('Parsed Alloy Datum:', alloyDatum);
+
+    if (!alloyDatum.instances || alloyDatum.instances.length === 0) {
+        throw new Error('No instances found in Alloy XML');
+    }
+
+    if (instanceNumber < 0 || instanceNumber >= alloyDatum.instances.length) {
+        throw new Error(`Invalid instance number: ${instanceNumber}. Must be between 0 and ${alloyDatum.instances.length - 1}`);
+    }
+
+    const alloyDataInstance = new CndCore.AlloyDataInstance(alloyDatum.instances[instanceNumber]);
+
+    console.log('Using Alloy Data Instance:', alloyDataInstance);
+    console.log('Types via Alloy IDataInstance:', alloyDataInstance.getTypes().length);
+    console.log('Atoms via Alloy IDataInstance:', alloyDataInstance.getAtoms().length);
+    console.log('Relations via Alloy IDataInstance:', alloyDataInstance.getRelations().length);
+
+    // Step 2: Create ForgeEvaluator with Alloy data
+    updateStatus('Creating ForgeEvaluator...', 'info');
+
+    let evaluationContext = {
+        sourceData: alloyXml,
+    }; //alloyDatum
+    const forgeEvaluator = new CndCore.ForgeEvaluator();
+    forgeEvaluator.initialize(evaluationContext);
+
+    console.log('Created ForgeEvaluator:', forgeEvaluator);
+
+    // NOTE: Mount the Evaluator REPL component
+    if (window.mountEvaluatorRepl) {
+        window.mountEvaluatorRepl('evaluator-repl-mount', forgeEvaluator, instanceNumber);
+    } else {
+        console.warn('Evaluator REPL mounting function not available, skipping REPL mount');
+    }
+
+    // Step 3: Parse layout specification
+    updateStatus('Parsing layout specification...', 'info');
+    let layoutSpec = null;
     try {
-        updateStatus('Processing Alloy data with ForgeEvaluator...', 'info');
-
-        // Get Alloy XML from input field
-        const alloyXml = getCurrentAlloyXml();
-        if (!alloyXml) {
-            throw new Error('Please enter an Alloy XML instance');
+        layoutSpec = CndCore.parseLayoutSpec(cndSpec);
+        if (window.clearAllErrors) {
+            window.clearAllErrors();
         }
-
-        // Get CND specification from input field
-        const cndSpec = getCurrentCNDSpec() || "";
-
-        console.log('Using Alloy XML:', alloyXml.substring(0, 200) + '...');
-        console.log('Using CND Spec:', cndSpec.substring(0, 200) + '...');
-
-        // Step 1: Parse Alloy XML
-        updateStatus('Parsing Alloy XML...', 'info');
-        const alloyDatum = CndCore.AlloyInstance.parseAlloyXML(alloyXml);
-        console.log('Parsed Alloy Datum:', alloyDatum);
-        
-        if (!alloyDatum.instances || alloyDatum.instances.length === 0) {
-            throw new Error('No instances found in Alloy XML');
-        }
-
-        if (instanceNumber < 0 || instanceNumber >= alloyDatum.instances.length) {
-            throw new Error(`Invalid instance number: ${instanceNumber}. Must be between 0 and ${alloyDatum.instances.length - 1}`);
-        }
-
-        const alloyDataInstance = new CndCore.AlloyDataInstance(alloyDatum.instances[instanceNumber]);
-
-        console.log('Using Alloy Data Instance:', alloyDataInstance);
-        console.log('Types via Alloy IDataInstance:', alloyDataInstance.getTypes().length);
-        console.log('Atoms via Alloy IDataInstance:', alloyDataInstance.getAtoms().length);
-        console.log('Relations via Alloy IDataInstance:', alloyDataInstance.getRelations().length);
-
-        // Step 2: Create ForgeEvaluator with Alloy data
-        updateStatus('Creating ForgeEvaluator...', 'info');
-
-        let evaluationContext = {
-            sourceData: alloyXml,
-        }; //alloyDatum
-        const forgeEvaluator = new CndCore.ForgeEvaluator();
-        forgeEvaluator.initialize(evaluationContext);
-
-        console.log('Created ForgeEvaluator:', forgeEvaluator);
-
-        // NOTE: Mount the Evaluator REPL component
-        if (window.mountEvaluatorRepl) {
-            window.mountEvaluatorRepl('evaluator-repl-mount', forgeEvaluator, instanceNumber);
+    } catch (error) {
+        console.error('Layout spec parse error:', error);
+        if (window.showParseError) {
+            window.showParseError(error.message, 'Layout Specification');
         } else {
-            console.warn('Evaluator REPL mounting function not available, skipping REPL mount');
+            updateStatus(`Layout spec parse error: ${error.message}`, 'error');
         }
+        return null;
+    }
+    console.log('Parsed Layout Spec:', layoutSpec);
 
-        // Step 3: Parse layout specification
-        updateStatus('Parsing layout specification...', 'info');
-        let layoutSpec = null;
-        try {
-            layoutSpec = CndCore.parseLayoutSpec(cndSpec);
-            if (window.clearAllErrors) {
-                window.clearAllErrors();
-            }
-        } catch (error) {
-            console.error('Layout spec parse error:', error);
-            if (window.showParseError) {
-                window.showParseError(error.message, 'Layout Specification');
-            } else {
-                updateStatus(`Layout spec parse error: ${error.message}`, 'error');
-            }
-            return;
-        }
-        console.log('Parsed Layout Spec:', layoutSpec);
+    // Step 4: Create LayoutInstance with ForgeEvaluator
+    updateStatus('Creating layout instance with ForgeEvaluator...', 'info');
+    const ENABLE_ALIGNMENT_EDGES = true;
 
-        // Step 4: Create LayoutInstance with ForgeEvaluator
-        updateStatus('Creating layout instance with ForgeEvaluator...', 'info');
-        const ENABLE_ALIGNMENT_EDGES = true;
-        
-        const layoutInstance = new CndCore.LayoutInstance(
-            layoutSpec, 
-            forgeEvaluator, 
-            instanceNumber, 
-            ENABLE_ALIGNMENT_EDGES
-        );
-        console.log('Created Layout Instance with ForgeEvaluator:', layoutInstance);
+    const layoutInstance = new CndCore.LayoutInstance(
+        layoutSpec,
+        forgeEvaluator,
+        instanceNumber,
+        ENABLE_ALIGNMENT_EDGES
+    );
+    console.log('Created Layout Instance with ForgeEvaluator:', layoutInstance);
 
-        // Step 5: Generate layout using Alloy data instance
-        updateStatus('Generating layout with Alloy data...', 'info');
-        const projections = {};
+    // Step 5: Generate layout using Alloy data instance
+    updateStatus('Generating layout with Alloy data...', 'info');
+    const projections = {};
 
-        try {
-            const layoutResult = layoutInstance.generateLayout(alloyDataInstance, projections);
+    try {
+        const layoutResult = layoutInstance.generateLayout(alloyDataInstance, projections);
+        if (storeLayout) {
             window.currentInstanceLayout = layoutResult.layout;
-    
-            if (layoutResult.error) {
-                console.error('Layout generation error:', layoutResult.error);
-    
-                // Check if this is a constraint conflict error
-                if (layoutResult.error.errorMessages) {
-                    if (window.showPositionalError) {
-                        window.showPositionalError(layoutResult.error.errorMessages);
-                    } else {
-                        updateStatus(`Positional constraint conflict: ${layoutResult.error.message}`, 'error');
-                    }
-                } else if (layoutResult.error.overlappingNodes) {
-                    if (window.showGroupOverlapError) {
-                        window.showGroupOverlapError(layoutResult.error.message);
-                    } else {
-                        updateStatus(`Group overlap error: ${layoutResult.error.message}`, 'error');
-                    }
+        }
+
+        if (layoutResult.error) {
+            console.error('Layout generation error:', layoutResult.error);
+
+            // Check if this is a constraint conflict error
+            if (layoutResult.error.errorMessages) {
+                if (window.showPositionalError) {
+                    window.showPositionalError(layoutResult.error.errorMessages);
                 } else {
-                    if (window.showGeneralError) {
-                        window.showGeneralError(`Layout generation error: ${layoutResult.error.message}`);
-                    } else {
-                        updateStatus(`Layout generation error: ${layoutResult.error.message}`, 'error');
-                    }
+                    updateStatus(`Positional constraint conflict: ${layoutResult.error.message}`, 'error');
                 }
-                return;
-            }
-        } catch (error) {
-            if (window.showGeneralError) {
-                window.showGeneralError(`Layout generation failed: ${error.message}`);
+            } else if (layoutResult.error.overlappingNodes) {
+                if (window.showGroupOverlapError) {
+                    window.showGroupOverlapError(layoutResult.error.message);
+                } else {
+                    updateStatus(`Group overlap error: ${layoutResult.error.message}`, 'error');
+                }
             } else {
-                updateStatus(`Layout generation failed: ${error.message}`, 'error');
+                if (window.showGeneralError) {
+                    window.showGeneralError(`Layout generation error: ${layoutResult.error.message}`);
+                } else {
+                    updateStatus(`Layout generation error: ${layoutResult.error.message}`, 'error');
+                }
             }
-            return;
+            return null;
         }
 
         // Clear errors on successful layout generation
@@ -186,13 +180,31 @@ async function loadAlloyData(instanceNumber = 0) {
             window.clearAllErrors();
         }
 
-        console.log('Generated Instance Layout using Alloy pipeline:', window.currentInstanceLayout);
+        console.log('Generated Instance Layout using Alloy pipeline:', storeLayout ? window.currentInstanceLayout : layoutResult.layout);
+        return layoutResult.layout;
+    } catch (error) {
+        if (window.showGeneralError) {
+            window.showGeneralError(`Layout generation failed: ${error.message}`);
+        } else {
+            updateStatus(`Layout generation failed: ${error.message}`, 'error');
+        }
+        return null;
+    }
+}
+
+async function loadAlloyData(instanceNumber = 0) {
+    try {
+        const layout = await generateLayoutForInstance(instanceNumber, { storeLayout: true });
+        if (!layout) {
+            throw new Error('Failed to generate layout data from Alloy');
+        }
 
         updateStatus('Alloy pipeline complete with ForgeEvaluator! Ready to render.', 'success');
-        
+        return layout;
     } catch (error) {
         console.error('Failed to load Alloy data:', error);
         updateStatus(`Alloy data loading failed: ${error.message}`, 'error');
+        return null;
     }
 }
 
@@ -206,8 +218,8 @@ async function renderGraph(instanceNumber = 0) {
     try {
         if (!window.currentInstanceLayout) {
             updateStatus('No layout data available. Processing Alloy data first...', 'info');
-            await loadAlloyData(instanceNumber);
-            if (!window.currentInstanceLayout) {
+            const layout = await loadAlloyData(instanceNumber);
+            if (!layout) {
                 throw new Error('Failed to generate layout data from Alloy');
             }
         }
@@ -223,6 +235,27 @@ async function renderGraph(instanceNumber = 0) {
         console.error('Error rendering Alloy graph:', error);
         updateStatus(`Alloy render error: ${error.message}`, 'error');
     }
+}
+
+/**
+ * Render a specific instance into any WebCola graph element
+ */
+async function renderGraphForInstance(elementId, instanceNumber = 0, { storeLayout = false } = {}) {
+    const graphElement = typeof elementId === 'string'
+        ? document.getElementById(elementId)
+        : elementId;
+
+    if (!graphElement) {
+        throw new Error(`Graph element ${elementId} not found`);
+    }
+
+    const layout = await generateLayoutForInstance(instanceNumber, { storeLayout });
+    if (!layout) {
+        throw new Error('Failed to generate layout for temporal comparison');
+    }
+
+    await graphElement.renderLayout(layout);
+    return layout;
 }
 
 /**
@@ -279,6 +312,7 @@ window.GraphAPI = {
     initializePipeline,
     loadAlloyData,
     renderGraph,
+    renderGraphForInstance,
     clearGraph,
     changeLayoutFormat,
     getCurrentAlloyXml,

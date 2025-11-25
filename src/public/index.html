@@ -120,7 +120,10 @@
 
                     // Update the navigation buttons
                     renderNavigationButtons();
-                    
+
+                    // Render temporal overview when data is ready
+                    renderTemporalOverview();
+
                     // Clean URL
                     window.history.replaceState({}, '', '/');
                 }
@@ -170,9 +173,15 @@
                 try {
                     // Use client-side generation instead of server submission
                     await window.GraphAPI.generateDiagram(instanceNumber);
-                    
+
                     // Update the navigation buttons
                     renderNavigationButtons();
+
+                    // Refresh temporal helpers now that layouts are available
+                    renderTemporalOverview();
+                    if (document.querySelector('#instanceTabs .nav-link.active')?.getAttribute('data-target') === '#temporalview') {
+                        renderTemporalComparison();
+                    }
 
                     updateStatus('Diagram generated successfully', 'success');
                 } catch (error) {
@@ -210,6 +219,9 @@
                             break;
                         case '#forgeinstview':
                             renderForgeInstance(); // Render Forge Instance when the tab is clicked
+                            break;
+                        case '#temporalview':
+                            renderTemporalComparison();
                             break;
                     }
                     
@@ -329,6 +341,7 @@
             const activeTab = document.querySelector('#instanceTabs .nav-link.active');
             if (activeTab) {
                 const target = activeTab.getAttribute('data-target');
+                renderTemporalOverview();
                 switch (target) {
                     case '#svggraphview':
                         if (window.GraphAPI?.generateDiagram) {
@@ -342,6 +355,128 @@
                     case '#forgeinstview':
                         renderForgeInstance();
                         break;
+                    case '#temporalview':
+                        renderTemporalComparison();
+                        break;
+                }
+            }
+        }
+
+        function getLoopBackIndex() {
+            if (typeof parsedAlloyXML?.loop !== 'undefined') {
+                const loopVal = parseInt(parsedAlloyXML.loop, 10);
+                if (!Number.isNaN(loopVal)) return loopVal;
+            }
+
+            const alloyDatum = document.getElementById('alloydatum')?.value || '';
+            const match = alloyDatum.match(/loop=\"(\d+)\"/);
+            return match ? parseInt(match[1], 10) : -1;
+        }
+
+        function renderTemporalOverview() {
+            const overviewCard = document.getElementById('temporal-overview');
+            const mapContainer = document.getElementById('temporal-map');
+            const loopLabel = document.getElementById('temporal-loop-label');
+
+            if (!overviewCard || !mapContainer) return;
+
+            mapContainer.innerHTML = '';
+
+            const numInstances = parsedAlloyXML?.instances?.length || 0;
+            if (numInstances <= 1) {
+                overviewCard.classList.add('d-none');
+                return;
+            }
+
+            const loopBack = getLoopBackIndex();
+            if (loopLabel) {
+                loopLabel.textContent = loopBack >= 0 ? `Loop to state ${loopBack}` : 'No loopback detected';
+            }
+
+            overviewCard.classList.remove('d-none');
+
+            const path = document.createElement('div');
+            path.className = 'temporal-map-path';
+
+            for (let i = 0; i < numInstances; i++) {
+                const node = document.createElement('button');
+                node.type = 'button';
+                node.className = 'temporal-state btn btn-sm';
+                node.textContent = i;
+                if (i === instanceNumber) {
+                    node.classList.add('active');
+                }
+                node.onclick = () => window.stateclick(i);
+                path.appendChild(node);
+
+                if (i < numInstances - 1) {
+                    const connector = document.createElement('span');
+                    connector.className = 'temporal-connector';
+                    connector.innerHTML = '&rarr;';
+                    path.appendChild(connector);
+                }
+            }
+
+            mapContainer.appendChild(path);
+
+            if (loopBack >= 0 && loopBack < numInstances) {
+                const loop = document.createElement('div');
+                loop.className = 'loopback-note';
+                loop.innerHTML = `<span class="temporal-connector loop">&#10227;</span> state ${numInstances - 1} → ${loopBack}`;
+                mapContainer.appendChild(loop);
+            }
+        }
+
+        function nextTemporalIndex() {
+            const numInstances = parsedAlloyXML?.instances?.length || 0;
+            if (numInstances === 0) return { current: 0, next: 0 };
+
+            const proposedNext = instanceNumber + 1;
+            if (proposedNext < numInstances) {
+                return { current: instanceNumber, next: proposedNext };
+            }
+
+            const loopBack = getLoopBackIndex();
+            if (loopBack >= 0 && loopBack < numInstances) {
+                return { current: instanceNumber, next: loopBack };
+            }
+
+            return { current: instanceNumber, next: numInstances - 1 };
+        }
+
+        async function renderTemporalComparison() {
+            const warning = document.getElementById('temporal-compare-warning');
+            const leftLabel = document.getElementById('temporal-left-index');
+            const rightLabel = document.getElementById('temporal-right-index');
+            const pairLabel = document.getElementById('temporal-pair-label');
+
+            const numInstances = parsedAlloyXML?.instances?.length || 0;
+            if (!parsedAlloyXML || numInstances <= 1) {
+                if (warning) {
+                    warning.textContent = 'A temporal trace requires at least two states. Load a temporal Alloy datum to compare.';
+                    warning.classList.remove('d-none');
+                }
+                return;
+            }
+
+            if (warning) {
+                warning.classList.add('d-none');
+            }
+
+            const { current, next } = nextTemporalIndex();
+
+            if (leftLabel) leftLabel.textContent = current;
+            if (rightLabel) rightLabel.textContent = next;
+            if (pairLabel) pairLabel.textContent = `(${current} → ${next})`;
+
+            try {
+                await window.GraphAPI.renderGraphForInstance('graph-compare-left', current, { storeLayout: false });
+                await window.GraphAPI.renderGraphForInstance('graph-compare-right', next, { storeLayout: false });
+            } catch (error) {
+                console.error('Temporal comparison rendering failed:', error);
+                if (warning) {
+                    warning.textContent = `Unable to render temporal pair: ${error.message}`;
+                    warning.classList.remove('d-none');
                 }
             }
         }
@@ -558,6 +693,73 @@
         body { overflow-x: hidden; }
         /* === End minimal flex adjustments === */
 
+        /* Temporal overview styling */
+        .temporal-map {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .temporal-map-path {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+        }
+
+        .temporal-state {
+            border-radius: 999px;
+            min-width: 2.5rem;
+            background: #f8f9fa;
+            border: 1px solid #ced4da;
+            color: #212529;
+            font-weight: 600;
+        }
+
+        .temporal-state.active {
+            background: #0d6efd;
+            border-color: #0d6efd;
+            color: white;
+        }
+
+        .temporal-connector {
+            color: #6c757d;
+            font-weight: bold;
+        }
+
+        .temporal-connector.loop {
+            color: #fd7e14;
+        }
+
+        .loopback-note {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .temporal-graph-pair {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            flex: 1 1 auto;
+            min-height: 0;
+        }
+
+        .temporal-graph-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        #temporalview webcola-cnd-graph {
+            flex: 1 1 auto;
+            max-width: 100%;
+            height: 100%;
+        }
+
         /* LEFT explore drawer trigger */
         #exploreDrawerTrigger {
             position: fixed;
@@ -765,6 +967,17 @@
                     <button id="previnstance" disabled hidden></button>
                     <button id="nextinstance" disabled hidden></button>
                 </div>
+
+                <div id="temporal-overview" class="card mb-2 d-none">
+                    <div class="card-body py-2">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold">Temporal Trace</span>
+                            <span class="text-muted small" id="temporal-loop-label"></span>
+                        </div>
+                        <div id="temporal-map" class="temporal-map"></div>
+                        <div class="text-muted small">Click on any state to focus its diagram.</div>
+                    </div>
+                </div>
                 <!-- Nav Tabs -->
                 <ul class="nav nav-tabs" id="instanceTabs">
                     <li class="nav-item">
@@ -775,6 +988,9 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" data-target="#forgeinstview" href="#!">Forge Instance</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-target="#temporalview" href="#!">Temporal Compare</a>
                     </li>
                 </ul>
 
@@ -798,6 +1014,40 @@
                 <div id="forgeinstview" class="tab-content" style="display: none;">
                     <div id="forge-inst-container" class="container-fluid">
                         <!-- Forge Instance will be rendered here -->
+                    </div>
+                </div>
+                <div id="temporalview" class="tab-content" style="display: none;">
+                    <div class="d-flex flex-column gap-2 h-100">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div>
+                                <span class="fw-semibold">State pair</span>
+                                <span class="text-muted small" id="temporal-pair-label"></span>
+                            </div>
+                            <div class="text-muted small" id="temporal-compare-hint">Showing state n alongside state n+1 (loop-aware).</div>
+                        </div>
+                        <div id="temporal-compare-warning" class="alert alert-info py-2 px-3 d-none"></div>
+                        <div class="temporal-graph-pair flex-grow-1">
+                            <div class="temporal-graph-card">
+                                <div class="small text-muted mb-1">State <span id="temporal-left-index">0</span></div>
+                                <webcola-cnd-graph
+                                    id="graph-compare-left"
+                                    layoutFormat="default"
+                                    width="600"
+                                    height="500"
+                                    aria-label="Temporal state n graph">
+                                </webcola-cnd-graph>
+                            </div>
+                            <div class="temporal-graph-card">
+                                <div class="small text-muted mb-1">State <span id="temporal-right-index">1</span></div>
+                                <webcola-cnd-graph
+                                    id="graph-compare-right"
+                                    layoutFormat="default"
+                                    width="600"
+                                    height="500"
+                                    aria-label="Temporal state n+1 graph">
+                                </webcola-cnd-graph>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
