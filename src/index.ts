@@ -55,6 +55,72 @@ const userId = getPersistentUserId();
 const logger = new Logger(userId, version);
 
 
+type TemporalNeighbor = {
+    colaNodes: any[];
+    colaEdges: any[];
+    colaConstraints: any[];
+    colaGroups: any[];
+    height: number;
+    width: number;
+    instanceNumber: number;
+    isLoopBack: boolean;
+};
+
+function computeTemporalNeighbor(
+    instances: AlloyInstance[],
+    instanceNumber: number,
+    loopBack: number,
+    li: LayoutInstance,
+    projections: Record<string, string>,
+): TemporalNeighbor | null {
+    const nextInstanceIndex = (() => {
+        if (instances.length <= 1) {
+            return null;
+        }
+
+        if (instanceNumber < instances.length - 1) {
+            return instanceNumber + 1;
+        }
+
+        if (loopBack >= 0 && loopBack < instances.length) {
+            return loopBack;
+        }
+
+        return null;
+    })();
+
+    if (nextInstanceIndex === null) {
+        return null;
+    }
+
+    try {
+        const { layout: nextLayout } = li.generateLayout(instances[nextInstanceIndex], projections);
+        const nextConstraintValidator = new ConstraintValidator(nextLayout);
+        const nextError = nextConstraintValidator.validateConstraints();
+
+        if (nextError) {
+            throw new Error(nextError);
+        }
+
+        const nextLayoutGen = new WebColaLayout(nextLayout);
+        return {
+            colaNodes: nextLayoutGen.colaNodes,
+            colaEdges: nextLayoutGen.colaEdges,
+            colaConstraints: nextLayoutGen.colaConstraints,
+            colaGroups: nextLayoutGen.groupDefinitions,
+            height: nextLayoutGen.FIG_HEIGHT,
+            width: nextLayoutGen.FIG_WIDTH,
+            instanceNumber: nextInstanceIndex,
+            isLoopBack: instanceNumber === instances.length - 1 && nextInstanceIndex !== instanceNumber + 1,
+        };
+    }
+    catch (e) {
+        console.error("Error generating next temporal layout", e);
+        return null;
+    }
+}
+
+
 function getFormContents(req: any) {
 
     let projections: Record<string, string> = {};
@@ -139,25 +205,7 @@ app.post('/', (req, res) => {
     const cope = req.body.cope;
     let error = "";
 
-    let temporalNeighbor: {
-        colaNodes: any[];
-        colaEdges: any[];
-        colaConstraints: any[];
-        colaGroups: any[];
-        height: number;
-        width: number;
-        instanceNumber: number | null;
-        isLoopBack: boolean;
-    } = {
-        colaNodes: [],
-        colaEdges: [],
-        colaConstraints: [],
-        colaGroups: [],
-        height: 0,
-        width: 0,
-        instanceNumber: null,
-        isLoopBack: false,
-    };
+    let temporalNeighbor: TemporalNeighbor | null = null;
 
     // Should this move elsewhere?
     var loggingEnabled = (req.body.loggingEnabled == undefined) ? true : (req.body.loggingEnabled.toLowerCase() === 'enabled');
@@ -200,48 +248,7 @@ app.post('/', (req, res) => {
         var height = cl.FIG_HEIGHT;
         var width = cl.FIG_WIDTH;
 
-        const nextInstanceIndex = (() => {
-            if (num_instances <= 1) {
-                return null;
-            }
-
-            if (instanceNumber < num_instances - 1) {
-                return instanceNumber + 1;
-            }
-
-            if (loopBack >= 0 && loopBack < num_instances) {
-                return loopBack;
-            }
-
-            return null;
-        })();
-
-        if (nextInstanceIndex !== null) {
-            try {
-                const { layout: nextLayout } = li.generateLayout(instances[nextInstanceIndex], projections);
-                const nextConstraintValidator = new ConstraintValidator(nextLayout);
-                const nextError = nextConstraintValidator.validateConstraints();
-
-                if (nextError) {
-                    throw new Error(nextError);
-                }
-
-                const nextLayoutGen = new WebColaLayout(nextLayout);
-                temporalNeighbor = {
-                    colaNodes: nextLayoutGen.colaNodes,
-                    colaEdges: nextLayoutGen.colaEdges,
-                    colaConstraints: nextLayoutGen.colaConstraints,
-                    colaGroups: nextLayoutGen.groupDefinitions,
-                    height: nextLayoutGen.FIG_HEIGHT,
-                    width: nextLayoutGen.FIG_WIDTH,
-                    instanceNumber: nextInstanceIndex,
-                    isLoopBack: instanceNumber === num_instances - 1 && nextInstanceIndex !== instanceNumber + 1,
-                };
-            }
-            catch (e) {
-                console.error("Error generating next temporal layout", e);
-            }
-        }
+        temporalNeighbor = computeTemporalNeighbor(instances, instanceNumber, loopBack, li, projections);
     }
     catch (e) {
         error = e.message;
@@ -403,59 +410,7 @@ app.get('/example/:name', (req, res) => {
     let height = cl.FIG_HEIGHT;
     let width = cl.FIG_WIDTH;
 
-    let temporalNeighbor = {
-        colaNodes: [],
-        colaEdges: [],
-        colaConstraints: [],
-        colaGroups: [],
-        height: 0,
-        width: 0,
-        instanceNumber: null,
-        isLoopBack: false,
-    };
-
-    const nextInstanceIndex = (() => {
-        if (num_instances <= 1) {
-            return null;
-        }
-
-        if (instanceNumber < num_instances - 1) {
-            return instanceNumber + 1;
-        }
-
-        if (loopBack >= 0 && loopBack < num_instances) {
-            return loopBack;
-        }
-
-        return null;
-    })();
-
-    if (nextInstanceIndex !== null) {
-        try {
-            const { layout: nextLayout } = li.generateLayout(instances[nextInstanceIndex], projections);
-            const nextConstraintValidator = new ConstraintValidator(nextLayout);
-            const nextError = nextConstraintValidator.validateConstraints();
-
-            if (nextError) {
-                throw new Error(nextError);
-            }
-
-            const nextLayoutGen = new WebColaLayout(nextLayout);
-            temporalNeighbor = {
-                colaNodes: nextLayoutGen.colaNodes,
-                colaEdges: nextLayoutGen.colaEdges,
-                colaConstraints: nextLayoutGen.colaConstraints,
-                colaGroups: nextLayoutGen.groupDefinitions,
-                height: nextLayoutGen.FIG_HEIGHT,
-                width: nextLayoutGen.FIG_WIDTH,
-                instanceNumber: nextInstanceIndex,
-                isLoopBack: instanceNumber === num_instances - 1 && nextInstanceIndex !== instanceNumber + 1,
-            };
-        }
-        catch (e) {
-            console.error("Error generating next temporal layout", e);
-        }
-    }
+    let temporalNeighbor = computeTemporalNeighbor(instances, instanceNumber, loopBack, li, projections);
 
     res.render('diagram', {
         'height': height,
