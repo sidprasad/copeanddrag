@@ -6,12 +6,82 @@
 // Variables to store data
 window.currentInstanceLayout = null;
 
+// Centralized storage for diagram inputs
+const diagramInputs = {
+    alloyXml: '',
+    cndSpec: ''
+};
+
+const safeTrim = (value) => typeof value === 'string' ? value.trim() : '';
+const readLocal = (key) => {
+    try {
+        return localStorage.getItem(key) || '';
+    } catch (err) {
+        console.warn(`Unable to read ${key} from localStorage`, err);
+        return '';
+    }
+};
+const writeLocal = (key, value) => {
+    try {
+        localStorage.setItem(key, value);
+    } catch (err) {
+        console.warn(`Unable to write ${key} to localStorage`, err);
+    }
+};
+
+/**
+ * Set the current diagram inputs and sync them to the page/localStorage
+ * @param {Object} inputs
+ * @param {string} [inputs.alloyXml] - Alloy XML text
+ * @param {string} [inputs.cndSpec] - CND spec text
+ * @param {Object} [options]
+ * @param {boolean} [options.persist=true] - Whether to persist to localStorage
+ */
+function setDiagramInputs({ alloyXml, cndSpec } = {}, { persist = true } = {}) {
+    const alloyValue = typeof alloyXml === 'string' ? safeTrim(alloyXml) : null;
+    const cndValue = typeof cndSpec === 'string' ? safeTrim(cndSpec) : null;
+
+    if (alloyValue !== null) {
+        diagramInputs.alloyXml = alloyValue;
+        const alloyTextarea = document.getElementById('alloydatum');
+        if (alloyTextarea && safeTrim(alloyTextarea.value) !== alloyValue) {
+            alloyTextarea.value = alloyValue;
+        }
+        if (persist) {
+            writeLocal('alloyDatum', alloyValue);
+        }
+    }
+
+    if (cndValue !== null) {
+        diagramInputs.cndSpec = cndValue;
+        const cndSpecContainer = document.getElementById('cndSpec');
+        if (cndSpecContainer && safeTrim(cndSpecContainer.textContent) !== cndValue) {
+            cndSpecContainer.textContent = cndValue;
+        }
+        if (persist) {
+            writeLocal('cndSpec', cndValue);
+        }
+    }
+}
+
 /**
  * Get current Alloy XML from input field
  * @returns {string} Alloy XML specification
  */
 function getCurrentAlloyXml() {
-    return document.getElementById('alloydatum').value.trim();
+    const alloyTextarea = document.getElementById('alloydatum');
+    const textareaValue = safeTrim(alloyTextarea?.value);
+    const storedValue = safeTrim(diagramInputs.alloyXml) || safeTrim(readLocal('alloyDatum'));
+    const chosen = textareaValue || storedValue;
+
+    if (chosen && alloyTextarea && safeTrim(alloyTextarea.value) !== chosen) {
+        alloyTextarea.value = chosen;
+    }
+    if (chosen && diagramInputs.alloyXml !== chosen) {
+        diagramInputs.alloyXml = chosen;
+    }
+
+    return chosen;
 }
 
 /**
@@ -19,10 +89,25 @@ function getCurrentAlloyXml() {
  * @returns {string} CND layout specification
  */
 function getCurrentCNDSpec() {
+    const hiddenSpec = document.getElementById('cndSpec');
     // Try to get value from React component first
-    return window.getCurrentCNDSpecFromReact ? 
-        window.getCurrentCNDSpecFromReact() : 
-        document.getElementById('webcola-cnd')?.value?.trim();
+    const reactValue = typeof window.getCurrentCNDSpecFromReact === 'function'
+        ? safeTrim(window.getCurrentCNDSpecFromReact())
+        : '';
+    const legacyInput = safeTrim(document.getElementById('webcola-cnd')?.value);
+    const hiddenValue = safeTrim(hiddenSpec?.textContent);
+    const storedValue = safeTrim(diagramInputs.cndSpec) || safeTrim(readLocal('cndSpec'));
+
+    const chosen = reactValue || legacyInput || hiddenValue || storedValue;
+
+    if (chosen && hiddenSpec && safeTrim(hiddenSpec.textContent) !== chosen) {
+        hiddenSpec.textContent = chosen;
+    }
+    if (chosen && diagramInputs.cndSpec !== chosen) {
+        diagramInputs.cndSpec = chosen;
+    }
+
+    return chosen;
 }
 
 /**
@@ -317,6 +402,7 @@ window.GraphAPI = {
     changeLayoutFormat,
     getCurrentAlloyXml,
     getCurrentCNDSpec,
+    setDiagramInputs,
     
     // Getter for current layout (useful for external access)
     getCurrentLayout: () => window.currentInstanceLayout

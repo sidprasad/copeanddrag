@@ -102,8 +102,19 @@
                     
                     // Populate forms with Sterling data
                     const alloyTextarea = document.getElementById('alloydatum');
-                    if (alloyTextarea) {
-                        alloyTextarea.value = alloyXML;
+                    if (window.GraphAPI?.setDiagramInputs) {
+                        window.GraphAPI.setDiagramInputs({
+                            alloyXml: alloyXML,
+                            cndSpec: data.cope || ''
+                        });
+                    } else {
+                        if (alloyTextarea) {
+                            alloyTextarea.value = alloyXML;
+                        }
+                        const cndSpecContainer = document.getElementById('cndSpec');
+                        if (cndSpecContainer) {
+                            cndSpecContainer.textContent = data.cope || '';
+                        }
                     }
 
                     // Mount the CnDLayoutInterface component with initial YAML value
@@ -137,9 +148,23 @@
             var alloyInstanceLabel = document.getElementById('alloyinstancelabel');
             var alloyDatumTextarea = document.getElementById('alloydatum');
 
-            // Fill the Alloy datum textarea with the current Alloy datum
-            if (alloyDatumTextarea) {
-                alloyDatumTextarea.value = localStorage.getItem('alloyDatum') || '';
+            const storedAlloyDatum = localStorage.getItem('alloyDatum') || '';
+            const storedCndSpec = localStorage.getItem('cndSpec') || '';
+
+            if (window.GraphAPI?.setDiagramInputs) {
+                window.GraphAPI.setDiagramInputs({
+                    alloyXml: storedAlloyDatum,
+                    cndSpec: storedCndSpec
+                }, { persist: false });
+            } else {
+                // Fallback: directly populate hidden fields if GraphAPI isn't ready
+                if (alloyDatumTextarea) {
+                    alloyDatumTextarea.value = storedAlloyDatum;
+                }
+                const cndSpecContainer = document.getElementById('cndSpec');
+                if (cndSpecContainer && storedCndSpec) {
+                    cndSpecContainer.textContent = storedCndSpec;
+                }
             }
 
             // Add onClick event listener to the Alloy Instance label
@@ -249,18 +274,16 @@
                 console.log('GraphAPI initialized.');
 
                 // Initialize global variables
-                if (localStorage.getItem('alloyDatum')) {
-                    const alloyDatum = localStorage.getItem('alloyDatum');
-                    parsedAlloyXML = CndCore.AlloyInstance.parseAlloyXML(alloyDatum);
+                if (storedAlloyDatum) {
+                    parsedAlloyXML = CndCore.AlloyInstance.parseAlloyXML(storedAlloyDatum);
                 }
 
                 if (localStorage.getItem('instanceNumber')) {
                     instanceNumber = parseInt(localStorage.getItem('instanceNumber'), 10);
                 }
 
-                if (localStorage.getItem('cndSpec')) {
-                    const cndSpec = localStorage.getItem('cndSpec');
-                    document.getElementById('cndSpec').textContent = cndSpec;
+                if (storedCndSpec) {
+                    document.getElementById('cndSpec').textContent = storedCndSpec;
                 }
             }
 
