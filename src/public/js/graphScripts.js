@@ -12,6 +12,7 @@ const diagramInputs = {
     cndSpec: ''
 };
 
+const getCndCore = () => window.CndCore || window.CnDCore;
 const safeTrim = (value) => typeof value === 'string' ? value.trim() : '';
 const readLocal = (key) => {
     try {
@@ -72,7 +73,8 @@ function getCurrentAlloyXml() {
     const alloyTextarea = document.getElementById('alloydatum');
     const textareaValue = safeTrim(alloyTextarea?.value);
     const storedValue = safeTrim(diagramInputs.alloyXml) || safeTrim(readLocal('alloyDatum'));
-    const chosen = textareaValue || storedValue;
+    const pendingSession = safeTrim(window.pendingSessionAlloyXml);
+    const chosen = textareaValue || storedValue || pendingSession;
 
     if (chosen && alloyTextarea && safeTrim(alloyTextarea.value) !== chosen) {
         alloyTextarea.value = chosen;
@@ -82,6 +84,14 @@ function getCurrentAlloyXml() {
     }
 
     return chosen;
+}
+
+/**
+ * Quick check for whether we have any Alloy datum available
+ * @returns {boolean}
+ */
+function hasAlloyDatum() {
+    return !!getCurrentAlloyXml();
 }
 
 /**
@@ -97,8 +107,9 @@ function getCurrentCNDSpec() {
     const legacyInput = safeTrim(document.getElementById('webcola-cnd')?.value);
     const hiddenValue = safeTrim(hiddenSpec?.textContent);
     const storedValue = safeTrim(diagramInputs.cndSpec) || safeTrim(readLocal('cndSpec'));
+    const pendingSession = safeTrim(window.pendingSessionCndSpec);
 
-    const chosen = reactValue || legacyInput || hiddenValue || storedValue;
+    const chosen = reactValue || legacyInput || hiddenValue || storedValue || pendingSession;
 
     if (chosen && hiddenSpec && safeTrim(hiddenSpec.textContent) !== chosen) {
         hiddenSpec.textContent = chosen;
@@ -115,15 +126,21 @@ function getCurrentCNDSpec() {
  * @returns {boolean} Success status
  */
 async function initializePipeline() {
+    const core = getCndCore();
+    if (!core) {
+        updateStatus('CndCore library not loaded yet.', 'error');
+        throw new Error('CndCore global not available');
+    }
+
     try {
         console.log('Complete CND-Core browser bundle loaded successfully');
-        console.log('Available on global CndCore:', Object.keys(CndCore));
+        console.log('Available on global CndCore:', Object.keys(core));
         
         // Check for Alloy-specific components
-        console.log('parseAlloyXML available:', !!CndCore.AlloyInstance.parseAlloyXML);
-        console.log('ForgeEvaluator available:', !!CndCore.ForgeEvaluator);
-        console.log('LayoutInstance available:', !!CndCore.LayoutInstance);
-        console.log('parseLayoutSpec available:', !!CndCore.parseLayoutSpec);
+        console.log('parseAlloyXML available:', !!core.AlloyInstance?.parseAlloyXML);
+        console.log('ForgeEvaluator available:', !!core.ForgeEvaluator);
+        console.log('LayoutInstance available:', !!core.LayoutInstance);
+        console.log('parseLayoutSpec available:', !!core.parseLayoutSpec);
         
         updateStatus('Alloy pipeline ready! Enter Alloy XML and CND specifications now.', 'success');
         
@@ -140,6 +157,11 @@ async function initializePipeline() {
  * @param {number} instanceNumber - Instance number to process (default 0)
  */
 async function generateLayoutForInstance(instanceNumber = 0, { storeLayout = true } = {}) {
+    const core = getCndCore();
+    if (!core) {
+        throw new Error('CndCore library is not loaded');
+    }
+
     updateStatus('Processing Alloy data with ForgeEvaluator...', 'info');
 
     // Get Alloy XML from input field
@@ -156,7 +178,7 @@ async function generateLayoutForInstance(instanceNumber = 0, { storeLayout = tru
 
     // Step 1: Parse Alloy XML
     updateStatus('Parsing Alloy XML...', 'info');
-    const alloyDatum = CndCore.AlloyInstance.parseAlloyXML(alloyXml);
+    const alloyDatum = core.AlloyInstance.parseAlloyXML(alloyXml);
     window.parsedAlloyXML = alloyDatum;
     console.log('Parsed Alloy Datum:', alloyDatum);
 
@@ -168,7 +190,7 @@ async function generateLayoutForInstance(instanceNumber = 0, { storeLayout = tru
         throw new Error(`Invalid instance number: ${instanceNumber}. Must be between 0 and ${alloyDatum.instances.length - 1}`);
     }
 
-    const alloyDataInstance = new CndCore.AlloyDataInstance(alloyDatum.instances[instanceNumber]);
+    const alloyDataInstance = new core.AlloyDataInstance(alloyDatum.instances[instanceNumber]);
 
     console.log('Using Alloy Data Instance:', alloyDataInstance);
     console.log('Types via Alloy IDataInstance:', alloyDataInstance.getTypes().length);
@@ -181,7 +203,7 @@ async function generateLayoutForInstance(instanceNumber = 0, { storeLayout = tru
     let evaluationContext = {
         sourceData: alloyXml,
     }; //alloyDatum
-    const forgeEvaluator = new CndCore.ForgeEvaluator();
+    const forgeEvaluator = new core.ForgeEvaluator();
     forgeEvaluator.initialize(evaluationContext);
 
     console.log('Created ForgeEvaluator:', forgeEvaluator);
@@ -197,7 +219,7 @@ async function generateLayoutForInstance(instanceNumber = 0, { storeLayout = tru
     updateStatus('Parsing layout specification...', 'info');
     let layoutSpec = null;
     try {
-        layoutSpec = CndCore.parseLayoutSpec(cndSpec);
+        layoutSpec = core.parseLayoutSpec(cndSpec);
         if (window.clearAllErrors) {
             window.clearAllErrors();
         }
@@ -216,7 +238,7 @@ async function generateLayoutForInstance(instanceNumber = 0, { storeLayout = tru
     updateStatus('Creating layout instance with ForgeEvaluator...', 'info');
     const ENABLE_ALIGNMENT_EDGES = true;
 
-    const layoutInstance = new CndCore.LayoutInstance(
+    const layoutInstance = new core.LayoutInstance(
         layoutSpec,
         forgeEvaluator,
         instanceNumber,
@@ -403,6 +425,7 @@ window.GraphAPI = {
     getCurrentAlloyXml,
     getCurrentCNDSpec,
     setDiagramInputs,
+    hasAlloyDatum,
     
     // Getter for current layout (useful for external access)
     getCurrentLayout: () => window.currentInstanceLayout
@@ -429,8 +452,9 @@ async function generateDiagram(instanceNumber = 0) {
         
         // Validate required data
         if (!formData.alloydatum) {
-            console.error('Missing Alloy XML data:', formData.alloydatum);
-            throw new Error('Needs an Alloy instance to generate a diagram');
+            console.warn('Missing Alloy XML data:', formData.alloydatum);
+            updateStatus('Load or paste an Alloy XML instance first.', 'error');
+            return;
         }
         
         // Render the graph
@@ -448,6 +472,12 @@ async function generateDiagram(instanceNumber = 0) {
  * Get form data from current page
  */
 function getClientFormData() {
+    // Sync the latest inputs into storage so subsequent reads (exports/refresh) are consistent
+    setDiagramInputs({
+        alloyXml: getCurrentAlloyXml(),
+        cndSpec: getCurrentCNDSpec(),
+    });
+
     return {
         alloydatum: getCurrentAlloyXml(),
         cope: getCurrentCNDSpec(),

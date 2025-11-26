@@ -63,6 +63,10 @@
         let parsedAlloyXML = null; // Parsed Alloy XML from Sterling data
         let instanceNumber = 0; // Zero-indexed number representing the instance being shown
 
+        // Reuse existing resolver if graphScripts loaded first
+        window.getCndCore = window.getCndCore || (() => window.CndCore || window.CnDCore);
+        const getCndCore = window.getCndCore;
+
         /**
          * Update status display with proper styling
          * @param {string} message - Status message to display
@@ -84,21 +88,27 @@
                 const response = await fetch(`/api/sterling-data/${sessionId}`);
                 if (response.ok) {
                     const data = await response.json();
-                    
+
                     // Parse the current Alloy XML
                     const alloyXML = data.alloydatum;
                     if (!alloyXML) {
                         throw new Error('Alloy datum not found in Sterling data');
                     }
-                    if (!CndCore.AlloyInstance.parseAlloyXML) {
-                        throw new Error('AlloyInstance.parseAlloyXML is not available in CndCore');
-                    }
+
+                    // Stash for later reads even if CndCore not ready yet
+                    window.pendingSessionAlloyXml = alloyXML;
+                    window.pendingSessionCndSpec = data.cope || '';
 
                     // Initialize global variables
-                    console.log('Parsing Alloy XML...');
-                    parsedAlloyXML = CndCore.AlloyInstance.parseAlloyXML(alloyXML);
-                    instanceNumber = 0; // Reset to first instance
-                    console.log('Parsed Alloy XML:', parsedAlloyXML);
+                    const core = getCndCore();
+                    if (core && core.AlloyInstance?.parseAlloyXML) {
+                        console.log('Parsing Alloy XML...');
+                        parsedAlloyXML = core.AlloyInstance.parseAlloyXML(alloyXML);
+                        instanceNumber = 0; // Reset to first instance
+                        console.log('Parsed Alloy XML:', parsedAlloyXML);
+                    } else {
+                        console.warn('CndCore not ready; deferring Alloy parsing until available.');
+                    }
                     
                     // Populate forms with Sterling data
                     const alloyTextarea = document.getElementById('alloydatum');
@@ -165,6 +175,13 @@
                 if (cndSpecContainer && storedCndSpec) {
                     cndSpecContainer.textContent = storedCndSpec;
                 }
+            }
+
+            // Keep diagramInputs in sync when the Alloy textarea is edited manually
+            if (alloyDatumTextarea) {
+                alloyDatumTextarea.addEventListener('input', (e) => {
+                    window.GraphAPI?.setDiagramInputs?.({ alloyXml: e.target.value });
+                });
             }
 
             // Add onClick event listener to the Alloy Instance label
@@ -259,9 +276,10 @@
             });
 
             // Check for existence of global functions from cnd-core CDN
-            if (window.CnDCore) {
-                window.DataAPI = CnDCore.DataAPI;
-                window.ErrorAPI = CnDCore.ErrorAPI;
+            const core = getCndCore();
+            if (core) {
+                window.DataAPI = core.DataAPI;
+                window.ErrorAPI = core.ErrorAPI;
                 console.log('CnDCore loaded successfully.');
             } else {
                 console.error('Error: CnDCore is not loaded. Please check that the proper version of cnd-core CDN (1.0.14 and above) is included.');
@@ -274,8 +292,8 @@
                 console.log('GraphAPI initialized.');
 
                 // Initialize global variables
-                if (storedAlloyDatum) {
-                    parsedAlloyXML = CndCore.AlloyInstance.parseAlloyXML(storedAlloyDatum);
+                if (storedAlloyDatum && core?.AlloyInstance?.parseAlloyXML) {
+                    parsedAlloyXML = core.AlloyInstance.parseAlloyXML(storedAlloyDatum);
                 }
 
                 if (localStorage.getItem('instanceNumber')) {
@@ -367,9 +385,11 @@
                 renderTemporalOverview();
                 switch (target) {
                     case '#svggraphview':
-                        if (window.GraphAPI?.generateDiagram) {
+                        if (window.GraphAPI?.generateDiagram && window.GraphAPI?.hasAlloyDatum?.()) {
                             console.log(`Rendering SVG graph view for instance ${instanceNumber}`);
                             window.GraphAPI.generateDiagram(instanceNumber);
+                        } else {
+                            console.log('Skipping render: Alloy XML not loaded yet.');
                         }
                         break;
                     case '#tableview':
