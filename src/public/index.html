@@ -1,408 +1,177 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-    <meta charset="utf-8" />
-    <title>Cope and Drag</title>
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-
-    <!-- Include Bootstrap CSS, JQuery, etc -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <meta charset="utf-8">
+    <title>Cope and Drag – Minimal</title>
 
     <link rel="icon" type="image/svg+xml" href="/img/logo.svg">
     <link rel="stylesheet" href="/css/diagramstyle.css">
-    <link rel="stylesheet" href="/css/index.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/spytial-core/dist/components/react-component-integration.css">
 
-    <script>
-        function loadLocalGraphlib() {
-            console.warn("CDN for graphlib-dot.min.js failed. Loading local copy...");
-            const script = document.createElement("script");
-            script.src = "/js/libs/graphlib-dot.min.js"; // Path to your local copy
-            document.head.appendChild(script);
-        }
-
-        function loadLocalCola() {
-            console.warn("CDN for cola.min.js failed. Loading local copy...");
-            const script = document.createElement("script");
-            script.src = "/js/libs/cola.js"; // Path to your local copy
-            document.head.appendChild(script);
-        }
-    </script>
-    <!-- Primary CDN -->
-    <script src="https://marvl.infotech.monash.edu/webcola/extern/graphlib-dot.min.js" onerror="loadLocalGraphlib()"></script>
-    <script src="https://cdn.jsdelivr.net/npm/webcola@3.4.0/WebCola/cola.min.js" onerror="loadLocalCola()"></script>
-
-    <!-- Include d3 here -->
+    <!-- d3 + React -->
     <script src="https://d3js.org/d3.v4.min.js"></script>
-
-    <!-- React for components -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 
-    <!-- Include your custom JavaScript file -->
-    <script src="/js/imgdownload.js" defer></script>
-    <script src="/js/graphScripts.js" onerror="console.error('Failed to load graphScripts.js')"></script>
-    <script src="/js/index.js" onerror="console.error('Failed to load index.js')"></script>
+    <!-- WebCola + Graphlib fallbacks -->
+    <script>
+        function loadLocalGraphlib() {
+            const script = document.createElement("script");
+            script.src = "/js/libs/graphlib-dot.min.js";
+            document.head.appendChild(script);
+        }
+        function loadLocalCola() {
+            const script = document.createElement("script");
+            script.src = "/js/libs/cola.js";
+            document.head.appendChild(script);
+        }
+    </script>
+    <script src="https://marvl.infotech.monash.edu/webcola/extern/graphlib-dot.min.js" onerror="loadLocalGraphlib()"></script>
+    <script src="https://cdn.jsdelivr.net/npm/webcola@3.4.0/WebCola/cola.min.js" onerror="loadLocalCola()"></script>
 
-    <!-- Complete CND-Core browser bundle -->
+    <!-- Core + components (provides CndCore/CnDCore and builder mount helpers) -->
     <script src="https://cdn.jsdelivr.net/npm/spytial-core/dist/browser/cnd-core-complete.global.js"></script>
-
-    <!-- Demo components bundle (includes InstanceBuilder integration) -->
     <script src="https://cdn.jsdelivr.net/npm/spytial-core/dist/components/react-component-integration.global.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/spytial-core/dist/components/react-component-integration.css">
 
-    <!-- Include other JS libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- Local scripts -->
+    <script src="/js/imgdownload.js" defer></script>
+    <script src="/js/graphScripts.js"></script>
+    <script src="/js/index.js" defer></script>
+
+    <style>
+        body { padding: 0.75rem; }
+        #graph-container, #graph-compare-left, #graph-compare-right {
+            display: block;
+            width: 100%;
+            height: 600px;
+            max-width: 100%;
+        }
+        .status { margin: 0.5rem 0; padding: 0.35rem 0.6rem; border-radius: 4px; }
+        .status.info { background: #eef3ff; color: #24355c; }
+        .status.success { background: #e5f7ed; color: #1f5133; }
+        .status.error { background: #fdecea; color: #6a1a17; }
+        .textarea-label { display: flex; align-items: center; gap: 0.35rem; }
+        .textarea-label button { padding: 0.15rem 0.35rem; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-light bg-light mb-3">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h4">Cope and Drag – Minimal</span>
+            <div class="d-flex gap-2">
+                <button id="cola" class="btn btn-primary">Apply Layout</button>
+                <button id="diagramDownloadButton" class="btn btn-outline-secondary" onclick="downloadBundle();" title="Export Diagram">
+                    Export
+                </button>
+                <a href="/import" class="btn btn-outline-secondary">Import</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div id="status" class="status info">Paste Alloy XML and CnD spec, then apply layout.</div>
+
+        <div class="row g-3">
+            <div class="col-lg-4">
+                <div class="mb-2">
+                    <div class="textarea-label">
+                        <label for="alloydatum" class="form-label mb-0">Alloy XML (datum.xml)</label>
+                        <button id="toggleAlloy" class="btn btn-sm btn-outline-secondary" type="button">Show/Hide</button>
+                    </div>
+                    <textarea id="alloydatum" class="form-control font-monospace" rows="10"></textarea>
+                </div>
+
+                <div class="mb-2">
+                    <div class="textarea-label">
+                        <span class="form-label mb-0">CnD Spec</span>
+                        <button id="openBuilder" class="btn btn-sm btn-outline-secondary" type="button">Open Builder</button>
+                    </div>
+                    <div id="cndSpec" class="form-control font-monospace" style="min-height: 180px; white-space: pre-wrap;"></div>
+                    <div id="webcola-cnd-container" class="mt-2"></div>
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label" for="layoutFormat">Layout Strategy</label>
+                    <select id="layoutFormat" class="form-select">
+                        <option value="default" selected>Standard</option>
+                        <option value="grid">Grid (Beta)</option>
+                    </select>
+                </div>
+
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" id="temporalToggle">
+                    <label class="form-check-label" for="temporalToggle">Show temporal comparison</label>
+                </div>
+
+                <div id="temporal-overview" class="card d-none">
+                    <div class="card-body py-2">
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-bold">Temporal Trace</span>
+                            <span class="text-muted small" id="temporal-loop-label"></span>
+                        </div>
+                        <div id="temporal-map" class="d-flex flex-wrap gap-1 mt-2"></div>
+                        <div class="text-muted small">Click a state to focus its diagram.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="card mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Diagram</span>
+                        <button id="clearGraphBtn" class="btn btn-sm btn-outline-secondary">Clear</button>
+                    </div>
+                    <div class="card-body">
+                        <webcola-cnd-graph 
+                            id="graph-container"
+                            layoutFormat="default"
+                            aria-label="Graph visualization"></webcola-cnd-graph>
+                    </div>
+                </div>
+
+                <div id="temporalview" class="card d-none">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Temporal Compare</span>
+                        <span class="text-muted small" id="temporal-pair-label"></span>
+                    </div>
+                    <div class="card-body">
+                        <div id="temporal-compare-warning" class="alert alert-info py-2 px-3 d-none"></div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="small text-muted mb-1">State <span id="temporal-left-index">0</span></div>
+                                <webcola-cnd-graph id="graph-compare-left" layoutFormat="default" aria-label="Temporal left"></webcola-cnd-graph>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="small text-muted mb-1">State <span id="temporal-right-index">1</span></div>
+                                <webcola-cnd-graph id="graph-compare-right" layoutFormat="default" aria-label="Temporal right"></webcola-cnd-graph>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 
     <script>
-        /** GLOBAL VARIABLES **/
-        let parsedAlloyXML = null; // Parsed Alloy XML from Sterling data
-        let instanceNumber = 0; // Zero-indexed number representing the instance being shown
-
-        // Reuse existing resolver if graphScripts loaded first
+        // Reuse shared resolver if present
         window.getCndCore = window.getCndCore || (() => window.CndCore || window.CnDCore);
-        const getCndCore = window.getCndCore;
 
-        /**
-         * Update status display with proper styling
-         * @param {string} message - Status message to display
-         * @param {string} type - Status type: 'info', 'success', 'error'
-         */
+        let parsedAlloyXML = null;
+        let instanceNumber = 0;
+
         function updateStatus(message, type = 'info') {
             const statusElement = document.getElementById('status');
+            if (!statusElement) return;
             statusElement.textContent = message;
             statusElement.className = `status ${type}`;
         }
 
-        /**
-         * Receive data from Sterling
-         * @param {string} sessionId - Sterling session ID
-         * @returns {Promise<void>}
-         */
-        async function handleSessionData(sessionId) {
-            try {
-                const response = await fetch(`/api/sterling-data/${sessionId}`);
-                if (response.ok) {
-                    const data = await response.json();
-
-                    // Parse the current Alloy XML
-                    const alloyXML = data.alloydatum;
-                    if (!alloyXML) {
-                        throw new Error('Alloy datum not found in Sterling data');
-                    }
-
-                    // Stash for later reads even if CndCore not ready yet
-                    window.pendingSessionAlloyXml = alloyXML;
-                    window.pendingSessionCndSpec = data.cope || '';
-
-                    // Initialize global variables
-                    const core = getCndCore();
-                    if (core && core.AlloyInstance?.parseAlloyXML) {
-                        console.log('Parsing Alloy XML...');
-                        parsedAlloyXML = core.AlloyInstance.parseAlloyXML(alloyXML);
-                        instanceNumber = 0; // Reset to first instance
-                        console.log('Parsed Alloy XML:', parsedAlloyXML);
-                    } else {
-                        console.warn('CndCore not ready; deferring Alloy parsing until available.');
-                    }
-                    
-                    // Populate forms with Sterling data
-                    const alloyTextarea = document.getElementById('alloydatum');
-                    if (window.GraphAPI?.setDiagramInputs) {
-                        window.GraphAPI.setDiagramInputs({
-                            alloyXml: alloyXML,
-                            cndSpec: data.cope || ''
-                        });
-                    } else {
-                        if (alloyTextarea) {
-                            alloyTextarea.value = alloyXML;
-                        }
-                        const cndSpecContainer = document.getElementById('cndSpec');
-                        if (cndSpecContainer) {
-                            cndSpecContainer.textContent = data.cope || '';
-                        }
-                    }
-
-                    // Mount the CnDLayoutInterface component with initial YAML value
-                    if (window.mountCndLayoutInterface) {
-                        const config = {
-                            initialYamlValue: data.cope,
-                            initialIsNoCodeView: false
-                        };
-                        window.mountCndLayoutInterface("webcola-cnd-container", config);
-                        console.log('CnDLayoutInterface mounted.');
-                    } else {
-                        console.error('Error: mountCndLayoutInterface is not available.');
-                    }
-
-                    // Update the navigation buttons
-                    renderNavigationButtons();
-
-                    // Render temporal overview when data is ready
-                    renderTemporalOverview();
-
-                    // Clean URL
-                    window.history.replaceState({}, '', '/');
-                }
-            } catch (error) {
-                console.error('Failed to load Sterling data:', error);
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', async function () {
-            // This is the text area input for the Alloy datum.
-            var alloyInstanceLabel = document.getElementById('alloyinstancelabel');
-            var alloyDatumTextarea = document.getElementById('alloydatum');
-
-            const storedAlloyDatum = localStorage.getItem('alloyDatum') || '';
-            const storedCndSpec = localStorage.getItem('cndSpec') || '';
-
-            if (window.GraphAPI?.setDiagramInputs) {
-                window.GraphAPI.setDiagramInputs({
-                    alloyXml: storedAlloyDatum,
-                    cndSpec: storedCndSpec
-                }, { persist: false });
-            } else {
-                // Fallback: directly populate hidden fields if GraphAPI isn't ready
-                if (alloyDatumTextarea) {
-                    alloyDatumTextarea.value = storedAlloyDatum;
-                }
-                const cndSpecContainer = document.getElementById('cndSpec');
-                if (cndSpecContainer && storedCndSpec) {
-                    cndSpecContainer.textContent = storedCndSpec;
-                }
-            }
-
-            // Keep diagramInputs in sync when the Alloy textarea is edited manually
-            if (alloyDatumTextarea) {
-                alloyDatumTextarea.addEventListener('input', (e) => {
-                    window.GraphAPI?.setDiagramInputs?.({ alloyXml: e.target.value });
-                });
-            }
-
-            // Add onClick event listener to the Alloy Instance label
-            alloyInstanceLabel.addEventListener('click', function () {
-                if (alloyDatumTextarea.style.display === 'none') {
-                    alloyDatumTextarea.style.display = 'block';
-                } else {
-                    alloyDatumTextarea.style.display = 'none';
-                }
-            });
-
-            // Add onClick event listener to the "Apply Layout" button
-            const submitButton = document.getElementById('cola');
-            submitButton.addEventListener('click', async function (event) {
-                console.log('Apply Layout button clicked');
-                // Set the class of the button to spinner
-                submitButton.classList.add('spinner-border', 'spinner-border-sm');
-                submitButton.setAttribute('disabled', 'disabled'); // Disable the button
-
-                // Add each projection control's value as a hidden input to the form
-                // const projectionControls = document.querySelectorAll('[id$="_projection"]');
-
-                // projectionControls.forEach(control => {
-                //     const hiddenInput = document.createElement('input');
-                //     hiddenInput.type = 'hidden';
-                //     hiddenInput.name = control.name; // Use the control's name as the input name
-                //     hiddenInput.value = control.value; // Use the control's value as the input value
-                //     form.appendChild(hiddenInput);
-                // });
-
-                try {
-                    // Use client-side generation instead of server submission
-                    await window.GraphAPI.generateDiagram(instanceNumber);
-
-                    // Update the navigation buttons
-                    renderNavigationButtons();
-
-                    // Refresh temporal helpers now that layouts are available
-                    renderTemporalOverview();
-                    if (document.querySelector('#instanceTabs .nav-link.active')?.getAttribute('data-target') === '#temporalview') {
-                        renderTemporalComparison();
-                    }
-
-                    updateStatus('Diagram generated successfully', 'success');
-                } catch (error) {
-                    console.error('Diagram generation failed:', error);
-                    updateStatus(`Generation failed: ${error.message}`, 'error');
-                } finally {
-                    submitButton.classList.remove('spinner-border', 'spinner-border-sm');
-                    submitButton.removeAttribute('disabled');
-                }
-            });
-
-            // Add event listeners to the tab views
-            const tabs = document.querySelectorAll('#instanceTabs .nav-link');
-            const tabContents = document.querySelectorAll('.tab-content');
-
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function (e) {
-                    e.preventDefault();
-
-                    // Remove active class from all tabs
-                    tabs.forEach(t => t.classList.remove('active'));
-                    
-                    // Hide all tab contents
-                    tabContents.forEach(content => content.style.display = 'none');
-                    
-                    // Add active class to the clicked tab
-                    this.classList.add('active');
-
-                    // Render the content of the tab
-                    switch (this.getAttribute('data-target')) {
-                        case '#svggraphview':
-                            break;
-                        case '#tableview':
-                            renderTable(); // Render table when the tab is clicked
-                            break;
-                        case '#forgeinstview':
-                            renderForgeInstance(); // Render Forge Instance when the tab is clicked
-                            break;
-                        case '#temporalview':
-                            renderTemporalComparison();
-                            break;
-                    }
-                    
-                    // Show the corresponding tab content
-                    const target = document.querySelector(this.dataset.target);
-                    if (target) {
-                        target.style.display = 'block';
-                    }
-                });
-            });
-
-            // Check for existence of global functions from cnd-core CDN
-            const core = getCndCore();
-            if (core) {
-                window.DataAPI = core.DataAPI;
-                window.ErrorAPI = core.ErrorAPI;
-                console.log('CnDCore loaded successfully.');
-            } else {
-                console.error('Error: CnDCore is not loaded. Please check that the proper version of cnd-core CDN (1.0.14 and above) is included.');
-                return;
-            }
-
-            // Initialize the pipeline
-            if (window.GraphAPI) {
-                window.GraphAPI.initializePipeline();
-                console.log('GraphAPI initialized.');
-
-                // Initialize global variables
-                if (storedAlloyDatum && core?.AlloyInstance?.parseAlloyXML) {
-                    parsedAlloyXML = core.AlloyInstance.parseAlloyXML(storedAlloyDatum);
-                }
-
-                if (localStorage.getItem('instanceNumber')) {
-                    instanceNumber = parseInt(localStorage.getItem('instanceNumber'), 10);
-                }
-
-                if (storedCndSpec) {
-                    document.getElementById('cndSpec').textContent = storedCndSpec;
-                }
-            }
-
-            /** Mount React components */
-
-            // Mount the CnDLayoutInterface component
-            if (window.mountCndLayoutInterface) {
-                const config = {
-                    initialYamlValue: document.getElementById('cndSpec').textContent || '',
-                    initialIsNoCodeView: false
-                };
-                window.mountCndLayoutInterface("webcola-cnd-container", config);
-                console.log('CnDLayoutInterface mounted.');
-            } else {
-                console.error('Error: mountCndLayoutInterface is not available.');
-            }
-
-            // Mount the Error Message Modal component
-            if (window.mountErrorMessageModal) {
-                window.mountErrorMessageModal('error_messages');
-                console.log('ErrorMessageModal mounted.');
-            } else {
-                console.warn('Warning: mountErrorMessageModal is not available.');
-            }
-
-            // Mount the RelationHighlighter component
-            if (window.mountRelationHighlighter) {
-                window.mountRelationHighlighter('relation-highlighter-mount', 'graph-container');
-                console.log('RelationHighlighter mounted.');
-            } else {
-                console.warn('Warning: mountRelationHighlighter is not available.');
-            }
-
-            // Check for Sterling session data
-            const urlParams = new URLSearchParams(window.location.search);
-            const sessionId = urlParams.get('session');
-            
-            if (sessionId) {
-                await handleSessionData(sessionId);
-                if (window.GraphAPI?.generateDiagram) {
-                    // Auto-generate diagram if session data is available
-                    await window.GraphAPI.generateDiagram(instanceNumber);
-                } else {
-                    console.warn('GraphAPI.generateDiagram is not available.');
-                }
-            }
-        });
-
-        window.addEventListener('load', () => {
-            // Render the active tab on page load
-            renderActiveTab();
-
-            // Update the navigation buttons on page load
-            renderNavigationButtons();
-        });
-
-        window.addEventListener('beforeunload', (event) => {
-            // Save the current Alloy datum to localStorage
-            const alloyDatum = document.getElementById('alloydatum');
-            if (alloyDatum) {
-                localStorage.setItem('alloyDatum', alloyDatum.value);
-            }
-
-            // Save the current instance number to localStorage
-            localStorage.setItem('instanceNumber', instanceNumber);
-
-            // Save the current CND spec to localStorage
-            const currentCndSpec = window.GraphAPI.getCurrentCNDSpec();
-            localStorage.setItem('cndSpec', currentCndSpec || '');
-        });
-
-        /** HELPER FUNCTIONS **/
-
-        /**
-         * Render the currently active tab based on the selected tab
-         */
-        function renderActiveTab() {
-            const activeTab = document.querySelector('#instanceTabs .nav-link.active');
-            if (activeTab) {
-                const target = activeTab.getAttribute('data-target');
-                renderTemporalOverview();
-                switch (target) {
-                    case '#svggraphview':
-                        if (window.GraphAPI?.generateDiagram && window.GraphAPI?.hasAlloyDatum?.()) {
-                            console.log(`Rendering SVG graph view for instance ${instanceNumber}`);
-                            window.GraphAPI.generateDiagram(instanceNumber);
-                        } else {
-                            console.log('Skipping render: Alloy XML not loaded yet.');
-                        }
-                        break;
-                    case '#tableview':
-                        renderTable();
-                        break;
-                    case '#forgeinstview':
-                        renderForgeInstance();
-                        break;
-                    case '#temporalview':
-                        renderTemporalComparison();
-                        break;
-                }
-            }
+        function syncHiddenSpec(text) {
+            const hidden = document.getElementById('cndSpec');
+            if (hidden) hidden.textContent = text || '';
         }
 
         function getLoopBackIndex() {
@@ -410,38 +179,9 @@
                 const loopVal = parseInt(parsedAlloyXML.loop, 10);
                 if (!Number.isNaN(loopVal)) return loopVal;
             }
-
             const alloyDatum = document.getElementById('alloydatum')?.value || '';
             const match = alloyDatum.match(/loop=\"(\d+)\"/);
             return match ? parseInt(match[1], 10) : -1;
-        }
-
-        function toggleTemporalTabVisibility(shouldShow) {
-            const temporalTab = document.querySelector('#instanceTabs .nav-link[data-target="#temporalview"]');
-            const temporalTabItem = temporalTab?.closest('li');
-            const temporalContent = document.getElementById('temporalview');
-
-            if (!shouldShow) {
-                temporalTabItem?.classList.add('d-none');
-
-                if (temporalTab?.classList.contains('active')) {
-                    temporalTab.classList.remove('active');
-                    const defaultTab = document.querySelector('#instanceTabs .nav-link[data-target="#svggraphview"]');
-                    defaultTab?.classList.add('active');
-
-                    const tabContents = document.querySelectorAll('.tab-content');
-                    tabContents.forEach(content => content.style.display = 'none');
-                    const defaultContent = document.getElementById('svggraphview');
-                    if (defaultContent) defaultContent.style.display = 'block';
-                }
-
-                if (temporalContent) {
-                    temporalContent.style.display = 'none';
-                }
-                return;
-            }
-
-            temporalTabItem?.classList.remove('d-none');
         }
 
         function renderTemporalOverview() {
@@ -450,70 +190,37 @@
             const loopLabel = document.getElementById('temporal-loop-label');
 
             if (!overviewCard || !mapContainer) return;
-
             mapContainer.innerHTML = '';
 
             const numInstances = parsedAlloyXML?.instances?.length || 0;
             if (numInstances <= 1) {
-                toggleTemporalTabVisibility(false);
                 overviewCard.classList.add('d-none');
                 return;
             }
 
-            toggleTemporalTabVisibility(true);
+            overviewCard.classList.remove('d-none');
             const loopBack = getLoopBackIndex();
             if (loopLabel) {
                 loopLabel.textContent = loopBack >= 0 ? `Loop to state ${loopBack}` : 'No loopback detected';
             }
 
-            overviewCard.classList.remove('d-none');
-
-            const path = document.createElement('div');
-            path.className = 'temporal-map-path';
-
             for (let i = 0; i < numInstances; i++) {
-                const node = document.createElement('button');
-                node.type = 'button';
-                node.className = 'temporal-state btn btn-sm';
-                node.textContent = i;
-                if (i === instanceNumber) {
-                    node.classList.add('active');
-                }
-                node.onclick = () => window.stateclick(i);
-                path.appendChild(node);
-
-                if (i < numInstances - 1) {
-                    const connector = document.createElement('span');
-                    connector.className = 'temporal-connector';
-                    connector.innerHTML = '&rarr;';
-                    path.appendChild(connector);
-                }
-            }
-
-            mapContainer.appendChild(path);
-
-            if (loopBack >= 0 && loopBack < numInstances) {
-                const loop = document.createElement('div');
-                loop.className = 'loopback-note';
-                loop.innerHTML = `<span class="temporal-connector loop">&#10227;</span> state ${numInstances - 1} → ${loopBack}`;
-                mapContainer.appendChild(loop);
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-sm ' + (i === instanceNumber ? 'btn-primary' : 'btn-outline-secondary');
+                btn.textContent = i;
+                btn.onclick = () => stateclick(i);
+                mapContainer.appendChild(btn);
             }
         }
 
         function nextTemporalIndex() {
             const numInstances = parsedAlloyXML?.instances?.length || 0;
             if (numInstances === 0) return { current: 0, next: 0 };
-
             const proposedNext = instanceNumber + 1;
-            if (proposedNext < numInstances) {
-                return { current: instanceNumber, next: proposedNext };
-            }
-
+            if (proposedNext < numInstances) return { current: instanceNumber, next: proposedNext };
             const loopBack = getLoopBackIndex();
-            if (loopBack >= 0 && loopBack < numInstances) {
-                return { current: instanceNumber, next: loopBack };
-            }
-
+            if (loopBack >= 0 && loopBack < numInstances) return { current: instanceNumber, next: loopBack };
             return { current: instanceNumber, next: numInstances - 1 };
         }
 
@@ -526,733 +233,152 @@
             const numInstances = parsedAlloyXML?.instances?.length || 0;
             if (!parsedAlloyXML || numInstances <= 1) {
                 if (warning) {
-                    warning.textContent = 'A temporal trace requires at least two states. Load a temporal Alloy datum to compare.';
+                    warning.textContent = 'A temporal trace requires at least two states.';
                     warning.classList.remove('d-none');
                 }
                 return;
             }
-
-            if (warning) {
-                warning.classList.add('d-none');
-            }
+            if (warning) warning.classList.add('d-none');
 
             const { current, next } = nextTemporalIndex();
-
             if (leftLabel) leftLabel.textContent = current;
             if (rightLabel) rightLabel.textContent = next;
             if (pairLabel) pairLabel.textContent = `(${current} → ${next})`;
 
-            try {
-                await window.GraphAPI.renderGraphForInstance('graph-compare-left', current, { storeLayout: false });
-                await window.GraphAPI.renderGraphForInstance('graph-compare-right', next, { storeLayout: false });
-            } catch (error) {
-                console.error('Temporal comparison rendering failed:', error);
-                if (warning) {
-                    warning.textContent = `Unable to render temporal pair: ${error.message}`;
-                    warning.classList.remove('d-none');
-                }
-            }
+            await window.GraphAPI.renderGraphForInstance('graph-compare-left', current, { storeLayout: false });
+            await window.GraphAPI.renderGraphForInstance('graph-compare-right', next, { storeLayout: false });
         }
 
-        /**
-         * Render the Forge Instance as a String based on parsed Alloy XML.
-         */
-        function renderForgeInstance() {
-            const forgeInstContainer = document.getElementById('forge-inst-container');
-            forgeInstContainer.innerHTML = ''; // Clear previous content
-
-            // Default element - when Forge Instance is not available, or empty
-            const defaultElement = document.createElement('p');
-            defaultElement.textContent = 'Instance Not Available';
-            
-            // Check if parsedAlloyXML is available and has instances
-            if (!parsedAlloyXML || !parsedAlloyXML.instances || parsedAlloyXML.instances.length === 0) {
-                forgeInstContainer.appendChild(defaultElement);
-                return;
-            }
-            
-            // Get the Forge Instance
-            const instances = parsedAlloyXML.instances;
-            if (!window.instanceToInst) {
-                console.error('Error: instanceToInst function is not available.');
-                forgeInstContainer.appendChild(defaultElement);
-                return;
-            }
-            const forgeInstance = window.instanceToInst(instances[instanceNumber]);
-            
-            // Render the Forge Instance
-            if (forgeInstance) {
-                const forgeInstElement = document.createElement('code');
-                forgeInstElement.style.whiteSpace = 'pre-wrap';
-                const instAsString = JSON.stringify(forgeInstance).trim().replace(/^"|"$/g, '').replace(/\\n/g, '\n');
-                forgeInstElement.textContent = instAsString;
-                forgeInstContainer.appendChild(forgeInstElement);
-            } else {
-                forgeInstContainer.appendChild(defaultElement);
-            }
-        }
-
-        /**
-         * Render an HTML table based on parsed Alloy XML.
-         */
-        function renderTable() {
-            const tableViewContainer = document.getElementById('table-view-container');
-            tableViewContainer.innerHTML = ''; // Clear previous content
-
-            // Default element - when table is not available, or empty
-            const defaultElement = document.createElement('p');
-            defaultElement.textContent = 'Table Not Available';
-
-            // Check if parsedAlloyXML is available and has instances
-            if (!parsedAlloyXML || !parsedAlloyXML.instances || parsedAlloyXML.instances.length === 0) {
-                tableViewContainer.appendChild(defaultElement);
-                return;
-            }
-
-            // Get the Forge Instance
-            const instances = parsedAlloyXML.instances;
-            if (!window.instanceToTables) {
-                console.error('Error: instanceToTables function is not available.');
-                tableViewContainer.appendChild(defaultElement);
-                return;
-            }
-            const forgeTable = window.instanceToTables(instances[instanceNumber]);
-
-            // Render the Forge Table
-            if (forgeTable) {
-                // Single flex container for atoms + relations
-                const merged = document.createElement('div');
-                merged.className = 'tables-merged';
-
-                // Atoms
-                Object.keys(forgeTable.atoms).forEach(atomType => {
-                    const values = forgeTable.atoms[atomType];
-                    if (Array.isArray(values)) {
-                        const wrap = document.createElement('div');
-                        wrap.className = 'table-wrapper';
-                        const table = document.createElement('table');
-                        table.className = 'compact-table';
-                        const thead = document.createElement('thead');
-                        const headerRow = document.createElement('tr');
-                        const headerCell = document.createElement('th');
-                        headerCell.textContent = atomType;
-                        headerRow.appendChild(headerCell);
-                        thead.appendChild(headerRow);
-                        table.appendChild(thead);
-                        const tbody = document.createElement('tbody');
-                        values.forEach(v => {
-                            const row = document.createElement('tr');
-                            const cell = document.createElement('td');
-                            cell.textContent = v;
-                            row.appendChild(cell);
-                            tbody.appendChild(row);
-                        });
-                        table.appendChild(tbody);
-                        wrap.appendChild(table);
-                        merged.appendChild(wrap);
-                    }
-                });
-
-                // Relations
-                Object.keys(forgeTable.relations).forEach(relationType => {
-                    const relVals = forgeTable.relations[relationType];
-                    if (relVals && relVals.length > 0) {
-                        const wrap = document.createElement('div');
-                        wrap.className = 'table-wrapper';
-                        // Determine max columns for proper header spanning
-                        let maxCols = 1;
-                        relVals.forEach(r => {
-                            if (Array.isArray(r)) {
-                                maxCols = Math.max(maxCols, r.length);
-                            }
-                        });
-                        let html = `<table class=\"compact-table\"><thead><tr><th colspan=\"${maxCols}\">${relationType}</th></tr></thead><tbody>`;
-                        relVals.forEach(r => {
-                            if (Array.isArray(r)) {
-                                const cells = r.map(value => `<td>${String(value).trim()}</td>`).join('');
-                                html += `<tr>${cells}</tr>`;
-                            } else {
-                                html += `<tr><td>${String(r).trim()}</td></tr>`;
-                            }
-                        });
-                        html += '</tbody></table>';
-                        wrap.innerHTML = html;
-                        merged.appendChild(wrap);
-                    }
-                });
-
-                tableViewContainer.appendChild(merged);
-            } else {
-                tableViewContainer.appendChild(defaultElement);
-            }
-        }
-        
-        /**
-         * Handle state click in temporal minimap
-         */
-        window.stateclick = async function(instanceIndex) {
-            const newInstanceNumber = parseInt(instanceIndex, 10);
-            
-            if (newInstanceNumber >= 0 && parsedAlloyXML?.instances && newInstanceNumber < parsedAlloyXML.instances.length) {
-                instanceNumber = newInstanceNumber;
-                renderNavigationButtons();
-                
-                // Regenerate the current view
-                renderActiveTab();
-            }
+        window.stateclick = function(instanceIndex) {
+            const newIdx = parseInt(instanceIndex, 10);
+            if (Number.isNaN(newIdx) || !parsedAlloyXML?.instances) return;
+            if (newIdx < 0 || newIdx >= parsedAlloyXML.instances.length) return;
+            instanceNumber = newIdx;
+            renderTemporalOverview();
+            renderTemporalComparison();
         };
-        
-        function renderNavigationButtons() {
-            const prevButton = document.getElementById('previnstance');
-            const nextButton = document.getElementById('nextinstance');
-            
-            if (!parsedAlloyXML?.instances) {
-                if (prevButton) prevButton.disabled = true;
-                if (nextButton) nextButton.disabled = true;
-                return;
-            }
-            
-            const numInstances = parsedAlloyXML.instances.length;
-            
-            if (prevButton) {
-                prevButton.disabled = instanceNumber <= 0;
-                prevButton.hidden = numInstances <= 1; // Hide if only one instance
-                prevButton.innerHTML = '&lt;&lt;';
-                prevButton.onclick = () => {
-                    if (instanceNumber > 0) {
-                        window.stateclick(instanceNumber - 1);
-                    }
-                };
-            }
-            
-            if (nextButton) {
-                nextButton.disabled = instanceNumber >= numInstances - 1;
-                nextButton.hidden = numInstances <= 1; // Hide if only one instance
-                nextButton.innerHTML = '&gt;&gt;';
-                nextButton.onclick = () => {
-                    if (instanceNumber < numInstances - 1) {
-                        window.stateclick(instanceNumber + 1);
-                    }
-                };
+
+        async function handleSessionData(sessionId) {
+            try {
+                const response = await fetch(`/api/sterling-data/${sessionId}`);
+                if (!response.ok) return;
+                const data = await response.json();
+                window.pendingSessionAlloyXml = data.alloydatum;
+                window.pendingSessionCndSpec = data.cope || '';
+                if (window.GraphAPI?.setDiagramInputs) {
+                    window.GraphAPI.setDiagramInputs({
+                        alloyXml: data.alloydatum,
+                        cndSpec: data.cope || ''
+                    });
+                }
+                syncHiddenSpec(data.cope || '');
+
+                const core = window.getCndCore();
+                if (core?.AlloyInstance?.parseAlloyXML && data.alloydatum) {
+                    parsedAlloyXML = core.AlloyInstance.parseAlloyXML(data.alloydatum);
+                    instanceNumber = 0;
+                    renderTemporalOverview();
+                }
+            } catch (err) {
+                console.error('Failed to load Sterling data:', err);
             }
         }
 
+        document.addEventListener('DOMContentLoaded', async () => {
+            const toggleAlloyBtn = document.getElementById('toggleAlloy');
+            const alloyTextarea = document.getElementById('alloydatum');
+            const builderContainer = document.getElementById('webcola-cnd-container');
+            const openBuilderBtn = document.getElementById('openBuilder');
+            const temporalToggle = document.getElementById('temporalToggle');
+
+            // Load stored data
+            const storedAlloy = localStorage.getItem('alloyDatum') || '';
+            const storedCnd = localStorage.getItem('cndSpec') || '';
+            if (window.GraphAPI?.setDiagramInputs) {
+                window.GraphAPI.setDiagramInputs({ alloyXml: storedAlloy, cndSpec: storedCnd }, { persist: false });
+            }
+            if (alloyTextarea && storedAlloy) alloyTextarea.value = storedAlloy;
+            syncHiddenSpec(storedCnd);
+
+            if (toggleAlloyBtn && alloyTextarea) {
+                toggleAlloyBtn.addEventListener('click', () => {
+                    alloyTextarea.classList.toggle('d-none');
+                });
+                alloyTextarea.addEventListener('input', (e) => {
+                    window.GraphAPI?.setDiagramInputs?.({ alloyXml: e.target.value });
+                });
+            }
+
+            if (builderContainer && window.mountCndLayoutInterface) {
+                const config = {
+                    initialYamlValue: storedCnd,
+                    initialIsNoCodeView: false
+                };
+                window.mountCndLayoutInterface('webcola-cnd-container', config);
+            }
+            if (openBuilderBtn && builderContainer) {
+                openBuilderBtn.addEventListener('click', () => {
+                    builderContainer.scrollIntoView({ behavior: 'smooth' });
+                });
+            }
+
+            // Button handlers
+            document.getElementById('cola')?.addEventListener('click', async () => {
+                try {
+                    await window.GraphAPI.generateDiagram(instanceNumber);
+                    parsedAlloyXML = window.parsedAlloyXML || parsedAlloyXML;
+                    renderTemporalOverview();
+                    if (temporalToggle?.checked) {
+                        await renderTemporalComparison();
+                    }
+                    updateStatus('Diagram generated.', 'success');
+                } catch (err) {
+                    console.error(err);
+                    updateStatus(err.message || 'Generation failed.', 'error');
+                }
+            });
+
+            document.getElementById('layoutFormat')?.addEventListener('change', () => {
+                window.GraphAPI.changeLayoutFormat();
+            });
+
+            document.getElementById('clearGraphBtn')?.addEventListener('click', () => {
+                window.GraphAPI.clearGraph();
+            });
+
+            temporalToggle?.addEventListener('change', async (e) => {
+                const temporalCard = document.getElementById('temporalview');
+                if (e.target.checked) {
+                    temporalCard?.classList.remove('d-none');
+                    await renderTemporalComparison();
+                } else {
+                    temporalCard?.classList.add('d-none');
+                }
+            });
+
+            // Initialize pipeline if available
+            try {
+                await window.GraphAPI.initializePipeline();
+            } catch (err) {
+                console.error('Pipeline init failed:', err);
+                updateStatus('CndCore not loaded. Check network and reload.', 'error');
+            }
+
+            // Session handling
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionId = urlParams.get('session');
+            if (sessionId) {
+                await handleSessionData(sessionId);
+            }
+        });
+
+        window.addEventListener('beforeunload', () => {
+            const alloyDatum = document.getElementById('alloydatum')?.value || '';
+            const cndSpec = window.GraphAPI?.getCurrentCNDSpec?.() || '';
+            localStorage.setItem('alloyDatum', alloyDatum);
+            localStorage.setItem('cndSpec', cndSpec);
+            localStorage.setItem('instanceNumber', instanceNumber);
+        });
     </script>
-
-    <style>
-        body {
-            padding: 0.5rem;
-            overflow-x: hidden;
-        }
-
-        /* === Minimal layout flex adjustments to fit #instanceCol in viewport === */
-        /** GPT-5 OUTPUT **/
-        html, body { height: 100vh; }
-        body { display: flex; flex-direction: column; overflow: hidden; }
-        nav.navbar, #error_container { flex: 0 0 auto; }
-        #contentcontainer { flex: 1 1 auto; display: flex; min-height: 0; overflow: hidden; width: 100%; }
-        /* Instance column fills remaining space */
-        #instanceCol { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
-        #instanceviews { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
-        /* Tab header groups do not grow */
-        #instanceviews > .btn-group, #instanceTabs { flex: 0 0 auto; }
-        /* Each tab panel can occupy remaining space */
-        #instanceviews > .tab-content { flex: 1 1 auto; min-height: 0; overflow: hidden; }
-        /* Scroll only inside non-graph tabs */
-        #tableview, #forgeinstview { overflow: auto !important; }
-        /* Ensure custom element does not trigger horizontal scroll */
-        webcola-cnd-graph#graph-container { max-width: 100%; height: 100%; display: block; }
-        /* Prevent horizontal page scroll */
-        body { overflow-x: hidden; }
-        /* === End minimal flex adjustments === */
-
-        /* Temporal overview styling */
-        .temporal-map {
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
-        }
-
-        .temporal-map-path {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.35rem;
-        }
-
-        .temporal-state {
-            border-radius: 999px;
-            min-width: 2.5rem;
-            background: #f8f9fa;
-            border: 1px solid #ced4da;
-            color: #212529;
-            font-weight: 600;
-        }
-
-        .temporal-state.active {
-            background: #0d6efd;
-            border-color: #0d6efd;
-            color: white;
-        }
-
-        .temporal-connector {
-            color: #6c757d;
-            font-weight: bold;
-        }
-
-        .temporal-connector.loop {
-            color: #fd7e14;
-        }
-
-        .loopback-note {
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-
-        .temporal-graph-pair {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1rem;
-            flex: 1 1 auto;
-            min-height: 0;
-        }
-
-        .temporal-graph-card {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 0.25rem;
-            padding: 0.5rem;
-            display: flex;
-            flex-direction: column;
-            min-height: 0;
-        }
-
-        #temporalview webcola-cnd-graph {
-            flex: 1 1 auto;
-            max-width: 100%;
-            height: 100%;
-        }
-
-        /* LEFT explore drawer trigger */
-        #exploreDrawerTrigger {
-            position: fixed;
-            top: 25%;
-            left: 0.25rem;
-            z-index: 2100;
-            padding: 0.5rem 0.6rem;
-            border-top-left-radius: 0.25rem;
-            border-bottom-left-radius: 0.25rem;
-            transition: background-color .2s ease;
-        }
-        #exploreDrawerTrigger:focus { outline: 2px solid #fff; }
-
-        /* Drawer trigger button */
-        #controlsDrawerTrigger {
-            position: fixed;
-            top: 40%;
-            right: 0.25rem;
-            z-index: 2100;
-            padding: 0.5rem 0.6rem;
-            border-top-right-radius: 0.25rem;
-            border-bottom-right-radius: 0.25rem;
-            transition: background-color .2s ease;
-        }
-        #controlsDrawerTrigger:focus { outline: 2px solid #fff; }
-
-        /* Drawer panel overlay */
-        #controlsCol.drawer {
-            position: fixed;
-            top: 0;
-            right: 0;
-            height: 100vh;
-            width: 540px;
-            max-width: 90vw;
-            background: #fff;
-            box-shadow: -4px 0 12px rgba(0,0,0,0.15);
-            transform: translateX(100%);
-            transition: transform .28s ease-in-out;
-            z-index: 2000;
-            border-left: 1px solid #ddd;
-            display: flex;
-            flex-direction: column;
-        }
-        #controlsCol.drawer.open { transform: translateX(0); }
-
-        /* When hovering trigger and not pinned/open yet */
-        #controlsCol.drawer.hover-peek { transform: translateX(calc(100% - 40px)); }
-
-        /* LEFT explore drawer panel overlay */
-        #exploreCol.drawer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 320px; /* mirrors controls drawer */
-            max-width: 90vw;
-            background: #fff;
-            box-shadow: 4px 0 12px rgba(0,0,0,0.15);
-            transform: translateX(-100%);
-            transition: transform .28s ease-in-out;
-            z-index: 2000;
-            border-right: 1px solid #ddd;
-            display: flex;
-            flex-direction: column;
-            padding: 10px;
-        }
-        #exploreCol.drawer.open { transform: translateX(0); }
-        #exploreCol.drawer.hover-peek { transform: translateX(calc(-100% + 40px)); }
-
-        /* Hide elements with the hidden class */
-        .hidden {
-            display: none !important;
-        }
-
-        .gutter {
-            background-color: #eee;
-            background-repeat: no-repeat;
-            background-position: 50%;
-        }
-
-        .gutter.gutter-horizontal {
-            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
-            cursor: col-resize;
-        }
-
-        /* Navigation buttons */
-        #previnstance, #nextinstance {
-            margin: 0 5px;
-            padding: 5px 10px;
-        }
-
-        #previnstance:disabled, #nextinstance:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /** Tab Content Styles **/
-        #instanceCol {
-            width: 100%;
-        }
-
-        /** Table Styles **/
-
-        /* Flexbox for compact layout */
-        .d-flex {
-            display: flex;
-            flex-wrap: wrap; /* Allow wrapping to the next line if tables don't fit */
-            gap: 1rem; /* Legacy spacing (not used by merged container) */
-        }
-
-        /* New merged container for atoms + relations */
-        .tables-merged {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.4rem; /* Reduced inter-table gap (priority) */
-            align-items: flex-start;
-        }
-
-        .table-wrapper {
-            flex: 0 0 auto; /* Natural width – prevents over-stretch causing whitespace */
-            max-width: 260px; /* Slightly narrower to fit more per row */
-        }
-
-        /* Compact table styling */
-        .compact-table th,
-        .compact-table td {
-            padding: 0.18rem 0.3rem; /* Tighter vertical padding */
-            font-size: 0.85rem; /* Still readable */
-            line-height: 1.1; /* Reduce cell height */
-            border: 1px solid #ddd; /* Light border for better readability */
-        }
-
-        .compact-table {
-            margin-bottom: 0.5rem; /* Reduce space between tables */
-            border-collapse: collapse;
-        }
-
-        .compact-table th {
-            text-align: center; /* Center header text; cells inherit acceptable */
-        }
-    </style>
-</head>
-
-<body>
-    <!-- Drawer triggers -->
-    <button id="exploreDrawerTrigger" type="button" class="btn btn-primary" title="Show explorer" aria-label="Show explorer">
-        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-    </button>
-    <button id="controlsDrawerTrigger" type="button" class="btn btn-primary" title="Show controls" aria-label="Show controls">
-        <i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i>
-    </button>
-    <nav class="navbar navbar-light bg-light">
-        <div class="row w-100">
-            <div class="col">
-                <h4 class="navbar-brand">Cope and Drag</h4>
-            </div>
-
-            <div class="col">
-                <!-- Button Group -->
-                <div class="btn-group mp-2" role="group">
-                    <!-- Download Diagram Button -->
-                    <button id="diagramDownloadButton" class="btn btn-outline-secondary m-0" onclick="downloadBundle();" title="Export Diagram">
-                        Export Diagram
-                    </button>
-
-                    <!-- Docs Button -->
-                    <a href="https://sidprasad.github.io/copeanddrag/" target="_blank" class="btn btn-outline-secondary mp-2" title="Docs">
-                        Docs
-                    </a>
-
-                    <!-- Docs Button -->
-                    <a href="/openapi" target="_blank" class="btn btn-outline-secondary mp-2" title="API Details">
-                        API Details
-                    </a>
-                </div>
-            </div>
-        </div>
-    </nav>
-    <div class="container m4" id="error_container">
-        <div id="error_messages">
-            <!-- React component mounted here -->
-        </div>
-    </div>
-
-    <div id="contentcontainer">
-        <!-- Explore drawer (overlay) -->
-        <div id="exploreCol" class="drawer">
-                <div class="row mt-1">
-                    <div id="layoutControl" class="container">
-                        <div class="input-group">
-                            <pre class="input-group-text">Layout Strategy</pre>
-                            <select title="Choose the Layout Format" class="form-control" id="layoutFormat" name="layoutFormat">
-                                <option value="default" selected>Standard</option>
-                                <option value="grid">Grid (Beta)</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div id="relation-highlighter-mount"></div>
-                    <div id="evaluator-repl-mount"></div>
-                </div>
-            </div>
-        <div id="instanceCol">
-            <div class="container-fluid" id="instanceviews">
-                <div class="btn-group" role="group" aria-label="Instance navigation">
-                    <button id="previnstance" disabled hidden></button>
-                    <button id="nextinstance" disabled hidden></button>
-                </div>
-
-                <div id="temporal-overview" class="card mb-2 d-none">
-                    <div class="card-body py-2">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <span class="fw-bold">Temporal Trace</span>
-                            <span class="text-muted small" id="temporal-loop-label"></span>
-                        </div>
-                        <div id="temporal-map" class="temporal-map"></div>
-                        <div class="text-muted small">Click on any state to focus its diagram.</div>
-                    </div>
-                </div>
-                <!-- Nav Tabs -->
-                <ul class="nav nav-tabs" id="instanceTabs">
-                    <li class="nav-item">
-                        <a class="nav-link active" data-target="#svggraphview" href="#!">Diagram</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-target="#tableview" href="#!">Table</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-target="#forgeinstview" href="#!">Forge Instance</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-target="#temporalview" href="#!">Temporal Compare</a>
-                    </li>
-                </ul>
-
-                <!-- Tab Content -->
-                <div id="svggraphview" class="tab-content">
-                    <!-- Use the webcola-cnd-graph custom element -->
-                    <webcola-cnd-graph 
-                        id="graph-container"
-                        layoutFormat="default"
-                        width="800"
-                        height="600"
-                        aria-label="Interactive graph visualization">
-                    </webcola-cnd-graph>
-                </div>
-
-                <div id="tableview" class="tab-content" style="display: none;">
-                    <div id="table-view-container" class="container-fluid">
-                        <!-- Table will be rendered here -->
-                    </div>
-                </div>
-                <div id="forgeinstview" class="tab-content" style="display: none;">
-                    <div id="forge-inst-container" class="container-fluid">
-                        <!-- Forge Instance will be rendered here -->
-                    </div>
-                </div>
-                <div id="temporalview" class="tab-content" style="display: none;">
-                    <div class="d-flex flex-column gap-2 h-100">
-                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                            <div>
-                                <span class="fw-semibold">State pair</span>
-                                <span class="text-muted small" id="temporal-pair-label"></span>
-                            </div>
-                            <div class="text-muted small" id="temporal-compare-hint">Showing state n alongside state n+1 (loop-aware).</div>
-                        </div>
-                        <div id="temporal-compare-warning" class="alert alert-info py-2 px-3 d-none"></div>
-                        <div class="temporal-graph-pair flex-grow-1">
-                            <div class="temporal-graph-card">
-                                <div class="small text-muted mb-1">State <span id="temporal-left-index">0</span></div>
-                                <webcola-cnd-graph
-                                    id="graph-compare-left"
-                                    layoutFormat="default"
-                                    width="600"
-                                    height="500"
-                                    aria-label="Temporal state n graph">
-                                </webcola-cnd-graph>
-                            </div>
-                            <div class="temporal-graph-card">
-                                <div class="small text-muted mb-1">State <span id="temporal-right-index">1</span></div>
-                                <webcola-cnd-graph
-                                    id="graph-compare-right"
-                                    layoutFormat="default"
-                                    width="600"
-                                    height="500"
-                                    aria-label="Temporal state n+1 graph">
-                                </webcola-cnd-graph>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id="controlsCol" class="drawer">
-            <div id="controls" class="col">
-                <div class="d-flex flex-column gap-2 p-1">
-                    <button id='cola' class="btn btn-primary btn-lg m-1 px-4">Apply Layout</button>
-                    <hr>
-
-                    <div id="status" class="status info">Ready to load Alloy graph...</div>
-                    
-                    <div id="webcola-cnd-container">
-                        <!-- React component mounted here -->
-                    </div>
-
-                    <!-- And here, we are in actual controls terroir. -->
-
-                    <br>
-                    <div id="alloyDatumControlSection">
-                        <label for="alloydatum" class="btn btn-outline-dark btn-sm" id="alloyinstancelabel"
-                            style="cursor: pointer;">Edit Datum</label>
-                        <textarea id="alloydatum" rows="5" name="alloydatum"
-                            style="display: none;"></textarea>
-                    </div>
-                    <br>
-
-                    <div id="cndSpec" class="hidden"></div>
-
-
-                    <!-- Here, projections is a list of type { type : string, projectedAtom : string, atoms : string[]} 
-                    If projections is non-empty, then show each type as a form input  and projectedAtom as the selected element of atoms
-                    -->
-
-                </div>
-            </div>
-        </div>
-    </div>
 </body>
-
-<script>
-
-/** Drawer logic **/
-
-// Drawer logic (minimal; class toggle + persistence)
-// TODO: Refactor into the script above
-(function(){
-    const drawer = document.getElementById('controlsCol');
-    const trigger = document.getElementById('controlsDrawerTrigger');
-    if(!drawer || !trigger) return;
-
-    const LS_KEY = 'controlsDrawerPinned';
-    let pinned = localStorage.getItem(LS_KEY) === 'true';
-    if(pinned) drawer.classList.add('open');
-
-    let hoverActive = false; // track transient hover state
-
-    function openTransient(){
-        if(pinned) return; // already open
-        drawer.classList.add('open');
-        hoverActive = true;
-    }
-    function closeTransient(){
-        if(pinned) return; // keep if pinned
-        drawer.classList.remove('open');
-        hoverActive = false;
-    }
-    function togglePinned(){
-        pinned = !pinned;
-        localStorage.setItem(LS_KEY, pinned);
-        if(pinned){
-            drawer.classList.add('open');
-        } else if(!hoverActive){
-            drawer.classList.remove('open');
-        }
-    }
-
-    // Hover open on trigger
-    trigger.addEventListener('mouseenter', openTransient);
-    // Hover when moving directly into drawer from trigger
-    drawer.addEventListener('mouseenter', () => { if(hoverActive || pinned) drawer.classList.add('open'); });
-    // Mouse leave entire drawer area (including trigger region)
-    drawer.addEventListener('mouseleave', () => { if(!pinned) closeTransient(); });
-    trigger.addEventListener('mouseleave', (e) => {
-        // if pointer not entering drawer
-        const rel = e.relatedTarget;
-        if(!drawer.contains(rel) && !pinned) closeTransient();
-    });
-
-    // Click trigger toggles pin (persisted)
-    trigger.addEventListener('click', (e) => { e.preventDefault(); togglePinned(); });
-
-    // Outside click closes if not pinned and open
-    document.addEventListener('click', (e) => {
-        if(!drawer.classList.contains('open') || pinned) return;
-        if(drawer.contains(e.target) || trigger.contains(e.target)) return;
-        closeTransient();
-    });
-
-    // ESC closes when not pinned
-    document.addEventListener('keydown', (e) => {
-        if(e.key === 'Escape' && drawer.classList.contains('open') && !pinned){
-            closeTransient();
-        }
-    });
-})();
-
-// Explore drawer logic (mirrors controls drawer)
-(function(){
-    const drawer = document.getElementById('exploreCol');
-    const trigger = document.getElementById('exploreDrawerTrigger');
-    if(!drawer || !trigger) return;
-
-    const LS_KEY = 'exploreDrawerPinned';
-    let pinned = localStorage.getItem(LS_KEY) === 'true';
-    if(pinned) drawer.classList.add('open');
-
-    let hoverActive = false;
-    function openTransient(){ if(pinned) return; drawer.classList.add('open'); hoverActive = true; }
-    function closeTransient(){ if(pinned) return; drawer.classList.remove('open'); hoverActive = false; }
-    function togglePinned(){
-        pinned = !pinned; localStorage.setItem(LS_KEY, pinned);
-        if(pinned) drawer.classList.add('open'); else if(!hoverActive) drawer.classList.remove('open');
-    }
-    trigger.addEventListener('mouseenter', openTransient);
-    drawer.addEventListener('mouseenter', () => { if(hoverActive || pinned) drawer.classList.add('open'); });
-    drawer.addEventListener('mouseleave', () => { if(!pinned) closeTransient(); });
-    trigger.addEventListener('mouseleave', (e) => { const rel = e.relatedTarget; if(!drawer.contains(rel) && !pinned) closeTransient(); });
-    trigger.addEventListener('click', (e) => { e.preventDefault(); togglePinned(); });
-    document.addEventListener('click', (e) => { if(!drawer.classList.contains('open') || pinned) return; if(drawer.contains(e.target) || trigger.contains(e.target)) return; closeTransient(); });
-    document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && drawer.classList.contains('open') && !pinned) closeTransient(); });
-})();
-</script>
-
 </html>
