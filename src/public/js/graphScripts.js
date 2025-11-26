@@ -12,7 +12,12 @@ const diagramInputs = {
     cndSpec: ''
 };
 
-const getCndCore = () => window.CndCore || window.CnDCore;
+const getCndCore = () => {
+    // Prefer correct casing (CnDCore) with Alloy APIs
+    if (window.CnDCore?.AlloyInstance?.parseAlloyXML) return window.CnDCore;
+    if (window.CndCore?.AlloyInstance?.parseAlloyXML) return window.CndCore;
+    return window.CnDCore || window.CndCore;
+};
 const safeTrim = (value) => typeof value === 'string' ? value.trim() : '';
 const readLocal = (key) => {
     try {
@@ -128,13 +133,13 @@ function getCurrentCNDSpec() {
 async function initializePipeline() {
     const core = getCndCore();
     if (!core) {
-        updateStatus('CndCore library not loaded yet.', 'error');
-        throw new Error('CndCore global not available');
+        updateStatus('CnDCore library not loaded yet.', 'error');
+        throw new Error('CnDCore global not available');
     }
 
     try {
         console.log('Complete CND-Core browser bundle loaded successfully');
-        console.log('Available on global CndCore:', Object.keys(core));
+        console.log('Available on global CnDCore:', Object.keys(core));
         
         // Check for Alloy-specific components
         console.log('parseAlloyXML available:', !!core.AlloyInstance?.parseAlloyXML);
@@ -159,7 +164,7 @@ async function initializePipeline() {
 async function generateLayoutForInstance(instanceNumber = 0, { storeLayout = true } = {}) {
     const core = getCndCore();
     if (!core) {
-        throw new Error('CndCore library is not loaded');
+        throw new Error('CnDCore library is not loaded');
     }
 
     updateStatus('Processing Alloy data with ForgeEvaluator...', 'info');

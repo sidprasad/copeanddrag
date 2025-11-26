@@ -31,7 +31,7 @@
     <script src="https://marvl.infotech.monash.edu/webcola/extern/graphlib-dot.min.js" onerror="loadLocalGraphlib()"></script>
     <script src="https://cdn.jsdelivr.net/npm/webcola@3.4.0/WebCola/cola.min.js" onerror="loadLocalCola()"></script>
 
-    <!-- Core + components (provides CndCore/CnDCore and builder mount helpers) -->
+    <!-- Core + components (provides CnDCore and builder mount helpers) -->
     <script src="https://cdn.jsdelivr.net/npm/spytial-core/dist/browser/cnd-core-complete.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/spytial-core/dist/components/react-component-integration.global.js"></script>
 
@@ -156,8 +156,12 @@
     </div>
 
     <script>
-        // Reuse shared resolver if present
-        window.getCndCore = window.getCndCore || (() => window.CndCore || window.CnDCore);
+        // Reuse shared resolver if present; prefer object with Alloy APIs
+        window.getCndCore = window.getCndCore || (() => {
+            if (window.CnDCore?.AlloyInstance?.parseAlloyXML) return window.CnDCore;
+            if (window.CndCore?.AlloyInstance?.parseAlloyXML) return window.CndCore;
+            return window.CnDCore || window.CndCore;
+        });
 
         let parsedAlloyXML = null;
         let instanceNumber = 0;
@@ -361,7 +365,7 @@
                 await window.GraphAPI.initializePipeline();
             } catch (err) {
                 console.error('Pipeline init failed:', err);
-                updateStatus('CndCore not loaded. Check network and reload.', 'error');
+                updateStatus('CnDCore not loaded. Check network and reload.', 'error');
             }
 
             // Session handling
