@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="description" content="None" /><link rel="canonical" href="https://sidprasad.github.io/copeanddrag/" />
+      <link rel="shortcut icon" href="img/favicon.ico" />
+    <title>Cope and Drag Docs</title>
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Home";
+        var mkdocs_page_input_path = "index.md";
+        var mkdocs_page_url = "/copeanddrag/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="." class="icon icon-home"> Cope and Drag Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Home</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#grounded-in-cognitive-science">Grounded In Cognitive Science</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#spatial-relationships-matter">Spatial Relationships Matter</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#visual-differences">Visual Differences</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="getting-started/">Getting Started</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="faq/">FAQ</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="examples/">Examples</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="constraints/">Constraints</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="directives/">Directives</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="underthehood/">Under the Hood</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href=".">Cope and Drag Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Home</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/sidprasad/copeanddrag/edit/master/docs/index.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="cope-and-drag">Cope and Drag</h1>
+<p><strong>Cope and Drag</strong> (or <code>CnD</code>) is a lightweight diagramming language designed for use with the <a href="https://forge-fm.org/">Forge</a> lightweight formal methods tool.</p>
+<p>The key idea is that <code>CnD</code> starts with a meaningful default visualization. Each operation added refines it. For example, you can <em>constrain</em> spatial layout (e.g., child nodes in a binary tree below their parents), <em>group</em> elements (e.g., nodes representing related components in a software architecture), or <em>direct</em> drawing style (e.g., color nodes in a red-black tree based on their color).</p>
+<p>The goal isn’t to create pretty diagrams but to generate <em>useful</em> ones. Diagrams respect the model’s structure and spatial relationships. If the diagram doesn’t match the model, no diagram is generated, and a solver-generated error is produced. This helps identify <em>bad instances</em>, where the model doesn’t match the author's intent, making <code>CnD</code> a meaningful debugging tool.</p>
+<blockquote>
+<p>🔍 <em>See our upcoming <a href="https://www.siddharthaprasad.com/unpublished/pgnk-lightweight-diagramming.pdf">paper in ECOOP 2025</a>.</em>
+</p>
+</blockquote>
+<h2 id="grounded-in-cognitive-science">Grounded In Cognitive Science</h2>
+<p>Cope and Drag is informed by findings from cognitive science about how people draw, interpret, and are confused by diagrams. </p>
+<h3 id="spatial-relationships-matter">Spatial Relationships Matter</h3>
+<blockquote>
+<p><em>“Spatial thinking is the foundation of abstract thought”</em> - <a href="https://en.wikipedia.org/wiki/Barbara_Tversky">Barbara Tversky</a>
+</p>
+</blockquote>
+<p>People read meaning into position - above, below, inside. Cope and Drag's <strong>constraints</strong> allow authors to shape diagram layouts to reflect these meaningful relationships. When spatial relationships in a diagram reflect domain relationships, they serve as cognitive aids. For example, placing a parent above its children in a family tree matches conveys a model of generational relationships, while nesting elements inside containers effectively shows membership.</p>
+<p>These spatial choices aren't just aesthetic; they help convey the semantics of the underlying model more intuitively. By making these relationships explicit through layout, Cope and Drag helps create useful, domain specific visualizations.</p>
+<h3 id="visual-differences">Visual Differences</h3>
+<blockquote>
+<p>💡 <em>In cognitive psychology, pre-attentive processing refers to how we perceive certain visual features—like color, size, and position—almost instantly, before focused attention.</em>
+</p>
+</blockquote>
+<p>Visual features like color, size, and position are processed by our brains almost instantly. Cope and Drag uses these features strategically to make diagrams easier to understand at a glance. Directives allow diagrammers to control <em>how</em> elements are displayed (color, shapes, or size), resulting in diagrams that focus the audience on what matters most.</p>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li><a href="/copeanddrag/getting-started">Getting Started</a>: Install the tool, explore how it interfaces with Forge.</li>
+<li><a href="/copeanddrag/examples">Examples</a>: Play with some pre-built example diagrams.</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="getting-started/" class="btn btn-neutral float-right" title="Getting Started">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/sidprasad/copeanddrag" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+    
+      <span><a href="getting-started/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = ".";</script>
+    <script src="js/theme_extra.js"></script>
+    <script src="js/theme.js"></script>
+      <script src="search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
+
+<!--
+MkDocs version : 1.6.1
+Build Date UTC : 2025-11-26 14:25:02.308520+00:00
+-->

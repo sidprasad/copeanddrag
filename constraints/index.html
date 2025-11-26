@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://sidprasad.github.io/copeanddrag/constraints/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Constraints - Cope and Drag Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Constraints";
+        var mkdocs_page_input_path = "constraints.md";
+        var mkdocs_page_url = "/copeanddrag/constraints/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Cope and Drag Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../getting-started/">Getting Started</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../faq/">FAQ</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../examples/">Examples</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Constraints</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#cyclic-constraints">Cyclic Constraints</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#parameters">Parameters</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#orientation-constraints">Orientation Constraints</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#parameters_1">Parameters</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#grouping-constraints">Grouping Constraints</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#grouping-by-field">Grouping by Field</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#parameters_2">Parameters</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#grouping-by-selector">Grouping by Selector</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#parameters_3">Parameters</a>
+    </li>
+        </ul>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#when-constraints-cannot-be-satisfied">When Constraints Cannot Be Satisfied</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../directives/">Directives</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../underthehood/">Under the Hood</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Cope and Drag Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Constraints</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/sidprasad/copeanddrag/edit/master/docs/constraints.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="constraints">Constraints</h1>
+<p>Constraints define spatial relationships between elements in the diagram. Each constraint consists of a <strong>type</strong> and associated <strong>parameters</strong>.</p>
+<h2 id="cyclic-constraints"><strong>Cyclic Constraints</strong></h2>
+<p>Cyclic constraints arrange related elements in a circular layout. <em>To be more precise, related elements are laid out roughly as a regular shape of n sides, where there are n related elements in the selector.</em></p>
+<p>The layout below is used in the <a href="/copeanddrag/examples#ringlights">Ring Lights</a>
+example to arrange a ring of lights along the boundary of a pentagon.</p>
+<div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nt">constraints</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">cyclic</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">selector</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">left</span>
+<span class="w">      </span><span class="nt">direction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">clockwise</span>
+<span class="nt">directives</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">flag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hideDisconnectedBuiltIns</span>
+</code></pre></div></td></tr></table></div>
+
+<h4 id="parameters">Parameters</h4>
+<ul>
+<li><code>selector</code> : A Forge expression that determines which elements upon which the constraint acts. This expression must return a set of elements of arity &gt;= 2, and the first and last of each tuple will be used. If multiple closed relations are returned, multiple cycles are  generated. For example, a selector evaluating to <code>{(A, B), (B, C), (C,D), (E,F), (F,E)}</code> will construct two independent shapes -- one relating <code>A, B, C</code> and another relating <code>E,F</code>.</li>
+<li><code>direction</code> : [Optional] Direction in which elements will be laid out. One of <code>clockwise</code> or <code>counterclockwise</code>. Defaults to <code>clockwise</code></li>
+</ul>
+<h2 id="orientation-constraints"><strong>Orientation Constraints</strong></h2>
+<p>Specify the relative positioning of elements in a graph. The layout below is used in the <a href="/copeanddrag/examples/#bt">binary tree example</a> shows how
+to ensure that a node's right children are laid out below it and to its right, and that its left children are laid out below it and to its left.</p>
+<div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nt">constraints</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">orientation</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">selector</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">right</span>
+<span class="w">      </span><span class="nt">directions</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">right</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">below</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">orientation</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">selector</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">left</span>
+<span class="w">      </span><span class="nt">directions</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">left</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">below</span>
+<span class="nt">directives</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">attribute</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">key</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">flag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hideDisconnectedBuiltIns</span>
+</code></pre></div></td></tr></table></div>
+
+<h4 id="parameters_1">Parameters</h4>
+<ul>
+<li><code>selector</code> : A Forge expression that determines which elements upon which the constraint acts. This expression must return a set of elements of arity &gt;= 2, and the first and last of each tuple will be used.</li>
+<li><code>directions</code> : Directions in which elements will be laid out. List of directions, which can be
+                <code>left</code>, <code>right</code>, <code>above</code>, <code>below</code>, <code>directlyAbove</code>, <code>directlyBelow</code>, <code>directlyLeft</code>, <code>directlyRight</code>.</li>
+</ul>
+<h2 id="grouping-constraints"><strong>Grouping Constraints</strong></h2>
+<p>Group elements together based on either a <strong>selector</strong> OR a <strong>field</strong>. Groups <strong>cannot</strong> intersect unless one is subsumed by another.</p>
+<h3 id="grouping-by-field">Grouping by Field</h3>
+<p>Grouping by field removes multiple edges between the group source(s) and target(s), and replaces them with the lowest number of arrows between group and element. The layout below shows the pertinent part of the <a href="/copeanddrag/examples/#fruit">Fruit in Baskets</a> example, which uses the 0th element 
+of the <code>fruit</code> relation as a key and adds elements in the 1st part of the relation to the associated group.</p>
+<div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">group</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fruit</span>
+<span class="w">      </span><span class="nt">groupOn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">      </span><span class="nt">addToGroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+</code></pre></div></td></tr></table></div>
+
+<h4 id="parameters_2">Parameters</h4>
+<ul>
+<li><code>field</code> : Name of the field in the source specification upon which the constraint acts.</li>
+<li><code>groupOn</code> : The 0 indexed element of the field that is used to group elements.</li>
+<li><code>addToGroup</code>: The 0 indexed element of the field which should be added to the group.</li>
+</ul>
+<h3 id="grouping-by-selector">Grouping by Selector</h3>
+<p>Grouping by selector affords a more flexible way to create groups. This operation, however, does not have required context to collapse multiple graph edges. As a result, it <strong>does not remove any edges from the graph</strong>. The layout below shows the pertinent part of the <a href="/copeanddrag/examples/#fruit">Fruit in Baskets</a> example, which uses a n-ary selector to group rotten fruit that are in the same basket together.</p>
+<div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">group</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">selector</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{b</span><span class="nv"> </span><span class="s">:</span><span class="nv"> </span><span class="s">Basket,</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">:</span><span class="nv"> </span><span class="s">Fruit</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">(a</span><span class="nv"> </span><span class="s">in</span><span class="nv"> </span><span class="s">b.fruit)</span><span class="nv"> </span><span class="s">and</span><span class="nv"> </span><span class="s">a.status</span><span class="nv"> </span><span class="s">=</span><span class="nv"> </span><span class="s">Rotten</span><span class="nv"> </span><span class="s">}&#39;</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rottenFruit</span>
+</code></pre></div></td></tr></table></div>
+
+<h4 id="parameters_3">Parameters</h4>
+<ul>
+<li><code>selector</code> : A Forge expression that determines which elements upon which the constraint acts.<ul>
+<li>If the selector evaluates to a set of singletons, all singletons are added to the group.</li>
+<li>If the selector evaluates to a set of tuples, the first element of the tuple is used as as a key upon which to group, while the last element of the tuple is added to the group associated with that key. For example, </li>
+</ul>
+</li>
+<li><code>name</code> : Name of the group to be displayed.</li>
+</ul>
+<h2 id="when-constraints-cannot-be-satisfied">When Constraints Cannot Be Satisfied</h2>
+<p>All CnD constraints are <strong>hard constraints</strong>, and thus must be satisfied for a diagram to be produced. Constraints might not be satisfied for one of two reasons:</p>
+<p><strong>A single CnD constraint definition could be inherently unsatisfiable.</strong> For example, a constraint on the <code>next</code> field that requires the same field to be laid out both leftwards and rightwards:</p>
+<div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">orientation</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">selector</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">next</span>
+<span class="w">    </span><span class="nt">directions</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">right</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">left</span><span class="p p-Indicator">]</span>
+</code></pre></div></td></tr></table></div>
+
+<p>This represents a bug in the CnD spec, and can be identified statically. In this case, CnD produces an error message in terms of the constraints that could not be satisfied.</p>
+<p><strong>Some constraints may be individually satisfiable, but become contradictory when laying out a specific instance.</strong> This is akin to a dynamic error, as it depends on the structure of the instance being visualized. </p>
+<p>In both these cases, CnD <strong>does not produce a diagram</strong>. Instead, it provides an error message explaining that the constraints could not be met. </p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../examples/" class="btn btn-neutral float-left" title="Examples"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../directives/" class="btn btn-neutral float-right" title="Directives">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/sidprasad/copeanddrag" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../examples/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../directives/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://sidprasad.github.io/copeanddrag/directives/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Directives - Cope and Drag Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Directives";
+        var mkdocs_page_input_path = "directives.md";
+        var mkdocs_page_url = "/copeanddrag/directives/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Cope and Drag Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../getting-started/">Getting Started</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../faq/">FAQ</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../examples/">Examples</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../constraints/">Constraints</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Directives</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#attribute-directives">Attribute Directives</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#parameters">Parameters</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#field-hiding-directives">Field Hiding Directives</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#parameters_1">Parameters</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#size-directives">Size Directives</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#parameters_2">Parameters</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#pictorial-directives">Pictorial Directives</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#parameters_3">Parameters</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#built-in-icons">Built In Icons</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#color-directives">Color Directives</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#parameters_4">Parameters</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#projection">Projection</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#parameters_5">Parameters</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#visibility-flags">Visibility Flags</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#inferred-edge">Inferred Edge</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#parameters_6">Parameters</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../underthehood/">Under the Hood</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Cope and Drag Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Directives</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/sidprasad/copeanddrag/edit/master/docs/directives.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="directives">Directives</h1>
+<p>Directives control the visual representation of elements, including icons, colors, attributes, and visibility.</p>
+<h3 id="attribute-directives"><strong>Attribute Directives</strong></h3>
+<p>These replace graph edges representing a relation with attribute fields within the source node of the edge. </p>
+<div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code>directives:
+    - attribute: {field: id}
+</code></pre></div></td></tr></table></div>
+
+<h4 id="parameters">Parameters</h4>
+<ul>
+<li><code>field</code> : Name of the field in the source specification upon which the directive acts.</li>
+</ul>
+<h3 id="field-hiding-directives">Field Hiding Directives</h3>
+<p>These remove graph edges representing a relation from the graph. This is similar to an attribute directive, but without 
+adding data to an edge's source node.</p>
+<div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code>directives:
+  - hideField:
+      field: id
+</code></pre></div></td></tr></table></div>
+
+<h4 id="parameters_1">Parameters</h4>
+<ul>
+<li><code>field</code> : Name of the field in the source specification upon which the directive acts.</li>
+</ul>
+<h3 id="size-directives">Size Directives</h3>
+<p>Assign a size to all atoms that meet a certain selector.</p>
+<div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nt">directives</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">size</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">selector</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Person&quot;</span>
+<span class="w">      </span><span class="nt">height</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">      </span><span class="nt">width</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+</code></pre></div></td></tr></table></div>
+
+<h4 id="parameters_2">Parameters</h4>
+<ul>
+<li><code>selector</code> : A Forge expression that determines which elements upon which the directive acts. This expression must return a set of singletons.</li>
+<li><code>height</code> : Height with which the node should be displayed.</li>
+<li><code>width</code> : Width with which the node should be displayed.</li>
+</ul>
+<h3 id="pictorial-directives"><strong>Pictorial Directives</strong></h3>
+<p>Assign an icon to all atoms of a certain sig.</p>
+<div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nt">directives</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">icon</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">selector</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Person</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/person.png</span>
+</code></pre></div></td></tr></table></div>
+
+<h4 id="parameters_3">Parameters</h4>
+<ul>
+<li><code>selector</code> : A Forge expression that determines which elements upon which the directive acts. This expression must return a set of singletons.</li>
+<li><code>path</code> : Path to the icon image (<code>png</code> and <code>jpg</code> supported). This path must be a publicly accessible URI.</li>
+<li><code>showLabels</code> : [Optional, default <code>false</code>] Should atom labels (e.g., atom name, attributes) be shown in addition to icons. If <code>true</code>, the icon is made smaller to prevent overlap with label text. </li>
+</ul>
+<h4 id="built-in-icons">Built In Icons</h4>
+<p>Cope and Drag also includes a selection of <a href="/copeanddrag/bundledicons">built in icons</a> for ease of use.</p>
+<h3 id="color-directives"><strong>Color Directives</strong></h3>
+<p>Allow specific hex-colors (or simple color names) to be associated with selected atoms.</p>
+<div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div><pre><span></span><code>directives:
+    - color:
+        selector: &quot;Apple&quot;
+        value: &quot;red&quot;
+</code></pre></div></td></tr></table></div>
+
+<h4 id="parameters_4">Parameters</h4>
+<ul>
+<li><code>selector</code> : A Forge expression that determines which elements upon which the constraint acts. This expression must return a set of singletons.</li>
+<li><code>value</code> : Hex (or simple english) description of the color to be applied.</li>
+</ul>
+<h3 id="projection"><strong>Projection</strong></h3>
+<p>These allow <a href="https://alloy.readthedocs.io/en/latest/tooling/visualizer.html#projection">projections</a> over atoms of a certain type. </p>
+<div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code>directives:
+    - projection: {sig: Ord}
+</code></pre></div></td></tr></table></div>
+
+<h4 id="parameters_5">Parameters</h4>
+<ul>
+<li><code>sig</code> : Sig name in the source specification.</li>
+</ul>
+<h3 id="visibility-flags"><strong>Visibility Flags</strong></h3>
+<p>Controls which elements are hidden. </p>
+<div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nt">directives</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">flag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hideDisconnectedBuiltIns</span>
+</code></pre></div></td></tr></table></div>
+
+<p>Current flags are:
+  - <code>hideDisconnected</code>: If true, hide all atoms in the graph that are not referenced by a relation.
+  - <code>hideDisconnectedBuiltIns</code>: If true, hide all atoms of built-in type (ex. <code>Int</code>) that are not referenced by a relation.</p>
+<h3 id="inferred-edge">Inferred Edge</h3>
+<p>The <code>inferredEdge</code> directive introduces visually distinct edges that represent inferred relationships — connections the diagrammer wants the viewer to see to better understand the model. These edges are not part of the model itself but help the viewer mentally hold and interpret higher-level connections.</p>
+<div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nt">directives</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">inferredEdge</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">selector</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{n1</span><span class="nv"> </span><span class="s">:</span><span class="nv"> </span><span class="s">Node,</span><span class="nv"> </span><span class="s">i</span><span class="nv"> </span><span class="s">:</span><span class="nv"> </span><span class="s">Int,</span><span class="nv"> </span><span class="s">n2</span><span class="nv"> </span><span class="s">:</span><span class="nv"> </span><span class="s">Node</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">n1-&gt;n2-&gt;i</span><span class="nv"> </span><span class="s">in</span><span class="nv"> </span><span class="s">edges</span><span class="nv"> </span><span class="s">}&#39;</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">weight</span>
+</code></pre></div></td></tr></table></div>
+
+<h4 id="parameters_6">Parameters</h4>
+<ul>
+<li><code>selector</code> : A Forge expression that determines which elements upon which the constraint acts. This expression must return a set of elements of arity &gt;= 2, and the first and last of each tuple will be used.</li>
+<li><code>name</code> : The label to be given to this edge. Any ''middle'' tuple elements in the selector (i.e. elements that are not first or last in the tuple) are appended to this name to better identify edges.</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../constraints/" class="btn btn-neutral float-left" title="Constraints"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../underthehood/" class="btn btn-neutral float-right" title="Under the Hood">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/sidprasad/copeanddrag" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../constraints/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../underthehood/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
