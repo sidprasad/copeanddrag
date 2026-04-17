@@ -1,7 +1,7 @@
 # sterling-connection
 
 The `sterling-connection` package is a Redux middleware that maintains a
-WebSocket connection between Spytial Sterling and a data provider such as
+WebSocket connection between Cope and Drag and a data provider such as
 Alloy or Forge.
 
 Refer to the

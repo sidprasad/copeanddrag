@@ -1,6 +1,6 @@
 # Release Process
 
-This document describes how to create a new release of Spytial Sterling.
+This document describes how to create a new release of Cope and Drag.
 
 ## Quick Release (Recommended)
 
