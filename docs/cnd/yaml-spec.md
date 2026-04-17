@@ -1,6 +1,6 @@
 # YAML Specification
 
-The CnD layout specification describes how diagrams are laid out as a YAML document. A spec has two top-level sections — both optional:
+The CnD layout specification describes how diagrams are laid out as a YAML document. A spec has four top-level sections, all optional:
 
 ```yaml
 constraints:
@@ -8,12 +8,20 @@ constraints:
 
 directives:
   - # ... directive definitions
+
+projections:
+  - # ... projection definitions
+
+temporal:
+  policy: # ... sequence policy
 ```
 
 An empty specification is valid.
 
-**Constraints** control the structural layout of nodes and their spatial relationships.
-**Directives** control visual styling and presentation without affecting layout structure.
+- **`constraints`** — structural layout of nodes and their spatial relationships. Reference below.
+- **`directives`** — visual styling and presentation (no effect on layout structure). Reference below.
+- **`projections`** — slice the instance along a sig axis and render multiple panes. See [Projections](./projections).
+- **`temporal`** — sequence policy for navigating traces from `forge/temporal` models. See [Temporal Mode](./temporal).
 
 ---
 
@@ -595,7 +603,7 @@ Selectors are expressions that identify atoms or tuples. The syntax depends on y
 | `selector1 -> selector2` | Product | `Person -> Int` |
 | `selector1.selector2` | Join | `Person.parent` |
 
-See [Evaluators](./evaluators) for the full query languages.
+See [Selectors](./evaluators) for the full operator set.
 
 ---
 

@@ -21,6 +21,7 @@ export default defineConfig({
           text: 'Guide',
           items: [
             { text: 'Getting Started', link: '/guide/getting-started' },
+            { text: 'Edit Mode (experimental)', link: '/guide/edit-mode' },
           ],
         },
       ],
@@ -30,8 +31,10 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/cnd/' },
             { text: 'YAML Specification', link: '/cnd/yaml-spec' },
-            { text: 'Evaluators', link: '/cnd/evaluators' },
+            { text: 'Selectors', link: '/cnd/evaluators' },
             { text: 'Field-Based Selectors', link: '/cnd/field-selectors' },
+            { text: 'Projections', link: '/cnd/projections' },
+            { text: 'Temporal Mode', link: '/cnd/temporal' },
             { text: 'Selector Synthesis', link: '/cnd/selector-synthesis' },
           ],
         },

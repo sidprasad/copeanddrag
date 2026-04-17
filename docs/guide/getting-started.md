@@ -9,6 +9,15 @@ Cope and Drag (CnD) is a diagramming approach built on top of [Sterling](https:/
 - **[CnD Language](/cnd/)** — the selector and constraint DSL.
 - **Guide** (this section) — install, embed, and use CnD with Alloy or Forge.
 
+## Feature tour
+
+- **[CnD language](/cnd/)** — constraints and directives for spatial layout.
+- **[Projections](/cnd/projections)** — slice an instance along a sig axis, render multiple panes.
+- **[Temporal mode](/cnd/temporal)** — navigate traces from `forge/temporal` models with a sequence policy.
+- **[Edit mode](/guide/edit-mode)** *(experimental)* — modify an instance in-browser and export as `inst`.
+
+Poke at the [demos](https://github.com/sidprasad/copeanddrag/tree/main/demos) to see each feature in use — notably [`demos/gc`](https://github.com/sidprasad/copeanddrag/tree/main/demos/gc) (projections), [`demos/rc2/goats_and_wolves.cnd`](https://github.com/sidprasad/copeanddrag/blob/main/demos/rc2/goats_and_wolves.cnd) (temporal), and [`demos/bst`](https://github.com/sidprasad/copeanddrag/tree/main/demos/bst) (pure layout).
+
 ## Install and run from source
 
 ```bash
@@ -22,7 +31,5 @@ The app serves on `http://localhost:8081`. If you're pointing at a Forge provide
 
 ## Next steps
 
-More content is coming. In the meantime:
-
-- Poke at the [examples in the repo](https://github.com/sidprasad/copeanddrag/tree/main/demos).
 - Read the [CnD language overview](/cnd/).
+- Skim the [YAML specification](/cnd/yaml-spec) for the full constraint and directive reference.
