@@ -1,4 +1,4 @@
-import { FIXTURES, getActiveFixture } from './fixtures';
+import { FIXTURES, generatorNameFor, getActiveFixture } from './fixtures';
 
 /**
  * Provider metadata. We advertise each fixture in the registry as a
@@ -35,8 +35,8 @@ export function mockData() {
     return { type: 'data', version: 1, payload: { enter: [] } };
   }
 
-  const fixture = getActiveFixture();
-  return datumFor(fixture.generatorName ?? 'rc', fixture.xml);
+  const { key, fixture } = getActiveFixture();
+  return datumFor(generatorNameFor(key), fixture.xml);
 }
 
 export function mockClick(payload: {
@@ -48,7 +48,7 @@ export function mockClick(payload: {
   if (!requested || !(requested in FIXTURES)) {
     return { type: 'data', version: 1, payload: { enter: [] } };
   }
-  return datumFor(requested, FIXTURES[requested].xml);
+  return datumFor(generatorNameFor(requested), FIXTURES[requested].xml);
 }
 
 export function mockEval(req: { id: string; expression: string }) {

@@ -1,5 +1,5 @@
 import { getActiveFixture } from './fixtures';
 
 export function getMockXml(): string {
-  return getActiveFixture().xml;
+  return getActiveFixture().fixture.xml;
 }

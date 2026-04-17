@@ -33,8 +33,10 @@ export const DEFAULT_FIXTURE = 'rc';
 /**
  * Resolve which fixture to serve based on the current page URL's
  * `?fixture=<key>` query param. Unknown keys log and fall back to the default.
+ * Returns both the resolved key and the Fixture so callers can derive a
+ * generatorName (defaulting to the key when the fixture doesn't override it).
  */
-export function getActiveFixture(): Fixture {
+export function getActiveFixture(): { key: string; fixture: Fixture } {
   let key = DEFAULT_FIXTURE;
   if (typeof window !== 'undefined' && window.location?.search) {
     const params = new URLSearchParams(window.location.search);
@@ -49,5 +51,10 @@ export function getActiveFixture(): Fixture {
       }
     }
   }
-  return FIXTURES[key];
+  return { key, fixture: FIXTURES[key] };
+}
+
+/** Generator name exposed for a given registry key — fixture override or the key itself. */
+export function generatorNameFor(key: string): string {
+  return FIXTURES[key]?.generatorName ?? key;
 }
