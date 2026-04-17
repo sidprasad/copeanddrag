@@ -14,6 +14,12 @@
       "port": 8081
     },
     {
+      "name": "sterling-mock",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["webpack", "serve", "--mode=development", "--env", "provider=mock"],
+      "port": 8081
+    },
+    {
       "name": "docs",
       "runtimeExecutable": "bash",
       "runtimeArgs": [

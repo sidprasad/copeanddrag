@@ -22,28 +22,28 @@ const ExplorerDrawer = () => {
   // const [generator, setGenerator] = useState<string|undefined>(generatorNames ? generatorNames[0]: undefined);
   const generator = useSterlingSelector(selectSelectedGenerator);
 
-  // There are two expected cases here:
-  //   (1) We have an active datum (and thus a generator name, if the provider uses generators);
-  //   (2) We have no active datum (and thus should give the user a menu of commands).
-  // In the event we have neither an active datum /or/ a list of generator names, don't show the tab.
-
-  if (!activeDatum && (!generatorNames || generatorNames.length < 1)) return null;
-  
-  // The generator is *new* if we have yet to fetch any instances from it. 
-  const generatorIsNew = 
+  // The generator is *new* if we have yet to fetch any instances from it.
+  const generatorIsNew =
     !data.some(d => d.generatorName == generator)
 
   // When clicking a generator name, it should request an instance if we have no
-  // data for that generator yet. Otherwise, it should just change the active datum. 
+  // data for that generator yet. Otherwise, it should just change the active datum.
   const onClickRun = useCallback(
     () => {
       if(generator !== undefined && generatorIsNew) {
         console.log(`Running new generator: ${generator}`)
-        dispatch(buttonClicked({id: undefined, 
-                                onClick: "next", 
+        dispatch(buttonClicked({id: undefined,
+                                onClick: "next",
                                 context: {generatorName: generator}}))}},
     [generator, data]
   );
+
+  // There are two expected cases here:
+  //   (1) We have an active datum (and thus a generator name, if the provider uses generators);
+  //   (2) We have no active datum (and thus should give the user a menu of commands).
+  // In the event we have neither an active datum /or/ a list of generator names, don't show the tab.
+  // Keep this AFTER all hook calls — conditional returns before hooks violate the Rules of Hooks.
+  if (!activeDatum && (!generatorNames || generatorNames.length < 1)) return null;
 
   return (
     <>

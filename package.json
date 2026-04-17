@@ -14,10 +14,13 @@
   "scripts": {
     "build:alloy": "webpack --env provider=alloy",
     "build:forge": "webpack --env provider=forge",
+    "build:mock": "webpack --env provider=mock",
     "dev:alloy": "webpack serve --open --mode=development --env provider=alloy",
     "dev:forge": "webpack serve --open --mode=development --env provider=forge",
+    "dev:mock": "webpack serve --open --mode=development --env provider=mock",
     "dev:alloy:synthesis": "webpack serve --open --mode=development --env provider=alloy --env synthesis=true",
     "dev:forge:synthesis": "webpack serve --open --mode=development --env provider=forge --env synthesis=true",
+    "dev:mock:synthesis": "webpack serve --open --mode=development --env provider=mock --env synthesis=true",
     "e2e": "webpack serve --mode=development --env provider=alloy",
     "test": "yarn node --experimental-vm-modules $(yarn bin jest)",
     "predeploy:alloy": "webpack --env provider=alloy",

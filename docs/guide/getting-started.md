@@ -29,6 +29,10 @@ yarn run dev:forge   # or: yarn run dev:alloy
 
 The app serves on `http://localhost:8081`. If you're pointing at a Forge provider on a non-default port, append it as a query parameter — e.g. `http://localhost:8081/?62703`.
 
+To explore CnD without running a solver, use `yarn run dev:mock` — it serves bundled Alloy/Forge XML fixtures over an in-process fake WebSocket, with no provider process required. Good for UI work, docs screenshots, demos, and deterministic test scenarios.
+
+Each fixture is exposed as a Sterling "generator" — pick one in the Explorer tab and click **Run** to load it, the same flow as a real Forge/Alloy run. To skip the picker on load, pass a `?fixture=<name>` query param (e.g. `http://localhost:8081/?fixture=rc`) and the mock auto-serves that fixture. The registry lives at [packages/sterling-connection/src/mock/fixtures.ts](https://github.com/sidprasad/copeanddrag/blob/main/packages/sterling-connection/src/mock/fixtures.ts) — add a new `.xml` fixture by dropping it in the tree and registering one line.
+
 ## Next steps
 
 - Read the [CnD language overview](/cnd/).
