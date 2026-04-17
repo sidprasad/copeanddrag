@@ -1,0 +1,6 @@
+constraints:
+  - orientation: {directions: [left], selector: left}
+
+directives:
+  - attribute: {field: val}
+  - flag: hideDisconnectedBuiltIns

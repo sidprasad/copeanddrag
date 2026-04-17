@@ -1,3 +1,0 @@
-constraints:
-    - orientation: {field: north, directions : [directlyAbove]}
-    - orientation: {field: east, directions: [directlyRight] }

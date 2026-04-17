@@ -1,6 +1,0 @@
-constraints:
-  - cyclic:
-      field: left
-      direction: clockwise
-directives:
-  - flag: hideDisconnected

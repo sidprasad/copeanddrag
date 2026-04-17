@@ -1,20 +1,60 @@
 {
-  "compilerOptions": {
-    /* Visit https://aka.ms/tsconfig to read more about this file */
-
-    /* Language and Environment */
-    "target": "ES2021",                                  /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
-    "lib": ["ES2021", "dom"],                            /* Specify a set of bundled library declaration files that describe the target runtime environment. */
-    "module": "commonjs",                                /* Specify what module code is generated. */
-    "strict": false,                                      /* Enable all strict type-checking options. */
-    "esModuleInterop": true,                             /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. */
-    "skipLibCheck": true,                                /* Skip type checking of all declaration files. */
-    "forceConsistentCasingInFileNames": true,            /* Disallow inconsistently-cased references to the same file. */
-    "outDir": "./dist",                                  /* Redirect output structure to the directory. */
-    "rootDir": "./src",                                  /* Specify the root directory of input files. */
-    "resolveJsonModule": true,                           /* Include modules imported with .json extension */
-    "sourceMap": true                                    /* Generates corresponding '.map' file. */
-  },
-  "include": ["src/**/*"],                               /* Include all TypeScript files in the src directory. */
-  "exclude": ["node_modules", "dist"]                    /* Exclude node_modules and dist directories. */
-}
+    "compilerOptions": {
+      "module": "esnext",
+      "target": "es6",
+      "strict": true,
+      "lib": [
+        "dom",
+        "dom.iterable",
+        "esnext"
+      ],      
+      "esModuleInterop": true,
+      "allowJs": true,
+      "allowSyntheticDefaultImports": true,
+      "jsx": "react-jsx",
+      "isolatedModules": true,
+      "skipLibCheck": true,
+      "noEmit": true,
+      "moduleResolution": "node",
+      "baseUrl": "./packages",
+      "paths": {
+        "@/alloy-graph": [
+          "alloy-graph/index.ts"
+        ],
+        "@/alloy-instance": [
+          "alloy-instance/index.ts"
+        ],
+        "@/graph-lib": [
+          "graph-lib/index.ts"
+        ],
+        "@/graph-svg": [
+          "graph-svg-custom/index.ts"
+        ],
+        "@/sterling-connection": [
+          "sterling-connection/index.ts"
+        ],
+        "@/sterling-hooks": [
+          "sterling-hooks/index.ts"
+        ],
+        "@/sterling-theme": [
+          "sterling-theme/index.ts"
+        ],
+        "@/sterling-ui": [
+          "sterling-ui/index.ts"
+        ],
+        "@/test-data/*": [
+          "test-data/*"
+        ],
+        "@/vector2": [
+          "vector2/index.ts"
+        ]
+      }
+    },
+    "include": [
+      "packages/**/*.ts",
+      "packages/**/*.tsx"
+    ],
+    "exclude": [
+      "node_modules"
+    ]
+  }

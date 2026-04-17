@@ -1,0 +1,26 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "sterling-alloy",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["webpack", "serve", "--mode=development", "--env", "provider=alloy"],
+      "port": 8081
+    },
+    {
+      "name": "sterling-forge",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["webpack", "serve", "--mode=development", "--env", "provider=forge"],
+      "port": 8081
+    },
+    {
+      "name": "docs",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-c",
+        "source ~/.nvm/nvm.sh && nvm use 22 >/dev/null && yarn --cwd docs dev --port 5173"
+      ],
+      "port": 5173
+    }
+  ]
+}

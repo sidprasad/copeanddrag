@@ -1,5 +1,0 @@
-constraints:
-  - orientation:
-      directions:
-        - left
-      selector: '{ a : A, b : B | a in A }'

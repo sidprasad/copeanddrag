@@ -1,0 +1,13 @@
+{
+  "folders": [
+    {
+      "path": "."
+    },
+    {
+      "path": "../sterling-e2e"
+    }
+  ],
+  "settings": {
+    "typescript.tsdk": "sterling-ts/node_modules/typescript/lib"
+  }
+}

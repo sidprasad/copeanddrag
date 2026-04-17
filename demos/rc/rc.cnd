@@ -1,0 +1,6 @@
+
+temporal:
+  policy: stability
+
+directives:
+  - flag: hideDisconnectedBuiltIns

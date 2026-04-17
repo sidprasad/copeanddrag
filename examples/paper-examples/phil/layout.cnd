@@ -1,7 +1,0 @@
-constraints:
-    - cyclic : {field : next}
-directives:
-    - attribute : {field: left}
-    - attribute : {field: right}
-    - flag: hideDisconnected
-    - projection : {sig: this/Table}

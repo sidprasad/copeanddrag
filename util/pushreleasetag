@@ -1,0 +1,87 @@
+#!/bin/bash
+
+# Push a release tag based on the version in package.json
+# Usage: ./util/pushreleasetag [--dry-run]
+
+set -e
+
+# Get the directory where the script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Change to project root
+cd "$PROJECT_ROOT"
+
+# Read version from package.json
+VERSION=$(node -p "require('./package.json').version")
+
+if [ -z "$VERSION" ]; then
+  echo "Error: Could not read version from package.json"
+  exit 1
+fi
+
+TAG="v${VERSION}"
+
+echo "Current version in package.json: ${VERSION}"
+echo "Tag to create: ${TAG}"
+
+# Check if tag already exists locally
+if git rev-parse "$TAG" >/dev/null 2>&1; then
+  echo "Error: Tag ${TAG} already exists locally"
+  echo "To recreate, delete it first with: git tag -d ${TAG}"
+  exit 1
+fi
+
+# Check if tag already exists on remote
+if git ls-remote --tags origin | grep -q "refs/tags/${TAG}"; then
+  echo "Error: Tag ${TAG} already exists on remote"
+  echo "Use a different version or delete the remote tag"
+  exit 1
+fi
+
+# Check if we're in dry-run mode
+DRY_RUN=false
+if [ "$1" = "--dry-run" ]; then
+  DRY_RUN=true
+  echo ""
+  echo "DRY RUN MODE - No changes will be made"
+fi
+
+echo ""
+echo "This will:"
+echo "  1. Create tag: ${TAG}"
+echo "  2. Push tag to origin"
+echo "  3. Trigger GitHub Actions to build and create a release"
+echo ""
+
+if [ "$DRY_RUN" = false ]; then
+  read -p "Continue? (y/N) " -n 1 -r
+  echo
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "Aborted."
+    exit 0
+  fi
+
+  # Create the tag
+  echo "Creating tag ${TAG}..."
+  git tag -a "$TAG" -m "Release ${VERSION}"
+
+  # Push the tag
+  echo "Pushing tag to origin..."
+  git push origin "$TAG"
+
+  echo ""
+  echo "✓ Tag ${TAG} pushed successfully!"
+  echo ""
+  echo "GitHub Actions will now:"
+  echo "  - Run tests"
+  echo "  - Build Alloy and Forge distributions"
+  echo "  - Create a GitHub release with downloadable assets"
+  echo ""
+  echo "Check the progress at:"
+  echo "https://github.com/$(git config --get remote.origin.url | sed 's/.*github.com[:/]\(.*\)\.git/\1/')/actions"
+else
+  echo ""
+  echo "DRY RUN: Would create and push tag ${TAG}"
+  echo "Run without --dry-run to actually push the tag"
+fi

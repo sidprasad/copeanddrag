@@ -1,9 +1,0 @@
-constraints:
-    - orientation: {field: next, directions : [directlyRight] }
-    - cyclic : {field: successor}
-directives:
-    - attribute : { field: ID }
-    - attribute : {field: highestSeenID}
-    - flag : hideDisconnected
-    - projection : {sig : Election}
-    - projection : {sig: State}

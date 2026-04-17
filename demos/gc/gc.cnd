@@ -1,0 +1,7 @@
+projections:
+  - sig: State
+    orderBy: "Initial->Changed + Changed->Marked + Marked->Swept"
+
+directives:
+  - edgeColor: {value: '#0000ff', field: next, weight: 2}
+  - flag: hideDisconnectedBuiltIns

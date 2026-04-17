@@ -1,0 +1,845 @@
+<alloy builddate="Friday, February 27th, 2026">
+<instance bitwidth="4" maxseq="-1" command="temporary-name_rc_1" filename="/Users/siddharthaprasad/Desktop/TAing/1710/sterling-ts/demos/rc/rc.frg" version="5.0.1" prefixLength="12" loop="10" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="GWBoat" ID="4" parentID="2">
+<atom label="GWBoat0"/>
+</sig>
+
+<sig label="GWAnimal" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Goat" ID="6" parentID="5">
+<atom label="Goat0"/><atom label="Goat1"/><atom label="Goat2"/>
+</sig>
+
+<sig label="Wolf" ID="7" parentID="5">
+<atom label="Wolf0"/><atom label="Wolf1"/><atom label="Wolf2"/>
+</sig>
+
+<sig label="Position" ID="8" parentID="2">
+
+</sig>
+
+<sig label="Near" ID="9" parentID="8">
+<atom label="Near0"/>
+</sig>
+
+<sig label="Far" ID="10" parentID="8">
+<atom label="Far0"/>
+</sig>
+
+<field label="animals" ID="11" parentID="8">
+<tuple><atom label="Near0"/><atom label="Goat0"/></tuple>
+<tuple><atom label="Near0"/><atom label="Goat1"/></tuple>
+<tuple><atom label="Near0"/><atom label="Goat2"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf0"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf1"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf2"/></tuple>
+<types><type ID="8"/><type ID="5"/></types>
+
+</field>
+
+<field label="location" ID="12" parentID="4">
+<tuple><atom label="GWBoat0"/><atom label="Near0"/></tuple>
+<types><type ID="4"/><type ID="8"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_rc_1" filename="/Users/siddharthaprasad/Desktop/TAing/1710/sterling-ts/demos/rc/rc.frg" version="5.0.1" prefixLength="12" loop="10" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="GWBoat" ID="4" parentID="2">
+<atom label="GWBoat0"/>
+</sig>
+
+<sig label="GWAnimal" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Goat" ID="6" parentID="5">
+<atom label="Goat0"/><atom label="Goat1"/><atom label="Goat2"/>
+</sig>
+
+<sig label="Wolf" ID="7" parentID="5">
+<atom label="Wolf0"/><atom label="Wolf1"/><atom label="Wolf2"/>
+</sig>
+
+<sig label="Position" ID="8" parentID="2">
+
+</sig>
+
+<sig label="Near" ID="9" parentID="8">
+<atom label="Near0"/>
+</sig>
+
+<sig label="Far" ID="10" parentID="8">
+<atom label="Far0"/>
+</sig>
+
+<field label="animals" ID="11" parentID="8">
+<tuple><atom label="Near0"/><atom label="Goat0"/></tuple>
+<tuple><atom label="Near0"/><atom label="Goat1"/></tuple>
+<tuple><atom label="Near0"/><atom label="Goat2"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf2"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf0"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf1"/></tuple>
+<types><type ID="8"/><type ID="5"/></types>
+
+</field>
+
+<field label="location" ID="12" parentID="4">
+<tuple><atom label="GWBoat0"/><atom label="Far0"/></tuple>
+<types><type ID="4"/><type ID="8"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_rc_1" filename="/Users/siddharthaprasad/Desktop/TAing/1710/sterling-ts/demos/rc/rc.frg" version="5.0.1" prefixLength="12" loop="10" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="GWBoat" ID="4" parentID="2">
+<atom label="GWBoat0"/>
+</sig>
+
+<sig label="GWAnimal" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Goat" ID="6" parentID="5">
+<atom label="Goat0"/><atom label="Goat1"/><atom label="Goat2"/>
+</sig>
+
+<sig label="Wolf" ID="7" parentID="5">
+<atom label="Wolf0"/><atom label="Wolf1"/><atom label="Wolf2"/>
+</sig>
+
+<sig label="Position" ID="8" parentID="2">
+
+</sig>
+
+<sig label="Near" ID="9" parentID="8">
+<atom label="Near0"/>
+</sig>
+
+<sig label="Far" ID="10" parentID="8">
+<atom label="Far0"/>
+</sig>
+
+<field label="animals" ID="11" parentID="8">
+<tuple><atom label="Near0"/><atom label="Goat0"/></tuple>
+<tuple><atom label="Near0"/><atom label="Goat1"/></tuple>
+<tuple><atom label="Near0"/><atom label="Goat2"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf1"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf2"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf0"/></tuple>
+<types><type ID="8"/><type ID="5"/></types>
+
+</field>
+
+<field label="location" ID="12" parentID="4">
+<tuple><atom label="GWBoat0"/><atom label="Near0"/></tuple>
+<types><type ID="4"/><type ID="8"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_rc_1" filename="/Users/siddharthaprasad/Desktop/TAing/1710/sterling-ts/demos/rc/rc.frg" version="5.0.1" prefixLength="12" loop="10" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="GWBoat" ID="4" parentID="2">
+<atom label="GWBoat0"/>
+</sig>
+
+<sig label="GWAnimal" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Goat" ID="6" parentID="5">
+<atom label="Goat0"/><atom label="Goat1"/><atom label="Goat2"/>
+</sig>
+
+<sig label="Wolf" ID="7" parentID="5">
+<atom label="Wolf0"/><atom label="Wolf1"/><atom label="Wolf2"/>
+</sig>
+
+<sig label="Position" ID="8" parentID="2">
+
+</sig>
+
+<sig label="Near" ID="9" parentID="8">
+<atom label="Near0"/>
+</sig>
+
+<sig label="Far" ID="10" parentID="8">
+<atom label="Far0"/>
+</sig>
+
+<field label="animals" ID="11" parentID="8">
+<tuple><atom label="Near0"/><atom label="Goat0"/></tuple>
+<tuple><atom label="Near0"/><atom label="Goat1"/></tuple>
+<tuple><atom label="Near0"/><atom label="Goat2"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf0"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf1"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf2"/></tuple>
+<types><type ID="8"/><type ID="5"/></types>
+
+</field>
+
+<field label="location" ID="12" parentID="4">
+<tuple><atom label="GWBoat0"/><atom label="Far0"/></tuple>
+<types><type ID="4"/><type ID="8"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_rc_1" filename="/Users/siddharthaprasad/Desktop/TAing/1710/sterling-ts/demos/rc/rc.frg" version="5.0.1" prefixLength="12" loop="10" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="GWBoat" ID="4" parentID="2">
+<atom label="GWBoat0"/>
+</sig>
+
+<sig label="GWAnimal" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Goat" ID="6" parentID="5">
+<atom label="Goat0"/><atom label="Goat1"/><atom label="Goat2"/>
+</sig>
+
+<sig label="Wolf" ID="7" parentID="5">
+<atom label="Wolf0"/><atom label="Wolf1"/><atom label="Wolf2"/>
+</sig>
+
+<sig label="Position" ID="8" parentID="2">
+
+</sig>
+
+<sig label="Near" ID="9" parentID="8">
+<atom label="Near0"/>
+</sig>
+
+<sig label="Far" ID="10" parentID="8">
+<atom label="Far0"/>
+</sig>
+
+<field label="animals" ID="11" parentID="8">
+<tuple><atom label="Near0"/><atom label="Goat0"/></tuple>
+<tuple><atom label="Near0"/><atom label="Goat1"/></tuple>
+<tuple><atom label="Near0"/><atom label="Goat2"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf1"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf0"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf2"/></tuple>
+<types><type ID="8"/><type ID="5"/></types>
+
+</field>
+
+<field label="location" ID="12" parentID="4">
+<tuple><atom label="GWBoat0"/><atom label="Near0"/></tuple>
+<types><type ID="4"/><type ID="8"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_rc_1" filename="/Users/siddharthaprasad/Desktop/TAing/1710/sterling-ts/demos/rc/rc.frg" version="5.0.1" prefixLength="12" loop="10" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="GWBoat" ID="4" parentID="2">
+<atom label="GWBoat0"/>
+</sig>
+
+<sig label="GWAnimal" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Goat" ID="6" parentID="5">
+<atom label="Goat0"/><atom label="Goat1"/><atom label="Goat2"/>
+</sig>
+
+<sig label="Wolf" ID="7" parentID="5">
+<atom label="Wolf0"/><atom label="Wolf1"/><atom label="Wolf2"/>
+</sig>
+
+<sig label="Position" ID="8" parentID="2">
+
+</sig>
+
+<sig label="Near" ID="9" parentID="8">
+<atom label="Near0"/>
+</sig>
+
+<sig label="Far" ID="10" parentID="8">
+<atom label="Far0"/>
+</sig>
+
+<field label="animals" ID="11" parentID="8">
+<tuple><atom label="Near0"/><atom label="Goat1"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf1"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat0"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat2"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf0"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf2"/></tuple>
+<types><type ID="8"/><type ID="5"/></types>
+
+</field>
+
+<field label="location" ID="12" parentID="4">
+<tuple><atom label="GWBoat0"/><atom label="Far0"/></tuple>
+<types><type ID="4"/><type ID="8"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_rc_1" filename="/Users/siddharthaprasad/Desktop/TAing/1710/sterling-ts/demos/rc/rc.frg" version="5.0.1" prefixLength="12" loop="10" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="GWBoat" ID="4" parentID="2">
+<atom label="GWBoat0"/>
+</sig>
+
+<sig label="GWAnimal" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Goat" ID="6" parentID="5">
+<atom label="Goat0"/><atom label="Goat1"/><atom label="Goat2"/>
+</sig>
+
+<sig label="Wolf" ID="7" parentID="5">
+<atom label="Wolf0"/><atom label="Wolf1"/><atom label="Wolf2"/>
+</sig>
+
+<sig label="Position" ID="8" parentID="2">
+
+</sig>
+
+<sig label="Near" ID="9" parentID="8">
+<atom label="Near0"/>
+</sig>
+
+<sig label="Far" ID="10" parentID="8">
+<atom label="Far0"/>
+</sig>
+
+<field label="animals" ID="11" parentID="8">
+<tuple><atom label="Near0"/><atom label="Goat1"/></tuple>
+<tuple><atom label="Near0"/><atom label="Goat2"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf0"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf1"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat0"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf2"/></tuple>
+<types><type ID="8"/><type ID="5"/></types>
+
+</field>
+
+<field label="location" ID="12" parentID="4">
+<tuple><atom label="GWBoat0"/><atom label="Near0"/></tuple>
+<types><type ID="4"/><type ID="8"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_rc_1" filename="/Users/siddharthaprasad/Desktop/TAing/1710/sterling-ts/demos/rc/rc.frg" version="5.0.1" prefixLength="12" loop="10" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="GWBoat" ID="4" parentID="2">
+<atom label="GWBoat0"/>
+</sig>
+
+<sig label="GWAnimal" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Goat" ID="6" parentID="5">
+<atom label="Goat0"/><atom label="Goat1"/><atom label="Goat2"/>
+</sig>
+
+<sig label="Wolf" ID="7" parentID="5">
+<atom label="Wolf0"/><atom label="Wolf1"/><atom label="Wolf2"/>
+</sig>
+
+<sig label="Position" ID="8" parentID="2">
+
+</sig>
+
+<sig label="Near" ID="9" parentID="8">
+<atom label="Near0"/>
+</sig>
+
+<sig label="Far" ID="10" parentID="8">
+<atom label="Far0"/>
+</sig>
+
+<field label="animals" ID="11" parentID="8">
+<tuple><atom label="Near0"/><atom label="Wolf0"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf1"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat0"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat1"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat2"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf2"/></tuple>
+<types><type ID="8"/><type ID="5"/></types>
+
+</field>
+
+<field label="location" ID="12" parentID="4">
+<tuple><atom label="GWBoat0"/><atom label="Far0"/></tuple>
+<types><type ID="4"/><type ID="8"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_rc_1" filename="/Users/siddharthaprasad/Desktop/TAing/1710/sterling-ts/demos/rc/rc.frg" version="5.0.1" prefixLength="12" loop="10" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="GWBoat" ID="4" parentID="2">
+<atom label="GWBoat0"/>
+</sig>
+
+<sig label="GWAnimal" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Goat" ID="6" parentID="5">
+<atom label="Goat0"/><atom label="Goat1"/><atom label="Goat2"/>
+</sig>
+
+<sig label="Wolf" ID="7" parentID="5">
+<atom label="Wolf0"/><atom label="Wolf1"/><atom label="Wolf2"/>
+</sig>
+
+<sig label="Position" ID="8" parentID="2">
+
+</sig>
+
+<sig label="Near" ID="9" parentID="8">
+<atom label="Near0"/>
+</sig>
+
+<sig label="Far" ID="10" parentID="8">
+<atom label="Far0"/>
+</sig>
+
+<field label="animals" ID="11" parentID="8">
+<tuple><atom label="Near0"/><atom label="Wolf0"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf1"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf2"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat0"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat1"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat2"/></tuple>
+<types><type ID="8"/><type ID="5"/></types>
+
+</field>
+
+<field label="location" ID="12" parentID="4">
+<tuple><atom label="GWBoat0"/><atom label="Near0"/></tuple>
+<types><type ID="4"/><type ID="8"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_rc_1" filename="/Users/siddharthaprasad/Desktop/TAing/1710/sterling-ts/demos/rc/rc.frg" version="5.0.1" prefixLength="12" loop="10" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="GWBoat" ID="4" parentID="2">
+<atom label="GWBoat0"/>
+</sig>
+
+<sig label="GWAnimal" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Goat" ID="6" parentID="5">
+<atom label="Goat0"/><atom label="Goat1"/><atom label="Goat2"/>
+</sig>
+
+<sig label="Wolf" ID="7" parentID="5">
+<atom label="Wolf0"/><atom label="Wolf1"/><atom label="Wolf2"/>
+</sig>
+
+<sig label="Position" ID="8" parentID="2">
+
+</sig>
+
+<sig label="Near" ID="9" parentID="8">
+<atom label="Near0"/>
+</sig>
+
+<sig label="Far" ID="10" parentID="8">
+<atom label="Far0"/>
+</sig>
+
+<field label="animals" ID="11" parentID="8">
+<tuple><atom label="Near0"/><atom label="Wolf1"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat0"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat1"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat2"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf0"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf2"/></tuple>
+<types><type ID="8"/><type ID="5"/></types>
+
+</field>
+
+<field label="location" ID="12" parentID="4">
+<tuple><atom label="GWBoat0"/><atom label="Far0"/></tuple>
+<types><type ID="4"/><type ID="8"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_rc_1" filename="/Users/siddharthaprasad/Desktop/TAing/1710/sterling-ts/demos/rc/rc.frg" version="5.0.1" prefixLength="12" loop="10" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="GWBoat" ID="4" parentID="2">
+<atom label="GWBoat0"/>
+</sig>
+
+<sig label="GWAnimal" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Goat" ID="6" parentID="5">
+<atom label="Goat0"/><atom label="Goat1"/><atom label="Goat2"/>
+</sig>
+
+<sig label="Wolf" ID="7" parentID="5">
+<atom label="Wolf0"/><atom label="Wolf1"/><atom label="Wolf2"/>
+</sig>
+
+<sig label="Position" ID="8" parentID="2">
+
+</sig>
+
+<sig label="Near" ID="9" parentID="8">
+<atom label="Near0"/>
+</sig>
+
+<sig label="Far" ID="10" parentID="8">
+<atom label="Far0"/>
+</sig>
+
+<field label="animals" ID="11" parentID="8">
+<tuple><atom label="Near0"/><atom label="Wolf0"/></tuple>
+<tuple><atom label="Near0"/><atom label="Wolf1"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat0"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat1"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat2"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf2"/></tuple>
+<types><type ID="8"/><type ID="5"/></types>
+
+</field>
+
+<field label="location" ID="12" parentID="4">
+<tuple><atom label="GWBoat0"/><atom label="Near0"/></tuple>
+<types><type ID="4"/><type ID="8"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="temporary-name_rc_1" filename="/Users/siddharthaprasad/Desktop/TAing/1710/sterling-ts/demos/rc/rc.frg" version="5.0.1" prefixLength="12" loop="10" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="GWBoat" ID="4" parentID="2">
+<atom label="GWBoat0"/>
+</sig>
+
+<sig label="GWAnimal" ID="5" parentID="2">
+
+</sig>
+
+<sig label="Goat" ID="6" parentID="5">
+<atom label="Goat0"/><atom label="Goat1"/><atom label="Goat2"/>
+</sig>
+
+<sig label="Wolf" ID="7" parentID="5">
+<atom label="Wolf0"/><atom label="Wolf1"/><atom label="Wolf2"/>
+</sig>
+
+<sig label="Position" ID="8" parentID="2">
+
+</sig>
+
+<sig label="Near" ID="9" parentID="8">
+<atom label="Near0"/>
+</sig>
+
+<sig label="Far" ID="10" parentID="8">
+<atom label="Far0"/>
+</sig>
+
+<field label="animals" ID="11" parentID="8">
+<tuple><atom label="Far0"/><atom label="Goat0"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat1"/></tuple>
+<tuple><atom label="Far0"/><atom label="Goat2"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf0"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf1"/></tuple>
+<tuple><atom label="Far0"/><atom label="Wolf2"/></tuple>
+<types><type ID="8"/><type ID="5"/></types>
+
+</field>
+
+<field label="location" ID="12" parentID="4">
+<tuple><atom label="GWBoat0"/><atom label="Far0"/></tuple>
+<types><type ID="4"/><type ID="8"/></types>
+
+</field>
+
+
+</instance>
+
+<source filename="/Users/siddharthaprasad/Desktop/TAing/1710/sterling-ts/demos/rc/rc.frg" content="#lang forge/temporal
+&#xA;
+&#xA;option max_tracelength 12
+&#xA;option min_tracelength 12
+&#xA;
+&#xA;option run_sterling &amp;quot;rc.cnd&amp;quot;
+&#xA;
+&#xA;---------- Definitions ----------
+&#xA;
+&#xA;abstract sig Position {
+&#xA;    var animals: set GWAnimal
+&#xA;}
+&#xA;one sig Near extends Position {}
+&#xA;one sig Far extends Position {}
+&#xA;
+&#xA;abstract sig GWAnimal {}
+&#xA;sig Goat extends GWAnimal {}
+&#xA;sig Wolf extends GWAnimal {}
+&#xA;
+&#xA;one sig GWBoat {
+&#xA;    var location: one Position
+&#xA;}
+&#xA;
+&#xA;pred GWvalidState {
+&#xA;     // For this problem, valid states are ones which are physically reasonable:
+&#xA;    //  - animals should be on one side or the other, but not both
+&#xA;    no a: GWAnimal | a in Near.animals and a in Far.animals
+&#xA;    GWAnimal = Near.animals + Far.animals
+&#xA;    // - boat must be on a side
+&#xA;    GWBoat.location = Near or GWBoat.location = Far
+&#xA;}
+&#xA;
+&#xA;// Each of the predicates below should *assume* valid states
+&#xA;// but should *not enforce* valid states.
+&#xA;
+&#xA;pred GWinitState {
+&#xA;    // All of the animals and the boat should start on the near side
+&#xA;    GWAnimal = Near.animals
+&#xA;    GWBoat.location = Near
+&#xA;}
+&#xA;
+&#xA;pred GWfinalState {
+&#xA;    // We want to see all of the animals reach the far side.
+&#xA;    GWAnimal = Far.animals
+&#xA;}
+&#xA;
+&#xA;pred GWmove[to, from: Position] {
+&#xA;    // The boat can carry at most two animals each way,
+&#xA;    // but it can't travel across the river on its own.
+&#xA;    GWBoat.location = from
+&#xA;    GWBoat.location' = to
+&#xA;    // One animal will cross iff a1 == a2
+&#xA;    some a1, a2: GWAnimal | {
+&#xA;        a1 in from.animals
+&#xA;        a2 in from.animals
+&#xA;        from.animals' = from.animals - (a1 + a2)
+&#xA;        to.animals' = to.animals + (a1 + a2)
+&#xA;    }
+&#xA;}
+&#xA;
+&#xA;-----------------------------------------
+&#xA;
+&#xA;pred GWneverEating {
+&#xA;    // If the sheep are out numbered on one of the sides,
+&#xA;    // then the wolves can overpower and eat them!
+&#xA;    // Check to see if we can avoid that.
+&#xA;    // Need the implication since we don't know if there are any goats to be outnumbered
+&#xA;    #{g: Goat | g in Near.animals} &amp;gt; 0 implies (#{w: Wolf | w in Near.animals} &amp;lt;= #{g: Goat | g in Near.animals})
+&#xA;    #{g: Goat | g in Far.animals} &amp;gt; 0 implies (#{w: Wolf | w in Far.animals} &amp;lt;= #{g: Goat | g in Far.animals})
+&#xA;}
+&#xA;
+&#xA;pred GWtraces {
+&#xA;    GWinitState
+&#xA;    eventually GWfinalState
+&#xA;    always GWvalidState
+&#xA;    always GWneverEating
+&#xA;    always (GWmove[Near, Far] or GWmove[Far, Near])
+&#xA;}
+&#xA;
+&#xA;run {
+&#xA;    GWtraces
+&#xA;} for exactly 6 GWAnimal, exactly 3 Goat, exactly 3 Wolf
+&#xA;
+&#xA;-- racket rc.frg -O run_sterling serve -O sterling_port 17100
+&#xA;-- then open http://localhost:8081?17100 in a web browser
+&#xA;"></source>
+ <visualizer cnd="&#xA;temporal:&#xA;  policy: stability&#xA;&#xA;directives:&#xA;  - flag: hideDisconnectedBuiltIns" /></alloy>

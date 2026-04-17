@@ -1,0 +1,14 @@
+temporal:
+  policy: stability
+
+constraints:
+  - orientation: {directions: [right, below], selector: GWFar->GWAnimal & gw}
+  - orientation: {directions: [left, below], selector: GWNear->GWAnimal & gw}
+  - orientation: {directions: [directlyRight], selector: GWNear->GWBoat + GWBoat->GWFar}
+  - group: {addEdge: true, selector: gw, name: gw}
+
+directives:
+  - icon: {showLabels: true, selector: Goat, path: https://www.siddharthaprasad.com/uploads/goat.png}
+  - icon: {showLabels: true, selector: Wolf, path: https://www.siddharthaprasad.com/uploads/wolf.png}
+  - hideField: {field: gw}
+  - flag: hideDisconnectedBuiltIns
