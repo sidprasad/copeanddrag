@@ -35,7 +35,7 @@ When a projection is active, CnD:
 2. For each atom, builds a filtered copy of the instance where the `sig` atoms are restricted to that one.
 3. Renders those copies as multiple panes — the user selects which atoms to show at a time from the sidebar.
 
-The multi-pane rendering is driven by [MultiProjectionGraph](../../packages/sterling/src/components/GraphView/MultiProjectionGraph.tsx) and the projection filtering itself by [alloy-instance/projection.ts](../../packages/alloy-instance/src/projection.ts).
+The multi-pane rendering is driven by [MultiProjectionGraph](https://github.com/sidprasad/copeanddrag/blob/main/packages/sterling/src/components/GraphView/MultiProjectionGraph.tsx) and the projection filtering itself by [alloy-instance/projection.ts](https://github.com/sidprasad/copeanddrag/blob/main/packages/alloy-instance/src/projection.ts).
 
 ## Interacting in the UI
 

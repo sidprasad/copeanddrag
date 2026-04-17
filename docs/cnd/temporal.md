@@ -23,7 +23,7 @@ temporal: stability
 
 ## Sequence policies
 
-The `policy` field controls how layout evolves as you move between states in the trace. All four are defined in [cndPreParser.ts](../../packages/sterling/src/utils/cndPreParser.ts).
+The `policy` field controls how layout evolves as you move between states in the trace. All four are defined in [cndPreParser.ts](https://github.com/sidprasad/copeanddrag/blob/main/packages/sterling/src/utils/cndPreParser.ts).
 
 | Policy | Behavior |
 |--------|----------|
@@ -36,7 +36,7 @@ If the policy string is misspelled or omitted, CnD falls back to `ignore_history
 
 ## Interacting in the UI
 
-The **Time** sidebar control in the Graph view (or Edit view) shows a trace index slider and lets you pick which states to display. Multi-select renders panes side-by-side via [MultiTemporalGraph](../../packages/sterling/src/components/GraphView/MultiTemporalGraph.tsx).
+The **Time** sidebar control in the Graph view (or Edit view) shows a trace index slider and lets you pick which states to display. Multi-select renders panes side-by-side via [MultiTemporalGraph](https://github.com/sidprasad/copeanddrag/blob/main/packages/sterling/src/components/GraphView/MultiTemporalGraph.tsx).
 
 ## Worked example
 
