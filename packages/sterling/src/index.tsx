@@ -23,5 +23,6 @@ ReactDOM.render(
 
 function getProviderURL(): string | undefined {
   const url = process.env.WS;
-  return url === 'query' ? undefined : url;
+  if (url === 'query') return undefined;
+  return url;
 }

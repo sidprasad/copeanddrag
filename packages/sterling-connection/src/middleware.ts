@@ -10,6 +10,7 @@ import {
   sterlingConnectionError,
   sterlingDisconnected
 } from './actions';
+import { MockWebSocketLike } from './mock/MockWebSocketLike';
 import { onMessage } from './receive/onMessage';
 import { sendClick } from './send/sendClick';
 import { sendData } from './send/sendData';
@@ -66,7 +67,10 @@ function sterlingConnectionMiddleware<S, D extends Dispatch>(): Middleware<
 
     if (ws) disconnect();
     url = url || getWebSocketURLFromLocation();
-    ws = new WebSocket(url);
+    ws =
+      url === 'mock'
+        ? (new MockWebSocketLike() as unknown as WebSocket)
+        : new WebSocket(url);
 
     // a function that initializes the reconnect attempt
     const startReconnect = () => {

@@ -10,7 +10,8 @@ const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 
 const envs = {
   alloy: 'env/alloy.env',
-  forge: 'env/forge.env'
+  forge: 'env/forge.env',
+  mock: 'env/mock.env'
 };
 
 const favIconPath = path.resolve(
@@ -82,6 +83,10 @@ module.exports = (env, argv) => {
           test: /\.ttf$/,
           include: path.resolve(__dirname, './node_modules/monaco_editor'),
           use: ['file-loader']
+        },
+        {
+          test: /\.xml$/,
+          type: 'asset/source'
         }
       ]
     },
