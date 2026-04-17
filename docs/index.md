@@ -23,4 +23,6 @@ features:
     details: Fork of the Sterling visualizer for Alloy and Forge, with CnD replacing DAGRE as the layout engine.
   - title: Language-first
     details: A small DSL for selectors, constraints, and layout directives — readable, composable, and spec-driven.
+  - title: Projections, traces, and editing
+    details: Slice instances by sig, navigate temporal traces with a sequence policy, or edit instances in-browser and export as inst.
 ---
