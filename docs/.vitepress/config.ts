@@ -29,7 +29,10 @@ export default defineConfig({
           text: 'CnD Language',
           items: [
             { text: 'Overview', link: '/cnd/' },
-            { text: 'Reference', link: '/cnd/reference' },
+            { text: 'YAML Specification', link: '/cnd/yaml-spec' },
+            { text: 'Evaluators', link: '/cnd/evaluators' },
+            { text: 'Field-Based Selectors', link: '/cnd/field-selectors' },
+            { text: 'Selector Synthesis', link: '/cnd/selector-synthesis' },
           ],
         },
       ],
