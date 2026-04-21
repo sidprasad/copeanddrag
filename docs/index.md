@@ -17,12 +17,12 @@ hero:
       link: https://github.com/sidprasad/copeanddrag
 
 features:
-  - title: Spatial refinement, not brute layout
-    details: Describe where things should be relative to each other. Let the solver do the arranging.
-  - title: Sterling-native
-    details: Fork of the Sterling visualizer for Alloy and Forge, with CnD replacing DAGRE as the layout engine.
-  - title: Language-first
-    details: A small DSL for selectors, constraints, and layout directives — readable, composable, and spec-driven.
-  - title: Projections, traces, and editing
-    details: Slice instances by sig, navigate temporal traces with a sequence policy, or edit instances in-browser and export as inst.
+  - title: Constraints, separate from directives
+    details: Spatial constraints describe where atoms go. Visual directives describe how they look. The two compose independently.
+  - title: For Alloy and Forge instances
+    details: CnD reads solver output and lets you specify layouts declaratively over sigs, atoms, and fields — no pixel coordinates.
+  - title: Grounded in how diagrams communicate
+    details: The constraint and directive vocabulary is drawn from cognitive-science principles and corpus studies on spatial reasoning in diagrams.
+  - title: Runs inside Sterling
+    details: A fork of the Sterling visualizer for Alloy and Forge, with CnD replacing DAGRE as the layout engine.
 ---

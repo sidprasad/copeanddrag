@@ -21,6 +21,7 @@ export default defineConfig({
           text: 'Guide',
           items: [
             { text: 'Getting Started', link: '/guide/getting-started' },
+            { text: 'The Views', link: '/guide/views' },
             { text: 'Edit Mode (experimental)', link: '/guide/edit-mode' },
           ],
         },
