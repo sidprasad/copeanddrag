@@ -65,12 +65,13 @@ module.exports = {
     '^.+\\.jsx?$': [
       //'babel-jest',
        'ts-jest',
-      {        
+      {
         useESM: true
-        // https://babeljs.io/docs/en/babel-core/#options        
+        // https://babeljs.io/docs/en/babel-core/#options
       },
     ],
-  },  
+    '\\.xml$': '<rootDir>/util/jest-xml-transformer.cjs',
+  },
   // From ts-jest guide on supporting paths mapping
   // note we replaced the moduleNameMapper given in the startup guide above
   //modulePaths: ['<rootDir>/packages', '<rootDir>/node_modules'],
