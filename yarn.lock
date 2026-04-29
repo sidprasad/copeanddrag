@@ -5091,6 +5091,11 @@ dashdash@^1.12.0:
   dependencies:
     assert-plus "^1.0.0"
 
+data-navigator@^2.4.1:
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/data-navigator/-/data-navigator-2.4.1.tgz#46ee7c17e35fcd7a54bf998fc77101a802d224c1"
+  integrity sha512-JYoSq2Wt1PTNuFRj+eUuUVfGTOOpc/XgJYiDMri+c35NRuCDDY/H+WeFr+SxZYmP6HlgV40VWXjBTVr1TFM0ww==
+
 data-urls@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/data-urls/-/data-urls-3.0.2.tgz#9cf24a477ae22bcef5cd5f6f0bfbc1d2d3be9143"
@@ -9481,10 +9486,10 @@ sprintf-js@~1.0.2:
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==
 
-spytial-core@2.3.0:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/spytial-core/-/spytial-core-2.3.0.tgz#ec2539f9977266c8fbf3082c9022b8ce72e75fff"
-  integrity sha512-I2DXwLP3hzGBhj5wseyZaj3WwfqJEnbILsrgZccS8PVh7QkWSmt2WzWjTLZpyYV5dIS70Y9k7AjBp3jzVB8XuA==
+spytial-core@2.5.0:
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/spytial-core/-/spytial-core-2.5.0.tgz#612df4d31a41124ae5c389680807030226c9d8f3"
+  integrity sha512-kmI5ERSn/ALa5IwKv84wgnsmJHd/gLHiujIkVrqlByfz9mX9csB/ii4wXeIA8KWr21FqqFpnbcRifj/2ESy4Mw==
   dependencies:
     "@types/d3" "^4.13.12"
     "@types/graphlib-dot" "^0.6.4"
@@ -9495,6 +9500,7 @@ spytial-core@2.3.0:
     chroma-js "^3.1.2"
     d3 "^7.9.0"
     dagre "^0.8.5"
+    data-navigator "^2.4.1"
     forge-expr-evaluator "^1.1.0"
     graphlib "^2.1.8"
     graphlib-dot "^0.6.4"
