@@ -8,7 +8,7 @@ import {
   selectProjectionConfig,
   selectSequencePolicyName
 } from '../../state/selectors';
-import { SpyTialEditGraph } from './SpyTialEditGraph';
+import { SpyTialEditGraph, type SpyTialEditGraphHandle } from './SpyTialEditGraph';
 import type { LayoutState } from '../GraphView/SpyTialGraph';
 import { getSpytialCore } from '../../utils/spytialCore';
 import { validateEditedInstance, ValidationIssue } from '../../utils/instanceValidation';
@@ -30,6 +30,7 @@ const EditView = () => {
 
   const layoutStateRef = useRef<LayoutState | undefined>(undefined);
   const graphElementRef = useRef<HTMLElementTagNameMap['structured-input-graph'] | null>(null);
+  const editGraphHandleRef = useRef<SpyTialEditGraphHandle | null>(null);
 
   type ExportFeedback =
     | { status: 'success'; message: string }
@@ -109,33 +110,15 @@ const EditView = () => {
     }
   }, [handleDataExported]);
 
-  const handleLoadFromInstance = useCallback(() => {
-    if (!datum?.data || !graphElementRef.current) return;
-
-    const core = getSpytialCore();
-    if (!core) return;
-
+  const handleLoadFromInstance = useCallback(async () => {
+    const handle = editGraphHandleRef.current;
+    if (!handle) return;
     try {
-      const alloyDatum = core.AlloyInstance.parseAlloyXML(datum.data);
-      if (!alloyDatum.instances || alloyDatum.instances.length === 0) return;
-
-      const instanceIndex = timeIndex !== undefined
-        ? Math.min(timeIndex, alloyDatum.instances.length - 1)
-        : 0;
-      const alloyDataInstance = new core.AlloyDataInstance(alloyDatum.instances[instanceIndex]);
-
-      if (graphElementRef.current.setDataInstance) {
-        graphElementRef.current.setDataInstance(alloyDataInstance);
-        // setDataInstance only assigns the field — trigger layout explicitly
-        const el = graphElementRef.current as any;
-        if (typeof el.enforceConstraintsAndRegenerate === 'function') {
-          el.enforceConstraintsAndRegenerate();
-        }
-      }
+      await handle.reloadFromInstance();
     } catch (err: any) {
       console.error('Failed to load instance:', err);
     }
-  }, [datum, timeIndex]);
+  }, []);
 
   return (
     <Pane className='grid grid-flow-col divide-x divide-dashed'>
@@ -216,6 +199,7 @@ const EditView = () => {
           )}
           <PaneBody>
             <SpyTialEditGraph
+              ref={editGraphHandleRef}
               datum={datum}
               cndSpec={cndSpec}
               timeIndex={timeIndex}
