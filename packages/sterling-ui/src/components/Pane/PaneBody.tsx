@@ -1,5 +1,6 @@
 import { Box, BoxProps, useStyleConfig } from '@chakra-ui/react';
 import sizes from '../../sizes';
+import { tokens } from '../../tokens';
 
 const PaneBody = (props: BoxProps) => {
   const styles = useStyleConfig('PaneBody');
@@ -13,7 +14,7 @@ const PaneBodyTheme = {
     right: 0,
     bottom: 0,
     left: 0,
-    bg: '#f8fafc'
+    bg: tokens.color.bg
   }
 };
 

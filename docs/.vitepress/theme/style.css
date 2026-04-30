@@ -1,0 +1,290 @@
+/*
+ * Cope and Drag — VitePress theme overrides.
+ *
+ * Tufte-leaning: warm paper background, hairline rules, restrained chrome,
+ * generous reading line-height. Body type is Atkinson Hyperlegible to match
+ * Spytial-core; mono is Fira Code for code blocks.
+ *
+ * Brand color is the Spytial purple (#5a3d8a). It is the *only* chromatic
+ * ink in the page — used for links, the active TOC item, the brand pip on
+ * the home hero, and nothing else.
+ */
+
+:root {
+  /* Typography */
+  --vp-font-family-base: 'Atkinson Hyperlegible', system-ui, -apple-system,
+    BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  --vp-font-family-mono: 'Fira Code', ui-monospace, SFMono-Regular, 'SF Mono',
+    Menlo, Consolas, 'Liberation Mono', monospace;
+
+  /* Brand — Spytial purple, used sparingly */
+  --vp-c-brand-1: #5a3d8a;
+  --vp-c-brand-2: #6b4ca0;
+  --vp-c-brand-3: #7c5db5;
+  --vp-c-brand-soft: #f0eef8;
+
+  /* Surfaces — paper, not screen */
+  --vp-c-bg: #fdfdfb;
+  --vp-c-bg-alt: #f8f7f3;
+  --vp-c-bg-soft: #f4f3ef;
+
+  /* Ink */
+  --vp-c-text-1: #1f2937;
+  --vp-c-text-2: #475569;
+  --vp-c-text-3: #64748b;
+
+  /* Rules */
+  --vp-c-divider: #e9ecef;
+  --vp-c-gutter: #e9ecef;
+  --vp-c-border: #dee2e6;
+
+  /* Buttons / CTA */
+  --vp-button-brand-bg: #5a3d8a;
+  --vp-button-brand-hover-bg: #4a3273;
+  --vp-button-brand-active-bg: #3d2a5e;
+  --vp-button-brand-border: #5a3d8a;
+  --vp-button-brand-hover-border: #4a3273;
+  --vp-button-brand-text: #ffffff;
+  --vp-button-brand-hover-text: #ffffff;
+
+  --vp-button-alt-bg: transparent;
+  --vp-button-alt-hover-bg: #f0eef8;
+  --vp-button-alt-active-bg: #e6e2f3;
+  --vp-button-alt-border: #c4b8e0;
+  --vp-button-alt-hover-border: #5a3d8a;
+  --vp-button-alt-text: #5a3d8a;
+  --vp-button-alt-hover-text: #3d2a5e;
+}
+
+.dark {
+  --vp-c-bg: #15131a;
+  --vp-c-bg-alt: #1c1923;
+  --vp-c-bg-soft: #211e29;
+
+  --vp-c-text-1: #e9e6f0;
+  --vp-c-text-2: #c4bfd0;
+  --vp-c-text-3: #8b8597;
+
+  --vp-c-divider: #2c2937;
+  --vp-c-gutter: #2c2937;
+  --vp-c-border: #3a3648;
+
+  --vp-c-brand-1: #b89be0;
+  --vp-c-brand-2: #a78ad0;
+  --vp-c-brand-3: #9479c0;
+  --vp-c-brand-soft: rgba(184, 155, 224, 0.14);
+}
+
+/* ---------------------------------------------------------------------------
+ * Reading column. Tufte: narrow, generous line-height, ample margins.
+ * ------------------------------------------------------------------------- */
+
+.VPDoc.has-aside .content-container {
+  max-width: 720px;
+}
+.VPDoc:not(.has-aside) .content-container {
+  max-width: 720px;
+}
+
+.vp-doc {
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.vp-doc h1 {
+  font-weight: 600;
+  font-size: 30px;
+  letter-spacing: -0.005em;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+.vp-doc h1::after {
+  content: '';
+  display: block;
+  width: 48px;
+  height: 2px;
+  background: var(--vp-c-brand-1);
+  margin-top: 0.75rem;
+}
+
+.vp-doc h2 {
+  font-weight: 600;
+  font-size: 22px;
+  letter-spacing: -0.003em;
+  border-top: 1px solid var(--vp-c-divider);
+  padding-top: 1.5rem;
+  margin-top: 2.5rem;
+}
+
+.vp-doc h3 {
+  font-weight: 600;
+  font-size: 17px;
+}
+
+.vp-doc p {
+  margin: 1em 0;
+}
+
+.vp-doc a {
+  color: var(--vp-c-brand-1);
+  text-decoration: none;
+  border-bottom: 1px solid var(--vp-c-brand-soft);
+  transition: border-color 0.15s ease;
+}
+.vp-doc a:hover {
+  border-bottom-color: var(--vp-c-brand-1);
+}
+
+.vp-doc blockquote {
+  border-left: 2px solid var(--vp-c-brand-1);
+  background: transparent;
+  color: var(--vp-c-text-2);
+  font-style: italic;
+  padding: 0.25rem 0 0.25rem 1.25rem;
+  margin: 1.25rem 0;
+}
+
+.vp-doc :not(pre) > code {
+  background: var(--vp-c-bg-alt);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 3px;
+  padding: 0.1em 0.35em;
+  font-size: 0.88em;
+}
+
+.vp-doc div[class*='language-'] {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 4px;
+  box-shadow: none;
+}
+
+/* ---------------------------------------------------------------------------
+ * Nav + sidebar — flatten, hairlines only.
+ * ------------------------------------------------------------------------- */
+
+.VPNav,
+.VPNavBar {
+  background: var(--vp-c-bg);
+  border-bottom: 1px solid var(--vp-c-divider);
+}
+.VPNavBar.has-sidebar .content,
+.VPNavBar .content-body {
+  background: transparent !important;
+}
+.VPNavBar:not(.has-sidebar):not(.top) {
+  box-shadow: none;
+}
+
+.VPSidebar {
+  background: var(--vp-c-bg) !important;
+  border-right: 1px solid var(--vp-c-divider);
+}
+
+.VPSidebarItem.level-0 > .item > .text {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--vp-c-text-3);
+}
+
+.VPSidebarItem.is-active > .item > .link > .text {
+  color: var(--vp-c-brand-1);
+  font-weight: 500;
+}
+
+/* ---------------------------------------------------------------------------
+ * Home hero — typographic, restrained. The wordmark IS the brand.
+ * ------------------------------------------------------------------------- */
+
+.VPHome {
+  background: var(--vp-c-bg);
+}
+
+.VPHero .container {
+  padding-top: 4rem;
+  padding-bottom: 3rem;
+}
+
+.VPHero .name {
+  font-weight: 600;
+  font-size: 46px;
+  letter-spacing: 0.01em;
+  line-height: 1.05;
+  background: none !important;
+  -webkit-text-fill-color: var(--vp-c-text-1);
+  color: var(--vp-c-text-1);
+  position: relative;
+  padding-left: 18px;
+}
+.VPHero .name::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 4px;
+  height: calc(100% - 12px);
+  background: var(--vp-c-brand-1);
+  border-radius: 1px;
+}
+
+.VPHero .text {
+  font-weight: 400;
+  font-style: italic;
+  font-size: 24px;
+  line-height: 1.3;
+  color: var(--vp-c-text-2);
+  margin-top: 0.75rem;
+  padding-left: 18px;
+}
+
+.VPHero .tagline {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--vp-c-text-3);
+  max-width: 56ch;
+  padding-left: 18px;
+  margin-top: 1.25rem;
+}
+
+.VPHero .actions {
+  padding-left: 18px;
+  gap: 0.5rem;
+}
+
+/* ---------------------------------------------------------------------------
+ * Home features — paper cards with hairlines, no shadow.
+ * ------------------------------------------------------------------------- */
+
+.VPFeature {
+  background: var(--vp-c-bg) !important;
+  border: 1px solid var(--vp-c-divider) !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  transition: border-color 0.15s ease;
+}
+.VPFeature:hover {
+  border-color: var(--vp-c-brand-1) !important;
+}
+.VPFeature .title {
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: -0.003em;
+}
+.VPFeature .details {
+  color: var(--vp-c-text-2);
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+/* ---------------------------------------------------------------------------
+ * Footer — quiet.
+ * ------------------------------------------------------------------------- */
+
+.VPFooter {
+  background: var(--vp-c-bg);
+  border-top: 1px solid var(--vp-c-divider);
+  color: var(--vp-c-text-3);
+  font-size: 13px;
+}

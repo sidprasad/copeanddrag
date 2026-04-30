@@ -1,6 +1,9 @@
 import '@fontsource/fira-code/variable.css';
 import '@fontsource/fira-code/400.css';
-import '@fontsource/inter/variable-full.css';
+import '@fontsource/atkinson-hyperlegible/400.css';
+import '@fontsource/atkinson-hyperlegible/700.css';
+import '@fontsource/atkinson-hyperlegible/400-italic.css';
+import '@fontsource/atkinson-hyperlegible/700-italic.css';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';

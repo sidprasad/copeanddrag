@@ -1,4 +1,5 @@
 import { extendTheme } from '@chakra-ui/react';
+import { tokens } from './tokens';
 import { DashboardTheme } from './components/Dashboard/Dashboard';
 import { DragBarTheme } from './components/Dashboard/DragBar';
 import { DragHandleTheme } from './components/Dashboard/DragHandle';
@@ -18,8 +19,9 @@ import { ViewTheme } from './components/View';
 
 const sterlingTheme = extendTheme({
   fonts: {
-    body: 'InterVariable',
-    mono: 'Fira Code VF, Fira Code, monospace'
+    body: tokens.fonts.body,
+    heading: tokens.fonts.body,
+    mono: tokens.fonts.mono
   },
   styles: {
     global: {
@@ -29,6 +31,11 @@ const sterlingTheme = extendTheme({
         overflow: 'hidden',
         userSelect: 'none',
         cursor: 'default'
+      },
+      body: {
+        bg: tokens.color.bg,
+        color: tokens.color.ink,
+        fontFeatureSettings: '"ss01", "cv11"'
       }
     }
   },
@@ -53,3 +60,4 @@ const sterlingTheme = extendTheme({
 });
 
 export { sterlingTheme };
+export { tokens } from './tokens';

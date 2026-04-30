@@ -1,9 +1,10 @@
 import { Flex, FlexProps, useStyleConfig } from '@chakra-ui/react';
 import sizes from '../../sizes';
+import { tokens } from '../../tokens';
 
 const SideBar = (props: FlexProps) => {
   const styles = useStyleConfig('SideBar');
-  return <Flex __css={{...styles, overflowY: 'auto'}} {...props} />;
+  return <Flex __css={{ ...styles, overflowY: 'auto' }} {...props} />;
 };
 
 const SideBarTheme = {
@@ -17,15 +18,13 @@ const SideBarTheme = {
     flexDir: 'column',
     alignItems: 'stretch',
     fontSize: 'xs',
-    gap: '6px',
+    gap: '4px',
     px: 2,
     py: 3,
     borderLeft: '1px solid',
-    borderColor: 'whiteAlpha.200',
-    bg: 'rgba(11, 17, 32, 0.88)',
-    backdropFilter: 'saturate(180%) blur(12px)',
-    boxShadow: '-12px 0 30px rgba(15, 23, 42, 0.35)',
-    color: 'gray.100',
+    borderColor: tokens.color.rule,
+    bg: tokens.color.surface,
+    color: tokens.color.ink,
     zIndex: 'banner'
   }
 };
