@@ -1,48 +1,51 @@
 import { Button, ButtonProps, useStyleConfig } from '@chakra-ui/react';
+import { tokens } from '../../tokens';
 
 const NavButton = (props: ButtonProps) => {
   const styles = useStyleConfig('NavButton');
   return <Button __css={styles} {...props} />;
 };
 
+// Active = 2px purple underline (hairline accent), no filled pill.
+// Default text uses `inkMuted` (7.5:1 contrast). Focus combines the
+// underline with an outer halo so it survives WCAG 2.4.11 against the
+// NavBar's white surface.
 const NavButtonTheme = {
   baseStyle: {
     display: 'flex',
     alignItems: 'center',
     gap: '0.35rem',
-    borderRadius: 'full',
-    px: 4,
-    py: 2,
+    borderRadius: '0px',
+    px: 3,
+    py: 1.5,
+    minH: '32px',
     lineHeight: 1.1,
     fontSize: 'sm',
-    fontWeight: 'semibold',
-    color: 'gray.100',
-    bg: 'whiteAlpha.50',
-    border: '1px solid',
-    borderColor: 'whiteAlpha.200',
-    boxShadow: '0 10px 30px rgba(15, 23, 42, 0.15)',
+    fontWeight: 500,
+    color: tokens.color.inkMuted,
+    bg: 'transparent',
+    boxShadow: 'inset 0 -2px 0 transparent',
     transitionProperty: 'common',
-    transitionDuration: 'normal',
+    transitionDuration: 'fast',
     _hover: {
-      bg: 'whiteAlpha.200',
-      color: 'white',
-      borderColor: 'whiteAlpha.300',
+      color: tokens.color.ink,
+      bg: 'transparent',
+      boxShadow: `inset 0 -2px 0 ${tokens.color.accentBorder}`,
       _disabled: {
         bg: 'initial'
       }
     },
     _active: {
-      bg: 'white',
-      color: '#0f172a',
-      borderColor: 'white',
-      boxShadow: '0 12px 34px rgba(15, 23, 42, 0.35)'
+      color: tokens.color.accent,
+      bg: 'transparent',
+      boxShadow: `inset 0 -2px 0 ${tokens.color.accent}`
     },
     _focusVisible: {
-      boxShadow: '0 0 0 2px rgba(99, 102, 241, 0.6)',
-      outline: 'none'
+      outline: 'none',
+      boxShadow: `inset 0 -2px 0 ${tokens.color.accent}, 0 0 0 1px ${tokens.color.accent}`
     },
     _disabled: {
-      opacity: 0.4,
+      opacity: 0.45,
       cursor: 'not-allowed'
     }
   }

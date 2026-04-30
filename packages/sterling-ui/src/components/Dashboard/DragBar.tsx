@@ -1,4 +1,5 @@
 import { Box, useStyleConfig } from '@chakra-ui/react';
+import { tokens } from '../../tokens';
 
 const DragBar = () => {
   const styles = useStyleConfig('DragBar');
@@ -9,10 +10,10 @@ const DragBarTheme = {
   baseStyle: {
     w: '1px',
     h: 'full',
-    transition: 'all ease 0.25s',
-    backgroundColor: 'gray.300',
+    transition: 'background-color ease 0.2s',
+    backgroundColor: tokens.color.rule,
     '.drag-handle:hover &': {
-      backgroundColor: 'gray.500'
+      backgroundColor: tokens.color.accent
     }
   }
 };

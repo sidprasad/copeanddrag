@@ -1,4 +1,5 @@
 import { Button, ButtonProps, Text, useStyleConfig } from '@chakra-ui/react';
+import { tokens } from '../../tokens';
 
 interface SideBarButtonProps {
   text: string;
@@ -23,48 +24,58 @@ const SideBarButton = (props: ButtonProps & SideBarButtonProps) => {
   );
 };
 
+// SideBar is on the right edge. Active state = 2px purple rule on the
+// button's INSIDE (left) edge — Tufte-style hairline marker.
+//
+// Default text uses `inkMuted` (#475569 = 7.5:1 on white) for WCAG AA.
+// Focus indicator combines a 2px accent inset with a 1px outer halo so
+// it remains visible against the adjacent SideBar surface (WCAG 2.4.11).
 const SideBarButtonTheme = {
   baseStyle: {
+    position: 'relative',
     display: 'flex',
     cursor: 'pointer',
     alignItems: 'center',
     justifyContent: 'center',
     py: 4,
+    px: 2,
+    minH: '44px',
     fontSize: 'xs',
-    fontWeight: 'semibold',
+    fontWeight: 500,
+    letterSpacing: '0.06em',
+    textTransform: 'uppercase',
     transitionProperty: 'common',
-    transitionDuration: 'normal',
+    transitionDuration: 'fast',
     writingMode: 'vertical-lr',
     textOrientation: 'sideways',
-    borderRadius: 'lg',
-    border: '1px solid',
-    borderColor: 'whiteAlpha.200',
-    color: 'gray.100',
-    bg: 'whiteAlpha.50',
-    boxShadow: '0 10px 30px rgba(15, 23, 42, 0.12)',
+    borderRadius: '2px',
+    color: tokens.color.inkMuted,
+    bg: 'transparent',
+    boxShadow: 'inset 2px 0 0 transparent',
     iconSpacing: '0.35rem',
     span: {
       marginRight: '.12rem'
     },
     _hover: {
-      bg: 'whiteAlpha.200',
-      color: 'white',
-      borderColor: 'whiteAlpha.300',
-      transform: 'translateY(-1px)',
+      color: tokens.color.ink,
+      bg: tokens.color.surfaceMuted,
       _disabled: {
         bg: 'initial'
       }
     },
     _active: {
-      bg: 'linear-gradient(180deg, #e0e7ff 0%, #c7d2fe 100%)',
-      color: '#0f172a',
-      borderColor: 'white',
-      boxShadow: '0 14px 36px rgba(15, 23, 42, 0.35)',
-      transform: 'translateY(-2px)'
+      color: tokens.color.accent,
+      bg: 'transparent',
+      boxShadow: `inset 2px 0 0 ${tokens.color.accent}`,
+      transform: 'none'
     },
     _focusVisible: {
-      boxShadow: '0 0 0 2px rgba(94, 234, 212, 0.65)',
-      outline: 'none'
+      outline: 'none',
+      boxShadow: `inset 2px 0 0 ${tokens.color.accent}, 0 0 0 1px ${tokens.color.accent}`
+    },
+    _disabled: {
+      opacity: 0.45,
+      cursor: 'not-allowed'
     }
   }
 };
