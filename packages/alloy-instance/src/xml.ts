@@ -26,10 +26,7 @@ export function parseAlloyXML(xml: string): AlloyDatum {
     instances: instances.map(instanceFromElement),
     bitwidth: parseNumericAttribute(instances[0], 'bitwidth'),
     command: parseStringAttribute(instances[0], 'command'),
-    loopBack:
-      parseNumericAttribute(instances[0], 'backloop') ??
-      // TODO: Remove this hack once forge is fixed
-      parseNumericAttribute(instances[0], 'loop'),
+    loopBack: parseLoopBack(instances[0]),
     maxSeq: parseNumericAttribute(instances[0], 'maxseq'),
     maxTrace: parseNumericAttribute(instances[0], 'maxtrace'),
     minTrace: parseNumericAttribute(instances[0], 'mintrace'),
@@ -46,6 +43,28 @@ function parseNumericAttribute(
 ): number | undefined {
   const value = element.getAttribute(attribute);
   return value ? +value : undefined;
+}
+
+/**
+ * The loop-back state index of a temporal trace. Providers express the lasso differently:
+ *  - `backloop` (Alloy/Sterling) or `loop` (Forge): the loop-back index directly;
+ *  - `looplength` (Alloy's own instance XML): the *length* of the loop, so the index is
+ *    `tracelength - looplength`.
+ *
+ * The `looplength` form is only honoured when `tracelength > 1`, so a static instance — which
+ * Alloy writes as `tracelength="1" looplength="1"` — is not mistaken for a one-state trace.
+ */
+function parseLoopBack(element: Element): number | undefined {
+  const backloop = parseNumericAttribute(element, 'backloop');
+  if (backloop !== undefined) return backloop;
+  const loop = parseNumericAttribute(element, 'loop');
+  if (loop !== undefined) return loop;
+  const tracelength = parseNumericAttribute(element, 'tracelength');
+  const looplength = parseNumericAttribute(element, 'looplength');
+  if (tracelength !== undefined && looplength !== undefined && tracelength > 1) {
+    return tracelength - looplength;
+  }
+  return undefined;
 }
 
 function parseStringAttribute(
