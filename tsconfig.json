@@ -15,7 +15,7 @@
       "isolatedModules": true,
       "skipLibCheck": true,
       "noEmit": true,
-      "moduleResolution": "node",
+      "moduleResolution": "bundler",
       "baseUrl": "./packages",
       "paths": {
         "@/alloy-graph": [
