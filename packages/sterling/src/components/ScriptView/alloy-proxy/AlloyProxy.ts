@@ -76,6 +76,16 @@ class AlloyProxy {
 
     }
 
+    /**
+     * The proxied set previously registered under `id`, if any. Lets callers reuse an existing
+     * atom/signature instead of re-proxying it (which throws on a duplicate ID) — needed because
+     * the same atom can legitimately appear under more than one signature (e.g. an `in` subset sig
+     * re-lists atoms that already belong to its parent sig).
+     */
+    get (id: string): AlloySet | undefined {
+        return this._sets.get(id);
+    }
+
     private _finalize (set: AlloySet): AlloySet {
 
         if (set.tuples().length === 1 && set.tuples()[0].atoms().length === 1) {

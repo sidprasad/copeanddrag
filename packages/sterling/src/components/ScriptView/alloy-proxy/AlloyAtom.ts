@@ -47,6 +47,15 @@ class AlloyAtom extends AlloySet {
 
         const label = element.getAttribute('label');
         if (!label) throw AlloyError.missingAttribute('AlloyAtom', 'label');
+
+        // The same atom can be listed under more than one signature — e.g. a subset (`in`) sig
+        // re-lists atoms that already belong to its parent sig. Atoms are identical up to their ID,
+        // so reuse the already-proxied atom rather than re-proxying it (which throws on a duplicate).
+        if (proxy) {
+            const existing = proxy.get(varName(label));
+            if (existing) return existing as AlloyAtom;
+        }
+
         return new AlloyAtom(label, proxy);
 
     }
