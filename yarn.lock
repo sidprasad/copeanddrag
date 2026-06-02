@@ -9347,10 +9347,10 @@ simple-get@^3.0.3, simple-get@^3.1.0:
     once "^1.3.1"
     simple-concat "^1.0.0"
 
-simple-graph-query@^2.6.0:
-  version "2.6.0"
-  resolved "https://registry.yarnpkg.com/simple-graph-query/-/simple-graph-query-2.6.0.tgz#c11ba418e0374fae67bc4b2a501ecaaa63dfe0df"
-  integrity sha512-SSeIySc/+urjHe4yA7D1/ez5wzGPTFEpeXqYdcQafA0wYYCnQwENCajJ7pMoSRQkZuKypi9WkBqCJBzdZdpT2A==
+simple-graph-query@^2.7.0:
+  version "2.7.0"
+  resolved "https://registry.yarnpkg.com/simple-graph-query/-/simple-graph-query-2.7.0.tgz#f5ba5dea3727fde5e89693c706606cb65b9a128b"
+  integrity sha512-sPt77bAY0YItIGQwPfOYBj32OUAD7jTHnOpLC90g04UvtixsmJ7ShDt6uYiUnhMyI/+M5QZrSKov3z8s1lCzsQ==
   dependencies:
     "@types/lodash" "^4.17.16"
     "@types/node" "^22.14.0"
@@ -9453,10 +9453,10 @@ sprintf-js@~1.0.2:
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==
 
-spytial-core@2.6.0:
-  version "2.6.0"
-  resolved "https://registry.yarnpkg.com/spytial-core/-/spytial-core-2.6.0.tgz#9128d563cc93a59833fdecbd397e92a00450a2a5"
-  integrity sha512-BNBOQVqecGoY2x3/uTn6hu5Cr0ublPpp4ZXkNc+0r9WrSk7HF+9n3nsZAovmc38qI6aYC0UhE+gW9iIb/YHWDg==
+spytial-core@2.6.4:
+  version "2.6.4"
+  resolved "https://registry.yarnpkg.com/spytial-core/-/spytial-core-2.6.4.tgz#9052ee25d2a7c280d4f768a56cf2dbd7a256ca80"
+  integrity sha512-mzIFgyWKLpMmhw5zARu+5kJE1Q16kV7JaBBZhLWBM/PGM+1Ca0gQU9dFkyh922QqDRjb8fF6x51Ki2SIHOQaOg==
   dependencies:
     "@types/d3" "^4.13.12"
     "@types/graphlib-dot" "^0.6.4"
@@ -9476,7 +9476,7 @@ spytial-core@2.6.0:
     lodash "^4.17.21"
     react "19.1.0"
     react-dom "19.1.0"
-    simple-graph-query "^2.6.0"
+    simple-graph-query "^2.7.0"
     webcola "^3.4.0"
 
 sshpk@^1.7.0:
@@ -10014,10 +10014,10 @@ typed-styles@^0.0.7:
   resolved "https://registry.yarnpkg.com/typed-styles/-/typed-styles-0.0.7.tgz#93392a008794c4595119ff62dde6809dbc40a3d9"
   integrity sha512-pzP0PWoZUhsECYjABgCGQlRGL1n7tOHsgwYv3oIiEpJwGhFTuty/YNeduxQYzXXa3Ge5BdT6sHYIQYpl4uJ+5Q==
 
-typescript@^4.9.5:
-  version "4.9.5"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.9.5.tgz#095979f9bcc0d09da324d58d03ce8f8374cbe65a"
-  integrity sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==
+typescript@^5.4.0:
+  version "5.9.3"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.9.3.tgz#5b4f59e15310ab17a216f5d6cf53ee476ede670f"
+  integrity sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==
 
 uglify-js@^3.1.4:
   version "3.19.3"

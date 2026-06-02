@@ -1,9 +1,5 @@
-export * from './src/atom';
-export * from './src/datum';
-export * from './src/instance';
-export * from './src/projection';
-export * from './src/relation';
-export * from './src/tuple';
-export * from './src/type';
-export * from './src/util';
-export * from './src/xml';
+// The Alloy instance / XML model is owned by spytial-core (the single source of truth).
+// This package re-exports it so existing `@/alloy-instance` imports keep working unchanged,
+// plus a few Cope and Drag-specific helpers that don't belong in the canonical parser.
+export * from 'spytial-core/alloy-instance';
+export * from './local';
