@@ -35,10 +35,13 @@ export interface UiState {
  * Create a new UI state.
  */
 export const newUiState = (initialView?: MainView): UiState => {
+  // In the Alloy build, start with the explorer drawer closed so the graph
+  // gets the full width by default. It can be reopened via the sidebar button.
+  const explorerClosedByDefault = process.env.PROVIDER === 'alloy';
   return {
     availableViews: ['GraphView', 'TableView', 'ScriptView', 'EditView'],
     mainView: initialView || 'ScriptView',
-    graphViewDrawer: 'explorer',
+    graphViewDrawer: explorerClosedByDefault ? null : 'explorer',
     tableViewDrawer: null,
     scriptViewDrawer: 'variables',
     editViewDrawer: null,
