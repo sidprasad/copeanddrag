@@ -1,6 +1,7 @@
 import { Pane, PaneBody, PaneHeader } from '@/sterling-ui';
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSterlingDispatch, useSterlingSelector } from '../../state/hooks';
+import { ensureBootstrapLoaded } from '../../utils/spytialCore';
 import { 
   selectActiveDatum, 
   selectCnDSpec, 
@@ -219,6 +220,42 @@ const GraphView = () => {
     }
   }, [dispatch, isSynthesisActive]);
 
+  // SpyTial's error modal is a singleton bound to spytial-core's global error
+  // manager. We mount it once, directly above the graph, so parse/layout errors
+  // raised during rendering are visible no matter which drawer tab is open —
+  // previously it lived inside the Layout drawer and was hidden on other tabs.
+  const errorMountRef = useRef<HTMLDivElement>(null);
+  const [isErrorMounted, setIsErrorMounted] = useState(false);
+
+  // The error modal is styled with Bootstrap; make sure it's loaded.
+  useEffect(() => {
+    ensureBootstrapLoaded();
+  }, []);
+
+  useEffect(() => {
+    if (isErrorMounted) return;
+
+    const tryMount = (): boolean => {
+      if (!errorMountRef.current || !window.mountErrorMessageModal) return false;
+      try {
+        window.mountErrorMessageModal('graph-error-mount');
+        setIsErrorMounted(true);
+        return true;
+      } catch (err) {
+        console.error('Failed to mount SpyTial Error Modal:', err);
+        return false;
+      }
+    };
+
+    // The global bundle is normally ready at boot, but poll briefly in case the
+    // mount node or the global isn't available on the first pass.
+    if (tryMount()) return;
+    const intervalId = setInterval(() => {
+      if (tryMount()) clearInterval(intervalId);
+    }, 200);
+    return () => clearInterval(intervalId);
+  }, [isErrorMounted]);
+
   // Determine if we should show multiple graphs
   const shouldShowMultiProjection = 
     multiProjectionInfo !== null &&
@@ -282,8 +319,18 @@ const GraphView = () => {
             <PaneHeader className='border-b'>
               <GraphViewHeader datum={datum} />
             </PaneHeader>
-            <PaneBody>
-              {renderGraphContent()}
+            <PaneBody display="flex" flexDirection="column">
+              {/* SpyTial error modal mounts here — sits above the graph and
+                  collapses to nothing when there is no active error. */}
+              <div
+                id="graph-error-mount"
+                ref={errorMountRef}
+                className="flex-shrink-0 px-2"
+                aria-live="polite"
+              />
+              <div className="relative flex-1 min-h-0">
+                {renderGraphContent()}
+              </div>
             </PaneBody>
           </Pane>
         </div>

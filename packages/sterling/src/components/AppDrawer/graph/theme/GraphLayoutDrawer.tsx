@@ -4,7 +4,7 @@ import { useSterlingDispatch, useSterlingSelector } from '../../../../state/hook
 import { selectActiveDatum, selectCnDSpec, selectSelectedProjections, selectTimeIndex, selectProjectionConfig, selectSequencePolicyName } from '../../../../state/selectors';
 import { cndSpecSet, selectedProjectionsSet } from '../../../../state/graphs/graphsSlice';
 import { parseCndFile } from '../../../../utils/cndPreParser';
-import { getSpytialCore } from '../../../../utils/spytialCore';
+import { ensureBootstrapLoaded, getSpytialCore } from '../../../../utils/spytialCore';
 import * as yaml from 'js-yaml';
 
 /**
@@ -37,9 +37,7 @@ const GraphLayoutDrawer = () => {
   const dispatch = useSterlingDispatch();
   const datum = useSterlingSelector(selectActiveDatum);
   const cndEditorRef = useRef<HTMLDivElement>(null);
-  const errorMountRef = useRef<HTMLDivElement>(null);
   const [isEditorMounted, setIsEditorMounted] = useState(false);
-  const [isErrorMounted, setIsErrorMounted] = useState(false);
 
   // Preserve the projections/sequence blocks that were stripped from the
   // editor so we can merge them back when "Apply Layout" is clicked.
@@ -138,31 +136,10 @@ const GraphLayoutDrawer = () => {
     }
   }, [datum, timeIndex, selectedProjections]);
 
-  // Load Bootstrap for SpyTial UI
+  // Load Bootstrap for SpyTial UI (used by the mounted CnD editor below).
   useEffect(() => {
-    const existingBootstrap = document.getElementById('spytial-bootstrap-stylesheet');
-    if (!existingBootstrap) {
-      const link = document.createElement('link');
-      link.id = 'spytial-bootstrap-stylesheet';
-      link.rel = 'stylesheet';
-      link.href = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css';
-      link.integrity = 'sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM';
-      link.crossOrigin = 'anonymous';
-      document.head.appendChild(link);
-    }
+    ensureBootstrapLoaded();
   }, []);
-
-  // Mount SpyTial error modal
-  useEffect(() => {
-    if (errorMountRef.current && window.mountErrorMessageModal && !isErrorMounted) {
-      try {
-        window.mountErrorMessageModal('layout-error-mount');
-        setIsErrorMounted(true);
-      } catch (err) {
-        console.error('Failed to mount SpyTial Error Modal:', err);
-      }
-    }
-  }, [isErrorMounted]);
 
   // Mount the CnD Layout Interface from SpyTial
   useEffect(() => {
@@ -274,14 +251,6 @@ const GraphLayoutDrawer = () => {
 
   return (
     <div className="absolute inset-0 flex flex-col overflow-y-auto bg-slate-50/90 text-slate-900">
-      {/* Error display area */}
-      <div
-        id="layout-error-mount"
-        ref={errorMountRef}
-        className="flex-shrink-0"
-        aria-live="polite"
-      />
-
       <div className="flex-1 space-y-3 p-3">
         {/* Actions */}
         <div className="flex gap-2">
