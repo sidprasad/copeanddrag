@@ -112,3 +112,25 @@ export function getSpytialCore(): SpytialCoreApi | undefined {
 export function hasSpytialCore(): boolean {
   return typeof getSpytialCore() !== 'undefined';
 }
+
+/**
+ * Ensure the SpyTial Bootstrap stylesheet is present in <head>.
+ *
+ * SpyTial's mounted React components — the CnD layout editor and the error
+ * message modal — are styled with Bootstrap utility classes (`card`,
+ * `border-danger`, `var(--bs-danger)`, …) that the component CSS bundle does
+ * not ship. The stylesheet is injected lazily and only once, no matter how
+ * many components request it.
+ */
+export function ensureBootstrapLoaded(): void {
+  if (typeof document === 'undefined') return;
+  if (document.getElementById('spytial-bootstrap-stylesheet')) return;
+
+  const link = document.createElement('link');
+  link.id = 'spytial-bootstrap-stylesheet';
+  link.rel = 'stylesheet';
+  link.href = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css';
+  link.integrity = 'sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM';
+  link.crossOrigin = 'anonymous';
+  document.head.appendChild(link);
+}
