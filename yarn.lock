@@ -9347,10 +9347,10 @@ simple-get@^3.0.3, simple-get@^3.1.0:
     once "^1.3.1"
     simple-concat "^1.0.0"
 
-simple-graph-query@^2.7.0:
-  version "2.7.0"
-  resolved "https://registry.yarnpkg.com/simple-graph-query/-/simple-graph-query-2.7.0.tgz#f5ba5dea3727fde5e89693c706606cb65b9a128b"
-  integrity sha512-sPt77bAY0YItIGQwPfOYBj32OUAD7jTHnOpLC90g04UvtixsmJ7ShDt6uYiUnhMyI/+M5QZrSKov3z8s1lCzsQ==
+simple-graph-query@^2.7.2:
+  version "2.7.2"
+  resolved "https://registry.yarnpkg.com/simple-graph-query/-/simple-graph-query-2.7.2.tgz#b7e0bf97ae64878c3d04986c260e246dceb2434a"
+  integrity sha512-QrSvr1swp+1+KEG3k3qdQ3pNnTpLKuv3Y5/w5QLywIQMQQMReSmQeVFDnW+Tn1EsEi6UTeDwW5lTPM0efecJFg==
   dependencies:
     "@types/lodash" "^4.17.16"
     "@types/node" "^22.14.0"
@@ -9453,10 +9453,10 @@ sprintf-js@~1.0.2:
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==
 
-spytial-core@2.6.5:
-  version "2.6.5"
-  resolved "https://registry.yarnpkg.com/spytial-core/-/spytial-core-2.6.5.tgz#18bd7e0dacb6b83f9f4046623081b7114f8d0a64"
-  integrity sha512-WU83Lf1vSqMVftqN4yPq/M/S2QYEx7aogEGh7lBdywJuWHum+ZBPSLae20Mb43LYYB6ZmdZWeh0bUW0u9Gsmzg==
+spytial-core@2.7.1:
+  version "2.7.1"
+  resolved "https://registry.yarnpkg.com/spytial-core/-/spytial-core-2.7.1.tgz#8e85bca82468dd2304237b14ea780e8292fd67aa"
+  integrity sha512-yrCjlJum6joSK/J9L+1puZKknMFhkAq91nLup54rRwwlO2IJmRFbnzch0kUlA2CoGHe//K+hyToMcJ4aa2NraQ==
   dependencies:
     "@types/d3" "^4.13.12"
     "@types/graphlib-dot" "^0.6.4"
@@ -9476,7 +9476,7 @@ spytial-core@2.6.5:
     lodash "^4.17.21"
     react "19.1.0"
     react-dom "19.1.0"
-    simple-graph-query "^2.7.0"
+    simple-graph-query "^2.7.2"
     webcola "^3.4.0"
 
 sshpk@^1.7.0:
