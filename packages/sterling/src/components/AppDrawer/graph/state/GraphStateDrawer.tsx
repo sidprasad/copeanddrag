@@ -20,7 +20,7 @@ const GraphStateDrawer = () => {
       {isTrace ? (
         <TimeSection datum={activeDatum} />
       ) : (
-        <div className='p-4 text-sm text-gray-500'>
+        <div className='p-4 text-sm text-ink-muted'>
           <p>Time controls are only available for trace-based instances.</p>
         </div>
       )}

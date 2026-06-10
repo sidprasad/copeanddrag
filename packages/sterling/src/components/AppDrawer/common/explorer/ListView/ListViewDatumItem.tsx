@@ -25,7 +25,7 @@ const ListViewDatumItem = (props: ListViewDatumItemProps) => {
   const statefulProjected = useSterlingSelector((state) =>
     selectDatumIsStatefulProjected(state, datum)
   );
-  const cn = active ? 'text-white bg-blue-600' : '';
+  const cn = active ? 'text-on-accent bg-accent' : '';
 
   return (
     <Row onClick={(event) => onClickItem(event, datum)}>

@@ -1,3 +1,5 @@
+import { ColorMode, resolveInitialColorMode } from '../../theme/colorMode';
+
 export type GraphView = 'GraphView';
 export type TableView = 'TableView';
 export type ScriptView = 'ScriptView';
@@ -29,6 +31,10 @@ export interface UiState {
   // the graph view drawer states
   // The generator name selected in the explorer dropdown
   selectedGenerator: string | undefined;
+
+  // active app color mode (light/dark); reflected onto <html> data-theme and
+  // synced to the graph's theme
+  colorMode: ColorMode;
 }
 
 /**
@@ -45,7 +51,8 @@ export const newUiState = (initialView?: MainView): UiState => {
     tableViewDrawer: null,
     scriptViewDrawer: 'variables',
     editViewDrawer: null,
-    selectedGenerator: undefined
+    selectedGenerator: undefined,
+    colorMode: resolveInitialColorMode()
   };
 };
 

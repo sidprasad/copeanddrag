@@ -2,14 +2,14 @@ import { LabelDef, ShapeDef } from '@/graph-svg';
 import { CSSProperties } from 'react';
 
 export const edgeStyle: CSSProperties = {
-  stroke: '#4A5568',
+  stroke: 'var(--ccd-minimap-edge)',
   strokeWidth: 1,
   fill: 'none'
 };
 
 export const nodeLabel: Omit<LabelDef, 'text'> = {
   style: {
-    fill: '#4A5568',
+    fill: 'var(--ccd-minimap-node-stroke)',
     fontFamily: 'monospace',
     fontSize: '10px',
     textAnchor: 'middle',
@@ -27,9 +27,9 @@ export const nodeShape: ShapeDef = {
 };
 
 export const nodeStyle: CSSProperties = {
-  stroke: '#4A5568',
+  stroke: 'var(--ccd-minimap-node-stroke)',
   strokeWidth: 1,
-  fill: 'white',
+  fill: 'var(--ccd-minimap-node-fill)',
   cursor: 'pointer'
 };
 
@@ -47,8 +47,8 @@ export const selectedNodeLabel: Omit<LabelDef, 'text'> = {
 };
 
 export const selectedNodeStyle: CSSProperties = {
-  stroke: '#333',
+  stroke: 'var(--ccd-minimap-selected-stroke)',
   strokeWidth: 1,
-  fill: 'white',
+  fill: 'var(--ccd-minimap-node-fill)',
   cursor: 'pointer'
 };

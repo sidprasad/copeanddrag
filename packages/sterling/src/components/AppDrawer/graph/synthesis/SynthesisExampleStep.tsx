@@ -115,7 +115,7 @@ export const SynthesisExampleStep = () => {
   return (
     <div className="flex flex-col h-full">
       {/* Instructions */}
-      <div className="p-4 bg-blue-50 border-b border-blue-200">
+      <div className="p-4 bg-accent-bg border-b border-accent-border">
         <Text fontSize="sm" fontWeight="semibold" mb={1} color="blue.900">
           Instance {instanceIndex + 1} of {numInstances}
         </Text>
@@ -128,7 +128,7 @@ export const SynthesisExampleStep = () => {
       {/* Text input for atom IDs */}
       <div className="p-4 space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-ink-muted mb-2">
             Atom IDs (comma-separated)
           </label>
           <Input
@@ -145,7 +145,7 @@ export const SynthesisExampleStep = () => {
       <div className="flex-1"></div>
 
       {/* Next button */}
-      <div className="p-4 border-t bg-gray-50">
+      <div className="p-4 border-t bg-surface-muted">
         <Button
           w="full"
           colorScheme="blue"

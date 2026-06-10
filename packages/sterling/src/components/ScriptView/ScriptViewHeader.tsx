@@ -14,7 +14,7 @@ const ScriptViewHeader = (props: ScriptViewHeaderProps) => {
   const command = parsed.command;
   return (
     <div className='w-full flex items-center space-x-2 px-2'>
-      <PaneTitle className='text-gray-400'>ID: {id}</PaneTitle>
+      <PaneTitle className='text-ink-faint'>ID: {id}</PaneTitle>
       <PaneTitle>{command}</PaneTitle>
       <div className='grow' />
       <ScriptViewHeaderButtons onExecute={onExecute} />

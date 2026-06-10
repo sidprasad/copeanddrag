@@ -10,12 +10,11 @@ const AppMiniMap = () => {
       transform='translate(-50%)'
       width='350px'
       height='50px'
-      backgroundColor='white'
       shadow='base'
       borderRadius='base'
       border='1px'
-      borderColor='gray.400'
-      bg='white'
+      borderColor='var(--ccd-rule-strong)'
+      bg='var(--ccd-minimap-bg)'
     >
       <MiniMap
         numStates={5}

@@ -84,7 +84,7 @@ const TimeProjectionsListRow = (props: ItemProps) => {
           />
         </ButtonGroup>
         <MdChevronLeft
-          className='-rotate-90 ml-2 cursor-pointer hover:text-black'
+          className='-rotate-90 ml-2 cursor-pointer hover:text-ink'
           onClick={onToggle}
         />
       </div>
@@ -109,10 +109,10 @@ const TimeProjectionCard = (props: ItemProps) => {
 
   return (
     <div className='m-2 col-span-3 flex flex-col border shadow'>
-      <div className='flex justify-between p-3 bg-slate-50'>
+      <div className='flex justify-between p-3 bg-surface-muted'>
         <div className='text-sm font-bold'>{type}</div>
         <MdChevronLeft
-          className='rotate-90 cursor-pointer hover:text-black'
+          className='rotate-90 cursor-pointer hover:text-ink'
           onClick={onToggle}
         />
       </div>
@@ -177,7 +177,7 @@ const TimeProjectionsListCard = (props: ItemProps) => {
       <div className='flex justify-between pb-3'>
         <div className='text-sm font-bold'>{type}</div>
         <MdChevronLeft
-          className='rotate-90 cursor-pointer hover:text-black'
+          className='rotate-90 cursor-pointer hover:text-ink'
           onClick={onToggle}
         />
       </div>

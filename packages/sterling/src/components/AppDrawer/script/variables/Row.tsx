@@ -5,13 +5,13 @@ const Row = (props: PropsWithChildren<any>) => (
 );
 
 const RowType = (props: PropsWithChildren<any>) => (
-  <div className='px-4 py-0.5 prose text-xs group-hover:bg-slate-100'>
+  <div className='px-4 py-0.5 prose text-xs group-hover:bg-surface-sunken'>
     {props.children}
   </div>
 );
 
 const RowVariable = (props: PropsWithChildren<any>) => (
-  <div className='px-4 py-0.5 text-xs font-mono group-hover:bg-slate-100'>
+  <div className='px-4 py-0.5 text-xs font-mono group-hover:bg-surface-sunken'>
     {props.children}
   </div>
 );

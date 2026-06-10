@@ -87,7 +87,7 @@ const EvaluatorInput = (props: EvaluatorInputProps) => {
           <Icon color={iconColor} as={GoChevronRight} />
         </span>
         <input
-          className='h-[35px] text-xs placeholder:italic placeholder:text-gray-400 placeholder:text-xs block bg-white w-full border-b border-gray-100 focus:border-gray-200 py-2 pl-9 pr-3 focus:outline-none'
+          className='h-[35px] text-xs placeholder:italic placeholder:text-ink-faint placeholder:text-xs block bg-surface w-full border-b border-rule focus:border-rule py-2 pl-9 pr-3 focus:outline-none'
           placeholder={placeholder}
           type='text'
           disabled={!active}

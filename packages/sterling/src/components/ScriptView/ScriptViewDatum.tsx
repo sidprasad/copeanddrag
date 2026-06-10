@@ -143,7 +143,7 @@ const ScriptViewDatum = (props: ScriptViewDatumProps) => {
                 The slightly off-white background color shows the actual full SVG area.*/}
             {stage === 'svg' && 
               <div aria-label='SVG Visualization' id='svg-container' style={{height: '100%', width: '100%', overflow: 'scroll'}}>
-                <svg ref={svgRef} style={{width:'100%', height:'100%', backgroundColor: 'snow'}}/>
+                <svg ref={svgRef} style={{width:'100%', height:'100%', backgroundColor: 'var(--ccd-surface-muted)'}}/>
               </div>}
           </Pane>
           <Pane className='relative' aria-label='Visualization Script' data-testid='script-editor-pane'>

@@ -18,31 +18,34 @@ export const tokens = {
     body: '"Atkinson Hyperlegible", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     mono: '"Fira Code VF", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace'
   },
+  // Each color resolves to a CSS custom property (see themeVars.css), so the
+  // whole shell re-themes when `data-theme` flips on <html>. Light values (the
+  // historical palette) and dark values live in themeVars.css.
   color: {
-    bg: '#fdfdfb',
-    surface: '#ffffff',
-    surfaceMuted: '#f4f3ef',
+    bg: 'var(--ccd-bg)',
+    surface: 'var(--ccd-surface)',
+    surfaceMuted: 'var(--ccd-surface-muted)',
 
-    ink: '#1f2937',
-    inkMuted: '#475569',
-    inkFaint: '#64748b',
-    inkDecorative: '#adb5bd',
+    ink: 'var(--ccd-ink)',
+    inkMuted: 'var(--ccd-ink-muted)',
+    inkFaint: 'var(--ccd-ink-faint)',
+    inkDecorative: 'var(--ccd-ink-decorative)',
 
-    rule: '#e9ecef',
-    ruleStrong: '#dee2e6',
+    rule: 'var(--ccd-rule)',
+    ruleStrong: 'var(--ccd-rule-strong)',
 
-    accent: '#5a3d8a',
-    accentBg: '#f0eef8',
-    accentBorder: '#c4b8e0',
-    accentInk: '#3d2a5e',
+    accent: 'var(--ccd-accent)',
+    accentBg: 'var(--ccd-accent-bg)',
+    accentBorder: 'var(--ccd-accent-border)',
+    accentInk: 'var(--ccd-accent-ink)',
 
-    codeBg: '#1e1e1e',
-    codeFg: '#d4d4d4',
-    codeMuted: '#9b9b9b',
+    codeBg: 'var(--ccd-code-bg)',
+    codeFg: 'var(--ccd-code-fg)',
+    codeMuted: 'var(--ccd-code-muted)',
 
-    success: '#1b5e20',
-    error: '#a31515',
-    warning: '#8a6d00'
+    success: 'var(--ccd-success)',
+    error: 'var(--ccd-error)',
+    warning: 'var(--ccd-warning)'
   },
   focus: {
     width: '2px',

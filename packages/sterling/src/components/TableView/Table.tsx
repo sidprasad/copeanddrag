@@ -19,7 +19,7 @@ const Table = (props: TableProps) => {
   return (
     <table className='prose shadow m-2 boarder prose text-xs font-mono' summary={data.title} role="table" style={style}>
     <caption className='prose prose-sm font-semibold px-2 py-1 border shadow' style={{ textAlign: 'left'}}>{data.title}</caption>
-    <thead className='bg-slate-100'>
+    <thead className='bg-surface-sunken'>
       <tr>
         {data.headers && data.headers.map((header, index) => {
           return (
@@ -42,7 +42,7 @@ const Table = (props: TableProps) => {
             {row.map((val, colIndex) => {
               return (
                 <td
-                  className='px-2 py-0.5 bg-white boarder'
+                  className='px-2 py-0.5 bg-surface boarder'
                   key={`${rowIndex}${colIndex}`}
                   headers={`header-${colIndex}`}
                 >

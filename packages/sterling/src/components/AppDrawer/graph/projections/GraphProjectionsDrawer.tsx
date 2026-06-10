@@ -116,8 +116,8 @@ const GraphProjectionsDrawer = () => {
   if (!activeDatum) {
     return (
       <div className='absolute inset-0 flex flex-col overflow-y-auto'>
-        <div className='mx-2 mt-2 rounded-lg border border-slate-200 bg-white p-3 shadow-sm'>
-          <p className='text-xs text-gray-500'>
+        <div className='mx-2 mt-2 rounded-lg border border-rule bg-surface p-3 shadow-sm'>
+          <p className='text-xs text-ink-muted'>
             No active instance. Run a model to configure projections.
           </p>
         </div>
@@ -128,8 +128,8 @@ const GraphProjectionsDrawer = () => {
   return (
     <div className='absolute inset-0 flex flex-col overflow-y-auto'>
       {/* ── Add Projection ─────────────────────────────────────── */}
-      <div className='mx-2 mt-2 mb-1 rounded-lg border border-slate-200 bg-white p-3 shadow-sm'>
-        <span className='text-sm font-semibold text-gray-800'>
+      <div className='mx-2 mt-2 mb-1 rounded-lg border border-rule bg-surface p-3 shadow-sm'>
+        <span className='text-sm font-semibold text-ink'>
           Add Projection
         </span>
         {availableTypes.length > 0 && (
@@ -139,7 +139,7 @@ const GraphProjectionsDrawer = () => {
                 key={typeName}
                 type='button'
                 onClick={() => handleAddProjection(typeName)}
-                className='px-2.5 py-1 text-xs rounded-md font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors'
+                className='px-2.5 py-1 text-xs rounded-md font-medium bg-success-bg text-success border border-success-border hover:bg-success-bg transition-colors'
               >
                 + {typeName}
               </button>
@@ -154,13 +154,13 @@ const GraphProjectionsDrawer = () => {
             onChange={(e) => setManualType(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') handleManualAdd(); }}
             placeholder='Type name (e.g. State)'
-            className='flex-1 px-2 py-1 text-xs rounded-md border border-gray-200 bg-gray-50 focus:outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200'
+            className='flex-1 px-2 py-1 text-xs rounded-md border border-rule bg-surface-muted focus:outline-none focus:border-accent-border focus:ring-1 focus:ring-accent'
           />
           <button
             type='button'
             onClick={handleManualAdd}
             disabled={!manualType.trim()}
-            className='px-2.5 py-1 text-xs rounded-md font-medium bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors'
+            className='px-2.5 py-1 text-xs rounded-md font-medium bg-accent text-on-accent hover:bg-accent disabled:bg-surface-sunken disabled:cursor-not-allowed transition-colors'
           >
             Add
           </button>
@@ -169,20 +169,20 @@ const GraphProjectionsDrawer = () => {
 
       {/* ── Active Projections ─────────────────────────────────── */}
       {currentProjections.length > 0 && (
-        <div className='mx-2 mt-1 mb-1 rounded-lg border border-slate-200 bg-white p-3 shadow-sm'>
-          <span className='text-sm font-semibold text-gray-800'>
+        <div className='mx-2 mt-1 mb-1 rounded-lg border border-rule bg-surface p-3 shadow-sm'>
+          <span className='text-sm font-semibold text-ink'>
             Active Projections
           </span>
           <div className='mt-2 space-y-1.5'>
             {currentProjections.map((proj) => (
               <div
                 key={proj.type}
-                className='flex items-center justify-between rounded-md bg-indigo-50 px-2.5 py-1.5'
+                className='flex items-center justify-between rounded-md bg-accent-bg px-2.5 py-1.5'
               >
-                <span className='text-xs font-medium text-indigo-800'>
+                <span className='text-xs font-medium text-accent'>
                   {proj.type}
                   {proj.orderBy && (
-                    <span className='ml-1 text-indigo-400 font-normal'>
+                    <span className='ml-1 text-accent font-normal'>
                       (ordered by {proj.orderBy})
                     </span>
                   )}
@@ -190,7 +190,7 @@ const GraphProjectionsDrawer = () => {
                 <button
                   type='button'
                   onClick={() => handleRemoveProjection(proj.type)}
-                  className='ml-2 text-xs text-red-400 hover:text-red-600 font-medium transition-colors'
+                  className='ml-2 text-xs text-danger hover:text-danger font-medium transition-colors'
                   title={`Remove ${proj.type} projection`}
                 >
                   ✕

@@ -126,7 +126,7 @@ const EditView = () => {
         <Pane>
           <PaneHeader className='border-b'>
             <div className='w-full flex items-center px-2 space-x-2'>
-              <PaneTitle className='text-gray-400'>Edit</PaneTitle>
+              <PaneTitle className='text-ink-faint'>Edit</PaneTitle>
               {datum && (
                 <PaneTitle>{datum.parsed.command}</PaneTitle>
               )}
@@ -135,7 +135,7 @@ const EditView = () => {
                 <button
                   type="button"
                   onClick={handleLoadFromInstance}
-                  className="px-3 py-1 text-xs font-medium rounded border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-400 transition"
+                  className="px-3 py-1 text-xs font-medium rounded border border-rule-strong bg-surface text-ink-muted hover:bg-surface-muted hover:border-rule-strong transition"
                 >
                   Load from Instance
                 </button>
@@ -143,25 +143,25 @@ const EditView = () => {
               <button
                 type="button"
                 onClick={handleExport}
-                className="px-3 py-1 text-xs font-medium rounded bg-indigo-600 text-white hover:bg-indigo-500 transition"
+                className="px-3 py-1 text-xs font-medium rounded bg-accent text-on-accent hover:bg-accent transition"
               >
                 Export as inst
               </button>
               {exportFeedback?.status === 'success' && (
-                <span className="text-xs text-green-600 font-medium">
+                <span className="text-xs text-success font-medium">
                   {exportFeedback.message}
                 </span>
               )}
             </div>
           </PaneHeader>
-          <div className="px-3 py-1.5 bg-amber-50 border-b border-amber-200 text-amber-700 text-xs">
+          <div className="px-3 py-1.5 bg-warning-bg border-b border-warning-border text-warning text-xs">
             Experimental feature — Edit mode is under active development.
           </div>
           {exportFeedback && exportFeedback.status !== 'success' && (
             <div className={`px-3 py-2 border-b text-xs ${
               exportFeedback.status === 'error'
-                ? 'bg-red-50 border-red-200 text-red-700'
-                : 'bg-amber-50 border-amber-200 text-amber-700'
+                ? 'bg-danger-bg border-danger-border text-danger'
+                : 'bg-warning-bg border-warning-border text-warning'
             }`}>
               <div className="flex items-center justify-between">
                 <span className="font-medium">{exportFeedback.message}</span>
@@ -188,7 +188,7 @@ const EditView = () => {
                 <ul className="mt-1.5 space-y-0.5 list-disc list-inside">
                   {exportFeedback.issues.map((issue, idx) => (
                     <li key={idx}>
-                      <span className={issue.severity === 'error' ? 'text-red-600' : 'text-amber-600'}>
+                      <span className={issue.severity === 'error' ? 'text-danger' : 'text-warning'}>
                         {issue.message}
                       </span>
                     </li>

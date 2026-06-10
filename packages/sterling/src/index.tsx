@@ -11,7 +11,13 @@ import { ChakraProvider } from '@chakra-ui/react';
 import { sterlingTheme } from '@/sterling-ui';
 import { Sterling } from './components/Sterling';
 import store from './state/store';
+import { wireColorMode } from './theme/wireColorMode';
+import '../../sterling-ui/src/themeVars.css';
 import './index.css';
+
+// Reflect the color mode onto <html> before first paint so the app renders in
+// the right theme, and keep it in sync thereafter.
+wireColorMode(store);
 
 ReactDOM.render(
   <React.StrictMode>

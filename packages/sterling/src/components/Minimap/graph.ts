@@ -76,7 +76,7 @@ function edgeStyles(graph: Graph): Record<string, CSSProperties> {
   const edgeStyles: Record<string, CSSProperties> = {};
   getEdges(graph).forEach((edge) => {
     edgeStyles[`${edge.id}`] = {
-      stroke: '#4A5568',
+      stroke: 'var(--ccd-minimap-edge)',
       strokeWidth: 1,
       fill: 'none'
     };
@@ -92,7 +92,7 @@ function nodeLabels(graph: Graph, current: number): Record<string, LabelDef[]> {
       {
         text: node.id,
         style: {
-          fill: active ? 'white' : '#4A5568',
+          fill: active ? '#ffffff' : 'var(--ccd-minimap-node-stroke)',
           fontFamily: 'monospace',
           fontSize: '10px',
           fontWeight: active ? 'bold' : 'normal',
@@ -128,9 +128,9 @@ function nodeStyles(
   getNodes(graph).forEach((node) => {
     const active = node.id === `${current}`;
     nodeStyles[node.id] = {
-      stroke: active ? '#3B82F6' : '#4A5568',
+      stroke: active ? 'var(--ccd-minimap-node-active)' : 'var(--ccd-minimap-node-stroke)',
       strokeWidth: 1,
-      fill: active ? '#3B82F6' : 'white',
+      fill: active ? 'var(--ccd-minimap-node-active)' : 'var(--ccd-minimap-node-fill)',
       cursor: 'pointer'
     };
   });

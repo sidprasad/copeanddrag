@@ -1,7 +1,11 @@
 import { DatumParsed } from '@/sterling-connection';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { parseCndFile, type CndProjection, type SequencePolicyName } from '../../utils/cndPreParser';
 import { getSpytialCore, hasSpytialCore } from '../../utils/spytialCore';
+import { useSterlingDispatch, useSterlingSelector } from '../../state/hooks';
+import { selectColorMode } from '../../state/selectors';
+import { colorModeSet } from '../../state/ui/uiSlice';
+import { isColorMode } from '../../theme/colorMode';
 
 /**
  * The signature label that Forge uses to indicate no more instances are available.
@@ -58,6 +62,10 @@ declare global {
       getLayoutState?: () => LayoutState;
       addToolbarControl?: (element: HTMLElement) => void;
       clear?: () => void;
+      // Theme API (spytial-core >= 2.8.0). setTheme re-tints a live graph with
+      // no re-render; the element also fires a 'theme-changed' event when the
+      // user picks a theme in its built-in Mode dropdown.
+      setTheme?: (name: string, overrides?: Record<string, string>, nodeColors?: Record<string, number>) => void;
       // Node highlighting for synthesis mode
       clearNodeHighlights?: () => void;
       highlightNodes?: (nodeIds: string[], color?: string) => boolean;
@@ -101,6 +109,12 @@ const SpyTialGraph = (props: SpyTialGraphProps) => {
     sequencePolicyName = 'ignore_history',
     projectionSelections = {}
   } = props;
+  // App color mode, synced bidirectionally with the graph's own theme.
+  const dispatch = useSterlingDispatch();
+  const colorMode = useSterlingSelector(selectColorMode);
+  const colorModeRef = useRef(colorMode);
+  colorModeRef.current = colorMode;
+
   // Separate ref for the graph container - this div is NOT managed by React's children
   const graphContainerRef = useRef<HTMLDivElement>(null);
   const graphElementRef = useRef<HTMLElementTagNameMap['webcola-cnd-graph'] | null>(null);
@@ -414,8 +428,12 @@ const SpyTialGraph = (props: SpyTialGraphProps) => {
     }
   }, [datum.data, datum.id, cndSpec, timeIndex, priorState]);
 
-  // Create and mount the webcola-cnd-graph element once
-  useEffect(() => {
+  // Create and mount the webcola-cnd-graph element once.
+  // useLayoutEffect (not useEffect) so the cleanup runs synchronously during the
+  // commit phase — ahead of React removing the host DOM — letting us detach the
+  // element ourselves and swallow any teardown error from the graph's
+  // disconnectedCallback (spytial-core can throw on an empty edge path).
+  useLayoutEffect(() => {
     if (!graphContainerRef.current || isInitializedRef.current) return;
 
     // Create the webcola-cnd-graph custom element
@@ -424,6 +442,9 @@ const SpyTialGraph = (props: SpyTialGraphProps) => {
     graphElement.setAttribute('layoutFormat', 'default');
     graphElement.setAttribute('transition-mode', 'morph');
     graphElement.setAttribute('aria-label', 'Interactive graph visualization');
+    // Start the graph on the app's current theme (declarative; applied by the
+    // element's attributeChangedCallback).
+    graphElement.setAttribute('theme', colorModeRef.current);
     graphElement.style.cssText = `
       width: 100%;
       height: 100%;
@@ -468,9 +489,18 @@ const SpyTialGraph = (props: SpyTialGraphProps) => {
       }
     };
 
+    // Graph -> app sync: when the user picks a theme in the graph's built-in
+    // Mode dropdown, follow it for the app chrome. (setTheme() does NOT fire
+    // this event, so app -> graph pushes never loop back.)
+    const handleThemeChanged = (e: CustomEvent) => {
+      const name = e?.detail?.theme;
+      if (isColorMode(name)) dispatch(colorModeSet(name));
+    };
+
     graphElement.addEventListener('layout-complete', handleLayoutComplete as EventListener);
     graphElement.addEventListener('node-drag-end', handleNodeDragEnd as EventListener);
     graphElement.addEventListener('viewbox-change', handleViewBoxChange as EventListener);
+    graphElement.addEventListener('theme-changed', handleThemeChanged as EventListener);
 
     graphContainerRef.current.appendChild(graphElement);
     graphElementRef.current = graphElement;
@@ -482,13 +512,21 @@ const SpyTialGraph = (props: SpyTialGraphProps) => {
         graphElementRef.current.removeEventListener('layout-complete', handleLayoutComplete as EventListener);
         graphElementRef.current.removeEventListener('node-drag-end', handleNodeDragEnd as EventListener);
         graphElementRef.current.removeEventListener('viewbox-change', handleViewBoxChange as EventListener);
-        
-        if (graphElementRef.current.clear) {
-          graphElementRef.current.clear();
+        graphElementRef.current.removeEventListener('theme-changed', handleThemeChanged as EventListener);
+
+        // Detach the element ourselves (before React removes the container) and
+        // swallow any error: spytial-core's disconnectedCallback can throw an
+        // InvalidStateError (getPointAtLength on an empty edge path) during
+        // dispose, and that must not be allowed to break React's unmount.
+        try {
+          graphElementRef.current.clear?.();
+        } catch {
+          /* ignore */
         }
-        // Remove the element we added
-        if (graphContainerRef.current && graphElementRef.current.parentNode === graphContainerRef.current) {
-          graphContainerRef.current.removeChild(graphElementRef.current);
+        try {
+          graphElementRef.current.remove();
+        } catch {
+          /* ignore spytial-core dispose throw */
         }
       }
       graphElementRef.current = null;
@@ -503,11 +541,17 @@ const SpyTialGraph = (props: SpyTialGraphProps) => {
     }
   }, [datum.data, cndSpec, timeIndex, loadGraph, isCndCoreReady]);
 
+  // App -> graph sync: re-tint the live graph whenever the app color mode
+  // changes (setTheme re-tints in place, no re-render needed).
+  useEffect(() => {
+    graphElementRef.current?.setTheme?.(colorMode);
+  }, [colorMode]);
+
   return (
-    <div 
+    <div
       className="absolute inset-0 flex flex-col"
-      style={{ 
-        background: 'white',
+      style={{
+        background: 'var(--ccd-surface)',
         overflow: 'hidden'
       }}
     >
@@ -523,11 +567,11 @@ const SpyTialGraph = (props: SpyTialGraphProps) => {
       />
       {/* React-managed overlay elements */}
       {isLoading && (
-        <div 
-          className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75"
-          style={{ zIndex: 10, pointerEvents: 'none' }}
+        <div
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ zIndex: 10, pointerEvents: 'none', background: 'var(--ccd-surface)', opacity: 0.75 }}
         >
-          <div className="text-gray-600">Loading graph...</div>
+          <div style={{ color: 'var(--ccd-ink-muted)' }}>Loading graph...</div>
         </div>
       )}
       {error && (
