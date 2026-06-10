@@ -1,7 +1,9 @@
 import { DatumParsed } from '@/sterling-connection';
-import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, useMemo } from 'react';
 import { parseCndFile, SequencePolicyName } from '../../utils/cndPreParser';
 import { getSpytialCore, hasSpytialCore } from '../../utils/spytialCore';
+import { useSterlingSelector } from '../../state/hooks';
+import { selectColorMode } from '../../state/selectors';
 
 /**
  * The signature label that Forge uses to indicate no more instances are available.
@@ -50,7 +52,10 @@ interface SingleTemporalPaneProps {
  */
 const SingleTemporalPane = (props: SingleTemporalPaneProps) => {
   const { datum, cndSpec, timeIndex, traceLength, index, sequencePolicyName = 'stability' } = props;
-  
+
+  const colorMode = useSterlingSelector(selectColorMode);
+  const colorModeRef = useRef(colorMode);
+  colorModeRef.current = colorMode;
   const graphContainerRef = useRef<HTMLDivElement>(null);
   const graphElementRef = useRef<HTMLElementTagNameMap['webcola-cnd-graph'] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -139,6 +144,7 @@ const SingleTemporalPane = (props: SingleTemporalPaneProps) => {
         if (graphElementRef.current.clear) {
           graphElementRef.current.clear();
         }
+        graphElementRef.current.setTheme?.(colorModeRef.current);
         await graphElementRef.current.renderLayout(layoutResult.layout);
       }
 
@@ -148,16 +154,23 @@ const SingleTemporalPane = (props: SingleTemporalPaneProps) => {
       setError(`Error: ${err.message}`);
       setIsLoading(false);
     }
+    // colorMode is intentionally NOT a dependency: theme switches re-tint in
+    // place via setTheme (effect below) — a full clear()+renderLayout here
+    // races spytial-core's WebCola ticks against nulled selections.
   }, [datum.data, datum.id, cndSpec, timeIndex, sequencePolicyName]);
 
-  // Create and mount the webcola-cnd-graph element once
-  useEffect(() => {
+  // Create and mount the webcola-cnd-graph element once.
+  // useLayoutEffect so the cleanup detaches the element synchronously, ahead of
+  // React removing the host DOM; the try/catch contains spytial-core's dispose
+  // throw (getPointAtLength on an empty edge path) so it can't break unmount.
+  useLayoutEffect(() => {
     if (!graphContainerRef.current || isInitializedRef.current) return;
 
     const graphElement = document.createElement('webcola-cnd-graph') as HTMLElementTagNameMap['webcola-cnd-graph'];
     graphElement.id = `spytial-graph-temporal-${index}`;
     graphElement.setAttribute('layoutFormat', 'default');
     graphElement.setAttribute('aria-label', `Graph visualization for time step ${timeIndex + 1}`);
+    graphElement.setAttribute('theme', colorModeRef.current);
     graphElement.style.cssText = `
       width: 100%;
       height: 100%;
@@ -171,11 +184,15 @@ const SingleTemporalPane = (props: SingleTemporalPaneProps) => {
 
     return () => {
       if (graphElementRef.current) {
-        if (graphElementRef.current.clear) {
-          graphElementRef.current.clear();
+        try {
+          graphElementRef.current.clear?.();
+        } catch {
+          /* ignore */
         }
-        if (graphContainerRef.current && graphElementRef.current.parentNode === graphContainerRef.current) {
-          graphContainerRef.current.removeChild(graphElementRef.current);
+        try {
+          graphElementRef.current.remove();
+        } catch {
+          /* ignore spytial-core dispose throw */
         }
       }
       graphElementRef.current = null;
@@ -191,38 +208,43 @@ const SingleTemporalPane = (props: SingleTemporalPaneProps) => {
     }
   }, [datum.data, cndSpec, timeIndex, loadGraph]);
 
+  // Theme switches re-tint the live graph in place (no re-layout).
+  useEffect(() => {
+    graphElementRef.current?.setTheme?.(colorMode);
+  }, [colorMode]);
+
   return (
-    <div className="relative flex flex-col border border-gray-300 rounded-lg overflow-hidden bg-white shadow-sm">
+    <div className="relative flex flex-col border border-rule-strong rounded-lg overflow-hidden bg-surface shadow-sm">
       {/* Header with time step label */}
-      <div className="px-3 py-2 bg-blue-50 border-b border-blue-200">
-        <span className="font-medium text-sm text-blue-800">
+      <div className="px-3 py-2 bg-info-bg border-b border-info-border">
+        <span className="font-medium text-sm text-info">
           State {timeIndex + 1} of {traceLength}
         </span>
       </div>
-      
+
       {/* Graph container */}
-      <div 
+      <div
         ref={graphContainerRef}
         className="flex-1"
-        style={{ 
+        style={{
           minHeight: '250px',
-          background: 'white'
+          background: 'var(--ccd-surface)'
         }}
       />
-      
+
       {/* Loading overlay */}
       {isLoading && (
-        <div 
-          className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75"
-          style={{ zIndex: 10, pointerEvents: 'none' }}
+        <div
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ zIndex: 10, pointerEvents: 'none', background: 'var(--ccd-overlay)' }}
         >
-          <div className="text-gray-600 text-sm">Loading...</div>
+          <div className="text-ink-muted text-sm">Loading...</div>
         </div>
       )}
-      
+
       {/* Error display */}
       {error && (
-        <div className="px-3 py-2 bg-red-50 border-t border-red-200 text-red-600 text-xs">
+        <div className="px-3 py-2 bg-danger-bg border-t border-danger-border text-danger text-xs">
           {error}
         </div>
       )}
@@ -280,7 +302,7 @@ const MultiTemporalGraph = (props: MultiTemporalGraphProps) => {
   if (error) {
     return (
       <div className="flex items-center justify-center h-full p-4">
-        <div className="text-red-600 bg-red-50 p-4 rounded-lg">
+        <div className="text-danger bg-danger-bg p-4 rounded-lg">
           <strong>Error:</strong> {error}
         </div>
       </div>
@@ -290,7 +312,7 @@ const MultiTemporalGraph = (props: MultiTemporalGraphProps) => {
   if (!isCndCoreReady) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-gray-600">Loading CnD Core...</div>
+        <div className="text-ink-muted">Loading CnD Core...</div>
       </div>
     );
   }
@@ -298,7 +320,7 @@ const MultiTemporalGraph = (props: MultiTemporalGraphProps) => {
   if (selectedTimeIndices.length === 0) {
     return (
       <div className="flex items-center justify-center h-full p-4">
-        <div className="text-gray-600 bg-gray-50 p-4 rounded-lg">
+        <div className="text-ink-muted bg-surface-muted p-4 rounded-lg">
           No time steps selected.
         </div>
       </div>
@@ -306,12 +328,12 @@ const MultiTemporalGraph = (props: MultiTemporalGraphProps) => {
   }
 
   return (
-    <div className="absolute inset-0 overflow-auto bg-gray-100 p-4">
+    <div className="absolute inset-0 overflow-auto bg-surface-sunken p-4">
       <div className="mb-4 px-2">
-        <h2 className="text-lg font-semibold text-gray-800">
+        <h2 className="text-lg font-semibold text-ink">
           Temporal Comparison
         </h2>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-ink-muted">
           Showing {selectedTimeIndices.length} time step{selectedTimeIndices.length !== 1 ? 's' : ''} of {traceLength}
         </p>
       </div>

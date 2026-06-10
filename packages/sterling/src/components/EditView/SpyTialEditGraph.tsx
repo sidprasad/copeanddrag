@@ -4,12 +4,15 @@ import {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useRef,
   useState,
 } from 'react';
 import { parseCndFile, type CndProjection, type SequencePolicyName } from '../../utils/cndPreParser';
 import { getSpytialCore, hasSpytialCore } from '../../utils/spytialCore';
 import type { LayoutState } from '../GraphView/SpyTialGraph';
+import { useSterlingSelector } from '../../state/hooks';
+import { selectColorMode } from '../../state/selectors';
 
 // Extend HTMLElementTagNameMap for the structured-input-graph custom element
 declare global {
@@ -24,6 +27,8 @@ declare global {
       getLayoutState?: () => LayoutState;
       addToolbarControl?: (element: HTMLElement) => void;
       clear?: () => void;
+      /** Switch the graph's internal theme (inherited from WebColaCnDGraph, spytial-core >= 2.8.0). */
+      setTheme?: (mode: 'light' | 'dark') => void;
       setDataInstance?: (instance: any) => void;
       getDataInstance?: () => any;
       getCurrentConstraintError?: () => any;
@@ -78,6 +83,9 @@ const SpyTialEditGraph = forwardRef<SpyTialEditGraphHandle, SpyTialEditGraphProp
     graphElementRef: externalGraphRef,
   } = props;
 
+  const colorMode = useSterlingSelector(selectColorMode);
+  const colorModeRef = useRef(colorMode);
+  colorModeRef.current = colorMode;
   const graphContainerRef = useRef<HTMLDivElement>(null);
   const graphElementRef = useRef<HTMLElementTagNameMap['structured-input-graph'] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -155,6 +163,9 @@ const SpyTialEditGraph = forwardRef<SpyTialEditGraphHandle, SpyTialEditGraphProp
     setError(null);
 
     try {
+      // Apply the active theme before (re)rendering so JS-driven fills follow.
+      el.setTheme?.(colorModeRef.current);
+
       // 1. Apply the CnD spec. Use the public Promise-returning method so
       // we can await pipeline initialization. Older spytial-core versions
       // only expose the attribute path; fall back with a warning.
@@ -207,6 +218,9 @@ const SpyTialEditGraph = forwardRef<SpyTialEditGraphHandle, SpyTialEditGraphProp
       setError(err?.message ?? 'Failed to load editor');
       setIsLoading(false);
     }
+    // colorMode is intentionally NOT a dependency: theme switches re-tint in
+    // place via setTheme (effect below) — a full bootstrap here races
+    // spytial-core's WebCola ticks against nulled selections.
   }, [cndSpec, datum?.id, datum?.data, timeIndex, isCndCoreReady]);
 
   // Run bootstrap when its inputs change. We deliberately key on datum.id
@@ -219,6 +233,11 @@ const SpyTialEditGraph = forwardRef<SpyTialEditGraphHandle, SpyTialEditGraphProp
     runBootstrap(false);
   }, [runBootstrap, isCndCoreReady, graphMounted]);
 
+  // Theme switches re-tint the live graph in place (no re-bootstrap).
+  useEffect(() => {
+    graphElementRef.current?.setTheme?.(colorMode);
+  }, [colorMode]);
+
   useImperativeHandle(ref, () => ({
     reloadFromInstance: async () => {
       lastLoadedKeyRef.current = null;
@@ -226,8 +245,11 @@ const SpyTialEditGraph = forwardRef<SpyTialEditGraphHandle, SpyTialEditGraphProp
     },
   }), [runBootstrap]);
 
-  // Create and mount the structured-input-graph element once
-  useEffect(() => {
+  // Create and mount the structured-input-graph element once.
+  // useLayoutEffect so the cleanup detaches the element synchronously, ahead of
+  // React removing the host DOM; the try/catch contains spytial-core's dispose
+  // throw (getPointAtLength on an empty edge path) so it can't break unmount.
+  useLayoutEffect(() => {
     if (!graphContainerRef.current || isInitializedRef.current) return;
 
     const graphElement = document.createElement('structured-input-graph') as HTMLElementTagNameMap['structured-input-graph'];
@@ -235,6 +257,7 @@ const SpyTialEditGraph = forwardRef<SpyTialEditGraphHandle, SpyTialEditGraphProp
     graphElement.setAttribute('layoutFormat', 'default');
     graphElement.setAttribute('show-export', 'false'); // We handle export ourselves
     graphElement.setAttribute('aria-label', 'Interactive graph editor');
+    graphElement.setAttribute('theme', colorModeRef.current);
     graphElement.style.cssText = `
       width: 100%;
       height: 100%;
@@ -321,11 +344,15 @@ const SpyTialEditGraph = forwardRef<SpyTialEditGraphHandle, SpyTialEditGraphProp
         graphElementRef.current.removeEventListener('layout-generation-error', handleLayoutGenerationError as EventListener);
         graphElementRef.current.removeEventListener('constraints-satisfied', handleConstraintsSatisfied as EventListener);
 
-        if (graphElementRef.current.clear) {
-          graphElementRef.current.clear();
+        try {
+          graphElementRef.current.clear?.();
+        } catch {
+          /* ignore */
         }
-        if (graphContainerRef.current && graphElementRef.current.parentNode === graphContainerRef.current) {
-          graphContainerRef.current.removeChild(graphElementRef.current);
+        try {
+          graphElementRef.current.remove();
+        } catch {
+          /* ignore spytial-core dispose throw */
         }
       }
       graphElementRef.current = null;
@@ -344,7 +371,7 @@ const SpyTialEditGraph = forwardRef<SpyTialEditGraphHandle, SpyTialEditGraphProp
     <div
       className="absolute inset-0 flex flex-col"
       style={{
-        background: 'white',
+        background: 'var(--ccd-surface)',
         overflow: 'hidden'
       }}
     >
@@ -362,15 +389,15 @@ const SpyTialEditGraph = forwardRef<SpyTialEditGraphHandle, SpyTialEditGraphProp
         // initializes — prevents add/delete from triggering the silent
         // no-op render path before layoutInstance/currentLayout exist.
         <div
-          className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75"
-          style={{ zIndex: 10, pointerEvents: 'auto' }}
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ zIndex: 10, pointerEvents: 'auto', background: 'var(--ccd-overlay)' }}
         >
-          <div className="text-gray-600">Loading editor...</div>
+          <div className="text-ink-muted">Loading editor...</div>
         </div>
       )}
       {error && (
         <div
-          className="absolute bottom-0 left-0 right-0 p-4 bg-red-100 border-t border-red-300 text-red-700"
+          className="absolute bottom-0 left-0 right-0 p-4 bg-danger-bg border-t border-danger-border text-danger"
           style={{ zIndex: 20 }}
         >
           <strong>Error:</strong> {error}

@@ -233,9 +233,9 @@ const SynthesisModePanel = () => {
   const isResultStep = currentStep > numInstances || result !== null;
 
   return (
-    <div className="absolute inset-0 flex flex-col bg-white">
+    <div className="absolute inset-0 flex flex-col bg-surface">
       {/* Header */}
-      <div className="p-4 border-b bg-blue-50 flex items-center justify-between">
+      <div className="p-4 border-b bg-accent-bg flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Icon as={MdScience} boxSize={6} color="blue.600" />
           <div>
@@ -271,7 +271,7 @@ const SynthesisModePanel = () => {
 
       {/* Footer actions */}
       {!isSetupStep && !isResultStep && (
-        <div className="p-4 border-t bg-gray-50 flex items-center justify-between">
+        <div className="p-4 border-t bg-surface-muted flex items-center justify-between">
           <Button
             size="sm"
             leftIcon={<MdArrowBack />}
@@ -290,7 +290,7 @@ const SynthesisModePanel = () => {
 
       {/* Error display */}
       {error && (
-        <div className="p-4 bg-red-50 border-t border-red-200 text-red-700 text-sm">
+        <div className="p-4 bg-danger-bg border-t border-danger-border text-danger text-sm">
           <strong>Error:</strong> {error}
         </div>
       )}

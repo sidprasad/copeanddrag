@@ -77,9 +77,9 @@ const TimePicker = ({ datum }: { datum: DatumParsed<any> }) => {
             onClick={toggleMultiSelectMode}
             className={`
               px-2 py-1 text-xs rounded-md transition-all font-medium
-              ${isMultiSelectMode 
-                ? 'bg-blue-600 text-white shadow-sm' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
+              ${isMultiSelectMode
+                ? 'bg-accent text-on-accent shadow-sm'
+                : 'bg-surface-sunken text-ink-muted hover:bg-surface-sunken border border-rule'
               }
             `}
           >
@@ -91,14 +91,14 @@ const TimePicker = ({ datum }: { datum: DatumParsed<any> }) => {
               <button
                 type="button"
                 onClick={selectFirstLast}
-                className="px-2 py-1 text-xs rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
+                className="px-2 py-1 text-xs rounded-md bg-surface-sunken text-ink-muted hover:bg-surface-sunken border border-rule"
               >
                 First & Last
               </button>
               <button
                 type="button"
                 onClick={selectAllTimeIndices}
-                className="px-2 py-1 text-xs rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
+                className="px-2 py-1 text-xs rounded-md bg-surface-sunken text-ink-muted hover:bg-surface-sunken border border-rule"
               >
                 All
               </button>
@@ -110,7 +110,7 @@ const TimePicker = ({ datum }: { datum: DatumParsed<any> }) => {
       {/* Multi-select time step buttons */}
       {isMultiSelectMode && (
         <div className="mb-2">
-          <p className="text-xs text-gray-500 mb-1.5">
+          <p className="text-xs text-ink-muted mb-1.5">
             Click states to compare side-by-side:
           </p>
           <div className="flex flex-wrap gap-1">
@@ -123,9 +123,9 @@ const TimePicker = ({ datum }: { datum: DatumParsed<any> }) => {
                   onClick={() => dispatch(timeIndexToggled({ datum, index: i }))}
                   className={`
                     w-8 h-8 text-xs rounded-md transition-all font-medium
-                    ${isSelected 
-                      ? 'bg-blue-600 text-white shadow-sm' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
+                    ${isSelected
+                      ? 'bg-accent text-on-accent shadow-sm'
+                      : 'bg-surface-sunken text-ink-muted hover:bg-surface-sunken border border-rule'
                     }
                   `}
                 >
@@ -135,7 +135,7 @@ const TimePicker = ({ datum }: { datum: DatumParsed<any> }) => {
             })}
           </div>
           {selectedTimeIndices.length > 1 && (
-            <p className="text-xs text-blue-600 mt-1.5 font-medium">
+            <p className="text-xs text-accent mt-1.5 font-medium">
               ✓ {selectedTimeIndices.length} states selected — showing side-by-side comparison
             </p>
           )}

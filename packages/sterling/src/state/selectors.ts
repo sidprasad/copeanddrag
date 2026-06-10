@@ -38,6 +38,7 @@ import { ScriptStageType, ScriptVariable } from './script/script';
 import scriptSelectors from './script/scriptSelectors';
 import { SterlingState } from './store';
 import { TableData } from './table/table';
+import { ColorMode } from '../theme/colorMode';
 import {
   GraphDrawerView,
   MainView,
@@ -62,6 +63,13 @@ export function selectSelectedGenerator(
   state: SterlingState
 ): string | undefined {
   return uiSelectors.selectSelectedGenerator(state.ui);
+}
+
+/**
+ * Select the active app color mode (light/dark).
+ */
+export function selectColorMode(state: SterlingState): ColorMode {
+  return uiSelectors.selectColorMode(state.ui);
 }
 
 

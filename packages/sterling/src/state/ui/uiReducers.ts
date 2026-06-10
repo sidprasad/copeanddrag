@@ -1,4 +1,5 @@
 import { PayloadAction } from '@reduxjs/toolkit';
+import { ColorMode } from '../../theme/colorMode';
 import {
   CommonDrawerView,
   GraphDrawerView,
@@ -95,6 +96,16 @@ function selectedGeneratorChanged(
   state.selectedGenerator = view.generatorName
 }
 
+/** Set the active color mode (e.g. when synced from the graph's theme). */
+function colorModeSet(state: UiState, action: PayloadAction<ColorMode>) {
+  state.colorMode = action.payload;
+}
+
+/** Toggle the active color mode (the in-app light/dark switch). */
+function colorModeToggled(state: UiState) {
+  state.colorMode = state.colorMode === 'dark' ? 'light' : 'dark';
+}
+
 
 
 export default {
@@ -104,5 +115,7 @@ export default {
   tableDrawerViewChanged,
   scriptDrawerViewChanged,
   editDrawerViewChanged,
-  selectedGeneratorChanged
+  selectedGeneratorChanged,
+  colorModeSet,
+  colorModeToggled
 };

@@ -23,44 +23,44 @@ const SynthesisDrawer = () => {
   // If no datum, show a message
   if (!datum) {
     return (
-      <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50/90 p-8 text-center">
-        <Icon as={MdScience} boxSize={12} className="mb-4 text-slate-300" />
-        <p className="text-slate-500">Load an instance to start synthesizing selectors.</p>
+      <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center" style={{ background: 'var(--ccd-overlay)' }}>
+        <Icon as={MdScience} boxSize={12} className="mb-4 text-ink-faint" />
+        <p className="text-ink-muted">Load an instance to start synthesizing selectors.</p>
       </div>
     );
   }
 
   // Default view - start synthesis button
   return (
-    <div className="absolute inset-0 flex flex-col overflow-y-auto bg-slate-50/90 text-slate-900">
+    <div className="absolute inset-0 flex flex-col overflow-y-auto text-ink" style={{ background: 'var(--ccd-overlay)' }}>
       <div className="flex-1 space-y-4 p-4">
-        <div className="space-y-4 rounded-xl border border-slate-200 bg-white/80 p-6 backdrop-blur shadow-sm">
+        <div className="space-y-4 rounded-xl border border-rule bg-surface p-6 backdrop-blur shadow-sm">
           <div className="flex items-center gap-3">
             <Icon as={MdScience} boxSize={8} className="text-fuchsia-600" />
             <div>
-              <h2 className="text-lg font-semibold text-slate-800">Selector Synthesis</h2>
-              <p className="text-sm text-slate-500">
+              <h2 className="text-lg font-semibold text-ink">Selector Synthesis</h2>
+              <p className="text-sm text-ink-muted">
                 Synthesize selectors from examples
               </p>
             </div>
           </div>
 
-          <p className="text-sm text-slate-600 leading-relaxed">
+          <p className="text-sm text-ink-muted leading-relaxed">
             Use this tool to automatically generate CnD selectors by providing positive 
             and negative examples. Select atoms across multiple instances to define 
             which elements should be matched by the selector.
           </p>
 
           <div className="space-y-3 pt-2">
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-              <h3 className="font-medium text-slate-700 mb-2">Selector Types</h3>
-              <ul className="text-sm text-slate-600 space-y-2">
+            <div className="rounded-lg border border-rule bg-surface-muted p-4">
+              <h3 className="font-medium text-ink-muted mb-2">Selector Types</h3>
+              <ul className="text-sm text-ink-muted space-y-2">
                 <li className="flex items-start gap-2">
                   <span className="inline-block w-5 h-5 rounded-full bg-fuchsia-100 text-fuchsia-600 text-xs flex items-center justify-center font-semibold mt-0.5">1</span>
                   <span><strong>Unary:</strong> Select individual atoms (e.g., "all Nodes with value &gt; 5")</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="inline-block w-5 h-5 rounded-full bg-purple-100 text-purple-600 text-xs flex items-center justify-center font-semibold mt-0.5">2</span>
+                  <span className="inline-block w-5 h-5 rounded-full bg-purple-100 text-accent text-xs flex items-center justify-center font-semibold mt-0.5">2</span>
                   <span><strong>Binary:</strong> Select pairs of atoms/edges (e.g., "all edges where source.value &lt; target.value")</span>
                 </li>
               </ul>
@@ -78,7 +78,7 @@ const SynthesisDrawer = () => {
               <button
                 type="button"
                 onClick={() => dispatch(enterSynthesisMode({ numInstances: 3, selectorType: 'binary' }))}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-md transition hover:from-purple-500 hover:to-indigo-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-md transition hover:from-purple-500 hover:to-indigo-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white"
               >
                 <Icon as={MdScience} />
                 Synthesize Binary Selector

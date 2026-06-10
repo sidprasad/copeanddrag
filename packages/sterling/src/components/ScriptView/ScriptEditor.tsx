@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { default as MonacoEditor, monaco } from 'react-monaco-editor';
 import { ScriptVariable } from '../../state/script/script';
 import { alloyDefs, generateAlloyVariablesModel } from './alloyModel';
+import { useSterlingSelector } from '../../state/hooks';
+import { selectColorMode } from '../../state/selectors';
 import IStandaloneCodeEditor = editor.IStandaloneCodeEditor;
 
 interface ScriptEditorProps {
@@ -26,6 +28,7 @@ const ScriptEditor = (props: ScriptEditorProps) => {
   } = props;
 
   const [editor, setEditor] = useState<IStandaloneCodeEditor>();
+  const colorMode = useSterlingSelector(selectColorMode);
 
   const editorDidMount = useCallback((editor: IStandaloneCodeEditor) => {
     editorRef(editor);
@@ -72,9 +75,10 @@ const ScriptEditor = (props: ScriptEditorProps) => {
   }, [editor, variables]);
 
   return (    
-    <MonacoEditor      
+    <MonacoEditor
       data-testid='script-view-monaco-editor'
       language='javascript'
+      theme={colorMode === 'dark' ? 'vs-dark' : 'vs'}
       options={{
         automaticLayout: true,
         scrollBeyondLastLine: false,

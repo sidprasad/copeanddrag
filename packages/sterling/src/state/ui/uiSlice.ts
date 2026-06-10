@@ -22,6 +22,8 @@ export const {
   tableDrawerViewChanged,
   scriptDrawerViewChanged,
   editDrawerViewChanged,
-  selectedGeneratorChanged
+  selectedGeneratorChanged,
+  colorModeSet,
+  colorModeToggled
 } = uiSlice.actions;
 export default uiSlice.reducer;

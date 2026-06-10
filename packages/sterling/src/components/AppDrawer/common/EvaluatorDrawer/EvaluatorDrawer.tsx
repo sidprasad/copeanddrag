@@ -29,7 +29,7 @@ const EvaluatorDrawer = () => {
 
 const TemporalEvaluatorNotice = () => {
   return (
-    <div className='mx-2 mt-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900'>
+    <div className='mx-2 mt-2 rounded-md border border-warning-border bg-warning-bg px-3 py-2 text-xs text-warning'>
       Temporal mode: evaluator expressions run with respect to the first
       state, not the currently displayed state.
     </div>

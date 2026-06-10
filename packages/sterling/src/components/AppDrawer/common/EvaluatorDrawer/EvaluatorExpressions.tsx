@@ -19,7 +19,7 @@ const EvaluatorExpression = (props: EvaluatorExpressionProps) => {
         </span>
         <div className='font-semibold select-text'>{expression.expression}</div>
       </div>
-      <div className='ml-6 text-gray-600 select-text'>{expression.result}</div>
+      <div className='ml-6 text-ink-muted select-text'>{expression.result}</div>
     </div>
   );
 };

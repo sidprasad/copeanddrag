@@ -1,4 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit';
+import { ColorMode } from '../../theme/colorMode';
 import {
   GraphDrawerView,
   MainView,
@@ -98,6 +99,11 @@ function selectSelectedGenerator(state: UiState): string | undefined {
   return state.selectedGenerator;
 }
 
+/** Select the active color mode. */
+function selectColorMode(state: UiState): ColorMode {
+  return state.colorMode;
+}
+
 
 export default {
   selectAvailableViews,
@@ -108,5 +114,6 @@ export default {
   selectEditDrawer,
   selectDrawerIsCollapsed,
   selectDrawerView,
-  selectSelectedGenerator
+  selectSelectedGenerator,
+  selectColorMode
 };

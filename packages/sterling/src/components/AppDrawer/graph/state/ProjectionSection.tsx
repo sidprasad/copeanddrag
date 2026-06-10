@@ -180,29 +180,29 @@ const ProjectionSection = ({ datum }: ProjectionSectionProps) => {
   const isMultiTypeMode = projectionData.length > 1;
 
   return (
-    <div className="mx-2 my-2 rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+    <div className="mx-2 my-2 rounded-lg border border-rule bg-surface p-3 shadow-sm">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-semibold text-gray-800">Projections</span>
+        <span className="text-sm font-semibold text-ink">Projections</span>
         <div className="flex gap-1">
           {hasCndProjections && (
-            <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
+            <span className="text-xs text-success bg-success-bg px-2 py-0.5 rounded">
               CND
             </span>
           )}
           {!isMultiTypeMode && (
-            <span className="text-xs text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">
+            <span className="text-xs text-accent bg-accent-bg px-2 py-0.5 rounded">
               Multi-select
             </span>
           )}
         </div>
       </div>
       {isMultiTypeMode ? (
-        <p className="text-xs text-gray-500 mb-3">
+        <p className="text-xs text-ink-muted mb-3">
           Projecting over multiple types. Select one atom per type.
         </p>
       ) : (
-        <p className="text-xs text-gray-500 mb-3">
-          Projecting over <span className="font-medium text-gray-700">{projectionData[0].typeName}</span>. 
+        <p className="text-xs text-ink-muted mb-3">
+          Projecting over <span className="font-medium text-ink-muted">{projectionData[0].typeName}</span>.
           Click to select, Shift+click to toggle. Multiple selections show separate graphs.
         </p>
       )}
@@ -214,14 +214,14 @@ const ProjectionSection = ({ datum }: ProjectionSectionProps) => {
         return (
           <div key={typeData.typeId} className="mb-3 last:mb-0">
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-medium text-gray-700">
+              <label className="text-xs font-medium text-ink-muted">
                 {typeData.typeName}
               </label>
               {!isMultiTypeMode && (
                 <button
                   type="button"
                   onClick={() => handleSelectAll(typeData.typeId, typeData.atoms)}
-                  className="text-xs text-indigo-600 hover:text-indigo-800"
+                  className="text-xs text-accent hover:text-accent"
                 >
                   {allSelected ? 'Select one' : 'Select all'}
                 </button>
@@ -237,9 +237,9 @@ const ProjectionSection = ({ datum }: ProjectionSectionProps) => {
                     onClick={(e) => handleAtomToggle(typeData.typeId, atom.id, e.shiftKey)}
                     className={`
                       px-2.5 py-1 text-xs rounded-md transition-all font-medium
-                      ${isSelected 
-                        ? 'bg-indigo-600 text-white shadow-sm' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
+                      ${isSelected
+                        ? 'bg-accent text-on-accent shadow-sm'
+                        : 'bg-surface-sunken text-ink-muted hover:bg-surface-sunken border border-rule'
                       }
                     `}
                   >
@@ -249,7 +249,7 @@ const ProjectionSection = ({ datum }: ProjectionSectionProps) => {
               })}
             </div>
             {!isMultiTypeMode && typeSelections.length > 1 && (
-              <p className="text-xs text-indigo-600 mt-1.5 font-medium">
+              <p className="text-xs text-accent mt-1.5 font-medium">
                 ✓ {typeSelections.length} selected — showing {typeSelections.length} graphs
               </p>
             )}

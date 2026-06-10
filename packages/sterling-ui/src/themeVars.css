@@ -1,0 +1,170 @@
+/*
+ * Cope-and-Drag theme variables — the single source of truth for app colors.
+ *
+ * `tokens.ts` maps every `tokens.color.*` to one of these `var(--ccd-*)`
+ * properties, and `tailwind.config.cjs` maps its semantic colors to the same
+ * vars. Flipping `data-theme` on <html> (see state/theme) re-themes the Chakra
+ * theme, all component themes, inline token usages, and Tailwind utilities at
+ * once — no `dark:` variants and no React re-render required.
+ *
+ * Light values are the historical palette (kept identical). Dark values are a
+ * warm-neutral set tuned for WCAG AA, anchored on the graph's #1e1e1e canvas.
+ */
+
+:root,
+[data-theme='light'] {
+  /* Surfaces */
+  --ccd-bg: #fdfdfb;
+  --ccd-surface: #ffffff;
+  --ccd-surface-muted: #f4f3ef;
+  --ccd-surface-sunken: #ececea;
+
+  /* Ink (text) */
+  --ccd-ink: #1f2937;
+  --ccd-ink-muted: #475569;
+  --ccd-ink-faint: #64748b;
+  --ccd-ink-decorative: #adb5bd;
+
+  /* Hairline rules */
+  --ccd-rule: #e9ecef;
+  --ccd-rule-strong: #dee2e6;
+
+  /* Accent */
+  --ccd-accent: #5a3d8a;
+  --ccd-accent-bg: #f0eef8;
+  --ccd-accent-border: #c4b8e0;
+  --ccd-accent-ink: #3d2a5e;
+  --ccd-on-accent: #ffffff;
+
+  /* Code surface (already dark in both modes) */
+  --ccd-code-bg: #1e1e1e;
+  --ccd-code-fg: #d4d4d4;
+  --ccd-code-muted: #9b9b9b;
+
+  /* Status — base text, subtle background, and border for tinted panels */
+  --ccd-success: #1b5e20;
+  --ccd-success-bg: #ecfdf3;
+  --ccd-success-border: #b7e4c7;
+  --ccd-error: #a31515;
+  --ccd-danger: #b42318;
+  --ccd-danger-bg: #fef3f2;
+  --ccd-danger-border: #fcc8c3;
+  --ccd-warning: #8a6d00;
+  --ccd-warning-bg: #fffaeb;
+  --ccd-warning-border: #fde68a;
+  --ccd-info: #1d4ed8;
+  --ccd-info-bg: #eff6ff;
+  --ccd-info-border: #bfdbfe;
+
+  /* Translucent scrim for loading overlays (over the canvas/surface) */
+  --ccd-overlay: rgba(255, 255, 255, 0.72);
+
+  /* Minimap (SVG fills/strokes applied via inline style objects) */
+  --ccd-minimap-bg: #ffffff;
+  --ccd-minimap-node-fill: #ffffff;
+  --ccd-minimap-node-stroke: #4a5568;
+  --ccd-minimap-node-active: #3b82f6;
+  --ccd-minimap-edge: #4a5568;
+  --ccd-minimap-selected-stroke: #333333;
+}
+
+/*
+ * Chakra's ColorModeProvider stamps a `chakra-ui-light` class on <body> and
+ * paints its own (light) body background. `html body` (specificity 0,0,0,2)
+ * outranks Chakra's `body` rule without !important, so the document root always
+ * follows our theme — no white flash on load or in layout gaps.
+ */
+html {
+  /* Root backstop so the page is themed even before React mounts / in any gap. */
+  background-color: var(--ccd-bg);
+}
+
+/*
+ * Tailwind's typography plugin (`prose`, used by the Table view) hardcodes a
+ * gray text palette via --tw-prose-* variables; remap it to the themed ink in
+ * dark mode so table text stays legible.
+ */
+/*
+ * spytial-core's embedded CnD editor widget (Layout drawer: Code View /
+ * Structured Builder) hardcodes a white form background; theme it in dark mode
+ * via its stable class names. Light mode is untouched.
+ */
+[data-theme='dark'] .cnd-layout-interface textarea,
+[data-theme='dark'] .cnd-layout-interface .form-control,
+[data-theme='dark'] .code-view-textarea {
+  background-color: var(--ccd-surface-muted);
+  color: var(--ccd-ink);
+  border-color: var(--ccd-rule-strong);
+}
+
+[data-theme='dark'] .prose {
+  --tw-prose-body: var(--ccd-ink-muted);
+  --tw-prose-headings: var(--ccd-ink);
+  --tw-prose-lead: var(--ccd-ink-muted);
+  --tw-prose-bold: var(--ccd-ink);
+  --tw-prose-captions: var(--ccd-ink-muted);
+  --tw-prose-code: var(--ccd-ink);
+  --tw-prose-th-borders: var(--ccd-rule-strong);
+  --tw-prose-td-borders: var(--ccd-rule);
+  color: var(--ccd-ink-muted);
+}
+html body {
+  background-color: var(--ccd-bg);
+  color: var(--ccd-ink);
+}
+
+[data-theme='dark'] {
+  /* Surfaces */
+  --ccd-bg: #16181d;
+  --ccd-surface: #1e2127;
+  --ccd-surface-muted: #262a31;
+  --ccd-surface-sunken: #2c313a;
+
+  /* Ink (text) */
+  --ccd-ink: #e6e7ea;
+  --ccd-ink-muted: #aab2c0;
+  --ccd-ink-faint: #7e8694;
+  --ccd-ink-decorative: #5b626e;
+
+  /* Hairline rules */
+  --ccd-rule: #2e333c;
+  --ccd-rule-strong: #3a404a;
+
+  /* Accent (lightened so it reads on dark) */
+  --ccd-accent: #b9a3e3;
+  --ccd-accent-bg: #2a2440;
+  --ccd-accent-border: #4a3f6b;
+  --ccd-accent-ink: #d9ccf2;
+  --ccd-on-accent: #1b1228;
+
+  /* Code surface (slightly sunken vs. surface) */
+  --ccd-code-bg: #141519;
+  --ccd-code-fg: #d4d4d4;
+  --ccd-code-muted: #9b9b9b;
+
+  /* Status (lightened for contrast on dark; subtle bgs are low-chroma tints) */
+  --ccd-success: #6cc070;
+  --ccd-success-bg: #1d3026;
+  --ccd-success-border: #2f5a3f;
+  --ccd-error: #f08a8a;
+  --ccd-danger: #f08a8a;
+  --ccd-danger-bg: #3a2526;
+  --ccd-danger-border: #5e3434;
+  --ccd-warning: #e0b95c;
+  --ccd-warning-bg: #3a3320;
+  --ccd-warning-border: #5a4d2a;
+  --ccd-info: #79b8f3;
+  --ccd-info-bg: #1c2a3c;
+  --ccd-info-border: #2e4a6b;
+
+  /* Translucent scrim for loading overlays */
+  --ccd-overlay: rgba(22, 24, 29, 0.72);
+
+  /* Minimap */
+  --ccd-minimap-bg: #1e2127;
+  --ccd-minimap-node-fill: #2b2f37;
+  --ccd-minimap-node-stroke: #8b919b;
+  --ccd-minimap-node-active: #5dade2;
+  --ccd-minimap-edge: #6b7280;
+  --ccd-minimap-selected-stroke: #e6e7ea;
+}

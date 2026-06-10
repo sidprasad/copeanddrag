@@ -250,20 +250,20 @@ const GraphLayoutDrawer = () => {
   }
 
   return (
-    <div className="absolute inset-0 flex flex-col overflow-y-auto bg-slate-50/90 text-slate-900">
+    <div className="absolute inset-0 flex flex-col overflow-y-auto text-ink" style={{ background: 'var(--ccd-overlay)' }}>
       <div className="flex-1 space-y-3 p-3">
         {/* Actions */}
         <div className="flex gap-2">
           <button
             type="button"
             onClick={applyLayout}
-            className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+            className="flex-1 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-on-accent shadow-sm transition hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
           >
             Apply Layout
           </button>
           
           <label className="group relative flex-1 cursor-pointer">
-            <div className="flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:border-indigo-400 hover:text-indigo-600">
+            <div className="flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-rule-strong bg-surface px-4 py-2.5 text-sm font-medium text-ink-muted transition hover:border-accent-border hover:text-accent">
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
               </svg>
@@ -279,11 +279,11 @@ const GraphLayoutDrawer = () => {
         </div>
 
         {/* Editor */}
-        <div className="rounded-lg border border-slate-200 bg-white shadow-sm p-3">
+        <div className="rounded-lg border border-rule bg-surface shadow-sm p-3">
           <div
             id="cnd-editor-mount"
             ref={cndEditorRef}
-            className="min-h-[360px] overflow-hidden rounded-lg border border-slate-200 bg-slate-50"
+            className="min-h-[360px] overflow-hidden rounded-lg border border-rule bg-surface-muted"
           />
         </div>
       </div>
