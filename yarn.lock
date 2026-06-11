@@ -2542,10 +2542,10 @@
   dependencies:
     "@sinonjs/commons" "^3.0.0"
 
-"@tailwindcss/forms@^0.4.0":
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/@tailwindcss/forms/-/forms-0.4.1.tgz#5a47ccd60490cbba84e662f2b9cf3d71a5126d17"
-  integrity sha512-gS9xjCmJjUBz/eP12QlENPLnf0tCx68oYE3mri0GMP5jdtVwLbGUNSRpjsp6NzLAZzZy3ueOwrcqB78Ax6Z84A==
+"@tailwindcss/forms@^0.5.11":
+  version "0.5.11"
+  resolved "https://registry.yarnpkg.com/@tailwindcss/forms/-/forms-0.5.11.tgz#e77039e96fa7b87c3d001a991f77f9418e666700"
+  integrity sha512-h9wegbZDPurxG22xZSoWtdzc41/OlNEUQERNqI/0fOwa2aVlWGu7C35E/x6LDyD3lgtztFSSjKZyuVM0hxhbgA==
   dependencies:
     mini-svg-data-uri "^1.2.3"
 
@@ -9453,10 +9453,10 @@ sprintf-js@~1.0.2:
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==
 
-spytial-core@2.8.0:
-  version "2.8.0"
-  resolved "https://registry.yarnpkg.com/spytial-core/-/spytial-core-2.8.0.tgz#66e451b31f2ef1e0b7048a84f78eb0ed1549e0fc"
-  integrity sha512-2d7qQcGg458WY+6sivQOLpFm6eLEkuniTmGIME8x2CNgQfKvxq12Thgsy9pWLgHlwdjQpqnMdnBNfthcTUoz/g==
+spytial-core@2.8.1:
+  version "2.8.1"
+  resolved "https://registry.yarnpkg.com/spytial-core/-/spytial-core-2.8.1.tgz#83eaeaac27d7c7e72fa2ee21edac763a18cdb50d"
+  integrity sha512-XAxsI4V2XaxggPXqRszpEQn/lOvDpj9fK6vxgSMw1Y3OAuyJcoOvYXiqkIo/EIWgPyREyQFeeFrBEFLK7S/YvA==
   dependencies:
     "@types/d3" "^4.13.12"
     "@types/graphlib-dot" "^0.6.4"

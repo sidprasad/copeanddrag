@@ -33,7 +33,13 @@ module.exports = (env, argv) => {
     context: __dirname,
     devServer: {
       hot: true,
-      port: 8081
+      port: 8081,
+      client: {
+        overlay: {
+          errors: true,
+          warnings: false
+        }
+      }
     },
     entry: './packages/sterling/src/index.tsx',
     output: {

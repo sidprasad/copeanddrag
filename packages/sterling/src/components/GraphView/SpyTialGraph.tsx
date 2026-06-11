@@ -514,20 +514,11 @@ const SpyTialGraph = (props: SpyTialGraphProps) => {
         graphElementRef.current.removeEventListener('viewbox-change', handleViewBoxChange as EventListener);
         graphElementRef.current.removeEventListener('theme-changed', handleThemeChanged as EventListener);
 
-        // Detach the element ourselves (before React removes the container) and
-        // swallow any error: spytial-core's disconnectedCallback can throw an
-        // InvalidStateError (getPointAtLength on an empty edge path) during
-        // dispose, and that must not be allowed to break React's unmount.
-        try {
-          graphElementRef.current.clear?.();
-        } catch {
-          /* ignore */
-        }
-        try {
-          graphElementRef.current.remove();
-        } catch {
-          /* ignore spytial-core dispose throw */
-        }
+        // Detach the element ourselves before React removes the container.
+        // spytial-core >=2.8.1 makes disconnectedCallback teardown safe, so
+        // clear()/remove() no longer throw during dispose.
+        graphElementRef.current.clear?.();
+        graphElementRef.current.remove();
       }
       graphElementRef.current = null;
       isInitializedRef.current = false;

@@ -203,8 +203,8 @@ const SingleProjectionPane = (props: SingleProjectionPaneProps) => {
 
   // Create and mount the webcola-cnd-graph element once.
   // useLayoutEffect so the cleanup detaches the element synchronously, ahead of
-  // React removing the host DOM; the try/catch contains spytial-core's dispose
-  // throw (getPointAtLength on an empty edge path) so it can't break unmount.
+  // React removing the host DOM. spytial-core >=2.8.1 makes disconnectedCallback
+  // teardown safe (no throw on dispose), so no try/catch guard is needed.
   useLayoutEffect(() => {
     if (!graphContainerRef.current || isInitializedRef.current) return;
 
@@ -226,16 +226,8 @@ const SingleProjectionPane = (props: SingleProjectionPaneProps) => {
 
     return () => {
       if (graphElementRef.current) {
-        try {
-          graphElementRef.current.clear?.();
-        } catch {
-          /* ignore */
-        }
-        try {
-          graphElementRef.current.remove();
-        } catch {
-          /* ignore spytial-core dispose throw */
-        }
+        graphElementRef.current.clear?.();
+        graphElementRef.current.remove();
       }
       graphElementRef.current = null;
       layoutRef.current = null;
