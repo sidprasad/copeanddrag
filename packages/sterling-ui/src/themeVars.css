@@ -85,16 +85,34 @@ html {
  * dark mode so table text stays legible.
  */
 /*
- * spytial-core's embedded CnD editor widget (Layout drawer: Code View /
- * Structured Builder) hardcodes a white form background; theme it in dark mode
- * via its stable class names. Light mode is untouched.
+ * spytial-core's embedded spec editor (Layout drawer) is themed entirely
+ * through its own --spytial-ed-* custom properties, which otherwise fall back
+ * to the editor's built-in light preset. Remap them onto our --ccd-* tokens so
+ * the editor tracks the app theme in both light and dark — flipping with
+ * data-theme like everything else, no `theme` prop and no React re-render.
+ * The editor renders its popups (autocomplete, add-menu) inside its own
+ * `.spytial-ed` root, so scoping the variables here reaches all of it.
+ * (spytial-core >= 2.9.0; replaces the old .cnd-layout-interface rule.)
  */
-[data-theme='dark'] .cnd-layout-interface textarea,
-[data-theme='dark'] .cnd-layout-interface .form-control,
-[data-theme='dark'] .code-view-textarea {
-  background-color: var(--ccd-surface-muted);
-  color: var(--ccd-ink);
-  border-color: var(--ccd-rule-strong);
+.spytial-ed {
+  --spytial-ed-surface: var(--ccd-surface);
+  --spytial-ed-surface-raised: var(--ccd-surface-muted);
+  --spytial-ed-border: var(--ccd-rule);
+  --spytial-ed-text: var(--ccd-ink);
+  --spytial-ed-text-muted: var(--ccd-ink-muted);
+  --spytial-ed-accent: var(--ccd-accent);
+  --spytial-ed-accent-text: var(--ccd-on-accent);
+  --spytial-ed-danger: var(--ccd-danger);
+  --spytial-ed-warning: var(--ccd-warning);
+  --spytial-ed-success: var(--ccd-success);
+
+  /* Selector / YAML syntax highlighting — themed hues that flip with the app. */
+  --spytial-ed-syn-keyword: var(--ccd-accent);
+  --spytial-ed-syn-type: var(--ccd-info);
+  --spytial-ed-syn-relation: var(--ccd-success);
+  --spytial-ed-syn-operator: var(--ccd-ink-muted);
+  --spytial-ed-syn-string: var(--ccd-warning);
+  --spytial-ed-syn-comment: var(--ccd-ink-faint);
 }
 
 [data-theme='dark'] .prose {
