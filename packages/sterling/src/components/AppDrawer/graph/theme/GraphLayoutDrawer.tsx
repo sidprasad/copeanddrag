@@ -141,6 +141,28 @@ const GraphLayoutDrawer = () => {
     ensureBootstrapLoaded();
   }, []);
 
+  // Push the active datum's data instance into SpyTial's shared instance state
+  // so the mounted spec editor (spytial-core >= 2.9.0's rebuilt structured
+  // builder) becomes domain-aware: relation/type dropdowns and selector
+  // autocomplete are derived from this instance. Mirrors the alloy-demo's
+  // `window.updateInstanceFromReact(alloyDataInstance)` call. Re-runs as the
+  // datum or time step changes so the editor's domain tracks what's displayed.
+  useEffect(() => {
+    const xml = datum?.data;
+    if (!xml) return;
+    const core = getSpytialCore();
+    if (!core?.AlloyInstance?.parseAlloyXML || !core.AlloyDataInstance) return;
+    try {
+      const alloyDatum = core.AlloyInstance.parseAlloyXML(xml);
+      if (!alloyDatum.instances || alloyDatum.instances.length === 0) return;
+      const instanceIndex = Math.min(timeIndex, alloyDatum.instances.length - 1);
+      const alloyDataInstance = new core.AlloyDataInstance(alloyDatum.instances[instanceIndex]);
+      window.updateInstanceFromReact?.(alloyDataInstance);
+    } catch (err) {
+      console.error('Failed to push data instance to spec editor:', err);
+    }
+  }, [datum?.data, timeIndex]);
+
   // Mount the CnD Layout Interface from SpyTial
   useEffect(() => {
     if (cndEditorRef.current && !isEditorMounted && datum) {

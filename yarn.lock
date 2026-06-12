@@ -9453,10 +9453,10 @@ sprintf-js@~1.0.2:
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==
 
-spytial-core@2.8.1:
-  version "2.8.1"
-  resolved "https://registry.yarnpkg.com/spytial-core/-/spytial-core-2.8.1.tgz#83eaeaac27d7c7e72fa2ee21edac763a18cdb50d"
-  integrity sha512-XAxsI4V2XaxggPXqRszpEQn/lOvDpj9fK6vxgSMw1Y3OAuyJcoOvYXiqkIo/EIWgPyREyQFeeFrBEFLK7S/YvA==
+spytial-core@2.9.0:
+  version "2.9.0"
+  resolved "https://registry.yarnpkg.com/spytial-core/-/spytial-core-2.9.0.tgz#2d9fa3623d9ab0213ff661028e9720a868c66f10"
+  integrity sha512-oj2gonnTyapA/oaJU1gvOBBSbqJDf1nIhRqOxMoIsG6t/9GMHvJfJytK0CyE7BS9nZ28lFUrTewVEESVGCa5Pw==
   dependencies:
     "@types/d3" "^4.13.12"
     "@types/graphlib-dot" "^0.6.4"

@@ -84,6 +84,12 @@ declare global {
     CnDCore?: SpytialCoreApi;
     mountCndLayoutInterface?: (elementId?: string, options?: any) => void;
     mountErrorMessageModal?: (elementId?: string) => void;
+    /**
+     * Push a data instance into SpyTial's shared instance state so the mounted
+     * spec editor (spytial-core >= 2.9.0) becomes domain-aware: type/relation
+     * dropdowns and selector autocomplete are derived from this instance.
+     */
+    updateInstanceFromReact?: (instance: any) => void;
     showParseError?: (message: string, context: string) => void;
     showGeneralError?: (message: string) => void;
     showPositionalError?: (errorMessages: any) => void;
