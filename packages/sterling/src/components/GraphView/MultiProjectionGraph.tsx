@@ -188,6 +188,10 @@ const SingleProjectionPane = (props: SingleProjectionPaneProps) => {
         }
         graphElementRef.current.setTheme?.(colorModeRef.current);
         await graphElementRef.current.renderLayout(layoutResult.layout);
+        // Re-fit the viewport to this projection's content. The graph otherwise
+        // keeps the prior viewport once the user has zoomed/panned, leaving the
+        // projection framed by a stale view. (See SpyTialGraph for the rationale.)
+        graphElementRef.current.resetViewToFitContent?.();
       }
 
       setIsLoading(false);

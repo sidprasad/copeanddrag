@@ -62,6 +62,9 @@ declare global {
       getLayoutState?: () => LayoutState;
       addToolbarControl?: (element: HTMLElement) => void;
       clear?: () => void;
+      // Clears the manual-zoom flag and fits/centers content to the viewport
+      // (same as the built-in recenter button). spytial-core >= 2.8.0.
+      resetViewToFitContent?: () => void;
       // Theme API (spytial-core >= 2.8.0). setTheme re-tints a live graph with
       // no re-render; the element also fires a 'theme-changed' event when the
       // user picks a theme in its built-in Mode dropdown.
@@ -415,6 +418,15 @@ const SpyTialGraph = (props: SpyTialGraphProps) => {
           layoutResult.layout,
           Object.keys(renderOptions).length > 0 ? renderOptions : undefined
         );
+
+        // Re-fit the viewport to the freshly rendered content. With morph
+        // transitions the graph restores the prior viewport and suppresses its
+        // own auto-fit once the user has zoomed/panned, which leaves a new
+        // instance / layout / time step framed by the stale viewport (users
+        // then had to click recenter). Every loadGraph() here is a content
+        // change — zoom/pan/drag are internal and never re-render — so fitting
+        // unconditionally is correct; in-instance manual zoom is untouched.
+        graphElementRef.current.resetViewToFitContent?.();
 
         // Track the current instance for next step's sequence policy
         prevInstanceRef.current = alloyDataInstance;

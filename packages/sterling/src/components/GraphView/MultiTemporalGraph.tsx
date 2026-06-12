@@ -146,6 +146,10 @@ const SingleTemporalPane = (props: SingleTemporalPaneProps) => {
         }
         graphElementRef.current.setTheme?.(colorModeRef.current);
         await graphElementRef.current.renderLayout(layoutResult.layout);
+        // Re-fit the viewport to this time step's content. The graph otherwise
+        // keeps the prior viewport once the user has zoomed/panned, leaving the
+        // step framed by a stale view. (See SpyTialGraph for the full rationale.)
+        graphElementRef.current.resetViewToFitContent?.();
       }
 
       setIsLoading(false);
