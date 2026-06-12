@@ -1,21 +1,16 @@
 export interface SterlingPreferences {
   layout: {
-    drawerWidth: number;
-    drawerMinWidth: number;
-    drawerMaxWidth: number;
-    explorerWidth: number;
-    explorerMinWidth: number;
-    explorerMaxWidth: number;
+    // The bottom-docked drawer's initial / min / max height in px.
+    drawerHeight: number;
+    drawerMinHeight: number;
+    drawerMaxHeight: number;
   };
 }
 
 export const defaultPreferences: SterlingPreferences = {
   layout: {
-    drawerWidth: 350,
-    drawerMinWidth: 100,
-    drawerMaxWidth: 600,
-    explorerWidth: 250,
-    explorerMinWidth: 60,
-    explorerMaxWidth: 250
+    drawerHeight: 280,
+    drawerMinHeight: 120,
+    drawerMaxHeight: 640
   }
 };

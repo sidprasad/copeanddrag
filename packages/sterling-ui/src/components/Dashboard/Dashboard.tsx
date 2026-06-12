@@ -15,89 +15,82 @@ import { HANDLE_PAD } from './constants';
 import { DragHandle } from './DragHandle';
 
 interface DashboardProps {
-  rightPaneCollapsed: boolean;
-  rightPaneInitialWidth: number;
-  rightPaneMinWidth: number;
-  rightPaneMaxWidth: number;
+  bottomPaneCollapsed: boolean;
+  bottomPaneInitialHeight: number;
+  bottomPaneMinHeight: number;
+  bottomPaneMaxHeight: number;
 }
 
+// The dashboard splits its two children vertically: the main stage fills the
+// top, the drawer docks to the bottom (VS Code "bottom panel" style). The seam
+// between them is a horizontal, row-resize drag handle. A collapsed drawer
+// slides fully below the viewport edge so the stage takes the full height.
 const Dashboard = (props: PropsWithChildren<DashboardProps>) => {
   const {
     children,
-    rightPaneCollapsed,
-    rightPaneInitialWidth,
-    rightPaneMinWidth,
-    rightPaneMaxWidth
+    bottomPaneCollapsed,
+    bottomPaneInitialHeight,
+    bottomPaneMinHeight,
+    bottomPaneMaxHeight
   } = props;
 
   const ref = useRef<HTMLDivElement | null>(null);
   const styles = useStyleConfig('Dashboard');
 
-  const [rightClickOffset, setRightClickOffset] = useState<number>(0);
-  const [rightDragging, setRightDragging] = useState<boolean>(false);
-  const [rightWidth, setRightWidth] = useState<number>(rightPaneInitialWidth);
+  const [clickOffset, setClickOffset] = useState<number>(0);
+  const [dragging, setDragging] = useState<boolean>(false);
+  const [height, setHeight] = useState<number>(bottomPaneInitialHeight);
 
-  const middleR = useMemo(
-    () => (rightPaneCollapsed ? 0 : rightWidth),
-    [rightPaneCollapsed, rightWidth]
+  // Height the drawer actually occupies (0 when collapsed)...
+  const bottomH = useMemo(
+    () => (bottomPaneCollapsed ? 0 : height),
+    [bottomPaneCollapsed, height]
   );
-  const rightR = useMemo(
-    () => (rightPaneCollapsed ? -rightWidth : 0),
-    [rightPaneCollapsed, rightWidth]
-  );
-
-  const middleStyle = useMemo<CSSProperties>(
-    () => style(undefined, 0, middleR, false || rightDragging),
-    [0, middleR, false, rightDragging]
+  // ...and how far it is translated below the bottom edge when collapsed.
+  const bottomB = useMemo(
+    () => (bottomPaneCollapsed ? -height : 0),
+    [bottomPaneCollapsed, height]
   );
 
-  const rightStyle = useMemo<CSSProperties>(
-    () => style(rightWidth, undefined, rightR, rightDragging),
-    [rightWidth, rightR, rightDragging]
+  const topStyle = useMemo<CSSProperties>(
+    () => style(undefined, 0, bottomH, dragging),
+    [bottomH, dragging]
   );
 
-  const rightHandleStyle = useMemo<CSSProperties>(
-    () => style(undefined, undefined, rightR + rightWidth, rightDragging),
-    [rightR, rightWidth, rightDragging]
+  const bottomStyle = useMemo<CSSProperties>(
+    () => style(height, undefined, bottomB, dragging),
+    [height, bottomB, dragging]
   );
 
-  const onMouseDown = useCallback(
-    (side, event) => {
-      const rect = event.target.getBoundingClientRect();
-      const offset = event.clientX - rect.left;
-      switch (side) {
-        case 'right':
-          setRightClickOffset(offset);
-          setRightDragging(true);
-          break;
-      }
-    },
-    [setRightDragging]
+  const handleStyle = useMemo<CSSProperties>(
+    () => style(undefined, undefined, bottomB + height, dragging),
+    [bottomB, height, dragging]
   );
+
+  const onMouseDown = useCallback((event: any) => {
+    const rect = event.target.getBoundingClientRect();
+    setClickOffset(event.clientY - rect.top);
+    setDragging(true);
+  }, []);
 
   const onMouseMove = useCallback(
     throttle((event) => {
-      if (rightDragging) {
+      if (dragging) {
         const current = ref.current;
         if (current) {
           window.getSelection()?.empty();
           const bbox = current.getBoundingClientRect();
-          const w = bbox.width - event.clientX + rightClickOffset - HANDLE_PAD;
-          setRightWidth(clamp(w, rightPaneMinWidth, rightPaneMaxWidth));
+          const h = bbox.bottom - event.clientY + clickOffset - HANDLE_PAD;
+          setHeight(clamp(h, bottomPaneMinHeight, bottomPaneMaxHeight));
         }
       }
     }, 16),
-    [
-      rightClickOffset,
-      rightDragging,
-      rightPaneMinWidth,
-      rightPaneMaxWidth
-    ]
+    [clickOffset, dragging, bottomPaneMinHeight, bottomPaneMaxHeight]
   );
 
   const onMouseUp = useCallback(() => {
-    setRightDragging(false);
-  }, [setRightDragging]);
+    setDragging(false);
+  }, [setDragging]);
 
   useEffect(() => {
     document.addEventListener('mousemove', onMouseMove);
@@ -110,17 +103,16 @@ const Dashboard = (props: PropsWithChildren<DashboardProps>) => {
 
   const definedChildren = Children.toArray(children).filter((c) => c);
 
-  return definedChildren.length === 2 ? ( //3
+  return definedChildren.length === 2 ? (
     <Box ref={ref} __css={styles}>
-      <div style={middleStyle}>{definedChildren[0]}</div>
-      <div style={rightStyle}>{definedChildren[1]}</div>
-      
-      <div
-        style={rightHandleStyle}
-        onMouseDown={(event) => onMouseDown('right', event)}
-      >
-        <DragHandle />
-      </div>
+      <div style={topStyle}>{definedChildren[0]}</div>
+      <div style={bottomStyle}>{definedChildren[1]}</div>
+
+      {!bottomPaneCollapsed && (
+        <div style={handleStyle} onMouseDown={onMouseDown}>
+          <DragHandle />
+        </div>
+      )}
     </Box>
   ) : null;
 };
@@ -129,29 +121,31 @@ const DashboardTheme = {
   baseStyle: {
     position: 'fixed',
     top: `${sizes.navBarSize}px`,
-    right: `${sizes.sideBarSize}px`,
-    bottom: `${sizes.statusBarSize}px`,
+    right: '0',
+    bottom: '0',
     left: '0'
   }
 };
 
+// Each child spans the full width and is anchored vertically: pass `top` for
+// the stage and `bottom` (+ a fixed `height`) for the drawer.
 function style(
-  width?: number,
-  left?: number,
-  right?: number,
+  height?: number,
+  top?: number,
+  bottom?: number,
   noTransitions?: boolean
 ): CSSProperties {
   const style: CSSProperties = {
     position: 'absolute',
-    top: '0',
-    bottom: '0',
+    left: '0',
+    right: '0',
     transition: noTransitions
       ? undefined
       : 'all 200ms cubic-bezier(0.85, 0, 0.15, 1)'
   };
-  if (width !== undefined) style.width = `${width}px`;
-  if (left !== undefined) style.left = `${left}px`;
-  if (right !== undefined) style.right = `${right}px`;
+  if (height !== undefined) style.height = `${height}px`;
+  if (top !== undefined) style.top = `${top}px`;
+  if (bottom !== undefined) style.bottom = `${bottom}px`;
   return style;
 }
 
