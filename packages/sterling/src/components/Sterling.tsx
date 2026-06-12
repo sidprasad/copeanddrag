@@ -5,9 +5,7 @@ import { useSterlingDispatch, useSterlingSelector } from '../state/hooks';
 import { selectDrawerIsCollapsed } from '../state/selectors';
 import { AppDrawer } from './AppDrawer/AppDrawer';
 import { AppNavBar } from './AppNavBar/AppNavBar';
-import { AppSideBar } from './AppSideBar/AppSideBar';
 import { AppStage } from './AppStage/AppStage';
-import { AppStatusBar } from './AppStatusBar/AppStatusBar';
 import { defaultPreferences } from '../preferences';
 // CndCore types are declared in ../types/cndcore.d.ts
 
@@ -28,22 +26,20 @@ const Sterling = (props: SterlingProps) => {
     };
   }, [url, dispatch]);
 
-  // Note: SpyTial error modal is mounted in GraphLayoutDrawer.tsx for contextual display
-
+  // The shell is intentionally minimal so the stage owns the screen: a slim
+  // top bar, and a bottom-docked drawer that the stage gives way to vertically.
   return (
     <>
       <Dashboard
-        rightPaneCollapsed={drawerCollapsed}
-        rightPaneInitialWidth={layout.drawerWidth}
-        rightPaneMinWidth={layout.drawerMinWidth}
-        rightPaneMaxWidth={layout.drawerMaxWidth}
+        bottomPaneCollapsed={drawerCollapsed}
+        bottomPaneInitialHeight={layout.drawerHeight}
+        bottomPaneMinHeight={layout.drawerMinHeight}
+        bottomPaneMaxHeight={layout.drawerMaxHeight}
       >
         <AppStage />
         <AppDrawer />
       </Dashboard>
-      <AppSideBar />
       <AppNavBar />
-      <AppStatusBar />
     </>
   );
 };

@@ -1,25 +1,24 @@
-import { Center, CenterProps, Text, Tooltip } from '@chakra-ui/react';
+import { Center, Tooltip } from '@chakra-ui/react';
 import { useSterlingSelector } from '../../state/hooks';
 import { selectIsConnected, selectProviderName } from '../../state/selectors';
-import { ConnectionDot } from './ConnectionDot';
+import { ConnectionDot } from '../AppStatusBar/ConnectionDot';
 
-const ConnectionStatus = (props: CenterProps) => {
+// Compact connection indicator for the nav bar: just the status dot with a
+// descriptive tooltip (the verbose "Connected"/"Disconnected" text label that
+// used to live in the status bar is dropped).
+const NavConnection = () => {
   const isConnected = useSterlingSelector(selectIsConnected);
   const providerName = useSterlingSelector(selectProviderName);
   const tooltip = isConnected
     ? `Connected to ${providerName}`
     : 'Not connected to a provider';
-  const text = isConnected ? 'Connected' : 'Disconnected';
   return (
     <Tooltip hasArrow label={tooltip}>
-      <Center {...props}>
+      <Center px={1}>
         <ConnectionDot isConnected={isConnected} />
-        <Text mx={1} userSelect='none'>
-          {text}
-        </Text>
       </Center>
     </Tooltip>
   );
 };
 
-export { ConnectionStatus };
+export { NavConnection };

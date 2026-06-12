@@ -1,7 +1,7 @@
 {
   "name": "sterling-layout",
   "description": "Cope and Drag (CnD): a fork of the Sterling visualizer that encodes spatial layout.",
-  "version": "4.0.10",
+  "version": "4.0.11",
   "main": "index.js",
   "author": "Siddhartha Prasad",
   "license": "MIT",
