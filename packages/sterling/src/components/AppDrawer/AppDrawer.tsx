@@ -1,9 +1,9 @@
 import { Pane, PaneBody, PaneHeader } from '@/sterling-ui';
-import { IconButton, Spacer } from '@chakra-ui/react';
+import { IconButton } from '@chakra-ui/react';
 import { MdClose } from 'react-icons/md';
 import { useSterlingSelector } from '../../state/hooks';
 import { selectMainView } from '../../state/selectors';
-import { DrawerSectionMenu } from './DrawerSectionMenu';
+import { DrawerSectionTabs } from './DrawerSectionTabs';
 import { useActiveDrawerSection, useSetDrawerSection } from './drawerSections';
 import { GraphDrawer } from './graph/GraphDrawer';
 import { ScriptDrawer } from './script/ScriptDrawer';
@@ -17,8 +17,7 @@ const AppDrawer = () => {
   return (
     <Pane>
       <PaneHeader className='border-b'>
-        <DrawerSectionMenu />
-        <Spacer />
+        <DrawerSectionTabs />
         <IconButton
           aria-label='Close panel'
           title='Close panel'

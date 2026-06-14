@@ -9,6 +9,8 @@ import {
 import { VscVariableGroup } from 'react-icons/vsc';
 import { useSterlingDispatch, useSterlingSelector } from '../../state/hooks';
 import {
+  selectActiveDatum,
+  selectDatumIsTrace,
   selectDrawerView,
   selectIsSynthesisEnabled,
   selectMainView
@@ -45,21 +47,29 @@ const COMMON = [EXPLORER, EVALUATOR, LOG];
 export function useDrawerSections(): DrawerSection[] {
   const view = useSterlingSelector(selectMainView);
   const synthesisEnabled = useSterlingSelector(selectIsSynthesisEnabled);
+  // Time only makes sense for a temporal trace (multiple states). For a single
+  // static instance there is nothing to scrub through, so the tab is hidden —
+  // matching the in-drawer guard in GraphStateDrawer.
+  const activeDatum = useSterlingSelector(selectActiveDatum);
+  const isTrace = useSterlingSelector((state) =>
+    activeDatum ? selectDatumIsTrace(state, activeDatum) : false
+  );
+  const TIME_IF_TRACE = isTrace ? [TIME] : [];
   switch (view) {
     case 'GraphView':
       return [
-        TIME,
+        ...TIME_IF_TRACE,
         PROJECTIONS,
         LAYOUT,
         ...(synthesisEnabled ? [SYNTHESIS] : []),
         ...COMMON
       ];
     case 'TableView':
-      return [TIME, ...COMMON];
+      return [...TIME_IF_TRACE, ...COMMON];
     case 'ScriptView':
       return [VARIABLES, ...COMMON];
     case 'EditView':
-      return [TIME, PROJECTIONS, LAYOUT, ...COMMON];
+      return [...TIME_IF_TRACE, PROJECTIONS, LAYOUT, ...COMMON];
     default:
       return [...COMMON];
   }
