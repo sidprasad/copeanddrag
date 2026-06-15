@@ -18,9 +18,9 @@ jobs:
   build-and-release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 18
           cache: yarn
@@ -87,7 +87,7 @@ jobs:
           fi
       
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.tag_name.outputs.tag }}
           name: Release ${{ steps.tag_name.outputs.tag }}
