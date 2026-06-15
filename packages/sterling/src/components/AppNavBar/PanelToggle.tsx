@@ -1,4 +1,4 @@
-import { IconButton } from '@chakra-ui/react';
+import { Button } from '@chakra-ui/react';
 import { VscLayoutPanel, VscLayoutPanelOff } from 'react-icons/vsc';
 import { useSterlingSelector } from '../../state/hooks';
 import { selectDrawerIsCollapsed } from '../../state/selectors';
@@ -27,14 +27,16 @@ const PanelToggle = () => {
 
   const label = collapsed ? 'Show panel' : 'Hide panel';
   return (
-    <IconButton
+    <Button
       aria-label={label}
       title={label}
-      icon={collapsed ? <VscLayoutPanel /> : <VscLayoutPanelOff />}
+      leftIcon={collapsed ? <VscLayoutPanel /> : <VscLayoutPanelOff />}
       size='sm'
       variant='ghost'
       onClick={toggle}
-    />
+    >
+      Panel
+    </Button>
   );
 };
 
