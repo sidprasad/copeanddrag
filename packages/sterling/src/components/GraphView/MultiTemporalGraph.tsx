@@ -479,19 +479,13 @@ const MultiTemporalGraph = (props: MultiTemporalGraphProps) => {
   }
 
   return (
-    <div className="absolute inset-0 overflow-auto bg-surface-sunken p-4">
-      <div className="mb-4 px-2">
-        <h2 className="text-lg font-semibold text-ink">
-          Temporal Comparison
-        </h2>
-        <p className="text-sm text-ink-muted">
-          Showing {selectedTimeIndices.length} time step{selectedTimeIndices.length !== 1 ? 's' : ''} of {traceLength}
-        </p>
-      </div>
-      
-      <div 
+    <div className="absolute inset-0 overflow-auto bg-surface-sunken p-3">
+      {/* No header here — each pane already labels its own "State N of M", so a
+          "Temporal Comparison / Showing N of M" banner is redundant and just
+          eats vertical space. */}
+      <div
         className="grid gap-4"
-        style={{ 
+        style={{
           gridTemplateColumns: `repeat(${gridCols}, minmax(300px, 1fr))`,
         }}
       >
