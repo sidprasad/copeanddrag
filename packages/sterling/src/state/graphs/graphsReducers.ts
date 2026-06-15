@@ -19,7 +19,7 @@ import { produce, castDraft } from 'immer';
 import { WritableDraft } from 'immer/dist/types/types-external';
 import { forEach, remove, set, unset } from 'lodash-es';
 import { Matrix } from 'transformation-matrix';
-import { generateLayoutId, GraphsState, PresentationMode } from './graphs';
+import { ComparisonLayout, generateLayoutId, GraphsState, PresentationMode } from './graphs';
 import { DEFAULT_LAYOUT_SETTINGS } from './graphsDefaults';
 import { LiteralUnion } from 'prettier';
 import { parseCndFile } from '../../utils/cndPreParser';
@@ -803,6 +803,18 @@ function presentationModeSet(
 }
 
 /**
+ * Set the flow direction ('horizontal' | 'vertical') for side-by-side state
+ * panes in window/compare mode.
+ */
+function comparisonLayoutSet(
+  state: DraftState,
+  action: PayloadAction<{ datum: DatumParsed<any>; layout: ComparisonLayout }>
+) {
+  const { datum, layout } = action.payload;
+  state.comparisonLayoutByDatumId[datum.id] = layout;
+}
+
+/**
  * Set the CnD spec for a generator (by generator name, so it persists across instances).
  * Also parses projections and sequence policy from the CND spec.
  */
@@ -943,6 +955,7 @@ export default {
   nodeLabelPropSet,
   nodeLabelStyleRemoved,
   nodeLabelStyleSet,
+  comparisonLayoutSet,
   nodesOffset,
   presentationModeSet,
   projectionAdded,

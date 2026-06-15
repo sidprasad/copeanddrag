@@ -51,8 +51,9 @@ function dataReceived(
       // Choose the first index as the first instance to display
       state.timeByDatumId[datumId] = 0;
 
-      // Default new data to the single-state presentation.
+      // Default new data to the single-state presentation, horizontal panes.
       state.presentationModeByDatumId[datumId] = 'single';
+      state.comparisonLayoutByDatumId[datumId] = 'horizontal';
 
       // If a CnD spec is present in the datum AND we don't already have one for this generator,
       // load it into the state. Otherwise, use the default directive to hide disconnected built-ins.
@@ -86,6 +87,7 @@ function dataReceived(
       delete state.matricesByDatumId[datumId];
       delete state.timeByDatumId[datumId];
       delete state.presentationModeByDatumId[datumId];
+      delete state.comparisonLayoutByDatumId[datumId];
       delete state.hiddenByDatumId[datumId];
     });
   }

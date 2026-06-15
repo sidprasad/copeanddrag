@@ -80,18 +80,19 @@ const TemporalPolicySection = ({ datum }: { datum: DatumParsed<any> }) => {
   };
 
   return (
-    <div className='px-4 py-3'>
-      <label
-        htmlFor='temporal-policy-select'
-        className='block text-xs font-semibold uppercase tracking-wide text-ink-muted mb-1'
-      >
-        Temporal Policy
-      </label>
+    <label
+      htmlFor='temporal-policy-select'
+      className='flex min-w-0 flex-1 items-center gap-2'
+      title={POLICY_OPTIONS.find((o) => o.value === currentPolicy)?.description}
+    >
+      <span className='whitespace-nowrap text-xs font-semibold uppercase tracking-wide text-ink-muted'>
+        Policy
+      </span>
       <select
         id='temporal-policy-select'
         value={currentPolicy}
         onChange={handleChange}
-        className='w-full rounded border border-rule-strong bg-surface px-3 py-2 text-sm shadow-sm focus:border-accent-border focus:outline-none focus:ring-1 focus:ring-accent'
+        className='min-w-0 flex-1 rounded border border-rule-strong bg-surface px-2 py-1 text-sm shadow-sm focus:border-accent-border focus:outline-none focus:ring-1 focus:ring-accent'
       >
         {POLICY_OPTIONS.map((opt) => (
           <option key={opt.value} value={opt.value}>
@@ -99,10 +100,7 @@ const TemporalPolicySection = ({ datum }: { datum: DatumParsed<any> }) => {
           </option>
         ))}
       </select>
-      <p className='mt-1 text-xs text-ink-faint'>
-        {POLICY_OPTIONS.find((o) => o.value === currentPolicy)?.description}
-      </p>
-    </div>
+    </label>
   );
 };
 

@@ -11,6 +11,7 @@ import {
   selectSelectedProjections,
   selectEffectiveTimeIndices,
   selectPresentationMode,
+  selectComparisonLayout,
   selectTraceLength,
   selectProjectionConfig,
   selectSequencePolicyName
@@ -74,6 +75,9 @@ const GraphView = () => {
   );
   const presentationMode = useSterlingSelector((state) =>
     datum ? selectPresentationMode(state, datum) : 'single'
+  );
+  const comparisonLayout = useSterlingSelector((state) =>
+    datum ? selectComparisonLayout(state, datum) : 'horizontal'
   );
 
   // CND-derived projection config and sequence policy
@@ -286,6 +290,7 @@ const GraphView = () => {
           traceLength={traceLength}
           sequencePolicyName={sequencePolicyName}
           anchorTimeIndex={presentationMode === 'window' ? timeIndex : undefined}
+          layout={comparisonLayout}
         />
       );
     }

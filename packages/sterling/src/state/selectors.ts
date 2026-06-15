@@ -29,7 +29,7 @@ import { Matrix } from 'transformation-matrix';
 import dataSelectors from './data/dataSelectors';
 import { Expression } from './evaluator/evaluator';
 import evaluatorSelectors from './evaluator/evaluatorSelectors';
-import { PresentationMode, RelationStyle, TypeStyle } from './graphs/graphs';
+import { ComparisonLayout, PresentationMode, RelationStyle, TypeStyle } from './graphs/graphs';
 import graphsSelectors from './graphs/graphsSelectors';
 import { LogItem } from './log/log';
 import logSelectors from './log/logSelectors';
@@ -688,6 +688,17 @@ export function selectPresentationMode(
   datum: DatumParsed<any>
 ): PresentationMode {
   return graphsSelectors.selectPresentationMode(state.graphs, datum);
+}
+
+/**
+ * Select the flow direction ('horizontal' | 'vertical') for side-by-side state
+ * panes in window/compare mode.
+ */
+export function selectComparisonLayout(
+  state: SterlingState,
+  datum: DatumParsed<any>
+): ComparisonLayout {
+  return graphsSelectors.selectComparisonLayout(state.graphs, datum);
 }
 
 /**

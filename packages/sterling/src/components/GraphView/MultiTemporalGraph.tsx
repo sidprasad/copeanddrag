@@ -5,6 +5,7 @@ import { getSpytialCore, hasSpytialCore } from '../../utils/spytialCore';
 import { useSterlingSelector } from '../../state/hooks';
 import { selectColorMode } from '../../state/selectors';
 import type { LayoutState } from './SpyTialGraph';
+import type { ComparisonLayout } from '../../state/graphs/graphs';
 
 /**
  * The signature label that Forge uses to indicate no more instances are available.
@@ -43,6 +44,8 @@ interface MultiTemporalGraphProps {
    * pane is laid out independently.
    */
   anchorTimeIndex?: number;
+  /** Flow direction for the panes: 'horizontal' (grid) or 'vertical' (column). */
+  layout?: ComparisonLayout;
 }
 
 interface SingleTemporalPaneProps {
@@ -237,10 +240,20 @@ const SingleTemporalPane = (props: SingleTemporalPaneProps) => {
           layoutResult.layout,
           Object.keys(renderOptions).length > 0 ? renderOptions : undefined
         );
+
+        // The pane can unmount/remount during the await (e.g. rapid scrubbing
+        // shifts the window), nulling the ref. Bail if so — a fresh loadGraph
+        // runs for the new element — rather than dereferencing null below.
+        const el = graphElementRef.current;
+        if (!el) {
+          setIsLoading(false);
+          return;
+        }
+
         // Re-fit the viewport to this time step's content. The graph otherwise
         // keeps the prior viewport once the user has zoomed/panned, leaving the
         // step framed by a stale view. (See SpyTialGraph for the full rationale.)
-        graphElementRef.current.resetViewToFitContent?.();
+        el.resetViewToFitContent?.();
 
         // Host the "State N of M" label inside the graph's own toolbar to save
         // the vertical space a separate header strip would take. Prepend it so
@@ -248,23 +261,22 @@ const SingleTemporalPane = (props: SingleTemporalPaneProps) => {
         // addToolbarControl only appends, where it gets clipped). Re-inserting
         // the same node just moves it, so it never duplicates.
         if (!labelRef.current) {
-          const el = document.createElement('div');
-          el.style.cssText =
+          const lbl = document.createElement('div');
+          lbl.style.cssText =
             'font-size:12px;font-weight:600;padding:0 8px;white-space:nowrap;display:flex;align-items:center;color:var(--ccd-ink-muted,#64748b);';
-          labelRef.current = el;
+          labelRef.current = lbl;
         }
         labelRef.current.textContent = `State ${timeIndex + 1} of ${traceLength}`;
-        const toolbar = graphElementRef.current.shadowRoot?.querySelector('#graph-toolbar');
+        const toolbar = el.shadowRoot?.querySelector('#graph-toolbar');
         if (toolbar) {
           toolbar.insertBefore(labelRef.current, toolbar.firstChild);
         } else {
-          graphElementRef.current.addToolbarControl?.(labelRef.current);
+          el.addToolbarControl?.(labelRef.current);
         }
 
         // Fallback: if 'layout-complete' never fires, still report (slightly
         // pre-settle) positions so followers don't wait forever.
         if (onLayoutStateChangeRef.current) {
-          const el = graphElementRef.current;
           setTimeout(() => {
             if (!anchorSettledRef.current && onLayoutStateChangeRef.current && el?.getLayoutState) {
               const s = el.getLayoutState();
@@ -400,7 +412,7 @@ const SingleTemporalPane = (props: SingleTemporalPaneProps) => {
  * Component that renders multiple graphs in a grid, one for each selected time step
  */
 const MultiTemporalGraph = (props: MultiTemporalGraphProps) => {
-  const { datum, cndSpec, selectedTimeIndices, traceLength, sequencePolicyName, anchorTimeIndex } = props;
+  const { datum, cndSpec, selectedTimeIndices, traceLength, sequencePolicyName, anchorTimeIndex, layout = 'horizontal' } = props;
 
   const [isCndCoreReady, setIsCndCoreReady] = useState(hasSpytialCore());
   const [error, setError] = useState<string | null>(null);
@@ -506,7 +518,12 @@ const MultiTemporalGraph = (props: MultiTemporalGraphProps) => {
       <div
         className="grid gap-4"
         style={{
-          gridTemplateColumns: `repeat(${gridCols}, minmax(300px, 1fr))`,
+          // Vertical = a single top-to-bottom column; horizontal = a wrapping
+          // left-to-right grid sized to the number of panes.
+          gridTemplateColumns:
+            layout === 'vertical'
+              ? 'minmax(0, 1fr)'
+              : `repeat(${gridCols}, minmax(300px, 1fr))`,
         }}
       >
         {selectedTimeIndices.map((timeIdx, index) => {

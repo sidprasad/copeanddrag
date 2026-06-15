@@ -15,6 +15,13 @@ import type { CndProjection, SequencePolicyName } from '../../utils/cndPreParser
  */
 export type PresentationMode = 'single' | 'window' | 'compare';
 
+/**
+ * How side-by-side state panes flow in window/compare mode:
+ * - 'horizontal' — left-to-right (a row, wrapping into a grid).
+ * - 'vertical'   — top-to-bottom (a single column).
+ */
+export type ComparisonLayout = 'horizontal' | 'vertical';
+
 export interface GraphsState {
   layoutsByDatumId: Record<
     string,
@@ -67,6 +74,9 @@ export interface GraphsState {
    * which Time-panel controls are shown.
    */
   presentationModeByDatumId: Record<string, PresentationMode>;
+
+  /** Flow direction for side-by-side state panes. Defaults to 'horizontal'. */
+  comparisonLayoutByDatumId: Record<string, ComparisonLayout>;
 
   /**
    * CND-derived projection configurations by generator name.
@@ -129,6 +139,7 @@ export function newGraphsState(): GraphsState {
     selectedProjectionsByGeneratorName: {},
     selectedTimeIndicesByDatumId: {},
     presentationModeByDatumId: {},
+    comparisonLayoutByDatumId: {},
     projectionConfigByGeneratorName: {},
     sequencePolicyByGeneratorName: {}
   };
