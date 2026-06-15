@@ -328,10 +328,20 @@ const GraphView = () => {
       {datum ? (
         <div className='relative'>
           <Pane>
-            <PaneHeader className='border-b'>
-              <GraphViewHeader datum={datum} />
-            </PaneHeader>
-            <PaneBody display="flex" flexDirection="column">
+            {/* The ID/command moved to the top nav bar (NavDatumInfo); only
+                render this header strip when the provider has action buttons.
+                When absent, pull the body up to top:0 so no empty gap is left
+                (PaneBody is absolutely positioned below the header by default). */}
+            {datum.buttons && datum.buttons.length > 0 && (
+              <PaneHeader className='border-b'>
+                <GraphViewHeader datum={datum} />
+              </PaneHeader>
+            )}
+            <PaneBody
+              display="flex"
+              flexDirection="column"
+              top={datum.buttons && datum.buttons.length > 0 ? undefined : '0px'}
+            >
               {/* SpyTial error modal mounts here — sits above the graph and
                   collapses to nothing when there is no active error. */}
               <div

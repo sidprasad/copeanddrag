@@ -1,6 +1,7 @@
 import { NavBar } from '@/sterling-ui';
 import { Spacer } from '@chakra-ui/react';
 import { NavConnection } from './NavConnection';
+import { NavDatumInfo } from './NavDatumInfo';
 import { OverflowMenu } from './OverflowMenu';
 import { PanelToggle } from './PanelToggle';
 import { ThemeToggle } from './ThemeToggle';
@@ -10,6 +11,7 @@ const AppNavBar = () => {
   return (
     <NavBar className='shadow'>
       <ViewMenu />
+      <NavDatumInfo />
       <Spacer />
       <NavConnection />
       <PanelToggle />
