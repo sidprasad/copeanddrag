@@ -93,6 +93,10 @@ const SingleTemporalPane = (props: SingleTemporalPaneProps) => {
   // Whether the anchor's settled positions have been reported for the current
   // render (set by the 'layout-complete' event; gates the timeout fallback).
   const anchorSettledRef = useRef(false);
+  // The "State N of M" label, hosted inside the graph's own toolbar (rather
+  // than a separate header strip) to save vertical space. One persistent node:
+  // re-adding it just moves it, so it never duplicates across re-renders.
+  const labelRef = useRef<HTMLDivElement | null>(null);
   const graphContainerRef = useRef<HTMLDivElement>(null);
   const graphElementRef = useRef<HTMLElementTagNameMap['webcola-cnd-graph'] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -238,6 +242,25 @@ const SingleTemporalPane = (props: SingleTemporalPaneProps) => {
         // step framed by a stale view. (See SpyTialGraph for the full rationale.)
         graphElementRef.current.resetViewToFitContent?.();
 
+        // Host the "State N of M" label inside the graph's own toolbar to save
+        // the vertical space a separate header strip would take. Prepend it so
+        // it stays visible when the toolbar overflows a narrow pane (the public
+        // addToolbarControl only appends, where it gets clipped). Re-inserting
+        // the same node just moves it, so it never duplicates.
+        if (!labelRef.current) {
+          const el = document.createElement('div');
+          el.style.cssText =
+            'font-size:12px;font-weight:600;padding:0 8px;white-space:nowrap;display:flex;align-items:center;color:var(--ccd-ink-muted,#64748b);';
+          labelRef.current = el;
+        }
+        labelRef.current.textContent = `State ${timeIndex + 1} of ${traceLength}`;
+        const toolbar = graphElementRef.current.shadowRoot?.querySelector('#graph-toolbar');
+        if (toolbar) {
+          toolbar.insertBefore(labelRef.current, toolbar.firstChild);
+        } else {
+          graphElementRef.current.addToolbarControl?.(labelRef.current);
+        }
+
         // Fallback: if 'layout-complete' never fires, still report (slightly
         // pre-settle) positions so followers don't wait forever.
         if (onLayoutStateChangeRef.current) {
@@ -270,6 +293,7 @@ const SingleTemporalPane = (props: SingleTemporalPaneProps) => {
     datum.id,
     cndSpec,
     timeIndex,
+    traceLength,
     sequencePolicyName,
     applyContinuity,
     priorState,
@@ -339,12 +363,8 @@ const SingleTemporalPane = (props: SingleTemporalPaneProps) => {
 
   return (
     <div className="relative flex flex-col border border-rule-strong rounded-lg overflow-hidden bg-surface shadow-sm">
-      {/* Header with time step label */}
-      <div className="px-3 py-2 bg-info-bg border-b border-info-border">
-        <span className="font-medium text-sm text-info">
-          State {timeIndex + 1} of {traceLength}
-        </span>
-      </div>
+      {/* The "State N of M" label is injected into the graph's own toolbar
+          (see loadGraph) instead of a separate header strip, to save space. */}
 
       {/* Graph container */}
       <div
