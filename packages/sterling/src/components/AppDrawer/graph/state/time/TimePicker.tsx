@@ -36,10 +36,11 @@ const TimePicker = ({ datum }: { datum: DatumParsed<any> }) => {
   const loopBack = useSterlingSelector((state) =>
     selectLoopbackIndex(state, datum)
   );
-  // The set of states actually on screen (drives the timeline highlight).
+  // The states actually on screen (drives the timeline highlight). Window mode
+  // can include null placeholder slots — drop them, only real states highlight.
   const effectiveIndices = useSterlingSelector((state) =>
     selectEffectiveTimeIndices(state, datum)
-  );
+  ).filter((i): i is number => i !== null);
   // The stored compare set (only meaningful in compare mode).
   const compareSet = useSterlingSelector((state) =>
     selectSelectedTimeIndices(state, datum)

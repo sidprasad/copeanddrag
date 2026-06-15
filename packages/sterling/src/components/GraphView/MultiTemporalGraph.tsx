@@ -31,8 +31,9 @@ function isOutOfInstances(alloyDataInstance: any): boolean {
 interface MultiTemporalGraphProps {
   datum: DatumParsed<any>;
   cndSpec: string;
-  /** Array of time indices to display */
-  selectedTimeIndices: number[];
+  /** State slots to display. `null` is a sliding-window placeholder (a missing
+   *  before/after neighbour) and renders as an empty "no state" pane. */
+  selectedTimeIndices: (number | null)[];
   /** Total number of time steps in the trace */
   traceLength: number;
   /** Sequence policy name from CND spec */
@@ -378,14 +379,12 @@ const SingleTemporalPane = (props: SingleTemporalPaneProps) => {
       {/* The "State N of M" label is injected into the graph's own toolbar
           (see loadGraph) instead of a separate header strip, to save space. */}
 
-      {/* Graph container */}
+      {/* Graph container — fills the pane; a generous min-height gives the graph
+          room without the over-tall panes that break its layout. */}
       <div
         ref={graphContainerRef}
         className="flex-1"
-        style={{
-          minHeight: '250px',
-          background: 'var(--ccd-surface)'
-        }}
+        style={{ minHeight: '320px', background: 'var(--ccd-surface)' }}
       />
 
       {/* Loading overlay */}
@@ -510,23 +509,52 @@ const MultiTemporalGraph = (props: MultiTemporalGraphProps) => {
     );
   }
 
+  // Window mode (anchor set) shows a fixed before/current/after strip, so put
+  // its slots in a single row; compare mode uses the count-based heuristic.
+  const isWindow = anchorTimeIndex !== undefined;
+  const columns = isWindow ? selectedTimeIndices.length : gridCols;
+
   return (
     <div className="absolute inset-0 overflow-auto bg-surface-sunken p-3">
       {/* No header here — each pane already labels its own "State N of M", so a
           "Temporal Comparison / Showing N of M" banner is redundant and just
           eats vertical space. */}
       <div
-        className="grid gap-4"
+        className="grid min-h-full gap-3"
         style={{
-          // Vertical = a single top-to-bottom column; horizontal = a wrapping
-          // left-to-right grid sized to the number of panes.
+          // Vertical = a single top-to-bottom column; horizontal = a row sized
+          // to the panes. Rows are content-height (each pane sets a generous
+          // min-height); we deliberately do NOT stretch to fill the stage — very
+          // tall panes break the graph's layout/morph (content lands off-screen).
+          // The window's single row is centred so the leftover height reads as
+          // intentional rather than a gap below.
           gridTemplateColumns:
             layout === 'vertical'
               ? 'minmax(0, 1fr)'
-              : `repeat(${gridCols}, minmax(300px, 1fr))`,
+              : `repeat(${columns}, minmax(260px, 1fr))`,
+          gridAutoRows: 'minmax(340px, auto)',
+          alignContent: isWindow ? 'center' : 'start'
         }}
       >
         {selectedTimeIndices.map((timeIdx, index) => {
+          // A null slot is a sliding-window placeholder for a missing neighbour.
+          if (timeIdx === null) {
+            return (
+              <div
+                key={`placeholder-${index}`}
+                className="flex flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-rule bg-surface-sunken text-ink-faint"
+              >
+                <span className="text-sm font-medium">
+                  {index === 0 ? 'No previous state' : 'No next state'}
+                </span>
+                <span className="text-xs">
+                  {index === 0
+                    ? 'State 0 is the start of the trace'
+                    : 'this is the end of the trace'}
+                </span>
+              </div>
+            );
+          }
           const isAnchor = continuityActive && timeIdx === anchorTimeIndex;
           const isFollower = continuityActive && !isAnchor;
           return (

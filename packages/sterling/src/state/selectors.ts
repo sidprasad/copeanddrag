@@ -702,35 +702,16 @@ export function selectComparisonLayout(
 }
 
 /**
- * Build the sliding-window indices [before, current, after] around `current`.
- * At the trace ends there is no neighbour: if the trace loops (loopBack is
- * defined) we wrap — the state before index 0 is the last state, and the state
- * after the last state is the loop-back target — otherwise we clamp (drop the
- * missing neighbour, leaving 2 states at the edges).
+ * Build the sliding-window slots [before, current, after] around `current`.
+ * A slot is `null` when the neighbour doesn't exist — before state 0, or after
+ * the last state — which the renderer shows as an empty "no state" placeholder
+ * (so state 0 reads as [—, 0, 1], keeping the current state in the middle).
  */
-function windowIndices(
-  current: number,
-  length: number,
-  loopBack: number | undefined
-): number[] {
-  if (length <= 1) return [0];
-  const before =
-    current - 1 >= 0
-      ? current - 1
-      : loopBack !== undefined
-      ? length - 1
-      : undefined;
-  const after =
-    current + 1 < length
-      ? current + 1
-      : loopBack !== undefined
-      ? loopBack
-      : undefined;
-  const raw = [before, current, after].filter(
-    (i): i is number => i !== undefined
-  );
-  // Dedup while preserving order (tiny/looping traces can repeat an index).
-  return Array.from(new Set(raw));
+function windowSlots(current: number, length: number): (number | null)[] {
+  if (length <= 1) return [current];
+  const before = current - 1 >= 0 ? current - 1 : null;
+  const after = current + 1 < length ? current + 1 : null;
+  return [before, current, after];
 }
 
 /**
@@ -739,7 +720,8 @@ function windowIndices(
  *   single  -> [current]
  *   window  -> [before, current, after]   (wraps on looping traces, else clamps)
  *   compare -> the user's stored set       (falls back to [current] when empty)
- * The side-by-side renderer keys purely off this set, so all three modes share
+ * A slot may be `null` (a sliding-window placeholder for a missing neighbour).
+ * The side-by-side renderer keys purely off this list, so all three modes share
  * one render path. Memoized (createSelector) so single/window return a stable
  * array reference instead of re-rendering consumers on every dispatch.
  */
@@ -752,12 +734,10 @@ export const selectEffectiveTimeIndices = createSelector(
     (state: SterlingState, datum: DatumParsed<any>) =>
       selectTraceLength(state, datum),
     (state: SterlingState, datum: DatumParsed<any>) =>
-      selectLoopbackIndex(state, datum),
-    (state: SterlingState, datum: DatumParsed<any>) =>
       selectSelectedTimeIndices(state, datum)
   ],
-  (mode, current, length, loopBack, compareSet): number[] => {
-    if (mode === 'window') return windowIndices(current, length, loopBack);
+  (mode, current, length, compareSet): (number | null)[] => {
+    if (mode === 'window') return windowSlots(current, length);
     if (mode === 'compare')
       return compareSet.length > 0 ? compareSet : [current];
     return [current];
