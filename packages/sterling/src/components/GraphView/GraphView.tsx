@@ -9,7 +9,9 @@ import {
   selectIsSynthesisActive,
   selectSynthesisStep,
   selectSelectedProjections,
-  selectSelectedTimeIndices,
+  selectEffectiveTimeIndices,
+  selectPresentationMode,
+  selectComparisonLayout,
   selectTraceLength,
   selectProjectionConfig,
   selectSequencePolicyName
@@ -66,9 +68,16 @@ const GraphView = () => {
     datum ? selectSelectedProjections(state, datum) : {}
   );
   
-  // Selected time indices for multi-temporal view
-  const selectedTimeIndices = useSterlingSelector((state) =>
-    datum ? selectSelectedTimeIndices(state, datum) : []
+  // Effective time indices to render, derived from the datum's presentation
+  // mode (single -> [current]; window -> before/current/after; compare -> set).
+  const effectiveTimeIndices = useSterlingSelector((state) =>
+    datum ? selectEffectiveTimeIndices(state, datum) : []
+  );
+  const presentationMode = useSterlingSelector((state) =>
+    datum ? selectPresentationMode(state, datum) : 'single'
+  );
+  const comparisonLayout = useSterlingSelector((state) =>
+    datum ? selectComparisonLayout(state, datum) : 'horizontal'
   );
 
   // CND-derived projection config and sequence policy
@@ -110,8 +119,9 @@ const GraphView = () => {
     return null;
   }, [selectedProjections]);
   
-  // Check if multi-temporal mode is active (more than 1 time index selected)
-  const isMultiTemporalActive = selectedTimeIndices.length > 1;
+  // Multi-temporal (side-by-side) rendering kicks in whenever the effective
+  // set has more than one state — i.e. window mode, or compare with 2+ states.
+  const isMultiTemporalActive = effectiveTimeIndices.length > 1;
 
   // Build a Record<string, string> of single-atom selections for applyProjectionTransform
   // (uses the first selected atom per projection type)
@@ -276,9 +286,11 @@ const GraphView = () => {
         <MultiTemporalGraph
           datum={datum}
           cndSpec={cndSpec}
-          selectedTimeIndices={selectedTimeIndices}
+          selectedTimeIndices={effectiveTimeIndices}
           traceLength={traceLength}
           sequencePolicyName={sequencePolicyName}
+          anchorTimeIndex={presentationMode === 'window' ? timeIndex : undefined}
+          layout={comparisonLayout}
         />
       );
     }
@@ -316,10 +328,20 @@ const GraphView = () => {
       {datum ? (
         <div className='relative'>
           <Pane>
-            <PaneHeader className='border-b'>
-              <GraphViewHeader datum={datum} />
-            </PaneHeader>
-            <PaneBody display="flex" flexDirection="column">
+            {/* The ID/command moved to the top nav bar (NavDatumInfo); only
+                render this header strip when the provider has action buttons.
+                When absent, pull the body up to top:0 so no empty gap is left
+                (PaneBody is absolutely positioned below the header by default). */}
+            {datum.buttons && datum.buttons.length > 0 && (
+              <PaneHeader className='border-b'>
+                <GraphViewHeader datum={datum} />
+              </PaneHeader>
+            )}
+            <PaneBody
+              display="flex"
+              flexDirection="column"
+              top={datum.buttons && datum.buttons.length > 0 ? undefined : '0px'}
+            >
               {/* SpyTial error modal mounts here — sits above the graph and
                   collapses to nothing when there is no active error. */}
               <div

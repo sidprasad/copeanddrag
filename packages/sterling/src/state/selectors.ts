@@ -29,7 +29,7 @@ import { Matrix } from 'transformation-matrix';
 import dataSelectors from './data/dataSelectors';
 import { Expression } from './evaluator/evaluator';
 import evaluatorSelectors from './evaluator/evaluatorSelectors';
-import { RelationStyle, TypeStyle } from './graphs/graphs';
+import { ComparisonLayout, PresentationMode, RelationStyle, TypeStyle } from './graphs/graphs';
 import graphsSelectors from './graphs/graphsSelectors';
 import { LogItem } from './log/log';
 import logSelectors from './log/logSelectors';
@@ -678,6 +678,71 @@ export function selectSelectedTimeIndices(
 ): number[] {
   return graphsSelectors.selectSelectedTimeIndices(state.graphs, datum);
 }
+
+/**
+ * Select how the Time drawer presents states for a datum
+ * ('single' | 'window' | 'compare').
+ */
+export function selectPresentationMode(
+  state: SterlingState,
+  datum: DatumParsed<any>
+): PresentationMode {
+  return graphsSelectors.selectPresentationMode(state.graphs, datum);
+}
+
+/**
+ * Select the flow direction ('horizontal' | 'vertical') for side-by-side state
+ * panes in window/compare mode.
+ */
+export function selectComparisonLayout(
+  state: SterlingState,
+  datum: DatumParsed<any>
+): ComparisonLayout {
+  return graphsSelectors.selectComparisonLayout(state.graphs, datum);
+}
+
+/**
+ * Build the sliding-window slots [before, current, after] around `current`.
+ * A slot is `null` when the neighbour doesn't exist — before state 0, or after
+ * the last state — which the renderer shows as an empty "no state" placeholder
+ * (so state 0 reads as [—, 0, 1], keeping the current state in the middle).
+ */
+function windowSlots(current: number, length: number): (number | null)[] {
+  if (length <= 1) return [current];
+  const before = current - 1 >= 0 ? current - 1 : null;
+  const after = current + 1 < length ? current + 1 : null;
+  return [before, current, after];
+}
+
+/**
+ * Select the time indices actually rendered on the stage, derived from the
+ * datum's presentation mode:
+ *   single  -> [current]
+ *   window  -> [before, current, after]   (wraps on looping traces, else clamps)
+ *   compare -> the user's stored set       (falls back to [current] when empty)
+ * A slot may be `null` (a sliding-window placeholder for a missing neighbour).
+ * The side-by-side renderer keys purely off this list, so all three modes share
+ * one render path. Memoized (createSelector) so single/window return a stable
+ * array reference instead of re-rendering consumers on every dispatch.
+ */
+export const selectEffectiveTimeIndices = createSelector(
+  [
+    (state: SterlingState, datum: DatumParsed<any>) =>
+      selectPresentationMode(state, datum),
+    (state: SterlingState, datum: DatumParsed<any>) =>
+      selectTimeIndex(state, datum),
+    (state: SterlingState, datum: DatumParsed<any>) =>
+      selectTraceLength(state, datum),
+    (state: SterlingState, datum: DatumParsed<any>) =>
+      selectSelectedTimeIndices(state, datum)
+  ],
+  (mode, current, length, compareSet): (number | null)[] => {
+    if (mode === 'window') return windowSlots(current, length);
+    if (mode === 'compare')
+      return compareSet.length > 0 ? compareSet : [current];
+    return [current];
+  }
+);
 
 /**
  * Select the CND-derived projection configuration for a datum.

@@ -1,4 +1,5 @@
 import { ButtonGroup, Center, IconButton } from '@chakra-ui/react';
+import { tokens } from '@/sterling-ui';
 import {
   BiArrowToLeft,
   BiArrowToRight,
@@ -22,7 +23,7 @@ const MinimapControls = (props: MinimapProps) => {
   } = props;
   return (
     <div className='flex'>
-      <ButtonGroup width='full' isAttached size='sm'>
+      <ButtonGroup width='full' isAttached size='sm' variant='ghost'>
         <IconButton
           aria-label='First State'
           icon={<BiArrowToLeft />}
@@ -37,7 +38,13 @@ const MinimapControls = (props: MinimapProps) => {
           disabled={current === 0}
           onClick={() => onChange(current - 1)}
         />
-        <Center width='full' px={2} fontSize='xs' bg='gray.100'>
+        <Center
+          width='full'
+          px={2}
+          fontSize='xs'
+          bg={tokens.color.surfaceMuted}
+          color={tokens.color.ink}
+        >
           {label(current)}
         </Center>
         {loopBack !== undefined && current === length - 1 ? (
@@ -49,7 +56,7 @@ const MinimapControls = (props: MinimapProps) => {
           />
         ) : (
           <IconButton
-            aria-label='First State'
+            aria-label='Next State'
             borderRadius={0}
             icon={<BiRightArrowAlt />}
             disabled={current === length - 1}
@@ -57,7 +64,7 @@ const MinimapControls = (props: MinimapProps) => {
           />
         )}
         <IconButton
-          aria-label='Previous State'
+          aria-label='Last State'
           icon={<BiArrowToRight />}
           disabled={current === length - 1}
           onClick={() => onChange(length - 1)}
@@ -67,7 +74,7 @@ const MinimapControls = (props: MinimapProps) => {
           size='sm'
           borderRadius={0}
           borderLeftWidth={1}
-          borderLeftColor='gray.300'
+          borderLeftColor={tokens.color.rule}
           icon={collapsed ? <BiChevronDown /> : <BiChevronUp />}
           onClick={() => onToggleCollapse()}
         />

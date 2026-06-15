@@ -1,23 +1,32 @@
 import { DatumParsed } from '@/sterling-connection';
 import { useCallback, useState } from 'react';
-import { timeIndexSet, timeIndexToggled, selectedTimeIndicesSet } from '../../../../../state/graphs/graphsSlice';
+import { selectedTimeIndicesSet, timeIndexSet } from '../../../../../state/graphs/graphsSlice';
 import {
   useSterlingDispatch,
   useSterlingSelector
 } from '../../../../../state/hooks';
 import {
+  selectEffectiveTimeIndices,
   selectLoopbackIndex,
+  selectPresentationMode,
+  selectSelectedTimeIndices,
   selectTimeIndex,
-  selectTraceLength,
-  selectSelectedTimeIndices
+  selectTraceLength
 } from '../../../../../state/selectors';
 import { Minimap } from '../../../../Minimap/Minimap';
+
+// Shared style for the compare-mode quick-select buttons. Theme-aware tokens
+// (not Chakra grays) so it tracks light/dark like the rest of the panel.
+const HELPER_BUTTON =
+  'rounded-md border border-rule bg-surface-sunken px-2 py-1 text-xs font-medium text-ink-muted transition-colors hover:bg-surface-muted hover:text-ink';
 
 const TimePicker = ({ datum }: { datum: DatumParsed<any> }) => {
   const dispatch = useSterlingDispatch();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
 
+  const mode = useSterlingSelector((state) =>
+    selectPresentationMode(state, datum)
+  );
   const timeIndex = useSterlingSelector((state) =>
     selectTimeIndex(state, datum)
   );
@@ -27,131 +36,89 @@ const TimePicker = ({ datum }: { datum: DatumParsed<any> }) => {
   const loopBack = useSterlingSelector((state) =>
     selectLoopbackIndex(state, datum)
   );
-  const selectedTimeIndices = useSterlingSelector((state) =>
+  // The states actually on screen (drives the timeline highlight). Window mode
+  // can include null placeholder slots — drop them, only real states highlight.
+  const effectiveIndices = useSterlingSelector((state) =>
+    selectEffectiveTimeIndices(state, datum)
+  ).filter((i): i is number => i !== null);
+  // The stored compare set (only meaningful in compare mode).
+  const compareSet = useSterlingSelector((state) =>
     selectSelectedTimeIndices(state, datum)
   );
 
-  const indexSet = useCallback(
-    (index: number) => {
-      if (isMultiSelectMode) {
-        // In multi-select mode, toggle the index
-        dispatch(timeIndexToggled({ datum, index }));
-      } else {
-        // In single-select mode, set the time index normally
-        dispatch(timeIndexSet({ datum, index }));
-      }
-    },
-    [datum, dispatch, isMultiSelectMode]
+  const moveTo = useCallback(
+    (index: number) => dispatch(timeIndexSet({ datum, index })),
+    [dispatch, datum]
   );
 
-  const toggleMultiSelectMode = useCallback(() => {
-    const newMode = !isMultiSelectMode;
-    setIsMultiSelectMode(newMode);
-    
-    if (newMode) {
-      // Entering multi-select mode: initialize with current time index
-      dispatch(selectedTimeIndicesSet({ datum, selectedIndices: [timeIndex] }));
-    } else {
-      // Leaving multi-select mode: clear the multi-select state
-      dispatch(selectedTimeIndicesSet({ datum, selectedIndices: [] }));
-    }
-  }, [isMultiSelectMode, dispatch, datum, timeIndex]);
-
-  const selectAllTimeIndices = useCallback(() => {
-    const allIndices = Array.from({ length: traceLength }, (_, i) => i);
-    dispatch(selectedTimeIndicesSet({ datum, selectedIndices: allIndices }));
-  }, [dispatch, datum, traceLength]);
+  // Toggle a state in/out of the compare set. We compute the next set and
+  // dispatch it wholesale (rather than a toggle action) so the operation is
+  // idempotent: React StrictMode invokes the graph's click reducer twice in
+  // dev, and a true toggle would flip back to its starting state. Setting the
+  // same array twice is a no-op, so the click sticks. Always keep ≥1 selected.
+  const toggleAt = useCallback(
+    (index: number) => {
+      const next = compareSet.includes(index)
+        ? compareSet.filter((i) => i !== index)
+        : [...compareSet, index].sort((a, b) => a - b);
+      dispatch(
+        selectedTimeIndicesSet({
+          datum,
+          selectedIndices: next.length > 0 ? next : compareSet
+        })
+      );
+    },
+    [dispatch, datum, compareSet]
+  );
 
   const selectFirstLast = useCallback(() => {
     const indices = traceLength > 1 ? [0, traceLength - 1] : [0];
     dispatch(selectedTimeIndicesSet({ datum, selectedIndices: indices }));
   }, [dispatch, datum, traceLength]);
 
+  const selectAll = useCallback(() => {
+    const indices = Array.from({ length: traceLength }, (_, i) => i);
+    dispatch(selectedTimeIndicesSet({ datum, selectedIndices: indices }));
+  }, [dispatch, datum, traceLength]);
+
   return (
-    <div className='mx-1 my-2'>
-      {/* Multi-select toggle for traces with multiple states */}
-      {traceLength > 1 && (
-        <div className="mb-2 flex items-center justify-between">
+    <div className='mx-1 my-2 flex flex-col gap-2'>
+      {/* Compare-only quick selectors */}
+      {mode === 'compare' && (
+        <div className='flex items-center gap-1 px-1'>
+          <span className='mr-1 text-xs text-ink-muted'>Quick select:</span>
           <button
-            type="button"
-            onClick={toggleMultiSelectMode}
-            className={`
-              px-2 py-1 text-xs rounded-md transition-all font-medium
-              ${isMultiSelectMode
-                ? 'bg-accent text-on-accent shadow-sm'
-                : 'bg-surface-sunken text-ink-muted hover:bg-surface-sunken border border-rule'
-              }
-            `}
+            type='button'
+            onClick={selectFirstLast}
+            className={HELPER_BUTTON}
           >
-            {isMultiSelectMode ? '✓ Compare Mode' : 'Compare States'}
+            First &amp; Last
           </button>
-          
-          {isMultiSelectMode && (
-            <div className="flex gap-1">
-              <button
-                type="button"
-                onClick={selectFirstLast}
-                className="px-2 py-1 text-xs rounded-md bg-surface-sunken text-ink-muted hover:bg-surface-sunken border border-rule"
-              >
-                First & Last
-              </button>
-              <button
-                type="button"
-                onClick={selectAllTimeIndices}
-                className="px-2 py-1 text-xs rounded-md bg-surface-sunken text-ink-muted hover:bg-surface-sunken border border-rule"
-              >
-                All
-              </button>
-            </div>
-          )}
+          <button type='button' onClick={selectAll} className={HELPER_BUTTON}>
+            All
+          </button>
         </div>
       )}
-      
-      {/* Multi-select time step buttons */}
-      {isMultiSelectMode && (
-        <div className="mb-2">
-          <p className="text-xs text-ink-muted mb-1.5">
-            Click states to compare side-by-side:
-          </p>
-          <div className="flex flex-wrap gap-1">
-            {Array.from({ length: traceLength }, (_, i) => {
-              const isSelected = selectedTimeIndices.includes(i);
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => dispatch(timeIndexToggled({ datum, index: i }))}
-                  className={`
-                    w-8 h-8 text-xs rounded-md transition-all font-medium
-                    ${isSelected
-                      ? 'bg-accent text-on-accent shadow-sm'
-                      : 'bg-surface-sunken text-ink-muted hover:bg-surface-sunken border border-rule'
-                    }
-                  `}
-                >
-                  {i + 1}
-                </button>
-              );
-            })}
-          </div>
-          {selectedTimeIndices.length > 1 && (
-            <p className="text-xs text-accent mt-1.5 font-medium">
-              ✓ {selectedTimeIndices.length} states selected — showing side-by-side comparison
-            </p>
-          )}
-        </div>
-      )}
-      
-      {/* Original minimap (always visible for navigation) */}
+
+      {/* Shared timeline. Clicking a circle moves the current state, except in
+          compare mode where it toggles the state in/out of the comparison. */}
       <Minimap
         collapsed={isCollapsed}
         current={timeIndex}
         length={traceLength}
         loopBack={loopBack}
-        label={(index) => `State ${index + 1}/${traceLength}`}
-        onChange={indexSet}
+        selectedIndices={effectiveIndices}
+        label={(index) => `State ${index}/${traceLength}`}
+        onChange={moveTo}
+        onNodeClick={mode === 'compare' ? toggleAt : moveTo}
         onToggleCollapse={() => setIsCollapsed((collapsed) => !collapsed)}
       />
+
+      {mode === 'compare' && compareSet.length > 1 && (
+        <p className='px-1 text-xs font-medium text-accent'>
+          ✓ {compareSet.length} states selected — showing side-by-side
+        </p>
+      )}
     </div>
   );
 };
