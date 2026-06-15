@@ -10,6 +10,7 @@ import {
   selectSynthesisStep,
   selectSelectedProjections,
   selectEffectiveTimeIndices,
+  selectPresentationMode,
   selectTraceLength,
   selectProjectionConfig,
   selectSequencePolicyName
@@ -70,6 +71,9 @@ const GraphView = () => {
   // mode (single -> [current]; window -> before/current/after; compare -> set).
   const effectiveTimeIndices = useSterlingSelector((state) =>
     datum ? selectEffectiveTimeIndices(state, datum) : []
+  );
+  const presentationMode = useSterlingSelector((state) =>
+    datum ? selectPresentationMode(state, datum) : 'single'
   );
 
   // CND-derived projection config and sequence policy
@@ -281,6 +285,7 @@ const GraphView = () => {
           selectedTimeIndices={effectiveTimeIndices}
           traceLength={traceLength}
           sequencePolicyName={sequencePolicyName}
+          anchorTimeIndex={presentationMode === 'window' ? timeIndex : undefined}
         />
       );
     }

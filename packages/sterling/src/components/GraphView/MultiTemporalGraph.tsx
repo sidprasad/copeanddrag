@@ -4,6 +4,7 @@ import { parseCndFile, SequencePolicyName } from '../../utils/cndPreParser';
 import { getSpytialCore, hasSpytialCore } from '../../utils/spytialCore';
 import { useSterlingSelector } from '../../state/hooks';
 import { selectColorMode } from '../../state/selectors';
+import type { LayoutState } from './SpyTialGraph';
 
 /**
  * The signature label that Forge uses to indicate no more instances are available.
@@ -35,6 +36,13 @@ interface MultiTemporalGraphProps {
   traceLength: number;
   /** Sequence policy name from CND spec */
   sequencePolicyName?: SequencePolicyName;
+  /**
+   * The current/anchor state index. When set (sliding-window mode), the other
+   * panes apply the temporal policy relative to this state's layout so matching
+   * nodes stay in place across the window. Undefined (compare mode) means every
+   * pane is laid out independently.
+   */
+  anchorTimeIndex?: number;
 }
 
 interface SingleTemporalPaneProps {
@@ -45,17 +53,46 @@ interface SingleTemporalPaneProps {
   index: number;
   /** Sequence policy name from CND spec */
   sequencePolicyName?: SequencePolicyName;
+  /** Apply the temporal policy, morphing this pane toward `priorState`. */
+  applyContinuity?: boolean;
+  /** The anchor (current) state's layout positions to continue from. */
+  priorState?: LayoutState;
+  /** The anchor state's trace index, used to build the policy's prevInstance. */
+  prevTimeIndex?: number;
+  /** Defer rendering until the anchor has reported its layout. */
+  waitingForAnchor?: boolean;
+  /** Anchor pane only: report its settled layout (or null on failure). */
+  onLayoutStateChange?: (state: LayoutState | null) => void;
 }
 
 /**
  * A single pane showing one time step
  */
 const SingleTemporalPane = (props: SingleTemporalPaneProps) => {
-  const { datum, cndSpec, timeIndex, traceLength, index, sequencePolicyName = 'stability' } = props;
+  const {
+    datum,
+    cndSpec,
+    timeIndex,
+    traceLength,
+    index,
+    sequencePolicyName = 'stability',
+    applyContinuity = false,
+    priorState,
+    prevTimeIndex,
+    waitingForAnchor = false,
+    onLayoutStateChange
+  } = props;
 
   const colorMode = useSterlingSelector(selectColorMode);
   const colorModeRef = useRef(colorMode);
   colorModeRef.current = colorMode;
+  // Keep the report callback in a ref so loadGraph doesn't re-run when the
+  // parent passes a fresh closure each render.
+  const onLayoutStateChangeRef = useRef(onLayoutStateChange);
+  onLayoutStateChangeRef.current = onLayoutStateChange;
+  // Whether the anchor's settled positions have been reported for the current
+  // render (set by the 'layout-complete' event; gates the timeout fallback).
+  const anchorSettledRef = useRef(false);
   const graphContainerRef = useRef<HTMLDivElement>(null);
   const graphElementRef = useRef<HTMLElementTagNameMap['webcola-cnd-graph'] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -68,7 +105,15 @@ const SingleTemporalPane = (props: SingleTemporalPaneProps) => {
    */
   const loadGraph = useCallback(async () => {
     if (!graphElementRef.current) return;
-    
+
+    // Non-anchor panes hold (showing the loading overlay) until the anchor has
+    // reported its layout, so they can morph toward it rather than flashing an
+    // independent layout first.
+    if (waitingForAnchor) {
+      setIsLoading(true);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -145,11 +190,67 @@ const SingleTemporalPane = (props: SingleTemporalPaneProps) => {
           graphElementRef.current.clear();
         }
         graphElementRef.current.setTheme?.(colorModeRef.current);
-        await graphElementRef.current.renderLayout(layoutResult.layout);
+
+        // In sliding-window mode the non-anchor panes morph toward the anchor
+        // (current) state's positions via the sequence policy, so matching
+        // nodes stay put across the window. Mirrors SpyTialGraph's single-state
+        // continuity. Compare mode passes no continuity and lays out freely.
+        const renderOptions: any = {};
+        const hasPrior =
+          applyContinuity &&
+          priorState &&
+          priorState.positions &&
+          priorState.positions.length > 0;
+        if (hasPrior && sequencePolicyName && sequencePolicyName !== 'ignore_history') {
+          try {
+            const policy = core.getSequencePolicy?.(sequencePolicyName);
+            if (policy) {
+              renderOptions.policy = policy;
+              renderOptions.currInstance = alloyDataInstance;
+              renderOptions.priorPositions = priorState;
+              if (prevTimeIndex !== undefined) {
+                const prevIdx = Math.min(prevTimeIndex, alloyDatum.instances.length - 1);
+                renderOptions.prevInstance = new core.AlloyDataInstance(alloyDatum.instances[prevIdx]);
+              }
+            } else {
+              renderOptions.priorPositions = priorState;
+            }
+          } catch (err) {
+            console.warn('[MultiTemporalGraph] Failed to get sequence policy:', err);
+            renderOptions.priorPositions = priorState;
+          }
+        }
+
+        // Anchor pane: arm settled-position reporting before rendering. The
+        // 'layout-complete' listener (added at element creation) captures the
+        // positions AFTER WebCola settles — capturing right after renderLayout
+        // resolves would hand followers pre-settle positions.
+        if (onLayoutStateChangeRef.current) {
+          anchorSettledRef.current = false;
+        }
+
+        await graphElementRef.current.renderLayout(
+          layoutResult.layout,
+          Object.keys(renderOptions).length > 0 ? renderOptions : undefined
+        );
         // Re-fit the viewport to this time step's content. The graph otherwise
         // keeps the prior viewport once the user has zoomed/panned, leaving the
         // step framed by a stale view. (See SpyTialGraph for the full rationale.)
         graphElementRef.current.resetViewToFitContent?.();
+
+        // Fallback: if 'layout-complete' never fires, still report (slightly
+        // pre-settle) positions so followers don't wait forever.
+        if (onLayoutStateChangeRef.current) {
+          const el = graphElementRef.current;
+          setTimeout(() => {
+            if (!anchorSettledRef.current && onLayoutStateChangeRef.current && el?.getLayoutState) {
+              const s = el.getLayoutState();
+              onLayoutStateChangeRef.current(
+                s && s.positions && s.positions.length > 0 ? s : null
+              );
+            }
+          }, 1500);
+        }
       }
 
       setIsLoading(false);
@@ -157,11 +258,24 @@ const SingleTemporalPane = (props: SingleTemporalPaneProps) => {
       console.error(`[Time ${timeIndex}] Error rendering graph:`, err);
       setError(`Error: ${err.message}`);
       setIsLoading(false);
+      // If the anchor fails, unblock the other panes so they render without
+      // continuity rather than waiting on a layout that will never arrive.
+      onLayoutStateChangeRef.current?.(null);
     }
     // colorMode is intentionally NOT a dependency: theme switches re-tint in
     // place via setTheme (effect below) — a full clear()+renderLayout here
     // races spytial-core's WebCola ticks against nulled selections.
-  }, [datum.data, datum.id, cndSpec, timeIndex, sequencePolicyName]);
+  }, [
+    datum.data,
+    datum.id,
+    cndSpec,
+    timeIndex,
+    sequencePolicyName,
+    applyContinuity,
+    priorState,
+    prevTimeIndex,
+    waitingForAnchor
+  ]);
 
   // Create and mount the webcola-cnd-graph element once.
   // useLayoutEffect so the cleanup detaches the element synchronously, ahead of
@@ -186,7 +300,21 @@ const SingleTemporalPane = (props: SingleTemporalPaneProps) => {
     graphElementRef.current = graphElement;
     isInitializedRef.current = true;
 
+    // Anchor pane only (others leave onLayoutStateChange undefined): capture the
+    // FINAL positions once WebCola settles and hand them to the follower panes.
+    const handleLayoutComplete = () => {
+      if (onLayoutStateChangeRef.current && graphElementRef.current?.getLayoutState) {
+        const s = graphElementRef.current.getLayoutState();
+        if (s && s.positions && s.positions.length > 0) {
+          anchorSettledRef.current = true;
+          onLayoutStateChangeRef.current(s);
+        }
+      }
+    };
+    graphElement.addEventListener('layout-complete', handleLayoutComplete as EventListener);
+
     return () => {
+      graphElement.removeEventListener('layout-complete', handleLayoutComplete as EventListener);
       if (graphElementRef.current) {
         graphElementRef.current.clear?.();
         graphElementRef.current.remove();
@@ -252,10 +380,37 @@ const SingleTemporalPane = (props: SingleTemporalPaneProps) => {
  * Component that renders multiple graphs in a grid, one for each selected time step
  */
 const MultiTemporalGraph = (props: MultiTemporalGraphProps) => {
-  const { datum, cndSpec, selectedTimeIndices, traceLength, sequencePolicyName } = props;
-  
+  const { datum, cndSpec, selectedTimeIndices, traceLength, sequencePolicyName, anchorTimeIndex } = props;
+
   const [isCndCoreReady, setIsCndCoreReady] = useState(hasSpytialCore());
   const [error, setError] = useState<string | null>(null);
+
+  // Sliding-window continuity: the pane for `anchorTimeIndex` (the current
+  // state) lays out fresh and reports its positions; the others wait for it and
+  // morph toward it via the temporal policy. Only active when an anchor is
+  // present, a real policy is set, and the anchor is one of the shown panes
+  // (compare mode passes no anchor, so panes stay independent).
+  const continuityActive =
+    anchorTimeIndex !== undefined &&
+    !!sequencePolicyName &&
+    sequencePolicyName !== 'ignore_history' &&
+    selectedTimeIndices.includes(anchorTimeIndex);
+
+  const [anchorResult, setAnchorResult] = useState<{
+    resolved: boolean;
+    state: LayoutState | null;
+  }>({ resolved: false, state: null });
+  const reportAnchor = useCallback(
+    (state: LayoutState | null) => setAnchorResult({ resolved: true, state }),
+    []
+  );
+
+  // Re-anchor whenever the window, policy, or spec changes (e.g. scrubbing
+  // shifts the window) so panes never continue from stale positions.
+  const windowKey = `${datum.id}|${cndSpec}|${sequencePolicyName ?? ''}|${anchorTimeIndex ?? ''}|${selectedTimeIndices.join(',')}`;
+  useEffect(() => {
+    setAnchorResult({ resolved: false, state: null });
+  }, [windowKey]);
 
   // Poll for CndCore availability
   useEffect(() => {
@@ -340,17 +495,26 @@ const MultiTemporalGraph = (props: MultiTemporalGraphProps) => {
           gridTemplateColumns: `repeat(${gridCols}, minmax(300px, 1fr))`,
         }}
       >
-        {selectedTimeIndices.map((timeIdx, index) => (
-          <SingleTemporalPane
-            key={`time-${timeIdx}`}
-            datum={datum}
-            cndSpec={cndSpec}
-            timeIndex={timeIdx}
-            traceLength={traceLength}
-            index={index}
-            sequencePolicyName={sequencePolicyName}
-          />
-        ))}
+        {selectedTimeIndices.map((timeIdx, index) => {
+          const isAnchor = continuityActive && timeIdx === anchorTimeIndex;
+          const isFollower = continuityActive && !isAnchor;
+          return (
+            <SingleTemporalPane
+              key={`time-${timeIdx}`}
+              datum={datum}
+              cndSpec={cndSpec}
+              timeIndex={timeIdx}
+              traceLength={traceLength}
+              index={index}
+              sequencePolicyName={sequencePolicyName}
+              applyContinuity={isFollower}
+              priorState={isFollower ? anchorResult.state ?? undefined : undefined}
+              prevTimeIndex={isFollower ? anchorTimeIndex : undefined}
+              waitingForAnchor={isFollower && !anchorResult.resolved}
+              onLayoutStateChange={isAnchor ? reportAnchor : undefined}
+            />
+          );
+        })}
       </div>
     </div>
   );
