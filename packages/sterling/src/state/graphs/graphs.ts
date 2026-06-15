@@ -6,6 +6,15 @@ import { WritableDraft } from 'immer/dist/types/types-external';
 import { Matrix } from 'transformation-matrix';
 import type { CndProjection, SequencePolicyName } from '../../utils/cndPreParser';
 
+/**
+ * How the Time drawer presents trace states:
+ * - 'single'  — one state at a time (scrub the timeline).
+ * - 'window'  — the state before, the current state, and the state after,
+ *               shown side-by-side (a sliding window over the trace).
+ * - 'compare' — an arbitrary user-chosen set of states, shown side-by-side.
+ */
+export type PresentationMode = 'single' | 'window' | 'compare';
+
 export interface GraphsState {
   layoutsByDatumId: Record<
     string,
@@ -51,6 +60,13 @@ export interface GraphsState {
    * When multiple indices are selected, multiple graphs are shown side-by-side.
    */
   selectedTimeIndicesByDatumId: Record<string, number[]>;
+
+  /**
+   * How the Time drawer presents states for each datum. Defaults to 'single'
+   * (see selectPresentationMode). Drives which time indices are rendered and
+   * which Time-panel controls are shown.
+   */
+  presentationModeByDatumId: Record<string, PresentationMode>;
 
   /**
    * CND-derived projection configurations by generator name.
@@ -112,6 +128,7 @@ export function newGraphsState(): GraphsState {
     cndSpecByGeneratorName: {},
     selectedProjectionsByGeneratorName: {},
     selectedTimeIndicesByDatumId: {},
+    presentationModeByDatumId: {},
     projectionConfigByGeneratorName: {},
     sequencePolicyByGeneratorName: {}
   };

@@ -29,7 +29,7 @@ import { Matrix } from 'transformation-matrix';
 import dataSelectors from './data/dataSelectors';
 import { Expression } from './evaluator/evaluator';
 import evaluatorSelectors from './evaluator/evaluatorSelectors';
-import { RelationStyle, TypeStyle } from './graphs/graphs';
+import { PresentationMode, RelationStyle, TypeStyle } from './graphs/graphs';
 import graphsSelectors from './graphs/graphsSelectors';
 import { LogItem } from './log/log';
 import logSelectors from './log/logSelectors';
@@ -678,6 +678,80 @@ export function selectSelectedTimeIndices(
 ): number[] {
   return graphsSelectors.selectSelectedTimeIndices(state.graphs, datum);
 }
+
+/**
+ * Select how the Time drawer presents states for a datum
+ * ('single' | 'window' | 'compare').
+ */
+export function selectPresentationMode(
+  state: SterlingState,
+  datum: DatumParsed<any>
+): PresentationMode {
+  return graphsSelectors.selectPresentationMode(state.graphs, datum);
+}
+
+/**
+ * Build the sliding-window indices [before, current, after] around `current`.
+ * At the trace ends there is no neighbour: if the trace loops (loopBack is
+ * defined) we wrap — the state before index 0 is the last state, and the state
+ * after the last state is the loop-back target — otherwise we clamp (drop the
+ * missing neighbour, leaving 2 states at the edges).
+ */
+function windowIndices(
+  current: number,
+  length: number,
+  loopBack: number | undefined
+): number[] {
+  if (length <= 1) return [0];
+  const before =
+    current - 1 >= 0
+      ? current - 1
+      : loopBack !== undefined
+      ? length - 1
+      : undefined;
+  const after =
+    current + 1 < length
+      ? current + 1
+      : loopBack !== undefined
+      ? loopBack
+      : undefined;
+  const raw = [before, current, after].filter(
+    (i): i is number => i !== undefined
+  );
+  // Dedup while preserving order (tiny/looping traces can repeat an index).
+  return Array.from(new Set(raw));
+}
+
+/**
+ * Select the time indices actually rendered on the stage, derived from the
+ * datum's presentation mode:
+ *   single  -> [current]
+ *   window  -> [before, current, after]   (wraps on looping traces, else clamps)
+ *   compare -> the user's stored set       (falls back to [current] when empty)
+ * The side-by-side renderer keys purely off this set, so all three modes share
+ * one render path. Memoized (createSelector) so single/window return a stable
+ * array reference instead of re-rendering consumers on every dispatch.
+ */
+export const selectEffectiveTimeIndices = createSelector(
+  [
+    (state: SterlingState, datum: DatumParsed<any>) =>
+      selectPresentationMode(state, datum),
+    (state: SterlingState, datum: DatumParsed<any>) =>
+      selectTimeIndex(state, datum),
+    (state: SterlingState, datum: DatumParsed<any>) =>
+      selectTraceLength(state, datum),
+    (state: SterlingState, datum: DatumParsed<any>) =>
+      selectLoopbackIndex(state, datum),
+    (state: SterlingState, datum: DatumParsed<any>) =>
+      selectSelectedTimeIndices(state, datum)
+  ],
+  (mode, current, length, loopBack, compareSet): number[] => {
+    if (mode === 'window') return windowIndices(current, length, loopBack);
+    if (mode === 'compare')
+      return compareSet.length > 0 ? compareSet : [current];
+    return [current];
+  }
+);
 
 /**
  * Select the CND-derived projection configuration for a datum.

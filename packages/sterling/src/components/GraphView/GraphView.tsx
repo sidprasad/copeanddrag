@@ -9,7 +9,7 @@ import {
   selectIsSynthesisActive,
   selectSynthesisStep,
   selectSelectedProjections,
-  selectSelectedTimeIndices,
+  selectEffectiveTimeIndices,
   selectTraceLength,
   selectProjectionConfig,
   selectSequencePolicyName
@@ -66,9 +66,10 @@ const GraphView = () => {
     datum ? selectSelectedProjections(state, datum) : {}
   );
   
-  // Selected time indices for multi-temporal view
-  const selectedTimeIndices = useSterlingSelector((state) =>
-    datum ? selectSelectedTimeIndices(state, datum) : []
+  // Effective time indices to render, derived from the datum's presentation
+  // mode (single -> [current]; window -> before/current/after; compare -> set).
+  const effectiveTimeIndices = useSterlingSelector((state) =>
+    datum ? selectEffectiveTimeIndices(state, datum) : []
   );
 
   // CND-derived projection config and sequence policy
@@ -110,8 +111,9 @@ const GraphView = () => {
     return null;
   }, [selectedProjections]);
   
-  // Check if multi-temporal mode is active (more than 1 time index selected)
-  const isMultiTemporalActive = selectedTimeIndices.length > 1;
+  // Multi-temporal (side-by-side) rendering kicks in whenever the effective
+  // set has more than one state — i.e. window mode, or compare with 2+ states.
+  const isMultiTemporalActive = effectiveTimeIndices.length > 1;
 
   // Build a Record<string, string> of single-atom selections for applyProjectionTransform
   // (uses the first selected atom per projection type)
@@ -276,7 +278,7 @@ const GraphView = () => {
         <MultiTemporalGraph
           datum={datum}
           cndSpec={cndSpec}
-          selectedTimeIndices={selectedTimeIndices}
+          selectedTimeIndices={effectiveTimeIndices}
           traceLength={traceLength}
           sequencePolicyName={sequencePolicyName}
         />

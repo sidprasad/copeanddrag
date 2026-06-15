@@ -51,6 +51,9 @@ function dataReceived(
       // Choose the first index as the first instance to display
       state.timeByDatumId[datumId] = 0;
 
+      // Default new data to the single-state presentation.
+      state.presentationModeByDatumId[datumId] = 'single';
+
       // If a CnD spec is present in the datum AND we don't already have one for this generator,
       // load it into the state. Otherwise, use the default directive to hide disconnected built-ins.
       // Using generator name allows the layout to persist across instances.
@@ -82,6 +85,7 @@ function dataReceived(
       delete state.layoutsByDatumId[datumId];
       delete state.matricesByDatumId[datumId];
       delete state.timeByDatumId[datumId];
+      delete state.presentationModeByDatumId[datumId];
       delete state.hiddenByDatumId[datumId];
     });
   }

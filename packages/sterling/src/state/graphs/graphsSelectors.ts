@@ -2,7 +2,7 @@ import { GraphLayout } from '@/alloy-graph';
 import { DatumParsed } from '@/sterling-connection';
 import { Projection, SterlingTheme } from '@/sterling-theme';
 import { Matrix } from 'transformation-matrix';
-import { generateLayoutId, GraphsState } from './graphs';
+import { generateLayoutId, GraphsState, PresentationMode } from './graphs';
 import type { CndProjection, SequencePolicyName } from '../../utils/cndPreParser';
 
 /**
@@ -112,6 +112,17 @@ function selectSelectedTimeIndices(
 }
 
 /**
+ * Select how the Time drawer presents states for a datum.
+ * Defaults to 'single' when nothing has been chosen yet.
+ */
+function selectPresentationMode(
+  state: GraphsState,
+  datum: DatumParsed<any>
+): PresentationMode {
+  return state.presentationModeByDatumId[datum.id] ?? 'single';
+}
+
+/**
  * Select the CND-derived projection configuration for a datum.
  * These are the projection directives parsed from the top-level `projections`
  * block of the CND spec.
@@ -140,6 +151,7 @@ function selectSequencePolicyName(
 export default {
   selectGraphLayout,
   selectHiddenRelations,
+  selectPresentationMode,
   selectProjections,
   selectProjectionConfig,
   selectSelectedProjections,

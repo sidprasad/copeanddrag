@@ -33,6 +33,7 @@ export const {
   nodeLabelPropRemoved,
   nodeLabelPropSet,
   nodesOffset,
+  presentationModeSet,
   projectionAdded,
   projectionAtomToggled,
   projectionOrderingSet,

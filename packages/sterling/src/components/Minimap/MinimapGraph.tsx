@@ -22,9 +22,9 @@ const MinimapGraph = (props: MinimapProps) => {
     <div className='grid place-items-center overflow-y-auto'>
       <InteractionProvider
         svg={ref.current}
-        onMouseDown={() => console.log('down')}
         onClickNode={(nodeId) => {
-          if (props.onChange) props.onChange(+nodeId);
+          const handler = props.onNodeClick ?? props.onChange;
+          if (handler) handler(+nodeId);
         }}
       >
         <svg
@@ -38,8 +38,8 @@ const MinimapGraph = (props: MinimapProps) => {
             id='minimap'
             graph={graph}
             nodeShapes={nodeShapes(graph)}
-            nodeStyles={nodeStyles(graph, props.current)}
-            nodeLabels={nodeLabels(graph, props.current)}
+            nodeStyles={nodeStyles(graph, props.current, props.selectedIndices)}
+            nodeLabels={nodeLabels(graph, props.current, props.selectedIndices)}
             edgeCurves={edgeCurves(graph)}
             edgeStyles={edgeStyles(graph)}
           />

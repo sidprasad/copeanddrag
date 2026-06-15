@@ -64,6 +64,7 @@
   --ccd-minimap-node-fill: #ffffff;
   --ccd-minimap-node-stroke: #4a5568;
   --ccd-minimap-node-active: #3b82f6;
+  --ccd-minimap-node-active-label: #ffffff;
   --ccd-minimap-edge: #4a5568;
   --ccd-minimap-selected-stroke: #333333;
 }
@@ -183,6 +184,7 @@ html body {
   --ccd-minimap-node-fill: #2b2f37;
   --ccd-minimap-node-stroke: #8b919b;
   --ccd-minimap-node-active: #5dade2;
+  --ccd-minimap-node-active-label: #11161d;
   --ccd-minimap-edge: #6b7280;
   --ccd-minimap-selected-stroke: #e6e7ea;
 }

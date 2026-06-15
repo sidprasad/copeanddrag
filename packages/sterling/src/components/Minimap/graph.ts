@@ -84,18 +84,28 @@ function edgeStyles(graph: Graph): Record<string, CSSProperties> {
   return edgeStyles;
 }
 
-function nodeLabels(graph: Graph, current: number): Record<string, LabelDef[]> {
+function nodeLabels(
+  graph: Graph,
+  current: number,
+  selectedIndices?: number[]
+): Record<string, LabelDef[]> {
+  const selected = new Set((selectedIndices ?? [current]).map(String));
   const nodeLabels: Record<string, LabelDef[]> = {};
   getNodes(graph).forEach((node) => {
-    const active = node.id === `${current}`;
+    const isSelected = selected.has(node.id);
+    const isCurrent = node.id === `${current}`;
     nodeLabels[`${node.id}`] = [
       {
         text: node.id,
         style: {
-          fill: active ? '#ffffff' : 'var(--ccd-minimap-node-stroke)',
+          // Selected circles are filled with the accent, so their label needs
+          // the on-accent colour (themed per light/dark); others use the stroke.
+          fill: isSelected
+            ? 'var(--ccd-minimap-node-active-label)'
+            : 'var(--ccd-minimap-node-stroke)',
           fontFamily: 'monospace',
           fontSize: '10px',
-          fontWeight: active ? 'bold' : 'normal',
+          fontWeight: isCurrent ? 'bold' : 'normal',
           textAnchor: 'middle',
           userSelect: 'none',
           cursor: 'pointer'
@@ -122,15 +132,27 @@ function nodeShapes(graph: Graph): Record<string, ShapeDef> {
 
 function nodeStyles(
   graph: Graph,
-  current: number
+  current: number,
+  selectedIndices?: number[]
 ): Record<string, CSSProperties> {
+  // Every rendered state is "selected" (filled); the current/anchor state also
+  // gets a stronger, thicker ring so it stands out within the selected set
+  // (e.g. the centre of a sliding window).
+  const selected = new Set((selectedIndices ?? [current]).map(String));
   const nodeStyles: Record<string, CSSProperties> = {};
   getNodes(graph).forEach((node) => {
-    const active = node.id === `${current}`;
+    const isSelected = selected.has(node.id);
+    const isCurrent = node.id === `${current}`;
     nodeStyles[node.id] = {
-      stroke: active ? 'var(--ccd-minimap-node-active)' : 'var(--ccd-minimap-node-stroke)',
-      strokeWidth: 1,
-      fill: active ? 'var(--ccd-minimap-node-active)' : 'var(--ccd-minimap-node-fill)',
+      stroke: isCurrent
+        ? 'var(--ccd-minimap-selected-stroke)'
+        : isSelected
+        ? 'var(--ccd-minimap-node-active)'
+        : 'var(--ccd-minimap-node-stroke)',
+      strokeWidth: isCurrent ? 2.5 : 1,
+      fill: isSelected
+        ? 'var(--ccd-minimap-node-active)'
+        : 'var(--ccd-minimap-node-fill)',
       cursor: 'pointer'
     };
   });
