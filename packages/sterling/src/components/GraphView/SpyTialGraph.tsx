@@ -1,7 +1,7 @@
 import { DatumParsed } from '@/sterling-connection';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { parseCndFile, type CndProjection, type SequencePolicyName } from '../../utils/cndPreParser';
-import { getSpytialCore, hasSpytialCore } from '../../utils/spytialCore';
+import { getSpytialCore, hasSpytialCore, removeGraphThemeControl } from '../../utils/spytialCore';
 import { useSterlingDispatch, useSterlingSelector } from '../../state/hooks';
 import { selectColorMode } from '../../state/selectors';
 import { colorModeSet } from '../../state/ui/uiSlice';
@@ -457,6 +457,9 @@ const SpyTialGraph = (props: SpyTialGraphProps) => {
     // Start the graph on the app's current theme (declarative; applied by the
     // element's attributeChangedCallback).
     graphElement.setAttribute('theme', colorModeRef.current);
+    // CopeAndDrag owns theming globally, so drop the graph's built-in per-graph
+    // Mode (theme) dropdown from its toolbar.
+    removeGraphThemeControl(graphElement);
     graphElement.style.cssText = `
       width: 100%;
       height: 100%;
