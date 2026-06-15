@@ -4,8 +4,7 @@ import type { PresentationMode } from '../../../../../state/graphs/graphs';
 import {
   presentationModeSet,
   selectedTimeIndicesSet,
-  timeIndexSet,
-  timeIndexToggled
+  timeIndexSet
 } from '../../../../../state/graphs/graphsSlice';
 import {
   useSterlingDispatch,
@@ -81,9 +80,24 @@ const TimePicker = ({ datum }: { datum: DatumParsed<any> }) => {
     [dispatch, datum]
   );
 
+  // Toggle a state in/out of the compare set. We compute the next set and
+  // dispatch it wholesale (rather than a toggle action) so the operation is
+  // idempotent: React StrictMode invokes the graph's click reducer twice in
+  // dev, and a true toggle would flip back to its starting state. Setting the
+  // same array twice is a no-op, so the click sticks. Always keep ≥1 selected.
   const toggleAt = useCallback(
-    (index: number) => dispatch(timeIndexToggled({ datum, index })),
-    [dispatch, datum]
+    (index: number) => {
+      const next = compareSet.includes(index)
+        ? compareSet.filter((i) => i !== index)
+        : [...compareSet, index].sort((a, b) => a - b);
+      dispatch(
+        selectedTimeIndicesSet({
+          datum,
+          selectedIndices: next.length > 0 ? next : compareSet
+        })
+      );
+    },
+    [dispatch, datum, compareSet]
   );
 
   const changeMode = useCallback(

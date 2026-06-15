@@ -25,7 +25,7 @@ const PanelToggle = () => {
     }
   };
 
-  const label = collapsed ? 'Show panel' : 'Hide panel';
+  const label = collapsed ? 'Show control panel' : 'Hide control panel';
   return (
     <Button
       aria-label={label}
@@ -35,7 +35,7 @@ const PanelToggle = () => {
       variant='ghost'
       onClick={toggle}
     >
-      Panel
+      Control Panel
     </Button>
   );
 };
