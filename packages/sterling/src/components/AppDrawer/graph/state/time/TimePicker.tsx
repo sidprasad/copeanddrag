@@ -107,7 +107,7 @@ const TimePicker = ({ datum }: { datum: DatumParsed<any> }) => {
         length={traceLength}
         loopBack={loopBack}
         selectedIndices={effectiveIndices}
-        label={(index) => `State ${index + 1}/${traceLength}`}
+        label={(index) => `State ${index}/${traceLength}`}
         onChange={moveTo}
         onNodeClick={mode === 'compare' ? toggleAt : moveTo}
         onToggleCollapse={() => setIsCollapsed((collapsed) => !collapsed)}

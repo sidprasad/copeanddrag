@@ -266,7 +266,7 @@ const SingleTemporalPane = (props: SingleTemporalPaneProps) => {
             'font-size:12px;font-weight:600;padding:0 8px;white-space:nowrap;display:flex;align-items:center;color:var(--ccd-ink-muted,#64748b);';
           labelRef.current = lbl;
         }
-        labelRef.current.textContent = `State ${timeIndex + 1} of ${traceLength}`;
+        labelRef.current.textContent = `State ${timeIndex} of ${traceLength}`;
         const toolbar = el.shadowRoot?.querySelector('#graph-toolbar');
         if (toolbar) {
           toolbar.insertBefore(labelRef.current, toolbar.firstChild);
@@ -323,7 +323,7 @@ const SingleTemporalPane = (props: SingleTemporalPaneProps) => {
     const graphElement = document.createElement('webcola-cnd-graph') as HTMLElementTagNameMap['webcola-cnd-graph'];
     graphElement.id = `spytial-graph-temporal-${index}`;
     graphElement.setAttribute('layoutFormat', 'default');
-    graphElement.setAttribute('aria-label', `Graph visualization for time step ${timeIndex + 1}`);
+    graphElement.setAttribute('aria-label', `Graph visualization for state ${timeIndex}`);
     graphElement.setAttribute('theme', colorModeRef.current);
     graphElement.style.cssText = `
       width: 100%;
