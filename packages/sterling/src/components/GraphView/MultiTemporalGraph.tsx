@@ -1,7 +1,7 @@
 import { DatumParsed } from '@/sterling-connection';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, useMemo } from 'react';
 import { parseCndFile, SequencePolicyName } from '../../utils/cndPreParser';
-import { getSpytialCore, hasSpytialCore } from '../../utils/spytialCore';
+import { getSpytialCore, hasSpytialCore, removeGraphThemeControl } from '../../utils/spytialCore';
 import { useSterlingSelector } from '../../state/hooks';
 import { selectColorMode } from '../../state/selectors';
 import type { LayoutState } from './SpyTialGraph';
@@ -326,6 +326,9 @@ const SingleTemporalPane = (props: SingleTemporalPaneProps) => {
     graphElement.setAttribute('layoutFormat', 'default');
     graphElement.setAttribute('aria-label', `Graph visualization for state ${timeIndex}`);
     graphElement.setAttribute('theme', colorModeRef.current);
+    // CopeAndDrag owns theming globally, so drop the graph's built-in per-graph
+    // Mode (theme) dropdown from its toolbar.
+    removeGraphThemeControl(graphElement);
     graphElement.style.cssText = `
       width: 100%;
       height: 100%;

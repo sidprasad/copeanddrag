@@ -120,6 +120,24 @@ export function hasSpytialCore(): boolean {
 }
 
 /**
+ * Remove the graph's built-in "Mode" theme dropdown from its toolbar.
+ *
+ * The webcola-cnd-graph element (spytial-core) ships a `Mode:` <select> in its
+ * shadow-DOM toolbar (the `#mode-control` group) that lets the user switch the
+ * graph's color theme per-instance. CopeAndDrag owns theming globally — the app
+ * color mode drives every graph via setTheme() — so the per-graph control is
+ * redundant and can desync the app chrome from the graph. We drop it here.
+ *
+ * The toolbar is built once, synchronously, in the element's constructor
+ * (initializeDOM sets shadowRoot.innerHTML and is never re-run on relayout), so
+ * `#mode-control` is present immediately after createElement and is safe to
+ * remove at that point. No-op if the element hasn't been upgraded yet.
+ */
+export function removeGraphThemeControl(graphElement: HTMLElement): void {
+  graphElement.shadowRoot?.querySelector('#mode-control')?.remove();
+}
+
+/**
  * Ensure the SpyTial Bootstrap stylesheet is present in <head>.
  *
  * SpyTial's mounted React components — the CnD layout editor and the error
