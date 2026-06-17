@@ -11,6 +11,9 @@
     "type": "git",
     "url": "https://github.com/sidprasad/copeanddrag.git"
   },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build:alloy": "webpack --env provider=alloy",
     "build:forge": "webpack --env provider=forge",
