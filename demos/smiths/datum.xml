@@ -1,0 +1,871 @@
+<alloy builddate="Monday, March 2nd, 2026">
+<instance bitwidth="4" maxseq="-1" command="getStuckSAT" filename="/Users/siddharthaprasad/Desktop/TAing/1710/lfs_dev/2026/labs/dining_smiths/solution/rude_smiths.frg" version="5.0.1" prefixLength="10" loop="9" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Smith" ID="4" parentID="2">
+<atom label="Smith4"/><atom label="Smith2"/><atom label="Smith0"/><atom label="Smith3"/><atom label="Smith1"/>
+</sig>
+
+<sig label="Table" ID="5" parentID="2">
+<atom label="Table0"/>
+</sig>
+
+<sig label="Chopstick" ID="6" parentID="2">
+<atom label="Chopstick2"/><atom label="Chopstick3"/><atom label="Chopstick0"/><atom label="Chopstick1"/><atom label="Chopstick4"/>
+</sig>
+
+<field label="smiths" ID="7" parentID="5">
+<tuple><atom label="Table0"/><atom label="0"/><atom label="Smith0"/></tuple>
+<tuple><atom label="Table0"/><atom label="1"/><atom label="Smith1"/></tuple>
+<tuple><atom label="Table0"/><atom label="2"/><atom label="Smith2"/></tuple>
+<tuple><atom label="Table0"/><atom label="3"/><atom label="Smith3"/></tuple>
+<tuple><atom label="Table0"/><atom label="4"/><atom label="Smith4"/></tuple>
+<types><type ID="5"/><type ID="1"/><type ID="4"/></types>
+
+</field>
+
+<field label="avail" ID="8" parentID="5">
+<tuple><atom label="Table0"/><atom label="Chopstick2"/></tuple>
+<tuple><atom label="Table0"/><atom label="Chopstick3"/></tuple>
+<tuple><atom label="Table0"/><atom label="Chopstick0"/></tuple>
+<tuple><atom label="Table0"/><atom label="Chopstick1"/></tuple>
+<tuple><atom label="Table0"/><atom label="Chopstick4"/></tuple>
+<types><type ID="5"/><type ID="6"/></types>
+
+</field>
+
+<field label="chops" ID="9" parentID="5">
+<tuple><atom label="Table0"/><atom label="0"/><atom label="Chopstick0"/></tuple>
+<tuple><atom label="Table0"/><atom label="1"/><atom label="Chopstick1"/></tuple>
+<tuple><atom label="Table0"/><atom label="2"/><atom label="Chopstick2"/></tuple>
+<tuple><atom label="Table0"/><atom label="3"/><atom label="Chopstick3"/></tuple>
+<tuple><atom label="Table0"/><atom label="4"/><atom label="Chopstick4"/></tuple>
+<types><type ID="5"/><type ID="1"/><type ID="6"/></types>
+
+</field>
+
+<field label="holdingLeft" ID="10" parentID="5">
+<types><type ID="5"/><type ID="4"/></types>
+
+</field>
+
+<field label="holdingRight" ID="11" parentID="5">
+<types><type ID="5"/><type ID="4"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="getStuckSAT" filename="/Users/siddharthaprasad/Desktop/TAing/1710/lfs_dev/2026/labs/dining_smiths/solution/rude_smiths.frg" version="5.0.1" prefixLength="10" loop="9" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Smith" ID="4" parentID="2">
+<atom label="Smith4"/><atom label="Smith2"/><atom label="Smith0"/><atom label="Smith3"/><atom label="Smith1"/>
+</sig>
+
+<sig label="Table" ID="5" parentID="2">
+<atom label="Table0"/>
+</sig>
+
+<sig label="Chopstick" ID="6" parentID="2">
+<atom label="Chopstick2"/><atom label="Chopstick3"/><atom label="Chopstick0"/><atom label="Chopstick1"/><atom label="Chopstick4"/>
+</sig>
+
+<field label="smiths" ID="7" parentID="5">
+<tuple><atom label="Table0"/><atom label="0"/><atom label="Smith0"/></tuple>
+<tuple><atom label="Table0"/><atom label="1"/><atom label="Smith1"/></tuple>
+<tuple><atom label="Table0"/><atom label="2"/><atom label="Smith2"/></tuple>
+<tuple><atom label="Table0"/><atom label="3"/><atom label="Smith3"/></tuple>
+<tuple><atom label="Table0"/><atom label="4"/><atom label="Smith4"/></tuple>
+<types><type ID="5"/><type ID="1"/><type ID="4"/></types>
+
+</field>
+
+<field label="avail" ID="8" parentID="5">
+<tuple><atom label="Table0"/><atom label="Chopstick2"/></tuple>
+<tuple><atom label="Table0"/><atom label="Chopstick3"/></tuple>
+<tuple><atom label="Table0"/><atom label="Chopstick0"/></tuple>
+<tuple><atom label="Table0"/><atom label="Chopstick1"/></tuple>
+<types><type ID="5"/><type ID="6"/></types>
+
+</field>
+
+<field label="chops" ID="9" parentID="5">
+<tuple><atom label="Table0"/><atom label="0"/><atom label="Chopstick0"/></tuple>
+<tuple><atom label="Table0"/><atom label="1"/><atom label="Chopstick1"/></tuple>
+<tuple><atom label="Table0"/><atom label="2"/><atom label="Chopstick2"/></tuple>
+<tuple><atom label="Table0"/><atom label="3"/><atom label="Chopstick3"/></tuple>
+<tuple><atom label="Table0"/><atom label="4"/><atom label="Chopstick4"/></tuple>
+<types><type ID="5"/><type ID="1"/><type ID="6"/></types>
+
+</field>
+
+<field label="holdingLeft" ID="10" parentID="5">
+<types><type ID="5"/><type ID="4"/></types>
+
+</field>
+
+<field label="holdingRight" ID="11" parentID="5">
+<tuple><atom label="Table0"/><atom label="Smith3"/></tuple>
+<types><type ID="5"/><type ID="4"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="getStuckSAT" filename="/Users/siddharthaprasad/Desktop/TAing/1710/lfs_dev/2026/labs/dining_smiths/solution/rude_smiths.frg" version="5.0.1" prefixLength="10" loop="9" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Smith" ID="4" parentID="2">
+<atom label="Smith4"/><atom label="Smith2"/><atom label="Smith0"/><atom label="Smith3"/><atom label="Smith1"/>
+</sig>
+
+<sig label="Table" ID="5" parentID="2">
+<atom label="Table0"/>
+</sig>
+
+<sig label="Chopstick" ID="6" parentID="2">
+<atom label="Chopstick2"/><atom label="Chopstick3"/><atom label="Chopstick0"/><atom label="Chopstick1"/><atom label="Chopstick4"/>
+</sig>
+
+<field label="smiths" ID="7" parentID="5">
+<tuple><atom label="Table0"/><atom label="0"/><atom label="Smith0"/></tuple>
+<tuple><atom label="Table0"/><atom label="1"/><atom label="Smith1"/></tuple>
+<tuple><atom label="Table0"/><atom label="2"/><atom label="Smith2"/></tuple>
+<tuple><atom label="Table0"/><atom label="3"/><atom label="Smith3"/></tuple>
+<tuple><atom label="Table0"/><atom label="4"/><atom label="Smith4"/></tuple>
+<types><type ID="5"/><type ID="1"/><type ID="4"/></types>
+
+</field>
+
+<field label="avail" ID="8" parentID="5">
+<tuple><atom label="Table0"/><atom label="Chopstick2"/></tuple>
+<tuple><atom label="Table0"/><atom label="Chopstick0"/></tuple>
+<tuple><atom label="Table0"/><atom label="Chopstick1"/></tuple>
+<types><type ID="5"/><type ID="6"/></types>
+
+</field>
+
+<field label="chops" ID="9" parentID="5">
+<tuple><atom label="Table0"/><atom label="0"/><atom label="Chopstick0"/></tuple>
+<tuple><atom label="Table0"/><atom label="1"/><atom label="Chopstick1"/></tuple>
+<tuple><atom label="Table0"/><atom label="2"/><atom label="Chopstick2"/></tuple>
+<tuple><atom label="Table0"/><atom label="3"/><atom label="Chopstick3"/></tuple>
+<tuple><atom label="Table0"/><atom label="4"/><atom label="Chopstick4"/></tuple>
+<types><type ID="5"/><type ID="1"/><type ID="6"/></types>
+
+</field>
+
+<field label="holdingLeft" ID="10" parentID="5">
+<tuple><atom label="Table0"/><atom label="Smith3"/></tuple>
+<types><type ID="5"/><type ID="4"/></types>
+
+</field>
+
+<field label="holdingRight" ID="11" parentID="5">
+<tuple><atom label="Table0"/><atom label="Smith3"/></tuple>
+<types><type ID="5"/><type ID="4"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="getStuckSAT" filename="/Users/siddharthaprasad/Desktop/TAing/1710/lfs_dev/2026/labs/dining_smiths/solution/rude_smiths.frg" version="5.0.1" prefixLength="10" loop="9" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Smith" ID="4" parentID="2">
+<atom label="Smith4"/><atom label="Smith2"/><atom label="Smith0"/><atom label="Smith3"/><atom label="Smith1"/>
+</sig>
+
+<sig label="Table" ID="5" parentID="2">
+<atom label="Table0"/>
+</sig>
+
+<sig label="Chopstick" ID="6" parentID="2">
+<atom label="Chopstick2"/><atom label="Chopstick3"/><atom label="Chopstick0"/><atom label="Chopstick1"/><atom label="Chopstick4"/>
+</sig>
+
+<field label="smiths" ID="7" parentID="5">
+<tuple><atom label="Table0"/><atom label="0"/><atom label="Smith0"/></tuple>
+<tuple><atom label="Table0"/><atom label="1"/><atom label="Smith1"/></tuple>
+<tuple><atom label="Table0"/><atom label="2"/><atom label="Smith2"/></tuple>
+<tuple><atom label="Table0"/><atom label="3"/><atom label="Smith3"/></tuple>
+<tuple><atom label="Table0"/><atom label="4"/><atom label="Smith4"/></tuple>
+<types><type ID="5"/><type ID="1"/><type ID="4"/></types>
+
+</field>
+
+<field label="avail" ID="8" parentID="5">
+<tuple><atom label="Table0"/><atom label="Chopstick2"/></tuple>
+<tuple><atom label="Table0"/><atom label="Chopstick3"/></tuple>
+<tuple><atom label="Table0"/><atom label="Chopstick0"/></tuple>
+<tuple><atom label="Table0"/><atom label="Chopstick1"/></tuple>
+<tuple><atom label="Table0"/><atom label="Chopstick4"/></tuple>
+<types><type ID="5"/><type ID="6"/></types>
+
+</field>
+
+<field label="chops" ID="9" parentID="5">
+<tuple><atom label="Table0"/><atom label="0"/><atom label="Chopstick0"/></tuple>
+<tuple><atom label="Table0"/><atom label="1"/><atom label="Chopstick1"/></tuple>
+<tuple><atom label="Table0"/><atom label="2"/><atom label="Chopstick2"/></tuple>
+<tuple><atom label="Table0"/><atom label="3"/><atom label="Chopstick3"/></tuple>
+<tuple><atom label="Table0"/><atom label="4"/><atom label="Chopstick4"/></tuple>
+<types><type ID="5"/><type ID="1"/><type ID="6"/></types>
+
+</field>
+
+<field label="holdingLeft" ID="10" parentID="5">
+<types><type ID="5"/><type ID="4"/></types>
+
+</field>
+
+<field label="holdingRight" ID="11" parentID="5">
+<types><type ID="5"/><type ID="4"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="getStuckSAT" filename="/Users/siddharthaprasad/Desktop/TAing/1710/lfs_dev/2026/labs/dining_smiths/solution/rude_smiths.frg" version="5.0.1" prefixLength="10" loop="9" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Smith" ID="4" parentID="2">
+<atom label="Smith4"/><atom label="Smith2"/><atom label="Smith0"/><atom label="Smith3"/><atom label="Smith1"/>
+</sig>
+
+<sig label="Table" ID="5" parentID="2">
+<atom label="Table0"/>
+</sig>
+
+<sig label="Chopstick" ID="6" parentID="2">
+<atom label="Chopstick2"/><atom label="Chopstick3"/><atom label="Chopstick0"/><atom label="Chopstick1"/><atom label="Chopstick4"/>
+</sig>
+
+<field label="smiths" ID="7" parentID="5">
+<tuple><atom label="Table0"/><atom label="0"/><atom label="Smith0"/></tuple>
+<tuple><atom label="Table0"/><atom label="1"/><atom label="Smith1"/></tuple>
+<tuple><atom label="Table0"/><atom label="2"/><atom label="Smith2"/></tuple>
+<tuple><atom label="Table0"/><atom label="3"/><atom label="Smith3"/></tuple>
+<tuple><atom label="Table0"/><atom label="4"/><atom label="Smith4"/></tuple>
+<types><type ID="5"/><type ID="1"/><type ID="4"/></types>
+
+</field>
+
+<field label="avail" ID="8" parentID="5">
+<tuple><atom label="Table0"/><atom label="Chopstick2"/></tuple>
+<tuple><atom label="Table0"/><atom label="Chopstick3"/></tuple>
+<tuple><atom label="Table0"/><atom label="Chopstick0"/></tuple>
+<tuple><atom label="Table0"/><atom label="Chopstick1"/></tuple>
+<types><type ID="5"/><type ID="6"/></types>
+
+</field>
+
+<field label="chops" ID="9" parentID="5">
+<tuple><atom label="Table0"/><atom label="0"/><atom label="Chopstick0"/></tuple>
+<tuple><atom label="Table0"/><atom label="1"/><atom label="Chopstick1"/></tuple>
+<tuple><atom label="Table0"/><atom label="2"/><atom label="Chopstick2"/></tuple>
+<tuple><atom label="Table0"/><atom label="3"/><atom label="Chopstick3"/></tuple>
+<tuple><atom label="Table0"/><atom label="4"/><atom label="Chopstick4"/></tuple>
+<types><type ID="5"/><type ID="1"/><type ID="6"/></types>
+
+</field>
+
+<field label="holdingLeft" ID="10" parentID="5">
+<tuple><atom label="Table0"/><atom label="Smith4"/></tuple>
+<types><type ID="5"/><type ID="4"/></types>
+
+</field>
+
+<field label="holdingRight" ID="11" parentID="5">
+<types><type ID="5"/><type ID="4"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="getStuckSAT" filename="/Users/siddharthaprasad/Desktop/TAing/1710/lfs_dev/2026/labs/dining_smiths/solution/rude_smiths.frg" version="5.0.1" prefixLength="10" loop="9" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Smith" ID="4" parentID="2">
+<atom label="Smith4"/><atom label="Smith2"/><atom label="Smith0"/><atom label="Smith3"/><atom label="Smith1"/>
+</sig>
+
+<sig label="Table" ID="5" parentID="2">
+<atom label="Table0"/>
+</sig>
+
+<sig label="Chopstick" ID="6" parentID="2">
+<atom label="Chopstick2"/><atom label="Chopstick3"/><atom label="Chopstick0"/><atom label="Chopstick1"/><atom label="Chopstick4"/>
+</sig>
+
+<field label="smiths" ID="7" parentID="5">
+<tuple><atom label="Table0"/><atom label="0"/><atom label="Smith0"/></tuple>
+<tuple><atom label="Table0"/><atom label="1"/><atom label="Smith1"/></tuple>
+<tuple><atom label="Table0"/><atom label="2"/><atom label="Smith2"/></tuple>
+<tuple><atom label="Table0"/><atom label="3"/><atom label="Smith3"/></tuple>
+<tuple><atom label="Table0"/><atom label="4"/><atom label="Smith4"/></tuple>
+<types><type ID="5"/><type ID="1"/><type ID="4"/></types>
+
+</field>
+
+<field label="avail" ID="8" parentID="5">
+<tuple><atom label="Table0"/><atom label="Chopstick2"/></tuple>
+<tuple><atom label="Table0"/><atom label="Chopstick3"/></tuple>
+<tuple><atom label="Table0"/><atom label="Chopstick0"/></tuple>
+<types><type ID="5"/><type ID="6"/></types>
+
+</field>
+
+<field label="chops" ID="9" parentID="5">
+<tuple><atom label="Table0"/><atom label="0"/><atom label="Chopstick0"/></tuple>
+<tuple><atom label="Table0"/><atom label="1"/><atom label="Chopstick1"/></tuple>
+<tuple><atom label="Table0"/><atom label="2"/><atom label="Chopstick2"/></tuple>
+<tuple><atom label="Table0"/><atom label="3"/><atom label="Chopstick3"/></tuple>
+<tuple><atom label="Table0"/><atom label="4"/><atom label="Chopstick4"/></tuple>
+<types><type ID="5"/><type ID="1"/><type ID="6"/></types>
+
+</field>
+
+<field label="holdingLeft" ID="10" parentID="5">
+<tuple><atom label="Table0"/><atom label="Smith4"/></tuple>
+<tuple><atom label="Table0"/><atom label="Smith1"/></tuple>
+<types><type ID="5"/><type ID="4"/></types>
+
+</field>
+
+<field label="holdingRight" ID="11" parentID="5">
+<types><type ID="5"/><type ID="4"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="getStuckSAT" filename="/Users/siddharthaprasad/Desktop/TAing/1710/lfs_dev/2026/labs/dining_smiths/solution/rude_smiths.frg" version="5.0.1" prefixLength="10" loop="9" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Smith" ID="4" parentID="2">
+<atom label="Smith4"/><atom label="Smith2"/><atom label="Smith0"/><atom label="Smith3"/><atom label="Smith1"/>
+</sig>
+
+<sig label="Table" ID="5" parentID="2">
+<atom label="Table0"/>
+</sig>
+
+<sig label="Chopstick" ID="6" parentID="2">
+<atom label="Chopstick2"/><atom label="Chopstick3"/><atom label="Chopstick0"/><atom label="Chopstick1"/><atom label="Chopstick4"/>
+</sig>
+
+<field label="smiths" ID="7" parentID="5">
+<tuple><atom label="Table0"/><atom label="0"/><atom label="Smith0"/></tuple>
+<tuple><atom label="Table0"/><atom label="1"/><atom label="Smith1"/></tuple>
+<tuple><atom label="Table0"/><atom label="2"/><atom label="Smith2"/></tuple>
+<tuple><atom label="Table0"/><atom label="3"/><atom label="Smith3"/></tuple>
+<tuple><atom label="Table0"/><atom label="4"/><atom label="Smith4"/></tuple>
+<types><type ID="5"/><type ID="1"/><type ID="4"/></types>
+
+</field>
+
+<field label="avail" ID="8" parentID="5">
+<tuple><atom label="Table0"/><atom label="Chopstick3"/></tuple>
+<tuple><atom label="Table0"/><atom label="Chopstick0"/></tuple>
+<types><type ID="5"/><type ID="6"/></types>
+
+</field>
+
+<field label="chops" ID="9" parentID="5">
+<tuple><atom label="Table0"/><atom label="0"/><atom label="Chopstick0"/></tuple>
+<tuple><atom label="Table0"/><atom label="1"/><atom label="Chopstick1"/></tuple>
+<tuple><atom label="Table0"/><atom label="2"/><atom label="Chopstick2"/></tuple>
+<tuple><atom label="Table0"/><atom label="3"/><atom label="Chopstick3"/></tuple>
+<tuple><atom label="Table0"/><atom label="4"/><atom label="Chopstick4"/></tuple>
+<types><type ID="5"/><type ID="1"/><type ID="6"/></types>
+
+</field>
+
+<field label="holdingLeft" ID="10" parentID="5">
+<tuple><atom label="Table0"/><atom label="Smith4"/></tuple>
+<tuple><atom label="Table0"/><atom label="Smith2"/></tuple>
+<tuple><atom label="Table0"/><atom label="Smith1"/></tuple>
+<types><type ID="5"/><type ID="4"/></types>
+
+</field>
+
+<field label="holdingRight" ID="11" parentID="5">
+<types><type ID="5"/><type ID="4"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="getStuckSAT" filename="/Users/siddharthaprasad/Desktop/TAing/1710/lfs_dev/2026/labs/dining_smiths/solution/rude_smiths.frg" version="5.0.1" prefixLength="10" loop="9" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Smith" ID="4" parentID="2">
+<atom label="Smith4"/><atom label="Smith2"/><atom label="Smith0"/><atom label="Smith3"/><atom label="Smith1"/>
+</sig>
+
+<sig label="Table" ID="5" parentID="2">
+<atom label="Table0"/>
+</sig>
+
+<sig label="Chopstick" ID="6" parentID="2">
+<atom label="Chopstick2"/><atom label="Chopstick3"/><atom label="Chopstick0"/><atom label="Chopstick1"/><atom label="Chopstick4"/>
+</sig>
+
+<field label="smiths" ID="7" parentID="5">
+<tuple><atom label="Table0"/><atom label="0"/><atom label="Smith0"/></tuple>
+<tuple><atom label="Table0"/><atom label="1"/><atom label="Smith1"/></tuple>
+<tuple><atom label="Table0"/><atom label="2"/><atom label="Smith2"/></tuple>
+<tuple><atom label="Table0"/><atom label="3"/><atom label="Smith3"/></tuple>
+<tuple><atom label="Table0"/><atom label="4"/><atom label="Smith4"/></tuple>
+<types><type ID="5"/><type ID="1"/><type ID="4"/></types>
+
+</field>
+
+<field label="avail" ID="8" parentID="5">
+<tuple><atom label="Table0"/><atom label="Chopstick0"/></tuple>
+<types><type ID="5"/><type ID="6"/></types>
+
+</field>
+
+<field label="chops" ID="9" parentID="5">
+<tuple><atom label="Table0"/><atom label="0"/><atom label="Chopstick0"/></tuple>
+<tuple><atom label="Table0"/><atom label="1"/><atom label="Chopstick1"/></tuple>
+<tuple><atom label="Table0"/><atom label="2"/><atom label="Chopstick2"/></tuple>
+<tuple><atom label="Table0"/><atom label="3"/><atom label="Chopstick3"/></tuple>
+<tuple><atom label="Table0"/><atom label="4"/><atom label="Chopstick4"/></tuple>
+<types><type ID="5"/><type ID="1"/><type ID="6"/></types>
+
+</field>
+
+<field label="holdingLeft" ID="10" parentID="5">
+<tuple><atom label="Table0"/><atom label="Smith4"/></tuple>
+<tuple><atom label="Table0"/><atom label="Smith2"/></tuple>
+<tuple><atom label="Table0"/><atom label="Smith3"/></tuple>
+<tuple><atom label="Table0"/><atom label="Smith1"/></tuple>
+<types><type ID="5"/><type ID="4"/></types>
+
+</field>
+
+<field label="holdingRight" ID="11" parentID="5">
+<types><type ID="5"/><type ID="4"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="getStuckSAT" filename="/Users/siddharthaprasad/Desktop/TAing/1710/lfs_dev/2026/labs/dining_smiths/solution/rude_smiths.frg" version="5.0.1" prefixLength="10" loop="9" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Smith" ID="4" parentID="2">
+<atom label="Smith4"/><atom label="Smith2"/><atom label="Smith0"/><atom label="Smith3"/><atom label="Smith1"/>
+</sig>
+
+<sig label="Table" ID="5" parentID="2">
+<atom label="Table0"/>
+</sig>
+
+<sig label="Chopstick" ID="6" parentID="2">
+<atom label="Chopstick2"/><atom label="Chopstick3"/><atom label="Chopstick0"/><atom label="Chopstick1"/><atom label="Chopstick4"/>
+</sig>
+
+<field label="smiths" ID="7" parentID="5">
+<tuple><atom label="Table0"/><atom label="0"/><atom label="Smith0"/></tuple>
+<tuple><atom label="Table0"/><atom label="1"/><atom label="Smith1"/></tuple>
+<tuple><atom label="Table0"/><atom label="2"/><atom label="Smith2"/></tuple>
+<tuple><atom label="Table0"/><atom label="3"/><atom label="Smith3"/></tuple>
+<tuple><atom label="Table0"/><atom label="4"/><atom label="Smith4"/></tuple>
+<types><type ID="5"/><type ID="1"/><type ID="4"/></types>
+
+</field>
+
+<field label="avail" ID="8" parentID="5">
+<types><type ID="5"/><type ID="6"/></types>
+
+</field>
+
+<field label="chops" ID="9" parentID="5">
+<tuple><atom label="Table0"/><atom label="0"/><atom label="Chopstick0"/></tuple>
+<tuple><atom label="Table0"/><atom label="1"/><atom label="Chopstick1"/></tuple>
+<tuple><atom label="Table0"/><atom label="2"/><atom label="Chopstick2"/></tuple>
+<tuple><atom label="Table0"/><atom label="3"/><atom label="Chopstick3"/></tuple>
+<tuple><atom label="Table0"/><atom label="4"/><atom label="Chopstick4"/></tuple>
+<types><type ID="5"/><type ID="1"/><type ID="6"/></types>
+
+</field>
+
+<field label="holdingLeft" ID="10" parentID="5">
+<tuple><atom label="Table0"/><atom label="Smith4"/></tuple>
+<tuple><atom label="Table0"/><atom label="Smith2"/></tuple>
+<tuple><atom label="Table0"/><atom label="Smith0"/></tuple>
+<tuple><atom label="Table0"/><atom label="Smith3"/></tuple>
+<tuple><atom label="Table0"/><atom label="Smith1"/></tuple>
+<types><type ID="5"/><type ID="4"/></types>
+
+</field>
+
+<field label="holdingRight" ID="11" parentID="5">
+<types><type ID="5"/><type ID="4"/></types>
+
+</field>
+
+
+</instance>
+<instance bitwidth="4" maxseq="-1" command="getStuckSAT" filename="/Users/siddharthaprasad/Desktop/TAing/1710/lfs_dev/2026/labs/dining_smiths/solution/rude_smiths.frg" version="5.0.1" prefixLength="10" loop="9" >
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+
+</sig>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<field label="no-field-guard" ID="3" parentID="2">
+<types> <type ID="2"/><type ID="2"/> </types>
+</field>
+
+<sig label="Smith" ID="4" parentID="2">
+<atom label="Smith4"/><atom label="Smith2"/><atom label="Smith0"/><atom label="Smith3"/><atom label="Smith1"/>
+</sig>
+
+<sig label="Table" ID="5" parentID="2">
+<atom label="Table0"/>
+</sig>
+
+<sig label="Chopstick" ID="6" parentID="2">
+<atom label="Chopstick2"/><atom label="Chopstick3"/><atom label="Chopstick0"/><atom label="Chopstick1"/><atom label="Chopstick4"/>
+</sig>
+
+<field label="smiths" ID="7" parentID="5">
+<tuple><atom label="Table0"/><atom label="0"/><atom label="Smith0"/></tuple>
+<tuple><atom label="Table0"/><atom label="1"/><atom label="Smith1"/></tuple>
+<tuple><atom label="Table0"/><atom label="2"/><atom label="Smith2"/></tuple>
+<tuple><atom label="Table0"/><atom label="3"/><atom label="Smith3"/></tuple>
+<tuple><atom label="Table0"/><atom label="4"/><atom label="Smith4"/></tuple>
+<types><type ID="5"/><type ID="1"/><type ID="4"/></types>
+
+</field>
+
+<field label="avail" ID="8" parentID="5">
+<types><type ID="5"/><type ID="6"/></types>
+
+</field>
+
+<field label="chops" ID="9" parentID="5">
+<tuple><atom label="Table0"/><atom label="0"/><atom label="Chopstick0"/></tuple>
+<tuple><atom label="Table0"/><atom label="1"/><atom label="Chopstick1"/></tuple>
+<tuple><atom label="Table0"/><atom label="2"/><atom label="Chopstick2"/></tuple>
+<tuple><atom label="Table0"/><atom label="3"/><atom label="Chopstick3"/></tuple>
+<tuple><atom label="Table0"/><atom label="4"/><atom label="Chopstick4"/></tuple>
+<types><type ID="5"/><type ID="1"/><type ID="6"/></types>
+
+</field>
+
+<field label="holdingLeft" ID="10" parentID="5">
+<tuple><atom label="Table0"/><atom label="Smith4"/></tuple>
+<tuple><atom label="Table0"/><atom label="Smith2"/></tuple>
+<tuple><atom label="Table0"/><atom label="Smith0"/></tuple>
+<tuple><atom label="Table0"/><atom label="Smith3"/></tuple>
+<tuple><atom label="Table0"/><atom label="Smith1"/></tuple>
+<types><type ID="5"/><type ID="4"/></types>
+
+</field>
+
+<field label="holdingRight" ID="11" parentID="5">
+<types><type ID="5"/><type ID="4"/></types>
+
+</field>
+
+
+</instance>
+
+<source filename="/Users/siddharthaprasad/Desktop/TAing/1710/lfs_dev/2026/labs/dining_smiths/solution/rude_smiths.frg" content="#lang forge
+&#xA;
+&#xA;option problem_type temporal
+&#xA;option max_tracelength 15
+&#xA;option min_tracelength 10
+&#xA;
+&#xA;-- DO NOT EDIT ABOVE THIS LINE
+&#xA;
+&#xA;-- Use native solver if possible for speedup on this problem (MacOS only in 2023)
+&#xA;-- option solver MiniSat 
+&#xA;
+&#xA;one sig Table {
+&#xA;    -- Each Smith's place at the table
+&#xA;    smiths : set Int -&amp;gt; Smith,
+&#xA;    -- Each Chopstick's place at the table, 
+&#xA;    -- where Chopstick 0 is on the left of Smith 0 (see the figure in the handout)
+&#xA;    chops : set Int -&amp;gt; Chopstick,
+&#xA;    -- The available Chopsticks at a point in time
+&#xA;    var avail : set Chopstick,
+&#xA;    -- The set of Smiths holding their left Chopstick at a point in time
+&#xA;    var holdingLeft : set Smith,
+&#xA;    -- The set of Smiths holding their right Chopstick at a point in time
+&#xA;    var holdingRight : set Smith
+&#xA;}
+&#xA;sig Chopstick {}
+&#xA;sig Smith {}
+&#xA;
+&#xA;pred wellformed {
+&#xA;    -- each Smith has a unique index (place at the table) between 0 and 4
+&#xA;    all s : Smith | let idx = (Table.smiths).s | {
+&#xA;        one idx
+&#xA;        idx &amp;gt;= 0 and idx &amp;lt;= 4
+&#xA;    }
+&#xA;    all disj s1, s2 : Smith | (Table.smiths).s1 != (Table.smiths).s2
+&#xA;
+&#xA;    -- each Chopstick has a unique index (place at the table) between 0 and 4
+&#xA;    all c : Chopstick | let idx = (Table.chops).c | {
+&#xA;        one idx
+&#xA;        idx &amp;gt;= 0 and idx &amp;lt;= 4
+&#xA;    }
+&#xA;    all disj c1, c2 : Chopstick | (Table.chops).c1 != (Table.chops).c2
+&#xA;}
+&#xA;
+&#xA;pred init {
+&#xA;    wellformed
+&#xA;    -- Every Chopstick starts out available
+&#xA;    Chopstick in Table.avail
+&#xA;    -- No Smith starts out holding anything
+&#xA;    no Table.holdingLeft
+&#xA;    no Table.holdingRight
+&#xA;}
+&#xA;
+&#xA;-- Helper functions that return the left or right Chopstick of a given Smith
+&#xA;-- based on the representation that Chopstick N is to the left of Smith N
+&#xA;fun leftChop[s : Smith]: Chopstick { Table.chops[Table.smiths.s] }
+&#xA;fun rightChop[s : Smith]: Chopstick { Table.chops[remainder[add[Table.smiths.s, 1], 5]] }
+&#xA;
+&#xA;-- The left Chopstick is available and the Smith isn't already holding it
+&#xA;pred LeftOk[s : Smith] {
+&#xA;    leftChop[s] in Table.avail
+&#xA;    s not in Table.holdingLeft
+&#xA;}
+&#xA;
+&#xA;-- The right Chopstick is available and the Smith isn't already holding it
+&#xA;pred RightOk[s : Smith] {
+&#xA;    rightChop[s] in Table.avail
+&#xA;    s not in Table.holdingRight
+&#xA;}
+&#xA;
+&#xA;-- The Smith is holding its left and right Chopsticks
+&#xA;pred DropOk[s : Smith] {
+&#xA;    s in Table.holdingLeft
+&#xA;    s in Table.holdingRight
+&#xA;}
+&#xA;
+&#xA;-- The Smith satisfies LeftOk and takes their left Chopstick 
+&#xA;pred TakeLeft[s : Smith] {
+&#xA;    LeftOk[s]
+&#xA;    -- The Smith is holding their left Chopstick in the next state
+&#xA;    Table.holdingLeft' = Table.holdingLeft + s
+&#xA;    Table.holdingRight' = Table.holdingRight
+&#xA;    -- The Chopstick is no longer available
+&#xA;    Table.avail' = Table.avail - leftChop[s]
+&#xA;}
+&#xA;
+&#xA;-- the Smith satisfies RightOk and takes their right Chopstick 
+&#xA;pred TakeRight[s : Smith] {
+&#xA;    RightOk[s]
+&#xA;    -- The Smith is holding their right Chopstick in the next state
+&#xA;    Table.holdingRight' = Table.holdingRight + s
+&#xA;    Table.holdingLeft' = Table.holdingLeft
+&#xA;    -- The Chopstick is no longer available
+&#xA;    Table.avail' = Table.avail - rightChop[s]
+&#xA;}
+&#xA;
+&#xA;-- the Smith satisfies DropOk and drops their Chopsticks
+&#xA;pred Drop[s : Smith] {
+&#xA;    DropOk[s]
+&#xA;    -- The Smith is not holding either Chopstick in the next state
+&#xA;    Table.holdingRight' = Table.holdingRight - s
+&#xA;    Table.holdingLeft' = Table.holdingLeft - s
+&#xA;    -- Both Chopsticks become available 
+&#xA;    Table.avail' = Table.avail + leftChop[s] + rightChop[s]
+&#xA;}
+&#xA;
+&#xA;-- A state where no Smith can make any moves, i.e. no Smith is enabled
+&#xA;pred NothingEnabled { no s : Smith | { LeftOk[s] or RightOk[s] or DropOk[s] } }
+&#xA;
+&#xA;-- We allow the system to do nothing *as long as* no Smith is enabled.
+&#xA;-- Recall that Forge requires lasso traces (traces that loop back onto themselves somewhere). 
+&#xA;-- Traces that  &amp;quot;get stuck&amp;quot;, i.e. hit a point where no Smith can make any moves, are not 
+&#xA;-- conducive to lasso traces. Allowing a &amp;quot;do nothing&amp;quot; transition when a trace hits this point 
+&#xA;-- makes it a lasso trace because Forge can loop back to the DoNothing transition forever. 
+&#xA;pred DoNothing {
+&#xA;    NothingEnabled
+&#xA;    Table.holdingRight' = Table.holdingRight
+&#xA;    Table.holdingLeft' = Table.holdingLeft
+&#xA;    Table.avail' = Table.avail
+&#xA;}
+&#xA;
+&#xA;pred traces {
+&#xA;    init
+&#xA;    always { some s : Smith | { TakeLeft[s] or TakeRight[s] or Drop[s] or DoNothing }}
+&#xA;} 
+&#xA;
+&#xA;-- Beware: in temporal mode, the optimizer instance constrains _all states_
+&#xA;-- This is one reason why we discourage use of the &amp;quot;example&amp;quot; syntax in temporal mode.
+&#xA;-- However, _partial_ instances can still be useful for optimization. Providing the
+&#xA;-- following in an instance, rather than constraints, can be used earlier in Forge's
+&#xA;-- solver pipline:
+&#xA;inst optimizer {
+&#xA;  -- There's a table
+&#xA;  Table = `Table0
+&#xA;  -- Five smiths sitting around the table
+&#xA;  Smith = `Smith0 + `Smith1 + `Smith2 + `Smith3 + `Smith4
+&#xA;  -- One chopstick between each pair in the circle of smiths
+&#xA;  Chopstick = `Chopstick0 + `Chopstick1 + `Chopstick2 + `Chopstick3 + `Chopstick4
+&#xA;  smiths = Table -&amp;gt; 0 -&amp;gt; `Smith0 + 
+&#xA;           Table -&amp;gt; 1 -&amp;gt; `Smith1 + 
+&#xA;           Table -&amp;gt; 2 -&amp;gt; `Smith2 + 
+&#xA;           Table -&amp;gt; 3 -&amp;gt; `Smith3 + 
+&#xA;           Table -&amp;gt; 4 -&amp;gt; `Smith4
+&#xA;  chops =  Table -&amp;gt; 0 -&amp;gt; `Chopstick0 + 
+&#xA;           Table -&amp;gt; 1 -&amp;gt; `Chopstick1 + 
+&#xA;           Table -&amp;gt; 2 -&amp;gt; `Chopstick2 + 
+&#xA;           Table -&amp;gt; 3 -&amp;gt; `Chopstick3 + 
+&#xA;           Table -&amp;gt; 4 -&amp;gt; `Chopstick4 
+&#xA;}
+&#xA;
+&#xA;-- Find a trace where we &amp;quot;get stuck&amp;quot;: At some point, every Smith is holding
+&#xA;-- its left Chopstick forever (remember that in rude smiths, when a Smith picks up
+&#xA;-- a Chopstick, it can't put it down unless it aquires both Chopsticks)
+&#xA;pred getStuck {
+&#xA;    eventually always Table.holdingLeft = Smith
+&#xA;}
+&#xA;
+&#xA;test expect {
+&#xA;    -- Vacuity test, validate that we can generate some trace. 
+&#xA;    tracesSAT: {traces} for exactly 5 Smith, exactly 5 Chopstick, 4 Int for optimizer
+&#xA;      is sat
+&#xA;    -- Validate that we can get stuck in rude smiths. 
+&#xA;    getStuckSAT: {traces and getStuck} for exactly 5 Smith, exactly 5 Chopstick, 4 Int for optimizer
+&#xA;      is sat
+&#xA;}
+&#xA;
+&#xA;-- TODO: Use the run statement to step through a Sterling instance where &amp;quot;getting stuck&amp;quot; occurs. 
+&#xA;run {traces and getStuck} for exactly 5 Smith, exactly 5 Chopstick, 4 Int for optimizer
+&#xA;"></source>
+</alloy>

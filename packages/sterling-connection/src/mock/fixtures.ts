@@ -1,4 +1,5 @@
 import rcXml from '../../../../demos/rc/rc-datum.xml';
+import smithsXml from '../../../../demos/smiths/datum.xml';
 
 /**
  * Registry of Alloy/Forge XML instance fixtures available to the mock provider.
@@ -19,12 +20,23 @@ export interface Fixture {
   xml: string;
   /** Optional override for the datum's generatorName (defaults to the registry key). */
   generatorName?: string;
+  /**
+   * Datum format the mock advertises for this fixture. Defaults to 'alloy'.
+   * Set to 'raw' to serve Alloy-format XML under the generic 'raw' format,
+   * which exercises the raw→Alloy trace upgrade in the parse layer.
+   */
+  format?: string;
 }
 
 export const FIXTURES: Record<string, Fixture> = {
   rc: {
     label: 'Goats and wolves river crossing (trace)',
     xml: rcXml
+  },
+  smiths: {
+    label: 'Dining smiths (Alloy-XML trace, served as raw)',
+    xml: smithsXml,
+    format: 'raw'
   }
 };
 

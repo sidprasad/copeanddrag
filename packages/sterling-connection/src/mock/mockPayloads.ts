@@ -36,7 +36,7 @@ export function mockData() {
   }
 
   const { key, fixture } = getActiveFixture();
-  return datumFor(generatorNameFor(key), fixture.xml);
+  return datumFor(generatorNameFor(key), fixture.xml, fixture.format);
 }
 
 export function mockClick(payload: {
@@ -48,7 +48,11 @@ export function mockClick(payload: {
   if (!requested || !(requested in FIXTURES)) {
     return { type: 'data', version: 1, payload: { enter: [] } };
   }
-  return datumFor(generatorNameFor(requested), FIXTURES[requested].xml);
+  return datumFor(
+    generatorNameFor(requested),
+    FIXTURES[requested].xml,
+    FIXTURES[requested].format
+  );
 }
 
 export function mockEval(req: { id: string; expression: string }) {
@@ -62,7 +66,7 @@ export function mockEval(req: { id: string; expression: string }) {
   };
 }
 
-function datumFor(generatorName: string, xml: string) {
+function datumFor(generatorName: string, xml: string, format: string = 'alloy') {
   return {
     type: 'data',
     version: 1,
@@ -71,7 +75,7 @@ function datumFor(generatorName: string, xml: string) {
         {
           id: `mock-${generatorName}-${Date.now()}`,
           generatorName,
-          format: 'alloy',
+          format,
           data: xml,
           evaluator: false
         }

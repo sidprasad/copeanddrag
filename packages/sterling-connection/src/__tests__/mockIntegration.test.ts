@@ -81,6 +81,29 @@ describe('mock provider end-to-end', () => {
     expect(datum.parsed.instances).toHaveLength(12);
   });
 
+  it('upgrades a raw datum whose payload is Alloy XML into a 10-instance trace', async () => {
+    const store = makeStore();
+    store.dispatch(connectSterling('mock'));
+    await settle();
+    store.dispatch(
+      buttonClicked({
+        id: undefined,
+        onClick: 'run',
+        context: { generatorName: 'smiths' }
+      })
+    );
+    await settle();
+    const { data } = store.getState();
+    const datum = data.datumById[data.active!];
+    // The mock advertises this fixture as format 'raw', but parseRawOrAlloy
+    // recognized the Alloy XML and upgraded it to a trace.
+    expect(datum.format).toBe('alloy');
+    expect(datum.parsed.instances).toHaveLength(10);
+    // loopBack is derived from the `loop="9"` attribute, which is what makes
+    // isAlloyDatumTrace true and lights up the temporal presentation modes.
+    expect(datum.parsed.loopBack).toBe(9);
+  });
+
   it('round-trips an eval expression through the evaluator slice', async () => {
     const store = makeStore();
     store.dispatch(connectSterling('mock'));

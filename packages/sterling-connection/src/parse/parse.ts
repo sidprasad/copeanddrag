@@ -2,7 +2,7 @@ import { Dispatch, MiddlewareAPI } from 'redux';
 import { sterlingError } from '../actions';
 import { DataJoin } from '../payload';
 import { Datum, DatumParsed } from '../types';
-import { parseAlloyDatum } from './alloy';
+import { isAlloyXML, parseAlloyDatum } from './alloy';
 import { parseRawDatum } from './raw';
 
 export type DataJoinParsed = Omit<DataJoin, 'enter'> & {
@@ -28,7 +28,7 @@ export function parseJoin<D extends Dispatch, S>(
         case 'alloy':
           return parseAlloyDatum(datum);
         case 'raw':
-          return parseRawDatum(datum);
+          return parseRawOrAlloy(datum);
         default:
           throw new Error('Unsupported format fell through unexpectedly.');
       }
@@ -36,6 +36,29 @@ export function parseJoin<D extends Dispatch, S>(
     update,
     exit
   };
+}
+
+/**
+ * Parse a 'raw' datum, upgrading it to an Alloy trace when the payload is
+ * actually Alloy-format XML.
+ *
+ * Some providers may deliver Alloy-compatible XML under the generic 'raw'
+ * format. When we recognize that XML, parsing it as Alloy lets trace detection,
+ * time navigation, presentation modes, and projections work — the graph
+ * renderer reads `datum.data` directly, so rendering is unaffected either way.
+ * Anything that isn't recognizable Alloy XML (or fails to parse) stays raw.
+ *
+ * @param datum A Datum the provider labelled 'raw'.
+ */
+function parseRawOrAlloy(datum: Datum): DatumParsed<any> {
+  if (isAlloyXML(datum.data)) {
+    try {
+      return parseAlloyDatum({ ...datum, format: 'alloy' });
+    } catch {
+      // Not valid Alloy XML after all — fall back to treating it as raw.
+    }
+  }
+  return parseRawDatum(datum);
 }
 
 /**
