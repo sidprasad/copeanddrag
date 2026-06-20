@@ -1,6 +1,6 @@
-import { Modal, ModalBody, ModalCloseButton, 
-         ModalContent, ModalFooter, ModalHeader, ModalOverlay, Center, 
-         Box,
+import { Modal, ModalBody, ModalCloseButton,
+         ModalContent, ModalFooter, ModalHeader, ModalOverlay, Center,
+         Box, Link,
          Divider} from '@chakra-ui/react';
 import { useSterlingSelector } from 'sterling/src/state/hooks';
 import { selectMainView } from 'sterling/src/state/selectors';
@@ -34,6 +34,7 @@ export function HelpModal({isOpen, onClose}: HelpProps) {
             <Box as="ul" listStyleType="circle">
                 <li>Use the <strong>evaluator</strong> tab to query the value of expressions and constraints.</li>
                 <li>The <strong>explorer</strong> tab lets you pick a run to visualize. Click on any prior instance to reload it in the visualizer.</li>
+                <li>Read the full <Link color="blue.500" fontWeight="semibold" href="https://www.siddharthaprasad.com/copeanddrag/cnd/" isExternal>Cope and Drag documentation</Link> for a complete guide.</li>
             </Box>
             <Divider orientation="horizontal" colorScheme="blackAlpha" />
             {mainView === 'ScriptView' && <ScriptViewHelp/>}
