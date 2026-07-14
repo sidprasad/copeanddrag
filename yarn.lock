@@ -8451,10 +8451,10 @@ signal-exit@^3.0.3, signal-exit@^3.0.7:
   resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-3.0.7.tgz#a9a1767f8af84155114eaabd73f99273c8f59ad9"
   integrity sha512-wnD2ZE+l+SPC/uoS0vXeE9L1+0wuaMqKlfz9AMUo38JsyLSBWSFcHR1Rri62LZc12vLr1gb3jl7iwQhgwpAbGQ==
 
-simple-graph-query@^2.7.2:
-  version "2.7.2"
-  resolved "https://registry.yarnpkg.com/simple-graph-query/-/simple-graph-query-2.7.2.tgz#b7e0bf97ae64878c3d04986c260e246dceb2434a"
-  integrity sha512-QrSvr1swp+1+KEG3k3qdQ3pNnTpLKuv3Y5/w5QLywIQMQQMReSmQeVFDnW+Tn1EsEi6UTeDwW5lTPM0efecJFg==
+simple-graph-query@^2.8.2:
+  version "2.8.2"
+  resolved "https://registry.yarnpkg.com/simple-graph-query/-/simple-graph-query-2.8.2.tgz#c2cd181e527e8e41cb385376185df38ce31ac0aa"
+  integrity sha512-OvFX13eb4xC/ckqVwRWXBVEdKlvQRZ8IsgyjPighYkxssLRuT03xjNhfDsuIYqwjWI8+q+MR5IjjQolM/88HIg==
   dependencies:
     "@types/lodash" "^4.17.16"
     "@types/node" "^22.14.0"
@@ -8550,10 +8550,10 @@ sprintf-js@~1.0.2:
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==
 
-spytial-core@2.9.1:
-  version "2.9.1"
-  resolved "https://registry.yarnpkg.com/spytial-core/-/spytial-core-2.9.1.tgz#4d2bd72ebf02cd8654b55a73225962a5e66d417b"
-  integrity sha512-IE3PbQhnXTRMRpjE6siK++ZCAzXexC9atZDMyu7SvNshMukzGBAN/CW84qfk4vbbgpT0LuKCmw6dOfI5f6qZiQ==
+spytial-core@3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/spytial-core/-/spytial-core-3.0.1.tgz#dbf99fa443bc6f902533f8ccf8ae73ea66b3f7f3"
+  integrity sha512-p02UZZ9s4gb3RqwewglR4daWft86KkIT9wlxlS0w397P0jzOtYht1a/Qm4p7QhaTzEBkrp08MXfPPyHwr7z47g==
   dependencies:
     "@types/d3" "^4.13.12"
     "@types/graphlib-dot" "^0.6.4"
@@ -8573,7 +8573,7 @@ spytial-core@2.9.1:
     lodash "^4.17.21"
     react "19.1.0"
     react-dom "19.1.0"
-    simple-graph-query "^2.7.2"
+    simple-graph-query "^2.8.2"
     webcola "^3.4.0"
 
 stack-utils@^2.0.3, stack-utils@^2.0.6:
