@@ -1,7 +1,14 @@
 import { Pane, PaneBody, PaneHeader } from '@/sterling-ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSterlingDispatch, useSterlingSelector } from '../../state/hooks';
-import { ensureBootstrapLoaded } from '../../utils/spytialCore';
+import {
+  ensureBootstrapLoaded,
+  getLayoutSpecWarnings,
+  hasSpytialCore,
+} from '../../utils/spytialCore';
+import type { LayoutSpecWarning } from '../../utils/spytialCore';
+import { parseCndFile } from '../../utils/cndPreParser';
+import { LayoutWarningBanner } from './LayoutWarningBanner';
 import { 
   selectActiveDatum, 
   selectCnDSpec, 
@@ -266,6 +273,44 @@ const GraphView = () => {
     return () => clearInterval(intervalId);
   }, [isErrorMounted]);
 
+  // --- Layout-spec warnings (spytial-core >= 3.3.0) --------------------------
+  // parseLayoutSpec returns non-fatal `warnings` (deprecated keys, unknown-key
+  // typos) that the render paths discard. We parse the active spec once here —
+  // decoupled from per-cell layout rendering — so a single banner covers every
+  // graph mode without duplicating across projection/temporal cells. Errors
+  // still flow to the error modal above; these are strictly advisory.
+  const [layoutWarnings, setLayoutWarnings] = useState<LayoutSpecWarning[]>([]);
+  const [warningsDismissed, setWarningsDismissed] = useState(false);
+
+  useEffect(() => {
+    const compute = () => {
+      try {
+        const layoutYaml = parseCndFile(cndSpec || '').layoutYaml;
+        setLayoutWarnings(getLayoutSpecWarnings(layoutYaml));
+      } catch {
+        setLayoutWarnings([]);
+      }
+    };
+    compute();
+    // The global bundle may still be loading on first render; retry briefly so
+    // warnings appear once parseLayoutSpec becomes available.
+    if (hasSpytialCore()) return;
+    const intervalId = setInterval(() => {
+      if (hasSpytialCore()) {
+        compute();
+        clearInterval(intervalId);
+      }
+    }, 200);
+    return () => clearInterval(intervalId);
+  }, [cndSpec]);
+
+  // Re-show the banner whenever the actual warning set changes, even if a prior
+  // one was dismissed — a new or different warning should not stay hidden.
+  const warningsKey = layoutWarnings.map((w) => `${w.code}:${w.message}`).join('|');
+  useEffect(() => {
+    setWarningsDismissed(false);
+  }, [warningsKey]);
+
   // Determine if we should show multiple graphs
   const shouldShowMultiProjection = 
     multiProjectionInfo !== null &&
@@ -350,6 +395,14 @@ const GraphView = () => {
                 className="flex-shrink-0 px-2"
                 aria-live="polite"
               />
+              {/* Non-blocking advisory warnings for the active layout spec —
+                  sits below the error modal, above the graph. */}
+              {!warningsDismissed && (
+                <LayoutWarningBanner
+                  warnings={layoutWarnings}
+                  onDismiss={() => setWarningsDismissed(true)}
+                />
+              )}
               <div className="relative flex-1 min-h-0">
                 {renderGraphContent()}
               </div>

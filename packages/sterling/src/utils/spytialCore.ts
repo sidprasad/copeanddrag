@@ -1,3 +1,27 @@
+/**
+ * A single non-fatal diagnostic from spytial-core >= 3.3.0's parseLayoutSpec.
+ *
+ * `code` is a machine-readable category (`deprecated` / `unknown-key` /
+ * `missing-required` / …); `message` is human-readable, with any "did you mean"
+ * or replacement hint baked into the text. Warnings never prevent a render —
+ * that is what separates them from errors, which throw.
+ */
+export interface LayoutSpecWarning {
+  code: string;
+  message: string;
+}
+
+/**
+ * Return shape of spytial-core >= 3.3.0's parseLayoutSpec. `warnings` is always
+ * present (empty array when the spec is clean). Real syntax/validation errors
+ * THROW instead of populating this array.
+ */
+export interface ParsedLayoutSpec {
+  constraints?: any;
+  directives?: any;
+  warnings?: LayoutSpecWarning[];
+}
+
 export interface SpytialCoreApi {
   AlloyInstance: {
     parseAlloyXML: (xml: string) => any;
@@ -7,7 +31,7 @@ export interface SpytialCoreApi {
     initialize: (context: { sourceData: any }) => void;
     evaluate: (expression: string, config?: any) => any;
   };
-  parseLayoutSpec: (spec: string) => any;
+  parseLayoutSpec: (spec: string) => ParsedLayoutSpec;
   LayoutInstance: new (
     layoutSpec: any,
     evaluator: any,
@@ -157,4 +181,30 @@ export function ensureBootstrapLoaded(): void {
   link.integrity = 'sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM';
   link.crossOrigin = 'anonymous';
   document.head.appendChild(link);
+}
+
+/**
+ * Extract the advisory warnings from a layout-spec YAML.
+ *
+ * spytial-core >= 3.3.0's parseLayoutSpec returns non-fatal `warnings`
+ * ({ code, message }) alongside the parsed spec — deprecated keys, unknown-key
+ * typos, etc. Real syntax/validation errors THROW instead (surfaced separately
+ * by the SpyTial error modal), so we swallow them here and report no warnings:
+ * a spec that fails to parse has an error, not a warning.
+ *
+ * @param layoutYaml Layout YAML with projection/sequence blocks already stripped
+ *   (i.e. `parseCndFile(spec).layoutYaml`). Passing a full CnD spec would make
+ *   the parser choke on the projection/temporal blocks it doesn't understand.
+ * @returns The warnings array (empty when the spec is clean, core is unavailable,
+ *   or the spec errors).
+ */
+export function getLayoutSpecWarnings(layoutYaml: string): LayoutSpecWarning[] {
+  const core = getSpytialCore();
+  if (!core) return [];
+  try {
+    const parsed = core.parseLayoutSpec(layoutYaml);
+    return Array.isArray(parsed?.warnings) ? parsed.warnings : [];
+  } catch {
+    return [];
+  }
 }
