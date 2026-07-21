@@ -17,10 +17,13 @@ Inside the Layout drawer, the CnD editor has two modes, toggled at the top of th
 
 The two views share a single underlying spec: switching modes regenerates the other representation from the current one, and undo/redo works across the toggle. The Structured Builder covers constraints and directives; `projections:` and `temporal:` blocks are not yet surfaced in the form UI, but are preserved through round-trips so they won't be lost by switching.
 
-Two actions sit above the editor:
+Three actions sit above the editor:
 
 - **Apply Layout** — commits the current spec and re-renders the diagram.
+- **Suggest layout** — uses Cope and Drag's Magic Alloy-inspired heuristics to analyze the raw Alloy/Forge schema and representative states. It validates the generated CnD constraints through the real layout pipeline for every state, weakens or omits candidates that fail, and then applies the strongest valid spec. The generated spec remains open in the editor for normal adjustment. Suggestion policy deliberately lives in Cope and Drag rather than wrapping `spytial-core.suggestLayout`: Cope owns its Alloy metadata adapter, CnD-specific candidate families, confidence ordering, fallbacks, and dependencies, while spytial-core remains the parser/evaluator/layout execution boundary.
 - **Upload `.cnd`** — loads a spec from a local file.
+
+Suggestions adapt Alloy's Magic Layout heuristics—enumerations, projections, structural relations, attributes, and presentation—and add topology checks for chains, rings, trees, back-links, and temporal stability. Candidate dependencies prevent destructive combinations, such as hiding an enum whose attribute conversion failed. If the validation pipeline itself is unavailable, the current layout is left unchanged.
 
 > **For agents writing `.cnd` specs:** prefer Code View and write against the grammar in [YAML Specification](../cnd/yaml-spec). The Structured Builder is a pedagogical surface, not a canonical one.
 

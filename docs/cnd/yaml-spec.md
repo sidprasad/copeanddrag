@@ -334,40 +334,59 @@ Hides atoms matching a selector from the visualization. (Can also be used as a d
 
 ## Directives
 
-### Atom Color
+### Atom Style (`atomStyle`)
 
-Sets the color of atoms matching a selector.
+Customizes the shape, fill, border, and label of atoms matching a selector.
 
 ```yaml
-- atomColor:
-    selector: <unary-selector>   # Required
-    value: <color>               # Required: CSS color
+- atomStyle:
+    selector: <unary-selector>   # Optional: defaults to all atoms
+    shape: <shape>               # Optional
+    fillStyle:                   # Optional
+      color: <color>
+    borderStyle:                 # Optional
+      color: <color>
+      width: <number>
+    textStyle:                   # Optional
+      color: <color>
 ```
 
 ```yaml
-- atomColor:
+- atomStyle:
     selector: Person
-    value: "#ff5733"
+    fillStyle:
+      color: "#ff5733"
+    borderStyle:
+      color: steelblue
+      width: 2
 
-- atomColor:
+- atomStyle:
     selector: Error
-    value: red
+    borderStyle:
+      color: red
 ```
+
+The legacy `atomColor: { selector, value }` form is still parsed for backward
+compatibility, but new specs should use `atomStyle`.
 
 ---
 
-### Edge Style (`edgeColor`)
+### Edge Style (`edgeStyle`)
 
 Customizes the appearance of edges for a specific field/relation.
 
 ```yaml
-- edgeColor:
+- edgeStyle:
     field: <field-name>          # Required: relation/field name
-    value: <color>               # Required: edge color
     selector: <unary-selector>   # Optional: filter by source atom
     filter: <n-ary-selector>     # Optional: filter which tuples apply
-    style: <line-style>          # Optional: line style
-    weight: <number>             # Optional: line thickness
+    lineStyle:                   # Optional
+      color: <color>
+      pattern: <line-style>
+      weight: <number>
+      highlight: <color>
+    textStyle:                   # Optional: edge-label styling
+      color: <color>
     showLabel: <boolean>         # Optional: show edge label
     hidden: <boolean>            # Optional: hide the edge entirely
 ```
@@ -375,34 +394,37 @@ Customizes the appearance of edges for a specific field/relation.
 | Field | Required | Type | Default | Description |
 |-------|----------|------|---------|-------------|
 | `field` | yes | string | — | Name of the relation |
-| `value` | yes | string | — | CSS color value |
 | `selector` | no | string | — | Unary selector to filter source atoms |
 | `filter` | no | string | — | N-ary selector to filter specific tuples |
-| `style` | no | string | `solid` | `solid`, `dashed`, or `dotted` |
-| `weight` | no | number | — | Line thickness in pixels |
+| `lineStyle` | no | object | — | Edge color, pattern, weight, and highlight |
+| `textStyle` | no | object | — | Edge-label styling |
 | `showLabel` | no | boolean | `true` | Whether to display the edge label |
 | `hidden` | no | boolean | `false` | Hide the edge from display |
 
 ```yaml
 # Color all 'parent' edges blue
-- edgeColor:
+- edgeStyle:
     field: parent
-    value: blue
+    lineStyle:
+      color: blue
 
 # Dashed red edges for specific source type
-- edgeColor:
+- edgeStyle:
     field: references
-    value: red
     selector: Document
-    style: dashed
-    weight: 2
+    lineStyle:
+      color: red
+      pattern: dashed
+      weight: 2
 
-# Hide edges but keep the relationship
-- edgeColor:
-    field: internal
-    value: gray
-    hidden: true
+# Keep an edge but omit its redundant label
+- edgeStyle:
+    field: next
+    showLabel: false
 ```
+
+The legacy `edgeColor: { field, value, style, weight }` form is still parsed
+for backward compatibility, but new specs should use `edgeStyle`.
 
 ---
 
@@ -638,13 +660,15 @@ constraints:
 
 directives:
   # Visual styling
-  - atomColor:
+  - atomStyle:
       selector: Person
-      value: "#4a90d9"
+      borderStyle:
+        color: "#4a90d9"
 
-  - atomColor:
+  - atomStyle:
       selector: Error
-      value: red
+      borderStyle:
+        color: red
 
   - icon:
       selector: File
@@ -652,11 +676,12 @@ directives:
       showLabels: true
 
   # Edge styling
-  - edgeColor:
+  - edgeStyle:
       field: error
-      value: red
-      style: dashed
-      weight: 2
+      lineStyle:
+        color: red
+        pattern: dashed
+        weight: 2
 
   # Convert to attributes
   - attribute:
