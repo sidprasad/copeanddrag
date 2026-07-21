@@ -73,6 +73,68 @@ const REVERSED_TREE_XML = instanceXml(`<sig label="Task" ID="4" parentID="2">
 <types> <type ID="4"/><type ID="4"/> </types>
 </field>`);
 
+/** The field name f is overloaded: declared on both A and B (#143 Phase 2). */
+const OVERLOADED_FIELD_XML = instanceXml(`<sig label="A" ID="4" parentID="2">
+<atom label="A0"/><atom label="A1"/><atom label="A2"/>
+</sig>
+<sig label="B" ID="5" parentID="2">
+<atom label="B0"/><atom label="B1"/>
+</sig>
+<field label="f" ID="6" parentID="4">
+<tuple><atom label="A0"/><atom label="A1"/></tuple>
+<tuple><atom label="A1"/><atom label="A2"/></tuple>
+<types> <type ID="4"/><type ID="4"/> </types>
+</field>
+<field label="f" ID="7" parentID="5">
+<tuple><atom label="B0"/><atom label="B1"/></tuple>
+<types> <type ID="5"/><type ID="5"/> </types>
+</field>`);
+
+/**
+ * A field declared on an abstract supertype whose full extension has no
+ * clean topology: the Item part is a chain while the Ghost part is a ring.
+ */
+const NARROWED_FIELD_XML = instanceXml(`<sig label="Elem" ID="4" parentID="2" abstract="yes">
+</sig>
+<sig label="Item" ID="5" parentID="4">
+<atom label="Item0"/><atom label="Item1"/><atom label="Item2"/>
+</sig>
+<sig label="Ghost" ID="6" parentID="4">
+<atom label="Ghost0"/><atom label="Ghost1"/><atom label="Ghost2"/>
+</sig>
+<field label="nxt" ID="7" parentID="4">
+<tuple><atom label="Item0"/><atom label="Item1"/></tuple>
+<tuple><atom label="Item1"/><atom label="Item2"/></tuple>
+<tuple><atom label="Ghost0"/><atom label="Ghost1"/></tuple>
+<tuple><atom label="Ghost1"/><atom label="Ghost2"/></tuple>
+<tuple><atom label="Ghost2"/><atom label="Ghost0"/></tuple>
+<types> <type ID="4"/><type ID="4"/> </types>
+</field>`);
+
+/** A file-system hierarchy through an Entry indirection: contents.object. */
+const INDIRECTION_XML = instanceXml(`<sig label="Obj" ID="4" parentID="2" abstract="yes"></sig>
+<sig label="Dir" ID="5" parentID="4">
+<atom label="Dir0"/><atom label="Dir1"/>
+</sig>
+<sig label="File" ID="6" parentID="4">
+<atom label="File0"/><atom label="File1"/>
+</sig>
+<sig label="Entry" ID="7" parentID="2">
+<atom label="Entry0"/><atom label="Entry1"/><atom label="Entry2"/>
+</sig>
+<field label="contents" ID="8" parentID="5">
+<tuple><atom label="Dir0"/><atom label="Entry0"/></tuple>
+<tuple><atom label="Dir0"/><atom label="Entry1"/></tuple>
+<tuple><atom label="Dir1"/><atom label="Entry2"/></tuple>
+<types> <type ID="5"/><type ID="7"/> </types>
+</field>
+<field label="object" ID="9" parentID="7">
+<tuple><atom label="Entry0"/><atom label="Dir1"/></tuple>
+<tuple><atom label="Entry1"/><atom label="File0"/></tuple>
+<tuple><atom label="Entry2"/><atom label="File1"/></tuple>
+<types> <type ID="7"/><type ID="4"/> </types>
+</field>`);
+
 const SPLIT_TREE_UNION: [string, string][] = [
   ['Node0', 'Node1'],
   ['Node1', 'Node3'],
@@ -230,4 +292,144 @@ describe('selector synthesis against the installed spytial-core', () => {
     expect(selectorOf(original)).toBeDefined();
     expect(selectorOf(renamed)).toBe(selectorOf(original));
   });
+
+  const constraintSelector = (patch: {
+    constraints?: Record<string, unknown>[];
+  }): string | undefined => {
+    const constraint = patch.constraints?.[0] as any;
+    return constraint?.orientation?.selector ?? constraint?.cyclic?.selector;
+  };
+
+  it('restricts each declaration of an overloaded field and never emits the bare name', async () => {
+    const instance = load(OVERLOADED_FIELD_XML);
+    const draft = suggestAlloyLayout(instance, { core });
+
+    const synthesized = draft.suggestions.filter(
+      ({ sourceRule }) => sourceRule === 'cope.selector-synthesis'
+    );
+    expect(synthesized).toHaveLength(2);
+    const selectors = synthesized.map(({ patch }) => constraintSelector(patch)!);
+    const aPart = asKeys([
+      ['A0', 'A1'],
+      ['A1', 'A2']
+    ]);
+    const bPart = asKeys([['B0', 'B1']]);
+    expect(
+      selectors.some((selector) =>
+        setsEqual(evaluatePairs(instance, selector), aPart)
+      )
+    ).toBe(true);
+    expect(
+      selectors.some((selector) =>
+        setsEqual(evaluatePairs(instance, selector), bPart)
+      )
+    ).toBe(true);
+
+    // The bare overloaded name denotes the union of both declarations, so no
+    // primary constraint may use it.
+    for (const item of draft.suggestions) {
+      for (const constraint of item.patch.constraints ?? []) {
+        const selector = constraintSelector({ constraints: [constraint] });
+        expect(selector).not.toBe('f');
+      }
+    }
+
+    const validated = await resolveValidatedLayout(draft, (spec) =>
+      validateCndSpecWithSpytial(spec, [instance], core)
+    );
+    for (const item of synthesized) {
+      const decision = validated.decisions.find(
+        ({ suggestionId }) => suggestionId === item.id
+      );
+      expect(decision?.outcome).toBe('applied');
+    }
+  });
+
+  it('narrows a supertype field to the subtype families where it is clean', async () => {
+    const instance = load(NARROWED_FIELD_XML);
+    const draft = suggestAlloyLayout(instance, { core });
+
+    const synthesized = draft.suggestions.filter(
+      ({ sourceRule }) => sourceRule === 'cope.selector-synthesis'
+    );
+    expect(synthesized).toHaveLength(2);
+
+    const chain = synthesized.find(({ patch }) =>
+      Boolean((patch.constraints?.[0] as any)?.orientation)
+    );
+    const ring = synthesized.find(({ patch }) =>
+      Boolean((patch.constraints?.[0] as any)?.cyclic)
+    );
+    expect(chain).toBeDefined();
+    expect(ring).toBeDefined();
+    expect(
+      evaluatePairs(instance, constraintSelector(chain!.patch)!)
+    ).toEqual(
+      asKeys([
+        ['Item0', 'Item1'],
+        ['Item1', 'Item2']
+      ])
+    );
+    expect(evaluatePairs(instance, constraintSelector(ring!.patch)!)).toEqual(
+      asKeys([
+        ['Ghost0', 'Ghost1'],
+        ['Ghost1', 'Ghost2'],
+        ['Ghost2', 'Ghost0']
+      ])
+    );
+
+    const validated = await resolveValidatedLayout(draft, (spec) =>
+      validateCndSpecWithSpytial(spec, [instance], core)
+    );
+    for (const item of synthesized) {
+      const decision = validated.decisions.find(
+        ({ suggestionId }) => suggestionId === item.id
+      );
+      expect(decision?.outcome).toBe('applied');
+    }
+  });
+
+  it('composes an indirection join into a single tree spine', async () => {
+    const instance = load(INDIRECTION_XML);
+    const draft = suggestAlloyLayout(instance, { core });
+
+    const synthesized = draft.suggestions.filter(
+      ({ sourceRule }) => sourceRule === 'cope.selector-synthesis'
+    );
+    expect(synthesized).toHaveLength(1);
+    const selector = constraintSelector(synthesized[0]!.patch)!;
+    expect(evaluatePairs(instance, selector)).toEqual(
+      asKeys([
+        ['Dir0', 'Dir1'],
+        ['Dir0', 'File0'],
+        ['Dir1', 'File1']
+      ])
+    );
+    // The weaker fallback keeps both declared fields as separate spines.
+    expect(synthesized[0]!.fallbacks[0]?.constraints).toHaveLength(2);
+
+    const validated = await resolveValidatedLayout(draft, (spec) =>
+      validateCndSpecWithSpytial(spec, [instance], core)
+    );
+    const decision = validated.decisions.find(
+      ({ suggestionId }) => suggestionId === synthesized[0]!.id
+    );
+    expect(decision?.outcome).toBe('applied');
+  });
+
+  it('keeps restriction selectors invariant under atom renaming', () => {
+    const renamedXml = OVERLOADED_FIELD_XML.replace(/A(\d)/g, 'Zeta9$1');
+    const selectorsOf = (xml: string) =>
+      suggestAlloyLayout(load(xml), { core })
+        .suggestions.filter(
+          ({ sourceRule }) => sourceRule === 'cope.selector-synthesis'
+        )
+        .map(({ patch }) => constraintSelector(patch))
+        .sort();
+    expect(selectorsOf(renamedXml)).toEqual(selectorsOf(OVERLOADED_FIELD_XML));
+  });
 });
+
+function setsEqual(left: Set<string>, right: Set<string>): boolean {
+  return left.size === right.size && [...left].every((key) => right.has(key));
+}

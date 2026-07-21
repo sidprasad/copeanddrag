@@ -1,5 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 import {
+  expressionCost,
   mentionsAtomLiteral,
   synthesizeAndVerifySelector
 } from '../selectorSynthesis';
@@ -355,6 +356,155 @@ describe('synthesizeAndVerifySelector', () => {
     expect(
       synthesizeAndVerifySelector(binaryExamples([TREE_UNION]), instances, core)
     ).toBeUndefined();
+  });
+});
+
+describe('guided hints and complexity ranking (#143 Phase 2)', () => {
+  it('prefers a verified hint and consults the search only at depth 0', () => {
+    const depths: number[] = [];
+    const { instances, core } = setup([TREE], {
+      synthesizeBinarySelectorWithExplanation: ((_: unknown, depth: number) => {
+        depths.push(depth);
+        return null;
+      }) as any
+    });
+    const result = synthesizeAndVerifySelector(
+      binaryExamples([TREE_UNION]),
+      instances,
+      core,
+      { hintExpressions: ['(lc + rc)'] }
+    );
+    expect(result).toEqual({
+      expression: '(lc + rc)',
+      source: 'guided',
+      cost: 3
+    });
+    expect(depths).toEqual([0]);
+  });
+
+  it('falls back to a full-depth search when no hint verifies', () => {
+    const depths: number[] = [];
+    const { instances, core } = setup([TREE]);
+    const spied = setup([TREE], {
+      synthesizeBinarySelectorWithExplanation: ((_: unknown, depth: number) => {
+        depths.push(depth);
+        return null;
+      }) as any
+    });
+    // The wrong hint is rejected by verification, so the real mini search
+    // still finds the union.
+    const result = synthesizeAndVerifySelector(
+      binaryExamples([TREE_UNION]),
+      instances,
+      core,
+      { hintExpressions: ['lc'] }
+    );
+    expect(result?.expression).toBe('(lc + rc)');
+    expect(result?.source).toBe('synthesized');
+    // Without any hints the search receives the default depth budget of 2.
+    synthesizeAndVerifySelector(
+      binaryExamples([TREE_UNION]),
+      spied.instances,
+      spied.core
+    );
+    expect(depths).toEqual([2]);
+  });
+
+  it('lets a cheaper declared name from the search beat a pricier verified hint', () => {
+    const world: MiniInstance = {
+      atoms: ['N0', 'N1', 'N2', 'N3', 'N4'],
+      relations: {
+        lc: TREE.relations.lc!,
+        rc: TREE.relations.rc!,
+        edge: TREE_UNION
+      }
+    };
+    const { instances, core } = setup([world]);
+    const result = synthesizeAndVerifySelector(
+      binaryExamples([TREE_UNION]),
+      instances,
+      core,
+      { hintExpressions: ['(lc + rc)'] }
+    );
+    expect(result).toEqual({ expression: 'edge', source: 'synthesized', cost: 1 });
+  });
+
+  it('prefers the guided expression when costs tie', () => {
+    const reversed: Pairs = [
+      ['T0', 'T1'],
+      ['T0', 'T2'],
+      ['T1', 'T3']
+    ];
+    const { instances, core } = setup([PARENTS]);
+    const result = synthesizeAndVerifySelector(
+      binaryExamples([reversed]),
+      instances,
+      core,
+      { hintExpressions: ['~boss'] }
+    );
+    // The mini search would return ~(boss); both cost 2, guided wins.
+    expect(result).toEqual({ expression: '~boss', source: 'guided', cost: 2 });
+  });
+
+  it('rejects a hint that mentions an atom literal', () => {
+    const { instances, core } = setup([TREE]);
+    expect(
+      synthesizeAndVerifySelector(binaryExamples([[]]), instances, core, {
+        hintExpressions: ['N0']
+      })
+    ).toBeUndefined();
+  });
+
+  it('accepts a verified hint even without any synthesizer', () => {
+    const { instances, core } = setup([TREE], {
+      synthesizeBinarySelectorWithExplanation: undefined,
+      synthesizeBinarySelector: undefined
+    });
+    const result = synthesizeAndVerifySelector(
+      binaryExamples([TREE_UNION]),
+      instances,
+      core,
+      { hintExpressions: ['(lc + rc)'] }
+    );
+    expect(result?.expression).toBe('(lc + rc)');
+    expect(result?.source).toBe('guided');
+  });
+
+  it('rejects a hint contradicted by a second instance', () => {
+    const secondWorld: MiniInstance = {
+      atoms: ['N0', 'N1', 'N2'],
+      relations: { lc: [['N0', 'N1']], rc: [['N0', 'N2']] }
+    };
+    const { instances, core } = setup([TREE, secondWorld]);
+    expect(
+      synthesizeAndVerifySelector(
+        binaryExamples([TREE_UNION, [['N0', 'N1']]]),
+        instances,
+        core,
+        { hintExpressions: ['(lc + rc)'] }
+      )
+    ).toBeUndefined();
+  });
+});
+
+describe('expressionCost', () => {
+  it('charges identifiers and simple operators one point each', () => {
+    expect(expressionCost('boss')).toBe(1);
+    expect(expressionCost('seq/Int')).toBe(1);
+    expect(expressionCost('contents.object')).toBe(3);
+    expect(expressionCost('(lc + rc)')).toBe(3);
+    expect(expressionCost('(f & (A -> A))')).toBe(5);
+  });
+
+  it('treats parenthesization as free so equivalent spellings tie', () => {
+    expect(expressionCost('~boss')).toBe(expressionCost('~(boss)'));
+    expect(expressionCost('lc + rc')).toBe(expressionCost('(lc + rc)'));
+  });
+
+  it('charges closures more than plain operators', () => {
+    expect(expressionCost('^next')).toBe(3);
+    expect(expressionCost('*next')).toBe(3);
+    expect(expressionCost('~next')).toBe(2);
   });
 });
 

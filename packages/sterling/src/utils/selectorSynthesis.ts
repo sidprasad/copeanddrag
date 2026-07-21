@@ -12,7 +12,9 @@ import type { SpytialDataInstance } from './layoutSuggestions';
  *
  * Everything here is pure and synchronous: no React, no Redux, no globals.
  * Synthesis is optional — any missing capability, mismatch, or error returns
- * undefined and the caller falls back to direct selectors.
+ * undefined and the caller falls back to direct selectors. Caller-supplied
+ * hint expressions need only the evaluator, so guided candidates still work
+ * on a core build without the synthesizer.
  *
  * Verified contract of the core API (spytial-core 3.4.0 browser bundle):
  *  - synthesizeBinarySelector(WithExplanation)(examples, maxDepth) where
@@ -21,6 +23,18 @@ import type { SpytialDataInstance } from './layoutSuggestions';
  *  - returns { expression } or null;
  *  - SGraphQueryEvaluator.evaluate(expr).selectedTuplesAll() returns ordered
  *    [sourceId, targetId] string pairs.
+ *
+ * Verified behavior of the core synthesizer (#143 Phase 2 probes):
+ *  - The search grammar covers identifiers, transpose, union, intersection,
+ *    difference, join, and (reflexive) closure, but NOT the arrow product, so
+ *    type restrictions such as `f & (A -> A)` can never be synthesized — the
+ *    evaluator accepts them, so callers supply them as hint expressions.
+ *  - maxDepth 0 only tries shared identifiers plus seeded `Type.rel` /
+ *    `rel.Type` joins (milliseconds, even when unsatisfiable).
+ *  - An UNSATISFIABLE target costs ~0.5s at depth 1, ~6-8s at depth 2, and
+ *    minutes at depth 3 on small instances: the search fans out before it can
+ *    fail. Hence the conservative default depth below and the hints-first
+ *    policy — call sites should pass the smallest depth their family needs.
  */
 
 export type SelectorExamples =
@@ -29,16 +43,65 @@ export type SelectorExamples =
 
 export interface SynthesizedSelectorCandidate {
   expression: string;
+  /**
+   * Where the winning expression came from: 'guided' means a caller-supplied
+   * hint expression that verified; 'synthesized' means the core search found
+   * it. Provenance feeds suggestion evidence, not acceptance — both sources
+   * pass the identical independent verification.
+   */
+  source: 'guided' | 'synthesized';
+  /** Complexity of the expression under expressionCost, for evidence text. */
+  cost: number;
 }
 
 export interface SynthesizeSelectorOptions {
-  /** Maximum expression depth explored by the synthesizer. */
+  /**
+   * Maximum expression depth explored by the synthesizer. Defaults to 2: an
+   * unsatisfiable depth-2 search costs seconds where depth 3 costs minutes
+   * (see header), and every current candidate family's target is expressible
+   * at depth <= 2. Pass 0 when the target is known to be outside the search
+   * grammar (e.g. arrow-product restrictions) — depth 0 still lets the
+   * search propose an extensionally equal declared name.
+   */
   maxDepth?: number;
   /**
    * Reject expressions that mention a concrete atom identifier. Automatic
    * suggestions must generalize; an expression naming Node$0 is overfit.
    */
   forbidAtomLiterals?: boolean;
+  /**
+   * Candidate expressions the caller constructed itself (e.g. `(lc + rc)`,
+   * `~boss`, `(f & (A -> A))`). Each is verified against every instance
+   * exactly like a synthesized expression. When a hint verifies, the core
+   * search still runs at depth 0 — a bare declared name that denotes the
+   * same extension should win on readability — but the expensive deep
+   * search is skipped.
+   */
+  hintExpressions?: readonly string[];
+}
+
+/**
+ * Deterministic complexity measure used to rank extensionally equivalent
+ * selector expressions: identifiers cost 1, most operators cost 1, closures
+ * and comprehension machinery cost 2 (they are conceptually heavier for a
+ * reader). Parentheses and whitespace are free, so `(lc + rc)` and
+ * `lc + rc` tie and the tie-break is stable elsewhere.
+ */
+export function expressionCost(expression: string): number {
+  let cost = 0;
+  const charge = (source: string, pattern: RegExp, weight: number): string =>
+    source.replace(pattern, () => {
+      cost += weight;
+      return ' ';
+    });
+  let rest = expression;
+  rest = charge(rest, /[A-Za-z_][\w$/']*/g, 1); // identifiers (seq/Int, Node$0)
+  rest = charge(rest, /\d+/g, 1); // numeric literals
+  rest = charge(rest, /->/g, 1); // arrow product (before '-')
+  rest = charge(rest, /[+&.\-~]/g, 1);
+  rest = charge(rest, /[\^*]/g, 2); // closures
+  charge(rest, /[{|]/g, 2); // comprehensions
+  return cost;
 }
 
 /** Instances used for synthesis must expose their atoms (AlloyDataInstance does). */
@@ -162,32 +225,45 @@ function atomsById(
 }
 
 /**
- * Synthesize a selector matching the intended extension on every instance,
- * then verify it independently. The intended pairs are ORDERED: (a, b) and
- * (b, a) are different targets, because selectors drive directed layout
- * constraints. Returns undefined on any failure — callers must treat that as
- * ordinary candidate failure, never as an error.
+ * Verify that `expression` reproduces the exact intended extension on every
+ * instance through the ordinary evaluator, and that it does not overfit to a
+ * concrete atom identifier. This is the single acceptance gate for guided
+ * and synthesized expressions alike.
  */
-export function synthesizeAndVerifySelector(
+function verifiesEverywhere(
+  expression: string,
   examples: SelectorExamples,
   instances: readonly SpytialDataInstance[],
-  core: SpytialCoreApi | undefined,
-  options: SynthesizeSelectorOptions = {}
-): SynthesizedSelectorCandidate | undefined {
-  const { maxDepth = 3, forbidAtomLiterals = true } = options;
-  if (!core?.SGraphQueryEvaluator) return undefined;
-  if (instances.length === 0) return undefined;
-  if (examples.matchesByInstance.length !== instances.length) return undefined;
-  if (!instances.every(hasAtoms)) return undefined;
-  const atomInstances = instances as readonly AtomBearingInstance[];
+  core: SpytialCoreApi,
+  forbidAtomLiterals: boolean
+): boolean {
+  if (forbidAtomLiterals && mentionsAtomLiteral(expression, instances)) {
+    return false;
+  }
+  for (const [index, instance] of instances.entries()) {
+    const actual = evaluateExtension(expression, instance, examples.arity, core);
+    if (!actual) return false;
+    if (!sameStringSets(actual, intendedKeys(examples, index))) {
+      return false;
+    }
+  }
+  return true;
+}
 
+/** Ask the core synthesizer for one expression matching the examples. */
+function invokeCoreSynthesis(
+  examples: SelectorExamples,
+  atomInstances: readonly AtomBearingInstance[],
+  core: SpytialCoreApi,
+  maxDepth: number
+): string | undefined {
   const synthesizeUnary =
     core.synthesizeAtomSelectorWithExplanation ?? core.synthesizeAtomSelector;
   const synthesizeBinary =
     core.synthesizeBinarySelectorWithExplanation ??
     core.synthesizeBinarySelector;
 
-  let expression: string | undefined;
+  let expression: unknown;
   try {
     if (examples.arity === 1) {
       if (!synthesizeUnary) return undefined;
@@ -230,24 +306,82 @@ export function synthesizeAndVerifySelector(
   } catch {
     return undefined;
   }
-  if (typeof expression !== 'string' || expression.trim() === '') {
-    return undefined;
-  }
+  return typeof expression === 'string' && expression.trim() !== ''
+    ? expression
+    : undefined;
+}
 
-  if (forbidAtomLiterals && mentionsAtomLiteral(expression, instances)) {
-    return undefined;
-  }
+/**
+ * Find a selector matching the intended extension on every instance, then
+ * verify it independently. The intended pairs are ORDERED: (a, b) and (b, a)
+ * are different targets, because selectors drive directed layout constraints.
+ * Returns undefined on any failure — callers must treat that as ordinary
+ * candidate failure, never as an error.
+ *
+ * Candidate policy (#143 open questions 1-2): caller hints are verified
+ * first; the core search then runs at depth 0 when a hint already verified
+ * (cheap hunt for an extensionally equal declared name) or at the full
+ * depth budget otherwise. Among all verified candidates the lowest
+ * expressionCost wins; ties prefer guided over synthesized, then the
+ * lexicographically smaller expression, so a bare declared relation always
+ * beats an equivalent derived expression on readability.
+ */
+export function synthesizeAndVerifySelector(
+  examples: SelectorExamples,
+  instances: readonly SpytialDataInstance[],
+  core: SpytialCoreApi | undefined,
+  options: SynthesizeSelectorOptions = {}
+): SynthesizedSelectorCandidate | undefined {
+  const { maxDepth = 2, forbidAtomLiterals = true } = options;
+  if (!core?.SGraphQueryEvaluator) return undefined;
+  if (instances.length === 0) return undefined;
+  if (examples.matchesByInstance.length !== instances.length) return undefined;
+  if (!instances.every(hasAtoms)) return undefined;
+  const atomInstances = instances as readonly AtomBearingInstance[];
 
-  // Independent verification: the synthesizer's own match report is not
-  // trusted; the expression must reproduce the exact intended extension on
-  // every instance through the ordinary evaluator.
-  for (const [index, instance] of instances.entries()) {
-    const actual = evaluateExtension(expression, instance, examples.arity, core);
-    if (!actual) return undefined;
-    if (!sameStringSets(actual, intendedKeys(examples, index))) {
-      return undefined;
+  const candidates: SynthesizedSelectorCandidate[] = [];
+  const seen = new Set<string>();
+  const addCandidate = (
+    expression: string,
+    source: 'guided' | 'synthesized'
+  ) => {
+    if (seen.has(expression)) return;
+    seen.add(expression);
+    if (
+      verifiesEverywhere(
+        expression,
+        examples,
+        instances,
+        core,
+        forbidAtomLiterals
+      )
+    ) {
+      candidates.push({ expression, source, cost: expressionCost(expression) });
+    }
+  };
+
+  for (const hint of options.hintExpressions ?? []) {
+    if (typeof hint === 'string' && hint.trim() !== '') {
+      addCandidate(hint, 'guided');
     }
   }
 
-  return { expression };
+  const searchDepth = candidates.length > 0 ? 0 : maxDepth;
+  const synthesized = invokeCoreSynthesis(
+    examples,
+    atomInstances,
+    core,
+    searchDepth
+  );
+  if (synthesized !== undefined) addCandidate(synthesized, 'synthesized');
+
+  if (candidates.length === 0) return undefined;
+  const sourceRank = { guided: 0, synthesized: 1 } as const;
+  candidates.sort(
+    (left, right) =>
+      left.cost - right.cost ||
+      sourceRank[left.source] - sourceRank[right.source] ||
+      left.expression.localeCompare(right.expression)
+  );
+  return candidates[0];
 }

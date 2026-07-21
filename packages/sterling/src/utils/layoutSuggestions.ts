@@ -2,6 +2,7 @@ import * as yaml from 'js-yaml';
 import { parseCndFile } from './cndPreParser';
 import type { SpytialCoreApi } from './spytialCore';
 import { synthesizeAndVerifySelector } from './selectorSynthesis';
+import type { SynthesizedSelectorCandidate } from './selectorSynthesis';
 
 /**
  * Suggestion policy intentionally lives in Cope and Drag rather than calling
@@ -333,6 +334,102 @@ function unionEdges(
     }
   }
   return edges;
+}
+
+function dedupEdgePairs(
+  edges: ReadonlyArray<[string, string]>
+): [string, string][] {
+  const seen = new Set<string>();
+  const result: [string, string][] = [];
+  for (const edge of edges) {
+    const key = `${edge[0]} ${edge[1]}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      result.push(edge);
+    }
+  }
+  return result;
+}
+
+/**
+ * The visual reading of an edge set, shared by the synthesis-backed candidate
+ * families: a simple ring, a single linear chain, a branching tree (fan-out
+ * but no fan-in), or a general acyclic spine. Undefined means no topology
+ * rule should fire on this extension.
+ */
+type StructureKind = 'cycle' | 'chain' | 'tree' | 'hierarchy';
+
+function classifyStructure(profile: EdgeProfile): StructureKind | undefined {
+  if (profile.edgeCount === 0) return undefined;
+  if (profile.isSimpleCycle) return 'cycle';
+  if (profile.isLinearChain) return 'chain';
+  if (!profile.isAcyclic) return undefined;
+  if (profile.maxIncoming <= 1 && profile.maxOutgoing >= 2) return 'tree';
+  return 'hierarchy';
+}
+
+function structuralPatch(kind: StructureKind, selector: string): CndPatch {
+  if (kind === 'cycle') {
+    return { constraints: [{ cyclic: { selector, direction: 'clockwise' } }] };
+  }
+  if (kind === 'chain') {
+    return {
+      constraints: [{ orientation: { selector, directions: ['directlyRight'] } }]
+    };
+  }
+  return { constraints: [{ orientation: { selector, directions: ['below'] } }] };
+}
+
+/** The issue-ranking "weaker direct constraint on the declared relation". */
+function weakerStructuralPatch(kind: StructureKind, selector: string): CndPatch {
+  if (kind === 'cycle') {
+    return { constraints: [{ cyclic: { selector, direction: 'clockwise' } }] };
+  }
+  if (kind === 'chain') {
+    return { constraints: [{ orientation: { selector, directions: ['right'] } }] };
+  }
+  return { constraints: [{ orientation: { selector, directions: ['below'] } }] };
+}
+
+/** The subtype family rooted at typeId: the type itself plus all descendants. */
+function typeFamily(
+  typeId: string,
+  types: readonly SpytialType[]
+): Set<string> {
+  const family = new Set([typeId]);
+  for (const candidate of types) {
+    if (candidate.types.includes(typeId)) family.add(candidate.id);
+  }
+  return family;
+}
+
+/** Atom ids belonging to any of the given types in one instance. */
+function atomIdsOfTypes(
+  typeIds: ReadonlySet<string>,
+  types: readonly SpytialType[]
+): Set<string> {
+  const ids = new Set<string>();
+  for (const type of types) {
+    if (!typeIds.has(type.id)) continue;
+    for (const atom of type.atoms) {
+      const id =
+        typeof atom === 'string' ? atom : (atom as { id?: unknown })?.id;
+      if (typeof id === 'string') ids.add(id);
+    }
+  }
+  return ids;
+}
+
+/** Provenance evidence line for a verified selector (#143 open question 2). */
+function selectorEvidence(
+  candidate: SynthesizedSelectorCandidate,
+  states: number
+): string {
+  const origin =
+    candidate.source === 'guided'
+      ? 'constructed from the declared relations'
+      : 'found by bounded relational search';
+  return `Selector ${candidate.expression} (complexity ${candidate.cost}) was ${origin} and verified on ${states} state(s)`;
 }
 
 function profileEdges(edges: ReadonlyArray<[string, string]>): EdgeProfile {
@@ -924,24 +1021,164 @@ export function suggestAlloyLayout(
     );
   }
 
-  // --- Synthesized structural selectors (#143, Phase 1) ---------------------
+  // --- Synthesized structural selectors (#143, Phases 1-2) ------------------
   // When core selector synthesis is available, name target edge sets that no
-  // single declared field denotes. The heuristic decides the visual intent
-  // (tree spine, below); synthesis only names the extension, and every
-  // accepted expression is re-verified against each supplied instance by
-  // synthesizeAndVerifySelector before it may appear here. Relations covered
-  // by an accepted synthesized candidate skip the generic topology rules
-  // below so the draft carries one spine constraint per structure.
+  // single declared field denotes: type-restricted parts of overloaded
+  // fields, trees split across several fields, reversed child-to-parent
+  // fields, and hierarchies reached through an indirection type. The
+  // heuristic decides the visual intent and collects the intended extension;
+  // the selector is either a Cope-constructed guided expression or a core-
+  // synthesized one, and either way is independently re-verified against
+  // every supplied instance by synthesizeAndVerifySelector before it may
+  // appear here. Relations covered by an accepted candidate — or made
+  // ambiguous by an overloaded field name — skip the generic topology rules
+  // below, so the draft carries one spine constraint per structure and never
+  // emits a bare name that denotes more than the profiled relation.
   const synthCovered = new Set<string>();
   if (options.core) {
+    // A field name declared on several sigs is OVERLOADED: the bare name
+    // evaluates to the union of every declaration, so no rule may use it to
+    // denote a single declaration's tuples.
+    const relationsByName = new Map<string, SpytialRelation[]>();
+    for (const relation of relations) {
+      relationsByName.set(relation.name, [
+        ...(relationsByName.get(relation.name) ?? []),
+        relation
+      ]);
+    }
+    const overloadedNames = new Set(
+      [...relationsByName]
+        .filter(([, group]) => group.length > 1)
+        .map(([name]) => name)
+    );
+
     const structural = relations.filter(
       (relation) =>
         relation.types.length === 2 &&
         relation.types[0] === relation.types[1] &&
         !enums.all.has(relation.types[1] ?? '') &&
         !nonEdgeRelations.has(relation.id) &&
-        relation.name !== 'parent'
+        relation.name !== 'parent' &&
+        !overloadedNames.has(relation.name)
     );
+
+    // Overloaded fields (#143 Phase 2): each self-typed declaration with a
+    // clean topology gets a type-restricted selector such as `f & (A -> A)`.
+    // The evaluator accepts the arrow product but the synthesis grammar
+    // cannot produce it, so the restriction is passed as a guided hint and
+    // the search budget stays at depth 0 (which still finds an extensionally
+    // equal declared name when one exists).
+    for (const name of overloadedNames) {
+      const group = relationsByName.get(name)!;
+      for (const member of group) synthCovered.add(member.id);
+      for (const member of group) {
+        const [sourceType, targetType] = member.types;
+        if (member.types.length !== 2 || !sourceType || !targetType) continue;
+        if (sourceType !== targetType) continue;
+        if (enums.all.has(targetType) || nonEdgeRelations.has(member.id)) {
+          continue;
+        }
+        const kind = classifyStructure(
+          profileEdges(unionEdges([member], examples))
+        );
+        if (!kind) continue;
+        const synthesized = synthesizeAndVerifySelector(
+          {
+            arity: 2,
+            matchesByInstance: examples.map((example) =>
+              orderedRelationEdges([member], example)
+            )
+          },
+          examples,
+          options.core,
+          {
+            hintExpressions: [`(${name} & (${sourceType} -> ${targetType}))`],
+            maxDepth: 0
+          }
+        );
+        if (!synthesized) continue;
+        suggestions.push(
+          suggestion(
+            `${kind === 'cycle' ? 'cyclic' : 'orientation'}:synth-restrict:${
+              member.id
+            }`,
+            structuralPatch(kind, synthesized.expression),
+            kind === 'hierarchy' ? 'medium' : 'high',
+            `Restrict the overloaded field ${name} to its ${sourceType} declaration and draw that part as a ${kind}.`,
+            [
+              `Field ${name} is declared on ${group.length} sigs, so the bare name denotes the union of all declarations`,
+              selectorEvidence(synthesized, examples.length)
+            ],
+            'cope.selector-synthesis',
+            true,
+            [weakerStructuralPatch(kind, name)]
+          )
+        );
+      }
+    }
+
+    // Supertype-declared fields whose clean structure appears only within one
+    // subtype family (#143 Phase 2). Fires only when the full relation has no
+    // recognizable topology, so it never competes with the generic rules or
+    // the families above; each subtype whose restriction is clean gets its
+    // own tuple-restricted candidate.
+    for (const relation of structural) {
+      const declaredType = relation.types[0]!;
+      const fullEdges = unionEdges([relation], examples);
+      if (fullEdges.length === 0) continue;
+      if (classifyStructure(profileEdges(fullEdges))) continue;
+      const subtypes = directSubtypes(declaredType, types);
+      if (subtypes.length < 2) continue;
+      for (const subtype of subtypes) {
+        const family = typeFamily(subtype.id, types);
+        const restrictedByExample = examples.map((example) => {
+          const familyAtoms = atomIdsOfTypes(family, example.getTypes());
+          return orderedRelationEdges([relation], example).filter(
+            ([source, target]) =>
+              familyAtoms.has(source) && familyAtoms.has(target)
+          );
+        });
+        const restrictedUnion = dedupEdgePairs(restrictedByExample.flat());
+        if (
+          restrictedUnion.length === 0 ||
+          restrictedUnion.length >= fullEdges.length
+        ) {
+          continue;
+        }
+        const kind = classifyStructure(profileEdges(restrictedUnion));
+        if (!kind) continue;
+        const synthesized = synthesizeAndVerifySelector(
+          { arity: 2, matchesByInstance: restrictedByExample },
+          examples,
+          options.core,
+          {
+            hintExpressions: [
+              `(${relation.name} & (${subtype.id} -> ${subtype.id}))`
+            ],
+            maxDepth: 0
+          }
+        );
+        if (!synthesized) continue;
+        synthCovered.add(relation.id);
+        suggestions.push(
+          suggestion(
+            `${kind === 'cycle' ? 'cyclic' : 'orientation'}:synth-narrow:${
+              relation.id
+            }:${subtype.id}`,
+            structuralPatch(kind, synthesized.expression),
+            'medium',
+            `Restrict ${relation.name} to ${subtype.id}, where it forms a clean ${kind}.`,
+            [
+              `${relation.name} as a whole has no clean topology, but its restriction to ${subtype.id} is a ${kind}`,
+              selectorEvidence(synthesized, examples.length)
+            ],
+            'cope.selector-synthesis',
+            true,
+            [weakerStructuralPatch(kind, relation.name)]
+          )
+        );
+      }
+    }
 
     // Trees split across several fields (e.g. left + right): the union forms
     // a branching forest that no contributing field forms alone.
@@ -985,7 +1222,18 @@ export function suggestAlloyLayout(
           )
         },
         examples,
-        options.core
+        options.core,
+        {
+          // The union of the contributing names denotes the target directly;
+          // deeper search is only needed when the hint fails to evaluate.
+          hintExpressions: [
+            `(${contributing
+              .map(({ name }) => name)
+              .sort()
+              .join(' + ')})`
+          ],
+          maxDepth: contributing.length > 2 ? 2 : 1
+        }
       );
       if (!synthesized) continue;
       const names = contributing.map(({ name }) => name);
@@ -1007,7 +1255,7 @@ export function suggestAlloyLayout(
           `Treat ${names.join(' + ')} together as one tree spine.`,
           [
             `The union of ${names.join(', ')} forms a branching tree that no single field forms alone`,
-            `Selector ${synthesized.expression} was synthesized and verified on ${examples.length} state(s)`
+            selectorEvidence(synthesized, examples.length)
           ],
           'cope.selector-synthesis',
           true,
@@ -1048,7 +1296,14 @@ export function suggestAlloyLayout(
           )
         },
         examples,
-        options.core
+        options.core,
+        {
+          // ~name denotes the transpose directly; depth 1 covers the search
+          // form ~(name) if the hint fails, and a depth-0 identifier pass can
+          // still surface a declared forward field with the same extension.
+          hintExpressions: [`~${relation.name}`],
+          maxDepth: 1
+        }
       );
       if (!synthesized) continue;
       synthCovered.add(relation.id);
@@ -1069,7 +1324,7 @@ export function suggestAlloyLayout(
           `Draw the reverse of ${relation.name} as a top-to-bottom tree.`,
           [
             `Every atom has at most one ${relation.name} target while targets fan in, so the reversed relation is the tree`,
-            `Selector ${synthesized.expression} was synthesized and verified on ${examples.length} state(s)`
+            selectorEvidence(synthesized, examples.length)
           ],
           'cope.selector-synthesis',
           true,
@@ -1087,6 +1342,115 @@ export function suggestAlloyLayout(
           ]
         )
       );
+    }
+
+    // Hierarchies through an indirection type (#143 Phase 2): a field joins
+    // the parent to an intermediate atom whose own field continues to the
+    // real child, as in Dir -contents-> Entry -object-> Obj. The composed
+    // relation contents.object is the tree; neither field is self-typed, so
+    // no other structural rule can see the spine.
+    const crossType = relations.filter(
+      (relation) =>
+        relation.types.length === 2 &&
+        relation.types[0] !== relation.types[1] &&
+        !nonEdgeRelations.has(relation.id) &&
+        !overloadedNames.has(relation.name) &&
+        !enums.all.has(relation.types[1] ?? '')
+    );
+    for (const first of crossType) {
+      for (const second of crossType) {
+        if (first === second) continue;
+        const linkType = first.types[1]!;
+        const continueType = second.types[0]!;
+        if (
+          linkType !== continueType &&
+          !typeFamily(linkType, types).has(continueType) &&
+          !typeFamily(continueType, types).has(linkType)
+        ) {
+          continue;
+        }
+
+        // Compose per example; the indirection reading requires every first
+        // edge to continue through exactly one second edge.
+        const joinByExample: [string, string][][] = [];
+        let composedCleanly = true;
+        for (const example of examples) {
+          const continuations = new Map<string, string[]>();
+          for (const [middle, child] of orderedRelationEdges(
+            [second],
+            example
+          )) {
+            continuations.set(middle, [
+              ...(continuations.get(middle) ?? []),
+              child
+            ]);
+          }
+          const joined: [string, string][] = [];
+          for (const [parent, middle] of orderedRelationEdges(
+            [first],
+            example
+          )) {
+            const children = continuations.get(middle) ?? [];
+            if (children.length !== 1) {
+              composedCleanly = false;
+              break;
+            }
+            joined.push([parent, children[0]!]);
+          }
+          if (!composedCleanly) break;
+          joinByExample.push(dedupEdgePairs(joined));
+        }
+        if (!composedCleanly) continue;
+        const joinUnion = dedupEdgePairs(joinByExample.flat());
+        if (joinUnion.length < 2) continue;
+        const kind = classifyStructure(profileEdges(joinUnion));
+        if (kind !== 'tree' && kind !== 'chain') continue;
+
+        const synthesized = synthesizeAndVerifySelector(
+          { arity: 2, matchesByInstance: joinByExample },
+          examples,
+          options.core,
+          {
+            hintExpressions: [`${first.name}.${second.name}`],
+            maxDepth: 1
+          }
+        );
+        if (!synthesized) continue;
+        synthCovered.add(first.id);
+        synthCovered.add(second.id);
+        suggestions.push(
+          suggestion(
+            `orientation:synth-join:${first.id}:${second.id}`,
+            structuralPatch(kind, synthesized.expression),
+            'medium',
+            `Follow ${first.name} through ${linkType} and draw the composed relation as one ${kind}.`,
+            [
+              `Every ${first.name} edge continues through exactly one ${second.name} edge, so ${linkType} atoms are an indirection`,
+              selectorEvidence(synthesized, examples.length)
+            ],
+            'cope.selector-synthesis',
+            true,
+            [
+              {
+                constraints: [
+                  {
+                    orientation: {
+                      selector: first.name,
+                      directions: ['below']
+                    }
+                  },
+                  {
+                    orientation: {
+                      selector: second.name,
+                      directions: ['below']
+                    }
+                  }
+                ]
+              }
+            ]
+          )
+        );
+      }
     }
   }
 
