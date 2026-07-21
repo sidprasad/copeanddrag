@@ -342,7 +342,7 @@ function dedupEdgePairs(
   const seen = new Set<string>();
   const result: [string, string][] = [];
   for (const edge of edges) {
-    const key = `${edge[0]} ${edge[1]}`;
+    const key = `${edge[0]}\u0000${edge[1]}`;
     if (!seen.has(key)) {
       seen.add(key);
       result.push(edge);
