@@ -281,6 +281,7 @@ const GraphLayoutDrawer = () => {
         examples,
         rawAlloyInstance: alloyDatum.instances[primaryIndex],
         includePresentation: true,
+        core,
       });
       const validationCache = new Map<string, LayoutValidationResult>();
       const draft = await resolveValidatedLayout(proposal, (spec) => {
