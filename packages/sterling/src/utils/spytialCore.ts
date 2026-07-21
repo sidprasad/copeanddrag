@@ -114,6 +114,13 @@ declare global {
      * dropdowns and selector autocomplete are derived from this instance.
      */
     updateInstanceFromReact?: (instance: any) => void;
+    /**
+     * Push a new layout spec into the mounted spec editor (spytial-core >=
+     * 3.4.0). The editor replaces its document in place — no remount, view and
+     * scroll preserved, one undo step. Absent on older cores; feature-detect
+     * and fall back to remounting.
+     */
+    updateSpecFromReact?: (yaml: string) => void;
     showParseError?: (message: string, context: string) => void;
     showGeneralError?: (message: string) => void;
     showPositionalError?: (errorMessages: any) => void;

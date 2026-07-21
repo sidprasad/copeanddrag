@@ -303,16 +303,24 @@ const GraphLayoutDrawer = () => {
 
       // Apply the strongest generated spec that passed the real layout pipeline
       // for every state, then reopen it for ordinary hand editing.
-      editorYamlOverrideRef.current = parsed.layoutYaml;
       refreshProjectionData(draft.spec);
       resetProjectionPanes();
       window.clearAllErrors?.();
       dispatch(cndSpecSet({ datum, spec: draft.spec }));
-      // spytial-core currently exposes no teardown for this embedded React
-      // editor. Re-keying is required to load generated YAML, but may retain a
-      // core-owned root/listener until core provides an explicit unmount hook.
-      setIsEditorMounted(false);
-      setEditorRevision((revision) => revision + 1);
+
+      if (typeof window.updateSpecFromReact === 'function') {
+        // spytial-core >= 3.4.0: push the generated YAML into the live editor.
+        // The document is replaced in place (one undo step); the Builder/Code
+        // tab, scroll, and the editor's React root all survive.
+        window.updateSpecFromReact(parsed.layoutYaml);
+      } else {
+        // Older cores have no inbound spec path: reload via a full remount.
+        // Re-keying loads the generated YAML but retains the abandoned
+        // core-owned root/listener until the core in use ships the push API.
+        editorYamlOverrideRef.current = parsed.layoutYaml;
+        setIsEditorMounted(false);
+        setEditorRevision((revision) => revision + 1);
+      }
     } catch (error) {
       setSuggestionError(error instanceof Error ? error.message : 'Could not suggest a layout.');
     } finally {
