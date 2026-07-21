@@ -867,7 +867,16 @@ export function suggestAlloyLayout(
     ...(options.examples ?? []).filter((item) => item !== instance)
   ];
   const types = instance.getTypes();
-  const relations = instance.getRelations();
+  const builtinIds = new Set(
+    types.filter(({ isBuiltin }) => isBuiltin).map(({ id }) => id)
+  );
+  // A genuine field's source column is the sig that declares it, never a
+  // builtin. Builtin-sourced relations are solver plumbing — Forge emits a
+  // sentinel field `no-field-guard` declared on univ itself — and must not
+  // reach any heuristic, so they are filtered out before every rule below.
+  const relations = instance
+    .getRelations()
+    .filter((relation) => !builtinIds.has(relation.types[0] ?? ''));
   const facts = schemaFacts(options.rawAlloyInstance);
   const enums = inferEnums(types, facts);
   const projection = projectionCandidate(types, relations, facts);
@@ -977,15 +986,15 @@ export function suggestAlloyLayout(
     }
   }
 
-  const builtinIds = new Set(
-    types.filter(({ isBuiltin }) => isBuiltin).map(({ id }) => id)
-  );
   for (const relation of relations) {
     const target = relation.types[1];
+    // An empty relation is vacuously functional; requiring an observed tuple
+    // keeps the "at most one target per source" evidence non-vacuous.
     if (
       relation.types.length === 2 &&
       target &&
       builtinIds.has(target) &&
+      unionEdges([relation], examples).length > 0 &&
       isFunctional(relation, examples)
     ) {
       const candidateId = `attribute:${relation.id}`;
