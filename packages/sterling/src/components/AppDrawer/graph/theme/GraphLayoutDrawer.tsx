@@ -5,6 +5,8 @@ import { selectActiveDatum, selectCnDSpec, selectSelectedProjections, selectTime
 import { cndSpecSet, selectedProjectionsSet } from '../../../../state/graphs/graphsSlice';
 import { parseCndFile } from '../../../../utils/cndPreParser';
 import { ensureBootstrapLoaded, getSpytialCore } from '../../../../utils/spytialCore';
+import { resolveValidatedLayout, suggestAlloyLayout, validateCndSpecWithSpytial } from '../../../../utils/layoutSuggestions';
+import type { LayoutValidationResult } from '../../../../utils/layoutSuggestions';
 import * as yaml from 'js-yaml';
 
 /**
@@ -38,6 +40,10 @@ const GraphLayoutDrawer = () => {
   const datum = useSterlingSelector(selectActiveDatum);
   const cndEditorRef = useRef<HTMLDivElement>(null);
   const [isEditorMounted, setIsEditorMounted] = useState(false);
+  const [editorRevision, setEditorRevision] = useState(0);
+  const editorYamlOverrideRef = useRef<string | null>(null);
+  const [suggestionError, setSuggestionError] = useState<string | null>(null);
+  const [isSuggesting, setIsSuggesting] = useState(false);
 
   // Preserve the projections/sequence blocks that were stripped from the
   // editor so we can merge them back when "Apply Layout" is clicked.
@@ -51,6 +57,14 @@ const GraphLayoutDrawer = () => {
   const timeIndex = useSterlingSelector((state) =>
     datum ? selectTimeIndex(state, datum) : 0
   );
+
+  // Overrides are scoped to one datum. If editor remounting is later added to
+  // datum switching, a generated spec must not leak into the next graph.
+  useEffect(() => {
+    editorYamlOverrideRef.current = null;
+    extraCndBlocksRef.current = {};
+    setSuggestionError(null);
+  }, [datum?.id]);
 
   const refreshProjectionData = useCallback((specText: string) => {
     if (!datum?.data) return;
@@ -170,8 +184,8 @@ const GraphLayoutDrawer = () => {
 
       // Strip projections/sequence blocks before passing to SpyTial's editor,
       // which only understands constraints/directives.
-      let editorInitialSpec = defaultSpec;
-      if (preloadedSpec && preloadedSpec !== '') {
+      let editorInitialSpec = editorYamlOverrideRef.current ?? defaultSpec;
+      if (editorYamlOverrideRef.current === null && preloadedSpec && preloadedSpec !== '') {
         const parsed = parseCndFile(preloadedSpec);
         editorInitialSpec = parsed.layoutYaml || defaultSpec;
 
@@ -194,17 +208,34 @@ const GraphLayoutDrawer = () => {
       try {
         const core = getSpytialCore();
         if (core?.mountCndLayoutInterface) {
-          core.mountCndLayoutInterface('cnd-editor-mount', options);
+          core.mountCndLayoutInterface(`cnd-editor-mount-${editorRevision}`, options);
           setIsEditorMounted(true);
         } else if (window.mountCndLayoutInterface) {
-          window.mountCndLayoutInterface('cnd-editor-mount', options);
+          window.mountCndLayoutInterface(`cnd-editor-mount-${editorRevision}`, options);
           setIsEditorMounted(true);
         }
       } catch (err) {
         console.error('Failed to mount CnD Layout Interface:', err);
       }
     }
-  }, [isEditorMounted, datum, preloadedSpec]);
+  }, [editorRevision, isEditorMounted, datum, preloadedSpec]);
+
+  const resetProjectionPanes = useCallback(() => {
+    if (!datum) return;
+    if (!window.currentProjections) {
+      window.currentProjections = {};
+    }
+    Object.entries(selectedProjections).forEach(([projectionType]) => {
+      dispatch(selectedProjectionsSet({
+        datum,
+        projectionType,
+        selectedAtoms: []
+      }));
+      if (window.currentProjections?.[projectionType]) {
+        delete window.currentProjections[projectionType];
+      }
+    });
+  }, [datum, dispatch, selectedProjections]);
 
   const applyLayout = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -217,25 +248,76 @@ const GraphLayoutDrawer = () => {
     refreshProjectionData(fullCndSpec);
 
     // Collapse to single-graph view before re-applying layout.
-    if (!window.currentProjections) {
-      window.currentProjections = {};
-    }
-    Object.entries(selectedProjections).forEach(([projectionType, atoms]) => {
-      dispatch(selectedProjectionsSet({
-        datum,
-        projectionType,
-        selectedAtoms: []
-      }));
-      if (window.currentProjections && window.currentProjections[projectionType]) {
-        delete window.currentProjections[projectionType];
-      }
-    });
+    resetProjectionPanes();
 
     if (window.clearAllErrors) {
       window.clearAllErrors();
     }
     
     dispatch(cndSpecSet({ datum, spec: fullCndSpec }));
+  };
+
+  const suggestLayout = async () => {
+    if (!datum?.data) return;
+    setSuggestionError(null);
+    setIsSuggesting(true);
+    try {
+      const core = getSpytialCore();
+      if (!core?.AlloyInstance?.parseAlloyXML || !core.AlloyDataInstance) {
+        throw new Error('The Alloy instance parser is unavailable.');
+      }
+      const alloyDatum = core.AlloyInstance.parseAlloyXML(datum.data);
+      if (!alloyDatum.instances?.length) {
+        throw new Error('No Alloy or Forge instance is available to analyze.');
+      }
+
+      const instances = alloyDatum.instances.map(
+        (instance: any) => new core.AlloyDataInstance(instance)
+      );
+      const primaryIndex = Math.min(timeIndex, instances.length - 1);
+      const primary = instances[primaryIndex];
+      const examples = instances.filter((_: any, index: number) => index !== primaryIndex);
+      const proposal = suggestAlloyLayout(primary, {
+        examples,
+        rawAlloyInstance: alloyDatum.instances[primaryIndex],
+        includePresentation: true,
+      });
+      const validationCache = new Map<string, LayoutValidationResult>();
+      const draft = await resolveValidatedLayout(proposal, (spec) => {
+        const cached = validationCache.get(spec);
+        if (cached) return cached;
+        const result = validateCndSpecWithSpytial(spec, instances, core);
+        validationCache.set(spec, result);
+        return result;
+      });
+
+      const parsed = parseCndFile(draft.spec);
+      const extraBlocks: Record<string, unknown> = {};
+      if (parsed.projections.length > 0) {
+        extraBlocks.projections = parsed.projections;
+      }
+      if (parsed.sequence.policy !== 'ignore_history') {
+        extraBlocks.temporal = { policy: parsed.sequence.policy };
+      }
+      extraCndBlocksRef.current = extraBlocks;
+
+      // Apply the strongest generated spec that passed the real layout pipeline
+      // for every state, then reopen it for ordinary hand editing.
+      editorYamlOverrideRef.current = parsed.layoutYaml;
+      refreshProjectionData(draft.spec);
+      resetProjectionPanes();
+      window.clearAllErrors?.();
+      dispatch(cndSpecSet({ datum, spec: draft.spec }));
+      // spytial-core currently exposes no teardown for this embedded React
+      // editor. Re-keying is required to load generated YAML, but may retain a
+      // core-owned root/listener until core provides an explicit unmount hook.
+      setIsEditorMounted(false);
+      setEditorRevision((revision) => revision + 1);
+    } catch (error) {
+      setSuggestionError(error instanceof Error ? error.message : 'Could not suggest a layout.');
+    } finally {
+      setIsSuggesting(false);
+    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -283,6 +365,16 @@ const GraphLayoutDrawer = () => {
           >
             Apply Layout
           </button>
+
+          <button
+            type="button"
+            onClick={suggestLayout}
+            disabled={isSuggesting || !getSpytialCore()?.AlloyInstance?.parseAlloyXML}
+            title="Generate and apply an editable CnD layout from the current instance"
+            className="flex-1 rounded-lg border border-accent-border bg-accent-bg px-4 py-2.5 text-sm font-medium text-accent transition hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isSuggesting ? 'Analyzing…' : 'Suggest layout'}
+          </button>
           
           <label className="group relative flex-1 cursor-pointer">
             <div className="flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-rule-strong bg-surface px-4 py-2.5 text-sm font-medium text-ink-muted transition hover:border-accent-border hover:text-accent">
@@ -300,10 +392,17 @@ const GraphLayoutDrawer = () => {
           </label>
         </div>
 
+        {suggestionError && (
+          <div className="rounded-lg border border-danger bg-danger-bg p-3 text-sm text-danger">
+            {suggestionError}
+          </div>
+        )}
+
         {/* Editor */}
         <div className="rounded-lg border border-rule bg-surface shadow-sm p-3">
           <div
-            id="cnd-editor-mount"
+            key={editorRevision}
+            id={`cnd-editor-mount-${editorRevision}`}
             ref={cndEditorRef}
             className="min-h-[360px] overflow-hidden rounded-lg border border-rule bg-surface-muted"
           />
