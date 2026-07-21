@@ -45,7 +45,6 @@ export default defineConfig({
             { text: 'Field-Based Selectors', link: '/cnd/field-selectors' },
             { text: 'Projections', link: '/cnd/projections' },
             { text: 'Temporal Mode', link: '/cnd/temporal' },
-            { text: 'Selector Synthesis', link: '/cnd/selector-synthesis' },
           ],
         },
       ],

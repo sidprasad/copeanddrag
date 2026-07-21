@@ -18,7 +18,6 @@ import {
   ExplorerDrawerHeader
 } from '../common/explorer/ExplorerDrawer';
 import { GraphLayoutDrawer, GraphLayoutDrawerHeader } from './theme/GraphLayoutDrawer';
-import { SynthesisDrawer, SynthesisDrawerHeader } from './synthesis';
 
 const GraphDrawer = () => {
   const drawer = useSterlingSelector(selectGraphDrawer);
@@ -30,7 +29,6 @@ const GraphDrawer = () => {
       {drawer === 'evaluator' && <EvaluatorDrawer />}
       {drawer === 'log' && <LogDrawer />}
       {drawer === 'layout' && <GraphLayoutDrawer />}
-      {drawer === 'synthesis' && <SynthesisDrawer />}
     </>
   );
 };
@@ -50,7 +48,6 @@ const GraphDrawerHeader = () => {
       {drawer === 'evaluator' && <EvaluatorDrawerHeader />}
       {drawer === 'log' && <LogDrawerHeader />}
       {drawer === 'layout' && <GraphLayoutDrawerHeader />}
-      {drawer === 'synthesis' && <SynthesisDrawerHeader />}
     </>
   );
 };

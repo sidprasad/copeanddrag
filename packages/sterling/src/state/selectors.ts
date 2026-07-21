@@ -767,64 +767,17 @@ export function selectSequencePolicyName(
 }
 
 /**
- * Synthesis mode selectors
+ * Instance-harvest selectors (programmatic multi-instance collection used by
+ * layout suggestion / selector synthesis flows).
  */
-export function selectIsSynthesisEnabled(state: SterlingState): boolean {
-  return providerSelectors.selectIsSynthesisEnabled(state.provider);
+export function selectHarvestStatus(state: SterlingState) {
+  return state.instanceHarvest.status;
 }
 
-export function selectIsSynthesisActive(state: SterlingState): boolean {
-  return state.synthesis.isActive;
+export function selectHarvestedInstances(state: SterlingState) {
+  return state.instanceHarvest.instances;
 }
 
-export function selectSynthesisSelectorType(state: SterlingState) {
-  return state.synthesis.selectorType;
-}
-
-export function selectSynthesisStep(state: SterlingState): number {
-  return state.synthesis.currentStep;
-}
-
-export function selectSynthesisNumInstances(state: SterlingState): number {
-  return state.synthesis.numInstances;
-}
-
-export function selectSynthesisExamples(state: SterlingState) {
-  return state.synthesis.examples;
-}
-
-export function selectSynthesisInstances(state: SterlingState) {
-  return state.synthesis.loadedInstances;
-}
-
-export function selectSynthesisResult(state: SterlingState) {
-  return state.synthesis.result;
-}
-
-export function selectSynthesisError(state: SterlingState) {
-  return state.synthesis.error;
-}
-
-export function selectSynthesisLoading(state: SterlingState): boolean {
-  return state.synthesis.isLoading;
-}
-
-export function selectCanSynthesize(state: SterlingState): boolean {
-  return (
-    !state.synthesis.isLoading &&
-    state.synthesis.examples.length === state.synthesis.numInstances &&
-    state.synthesis.examples.every((ex: any) => ex.selectedAtomIds.length > 0 || ex.selectedPairs.length > 0)
-  );
-}
-
-export function selectSynthesisDraftAtomIds(state: SterlingState): string[] {
-  return state.synthesis.draftSelection.atomIds;
-}
-
-export function selectSynthesisDraftPairs(state: SterlingState): [string, string][] {
-  return state.synthesis.draftSelection.pairs;
-}
-
-export function selectSynthesisCurrentDataInstance(state: SterlingState): any | null {
-  return state.synthesis.currentDataInstance;
+export function selectHarvestError(state: SterlingState) {
+  return state.instanceHarvest.error;
 }

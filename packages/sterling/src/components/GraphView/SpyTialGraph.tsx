@@ -69,7 +69,8 @@ declare global {
       // no re-render; the element also fires a 'theme-changed' event when the
       // user picks a theme in its built-in Mode dropdown.
       setTheme?: (name: string, overrides?: Record<string, string>, nodeColors?: Record<string, number>) => void;
-      // Node highlighting for synthesis mode
+      // Node highlighting (spytial-core element API) — e.g. for previewing
+      // which atoms/pairs a suggested layout selector targets.
       clearNodeHighlights?: () => void;
       highlightNodes?: (nodeIds: string[], color?: string) => boolean;
       highlightNodePairs?: (pairs: [string, string][], options?: { showBadges?: boolean }) => boolean;
@@ -87,10 +88,6 @@ interface SpyTialGraphProps {
   /** Prior layout state from previous frame for temporal continuity */
   priorState?: LayoutState;
   onCndSpecChange?: (spec: string) => void;
-  /** Synthesis mode: enable node selection */
-  synthesisMode?: boolean;
-  /** Callback to receive the AlloyDataInstance when it's created (for synthesis) */
-  onDataInstanceCreated?: (dataInstance: any) => void;
   /** CND-derived projection configuration */
   projectionConfig?: CndProjection[];
   /** CND-derived sequence policy name */
@@ -100,14 +97,12 @@ interface SpyTialGraphProps {
 }
 
 const SpyTialGraph = (props: SpyTialGraphProps) => {
-  const { 
-    datum, 
-    cndSpec, 
-    timeIndex, 
-    priorState, 
+  const {
+    datum,
+    cndSpec,
+    timeIndex,
+    priorState,
     onLayoutStateChange,
-    synthesisMode = false,
-    onDataInstanceCreated,
     projectionConfig = [],
     sequencePolicyName = 'ignore_history',
     projectionSelections = {}
@@ -235,11 +230,6 @@ const SpyTialGraph = (props: SpyTialGraphProps) => {
           graphElementRef.current.clear();
         }
         return;
-      }
-
-      // Notify parent if in synthesis mode - pass raw instance data (not class) for Redux storage
-      if (synthesisMode && onDataInstanceCreated) {
-        onDataInstanceCreated(alloyDatum.instances[instanceIndex]);
       }
 
       // Step 3: Create SGraphQueryEvaluator for layout generation
@@ -564,11 +554,11 @@ const SpyTialGraph = (props: SpyTialGraphProps) => {
       {/* This div is where we manually mount the custom element - React won't touch its children */}
       <div 
         ref={graphContainerRef} 
-        style={{ 
+        style={{
           flex: 1,
           position: 'relative',
           minHeight: '400px',
-          cursor: synthesisMode ? 'pointer' : 'default'
+          cursor: 'default'
         }}
       />
       {/* React-managed overlay elements */}

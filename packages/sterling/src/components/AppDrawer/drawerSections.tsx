@@ -3,7 +3,6 @@ import { FaFilm } from 'react-icons/fa';
 import { GoNote, GoTerminal } from 'react-icons/go';
 import {
   MdFilterCenterFocus,
-  MdScience,
   MdWorkspacesOutline
 } from 'react-icons/md';
 import { VscVariableGroup } from 'react-icons/vsc';
@@ -12,7 +11,6 @@ import {
   selectActiveDatum,
   selectDatumIsTrace,
   selectDrawerView,
-  selectIsSynthesisEnabled,
   selectMainView
 } from '../../state/selectors';
 import {
@@ -34,7 +32,6 @@ export interface DrawerSection {
 const TIME: DrawerSection = { value: 'state', label: 'Time', icon: <FaFilm /> };
 const PROJECTIONS: DrawerSection = { value: 'projections', label: 'Projections', icon: <MdFilterCenterFocus /> };
 const LAYOUT: DrawerSection = { value: 'layout', label: 'Layout', icon: <MdWorkspacesOutline /> };
-const SYNTHESIS: DrawerSection = { value: 'synthesis', label: 'Synthesis', icon: <MdScience /> };
 const VARIABLES: DrawerSection = { value: 'variables', label: 'Variables', icon: <VscVariableGroup /> };
 const EXPLORER: DrawerSection = { value: 'explorer', label: 'Explorer', icon: <FaFilm /> };
 const EVALUATOR: DrawerSection = { value: 'evaluator', label: 'Evaluator', icon: <GoTerminal /> };
@@ -46,7 +43,6 @@ const COMMON = [EXPLORER, EVALUATOR, LOG];
 /** Sections available in the bottom drawer for the active main view. */
 export function useDrawerSections(): DrawerSection[] {
   const view = useSterlingSelector(selectMainView);
-  const synthesisEnabled = useSterlingSelector(selectIsSynthesisEnabled);
   // Time only makes sense for a temporal trace (multiple states). For a single
   // static instance there is nothing to scrub through, so the tab is hidden —
   // matching the in-drawer guard in GraphStateDrawer.
@@ -57,13 +53,7 @@ export function useDrawerSections(): DrawerSection[] {
   const TIME_IF_TRACE = isTrace ? [TIME] : [];
   switch (view) {
     case 'GraphView':
-      return [
-        ...TIME_IF_TRACE,
-        PROJECTIONS,
-        LAYOUT,
-        ...(synthesisEnabled ? [SYNTHESIS] : []),
-        ...COMMON
-      ];
+      return [...TIME_IF_TRACE, PROJECTIONS, LAYOUT, ...COMMON];
     case 'TableView':
       return [...TIME_IF_TRACE, ...COMMON];
     case 'ScriptView':
