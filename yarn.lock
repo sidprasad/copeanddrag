@@ -8659,10 +8659,10 @@ sprintf-js@~1.0.2:
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==
 
-spytial-core@3.3.0:
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/spytial-core/-/spytial-core-3.3.0.tgz#7af3c279baa33c55d3ce0809c56791b78218102c"
-  integrity sha512-xpshOoy18VxhaAmNzYi2QjK+0qHOogIZJoxVayVE9WlLDkDwnE8OyHPPNXITOMpq3PgkIYbraLasoOE+3maxDQ==
+spytial-core@3.4.0:
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/spytial-core/-/spytial-core-3.4.0.tgz#5b570d6d1fc5126353bca11b1e618aab657edbc5"
+  integrity sha512-PckCWM5hbl++kehfNbrtmMl9Qo26jkSquRd2HAALT5zeA8coO2La3LLOdonDkFeNL7dXpKHcR/rswZ0vtgiNSA==
   dependencies:
     "@codemirror/commands" "^6.10.4"
     "@codemirror/lang-yaml" "^6.1.3"
