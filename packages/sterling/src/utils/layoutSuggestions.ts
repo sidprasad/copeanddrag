@@ -1,6 +1,7 @@
 import * as yaml from 'js-yaml';
 import { parseCndFile } from './cndPreParser';
 import type { SpytialCoreApi } from './spytialCore';
+import { synthesizeAndVerifySelector } from './selectorSynthesis';
 
 /**
  * Suggestion policy intentionally lives in Cope and Drag rather than calling
@@ -112,19 +113,32 @@ export class LayoutValidationUnavailableError extends Error {
   }
 }
 
-interface RelationProfile {
+interface EdgeProfile {
   edgeCount: number;
-  isBinary: boolean;
-  isSelfRelation: boolean;
   isAcyclic: boolean;
   isLinearChain: boolean;
   isSimpleCycle: boolean;
+  maxIncoming: number;
+  maxOutgoing: number;
+}
+
+interface RelationProfile extends EdgeProfile {
+  isBinary: boolean;
+  isSelfRelation: boolean;
 }
 
 interface SuggestLayoutOptions {
   examples?: readonly SpytialDataInstance[];
   rawAlloyInstance?: RawAlloyInstance;
   includePresentation?: boolean;
+  /**
+   * Optional spytial-core API. When present (and the instances expose their
+   * atoms), structural heuristics may use selector synthesis to name a target
+   * edge set that no single declared field denotes — e.g. a tree split across
+   * `left + right`, or the transpose of a child-to-parent field. Absent, the
+   * draft is exactly the direct-selector draft.
+   */
+  core?: SpytialCoreApi;
 }
 
 const PALETTE = [
@@ -278,23 +292,50 @@ function isFunctional(
   });
 }
 
-function relationProfile(
-  relation: SpytialRelation,
-  examples: readonly SpytialDataInstance[]
-): RelationProfile {
-  const isBinary = relation.types.length === 2;
-  const edgeMap = new Map<string, [string, string]>();
-  if (isBinary) {
-    for (const example of examples) {
-      for (const tuple of matchingRelation(relation, example)?.tuples ?? []) {
-        const [source, target] = tuple.atoms;
-        if (source !== undefined && target !== undefined) {
-          edgeMap.set(`${source}\u0000${target}`, [source, target]);
-        }
+/**
+ * Collect the deduplicated edge set of one or more binary relations in a
+ * single instance, in tuple order.
+ */
+function orderedRelationEdges(
+  relations: readonly SpytialRelation[],
+  example: SpytialDataInstance
+): [string, string][] {
+  const seen = new Set<string>();
+  const edges: [string, string][] = [];
+  for (const relation of relations) {
+    for (const tuple of matchingRelation(relation, example)?.tuples ?? []) {
+      const [source, target] = tuple.atoms;
+      if (source === undefined || target === undefined) continue;
+      const key = `${source}\u0000${target}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        edges.push([source, target]);
       }
     }
   }
-  const edges = [...edgeMap.values()];
+  return edges;
+}
+
+/** Union of the relations' edges across every example, deduplicated. */
+function unionEdges(
+  relations: readonly SpytialRelation[],
+  examples: readonly SpytialDataInstance[]
+): [string, string][] {
+  const seen = new Set<string>();
+  const edges: [string, string][] = [];
+  for (const example of examples) {
+    for (const edge of orderedRelationEdges(relations, example)) {
+      const key = `${edge[0]}\u0000${edge[1]}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        edges.push(edge);
+      }
+    }
+  }
+  return edges;
+}
+
+function profileEdges(edges: ReadonlyArray<[string, string]>): EdgeProfile {
   const nodes = new Set(edges.flatMap(([source, target]) => [source, target]));
   const incoming = new Map([...nodes].map((node) => [node, 0]));
   const outgoing = new Map([...nodes].map((node) => [node, [] as string[]]));
@@ -343,10 +384,11 @@ function relationProfile(
   );
   const leaves = [...nodes].filter((node) => outdegree(node) === 0).length;
 
+  const maxIncoming = Math.max(0, ...[...nodes].map((node) => incoming.get(node) ?? 0));
+  const maxOutgoing = Math.max(0, ...[...nodes].map((node) => outdegree(node)));
+
   return {
     edgeCount: edges.length,
-    isBinary,
-    isSelfRelation: isBinary && relation.types[0] === relation.types[1],
     isAcyclic: visited === nodes.size,
     isLinearChain:
       connected &&
@@ -361,7 +403,22 @@ function relationProfile(
       edges.length === nodes.size &&
       [...nodes].every(
         (node) => incoming.get(node) === 1 && outdegree(node) === 1
-      )
+      ),
+    maxIncoming,
+    maxOutgoing
+  };
+}
+
+function relationProfile(
+  relation: SpytialRelation,
+  examples: readonly SpytialDataInstance[]
+): RelationProfile {
+  const isBinary = relation.types.length === 2;
+  const edges = isBinary ? unionEdges([relation], examples) : [];
+  return {
+    ...profileEdges(edges),
+    isBinary,
+    isSelfRelation: isBinary && relation.types[0] === relation.types[1]
   };
 }
 
@@ -867,6 +924,172 @@ export function suggestAlloyLayout(
     );
   }
 
+  // --- Synthesized structural selectors (#143, Phase 1) ---------------------
+  // When core selector synthesis is available, name target edge sets that no
+  // single declared field denotes. The heuristic decides the visual intent
+  // (tree spine, below); synthesis only names the extension, and every
+  // accepted expression is re-verified against each supplied instance by
+  // synthesizeAndVerifySelector before it may appear here. Relations covered
+  // by an accepted synthesized candidate skip the generic topology rules
+  // below so the draft carries one spine constraint per structure.
+  const synthCovered = new Set<string>();
+  if (options.core) {
+    const structural = relations.filter(
+      (relation) =>
+        relation.types.length === 2 &&
+        relation.types[0] === relation.types[1] &&
+        !enums.all.has(relation.types[1] ?? '') &&
+        !nonEdgeRelations.has(relation.id) &&
+        relation.name !== 'parent'
+    );
+
+    // Trees split across several fields (e.g. left + right): the union forms
+    // a branching forest that no contributing field forms alone.
+    const bySourceType = new Map<string, SpytialRelation[]>();
+    for (const relation of structural) {
+      const sourceType = relation.types[0]!;
+      bySourceType.set(sourceType, [
+        ...(bySourceType.get(sourceType) ?? []),
+        relation
+      ]);
+    }
+    for (const [sourceType, group] of bySourceType) {
+      if (group.length < 2) continue;
+      // left/right alone are already handled by the dedicated named rule.
+      if (group.every(({ name }) => name === 'left' || name === 'right')) {
+        continue;
+      }
+      const union = unionEdges(group, examples);
+      const profile = profileEdges(union);
+      const contributing = group.filter(
+        (relation) => unionEdges([relation], examples).length > 0
+      );
+      const coveredBySingleField = group.some(
+        (relation) => unionEdges([relation], examples).length === union.length
+      );
+      if (
+        union.length === 0 ||
+        contributing.length < 2 ||
+        coveredBySingleField ||
+        !profile.isAcyclic ||
+        profile.maxIncoming > 1 ||
+        profile.maxOutgoing < 2
+      ) {
+        continue;
+      }
+      const synthesized = synthesizeAndVerifySelector(
+        {
+          arity: 2,
+          matchesByInstance: examples.map((example) =>
+            orderedRelationEdges(group, example)
+          )
+        },
+        examples,
+        options.core
+      );
+      if (!synthesized) continue;
+      const names = contributing.map(({ name }) => name);
+      for (const relation of group) synthCovered.add(relation.id);
+      suggestions.push(
+        suggestion(
+          `orientation:synth-union:${sourceType}`,
+          {
+            constraints: [
+              {
+                orientation: {
+                  selector: synthesized.expression,
+                  directions: ['below']
+                }
+              }
+            ]
+          },
+          'high',
+          `Treat ${names.join(' + ')} together as one tree spine.`,
+          [
+            `The union of ${names.join(', ')} forms a branching tree that no single field forms alone`,
+            `Selector ${synthesized.expression} was synthesized and verified on ${examples.length} state(s)`
+          ],
+          'cope.selector-synthesis',
+          true,
+          [
+            {
+              constraints: contributing.map((relation) => ({
+                orientation: { selector: relation.name, directions: ['below'] }
+              }))
+            }
+          ]
+        )
+      );
+    }
+
+    // Reversed structural relations: each source has at most one target but
+    // targets fan in (e.g. a child-to-parent field with an unfamiliar name).
+    // The transpose is the tree; drawing the declared direction downward
+    // would put parents below their children.
+    for (const relation of structural) {
+      if (synthCovered.has(relation.id)) continue;
+      const forward = unionEdges([relation], examples);
+      const profile = profileEdges(forward);
+      if (
+        forward.length === 0 ||
+        !profile.isAcyclic ||
+        profile.maxOutgoing > 1 ||
+        profile.maxIncoming < 2
+      ) {
+        continue;
+      }
+      const synthesized = synthesizeAndVerifySelector(
+        {
+          arity: 2,
+          matchesByInstance: examples.map((example) =>
+            orderedRelationEdges([relation], example).map(
+              ([source, target]) => [target, source] as [string, string]
+            )
+          )
+        },
+        examples,
+        options.core
+      );
+      if (!synthesized) continue;
+      synthCovered.add(relation.id);
+      suggestions.push(
+        suggestion(
+          `orientation:synth-transpose:${relation.id}`,
+          {
+            constraints: [
+              {
+                orientation: {
+                  selector: synthesized.expression,
+                  directions: ['below']
+                }
+              }
+            ]
+          },
+          'medium',
+          `Draw the reverse of ${relation.name} as a top-to-bottom tree.`,
+          [
+            `Every atom has at most one ${relation.name} target while targets fan in, so the reversed relation is the tree`,
+            `Selector ${synthesized.expression} was synthesized and verified on ${examples.length} state(s)`
+          ],
+          'cope.selector-synthesis',
+          true,
+          [
+            {
+              constraints: [
+                {
+                  orientation: {
+                    selector: relation.name,
+                    directions: ['above']
+                  }
+                }
+              ]
+            }
+          ]
+        )
+      );
+    }
+  }
+
   const hasForwardChild = relations.some(({ name }) =>
     ['left', 'right', 'child', 'children', 'next'].includes(name)
   );
@@ -940,7 +1163,7 @@ export function suggestAlloyLayout(
           ]
         )
       );
-    } else if (profile.isSimpleCycle) {
+    } else if (profile.isSimpleCycle && !synthCovered.has(relation.id)) {
       suggestions.push(
         suggestion(
           `cyclic:${relation.id}`,
@@ -957,7 +1180,7 @@ export function suggestAlloyLayout(
           'cope.topology'
         )
       );
-    } else if (profile.isLinearChain) {
+    } else if (profile.isLinearChain && !synthCovered.has(relation.id)) {
       suggestions.push(
         suggestion(
           `orientation:${relation.id}:chain`,
@@ -993,7 +1216,8 @@ export function suggestAlloyLayout(
     } else if (
       profile.isSelfRelation &&
       profile.isAcyclic &&
-      profile.edgeCount > 0
+      profile.edgeCount > 0 &&
+      !synthCovered.has(relation.id)
     ) {
       suggestions.push(
         suggestion(

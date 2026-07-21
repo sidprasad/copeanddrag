@@ -25,6 +25,8 @@ Three actions sit above the editor:
 
 Suggestions adapt Alloy's Magic Layout heuristics—enumerations, projections, structural relations, attributes, and presentation—and add topology checks for chains, rings, trees, back-links, and temporal stability. Candidate dependencies prevent destructive combinations, such as hiding an enum whose attribute conversion failed. If the validation pipeline itself is unavailable, the current layout is left unchanged.
 
+When the installed spytial-core exposes selector synthesis, structural suggestions can also target edge sets that no single declared field denotes. The division of labor is strict: the heuristic infers the **visual intent** (this is a tree; children go below) and collects the intended atoms or directed pairs, while synthesis only discovers a **selector expression** naming that extension—for example `lc + rc` for a tree split across two fields, or `~boss` when the declared field points from child to parent. Every synthesized selector is independently re-evaluated against each available state and accepted only on an exact ordered match; expressions that mention concrete atom names are rejected. If synthesis is unavailable or fails, the ordinary direct-selector candidates and fallbacks apply unchanged.
+
 > **For agents writing `.cnd` specs:** prefer Code View and write against the grammar in [YAML Specification](../cnd/yaml-spec). The Structured Builder is a pedagogical surface, not a canonical one.
 
 ## Table view
