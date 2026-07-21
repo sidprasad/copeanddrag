@@ -10,8 +10,7 @@ export type GraphDrawerView =
   | CommonDrawerView
   | 'state'
   | 'projections'
-  | 'layout'
-  | 'synthesis';
+  | 'layout';
 export type TableDrawerView = CommonDrawerView | 'state';
 export type ScriptDrawerView = CommonDrawerView | 'variables';
 

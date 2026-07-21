@@ -18,15 +18,6 @@ yarn run dev:alloy   # dev mode for Alloy (also needed for the mock provider)
 
 The app runs on `http://localhost:8081`. When running against a Forge provider, the instance-provider port is appended as a query parameter — e.g. `http://localhost:8081/?62703` if the provider port is `62703`. In Forge, you can set `sterling_port` in the run options to pin the provider port so the URL stays stable across runs.
 
-### Synthesis dev mode
-
-Selector synthesis UI is gated on a provider capability flag (see below). To run locally with synthesis forced on:
-
-```bash
-yarn run dev:forge:synthesis
-yarn run dev:alloy:synthesis
-```
-
 ### Loading a mock trace directly
 
 Use `Manual Datum` near the bottom of the screen and paste in Alloy-style instance XML.
@@ -84,12 +75,12 @@ The app hides/shows UI features based on capabilities advertised by the provider
     "name": "my-provider",
     "views": ["graph", "table", "script"],
     "generators": ["run", "check"],
-    "features": ["synthesis"]
+    "features": []
   }
 }
 ```
 
-- Selector synthesis in the Graph drawer is hidden unless the provider includes `"synthesis"` in `features`.
+No features are currently gated this way; the mechanism (`selectHasFeature`) remains available for future capabilities.
 
 ## Release flow
 

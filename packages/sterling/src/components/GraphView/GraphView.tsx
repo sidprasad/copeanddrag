@@ -9,12 +9,10 @@ import {
 import type { LayoutSpecWarning } from '../../utils/spytialCore';
 import { parseCndFile } from '../../utils/cndPreParser';
 import { LayoutWarningBanner } from './LayoutWarningBanner';
-import { 
-  selectActiveDatum, 
-  selectCnDSpec, 
+import {
+  selectActiveDatum,
+  selectCnDSpec,
   selectTimeIndex,
-  selectIsSynthesisActive,
-  selectSynthesisStep,
   selectSelectedProjections,
   selectEffectiveTimeIndices,
   selectPresentationMode,
@@ -23,7 +21,6 @@ import {
   selectProjectionConfig,
   selectSequencePolicyName
 } from '../../state/selectors';
-import { setCurrentDataInstance } from '../../state/synthesis/synthesisSlice';
 import { selectedProjectionsSet } from '../../state/graphs/graphsSlice';
 import { SpyTialGraph } from './SpyTialGraph';
 import { MultiProjectionGraph } from './MultiProjectionGraph';
@@ -142,10 +139,6 @@ const GraphView = () => {
     return selections;
   }, [selectedProjections]);
   
-  // Synthesis mode state
-  const isSynthesisActive = useSterlingSelector(selectIsSynthesisActive);
-  const currentStep = useSterlingSelector(selectSynthesisStep);
-
   const latestDatumRef = useRef(datum);
   const latestSelectionsRef = useRef(selectedProjections);
   latestDatumRef.current = datum;
@@ -230,13 +223,6 @@ const GraphView = () => {
     layoutStateRef.current = state;
   }, []);
 
-  // Callback to receive the AlloyDataInstance for synthesis
-  const handleDataInstanceCreated = useCallback((dataInstance: any) => {
-    if (isSynthesisActive) {
-      dispatch(setCurrentDataInstance({ dataInstance }));
-    }
-  }, [dispatch, isSynthesisActive]);
-
   // SpyTial's error modal is a singleton bound to spytial-core's global error
   // manager. We mount it once, directly above the graph, so parse/layout errors
   // raised during rendering are visible no matter which drawer tab is open —
@@ -312,14 +298,11 @@ const GraphView = () => {
   }, [warningsKey]);
 
   // Determine if we should show multiple graphs
-  const shouldShowMultiProjection = 
+  const shouldShowMultiProjection =
     multiProjectionInfo !== null &&
-    !isSynthesisActive &&
     !isMultiTemporalActive;  // Multi-temporal takes precedence
-  
-  const shouldShowMultiTemporal =
-    isMultiTemporalActive &&
-    !isSynthesisActive;  // Don't show multi-temporal in synthesis mode
+
+  const shouldShowMultiTemporal = isMultiTemporalActive;
 
   // Render the appropriate graph component
   const renderGraphContent = () => {
@@ -353,14 +336,12 @@ const GraphView = () => {
     }
     
     return (
-      <SpyTialGraph 
-        datum={datum} 
+      <SpyTialGraph
+        datum={datum}
         cndSpec={cndSpec}
         timeIndex={timeIndex}
         priorState={layoutStateRef.current}
         onLayoutStateChange={handleLayoutStateChange}
-        synthesisMode={isSynthesisActive && currentStep > 0}
-        onDataInstanceCreated={handleDataInstanceCreated}
         projectionConfig={projectionConfig}
         sequencePolicyName={sequencePolicyName}
         projectionSelections={projectionSelections}

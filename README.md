@@ -28,7 +28,7 @@ yarn install
 yarn run dev:forge   # or: yarn run dev:alloy
 ```
 
-The app runs on `http://localhost:8081`. For the full dev walkthrough — building, synthesis mode, code layout, feature flags — see **[DEVGUIDE.md](./DEVGUIDE.md)**.
+The app runs on `http://localhost:8081`. For the full dev walkthrough — building, code layout, feature flags — see **[DEVGUIDE.md](./DEVGUIDE.md)**.
 
 ## License
 

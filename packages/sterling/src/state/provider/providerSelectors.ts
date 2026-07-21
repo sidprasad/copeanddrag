@@ -35,18 +35,10 @@ function selectHasFeature(state: ProviderState, feature: string): boolean {
   return (state.features || []).includes(feature);
 }
 
-/**
- * Select whether synthesis feature is enabled (via command-line flag).
- */
-function selectIsSynthesisEnabled(state: ProviderState): boolean {
-  return state.synthesisEnabled;
-}
-
 export default {
   selectIsConnected,
   selectProviderName,
   selectProviderGeneratorNames,
   selectProviderFeatures,
-  selectHasFeature,
-  selectIsSynthesisEnabled
+  selectHasFeature
 };

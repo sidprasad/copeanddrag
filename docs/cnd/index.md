@@ -19,7 +19,6 @@ A CnD spec is a YAML document with four optional top-level sections — `constra
 - **[Field-Based Directives with Selectors](./field-selectors)** — how `selector` and `filter` parameters scope field-based directives to specific source types or tuples.
 - **[Projections](./projections)** — the `projections:` block: slice an instance along a sig axis and render multiple panes.
 - **[Temporal Mode](./temporal)** — the `temporal:` block: navigate a trace from `forge/temporal` models with a chosen sequence policy.
-- **[Selector Synthesis](./selector-synthesis)** — auto-generate selector expressions by picking example atoms in the UI.
 
 ## Minimal example
 
