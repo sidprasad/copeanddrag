@@ -446,6 +446,67 @@ describe('guided hints and complexity ranking (#143 Phase 2)', () => {
     expect(result).toEqual({ expression: '~boss', source: 'guided', cost: 2 });
   });
 
+  it('rejects search results that mention a schema-ambiguous name', () => {
+    // kids extensionally equals ~boss in this world, so the search returns
+    // the cheaper bare name — but the caller knows `kids` is ambiguous
+    // (e.g. overloaded across sigs) and forbids it, so the hint wins.
+    const world: MiniInstance = {
+      atoms: ['T0', 'T1', 'T2', 'T3'],
+      relations: {
+        boss: PARENTS.relations.boss!,
+        kids: [
+          ['T0', 'T1'],
+          ['T0', 'T2'],
+          ['T1', 'T3']
+        ]
+      }
+    };
+    const target: Pairs = [
+      ['T0', 'T1'],
+      ['T0', 'T2'],
+      ['T1', 'T3']
+    ];
+    const unrestricted = setup([world]);
+    expect(
+      synthesizeAndVerifySelector(
+        binaryExamples([target]),
+        unrestricted.instances,
+        unrestricted.core,
+        { hintExpressions: ['~boss'] }
+      )
+    ).toEqual({ expression: 'kids', source: 'synthesized', cost: 1 });
+
+    const restricted = setup([world]);
+    expect(
+      synthesizeAndVerifySelector(
+        binaryExamples([target]),
+        restricted.instances,
+        restricted.core,
+        { hintExpressions: ['~boss'], forbidSearchMentions: ['kids'] }
+      )
+    ).toEqual({ expression: '~boss', source: 'guided', cost: 2 });
+  });
+
+  it('exempts caller hints from forbidSearchMentions', () => {
+    const { instances, core } = setup([PARENTS], {
+      synthesizeBinarySelectorWithExplanation: (() => null) as any
+    });
+    const result = synthesizeAndVerifySelector(
+      binaryExamples([
+        [
+          ['T0', 'T1'],
+          ['T0', 'T2'],
+          ['T1', 'T3']
+        ]
+      ]),
+      instances,
+      core,
+      { hintExpressions: ['~boss'], forbidSearchMentions: ['boss'] }
+    );
+    expect(result?.expression).toBe('~boss');
+    expect(result?.source).toBe('guided');
+  });
+
   it('rejects a hint that mentions an atom literal', () => {
     const { instances, core } = setup([TREE]);
     expect(

@@ -1060,6 +1060,11 @@ export function suggestAlloyLayout(
         .filter(([, group]) => group.length > 1)
         .map(([name]) => name)
     );
+    // An overloaded bare name can pass extensional verification whenever the
+    // sibling declarations happen to be empty in the supplied instances, yet
+    // still denote the union elsewhere. Automatic search results must never
+    // mention one; the guided hints below restrict them deliberately.
+    const ambiguousNames = [...overloadedNames];
 
     const structural = relations.filter(
       (relation) =>
@@ -1102,7 +1107,8 @@ export function suggestAlloyLayout(
           options.core,
           {
             hintExpressions: [`(${name} & (${sourceType} -> ${targetType}))`],
-            maxDepth: 0
+            maxDepth: 0,
+            forbidSearchMentions: ambiguousNames
           }
         );
         if (!synthesized) continue;
@@ -1164,7 +1170,8 @@ export function suggestAlloyLayout(
             hintExpressions: [
               `(${relation.name} & (${subtype.id} -> ${subtype.id}))`
             ],
-            maxDepth: 0
+            maxDepth: 0,
+            forbidSearchMentions: ambiguousNames
           }
         );
         if (!synthesized) continue;
@@ -1241,7 +1248,8 @@ export function suggestAlloyLayout(
               .sort()
               .join(' + ')})`
           ],
-          maxDepth: contributing.length > 2 ? 2 : 1
+          maxDepth: contributing.length > 2 ? 2 : 1,
+          forbidSearchMentions: ambiguousNames
         }
       );
       if (!synthesized) continue;
@@ -1311,7 +1319,8 @@ export function suggestAlloyLayout(
           // form ~(name) if the hint fails, and a depth-0 identifier pass can
           // still surface a declared forward field with the same extension.
           hintExpressions: [`~${relation.name}`],
-          maxDepth: 1
+          maxDepth: 1,
+          forbidSearchMentions: ambiguousNames
         }
       );
       if (!synthesized) continue;
@@ -1421,7 +1430,8 @@ export function suggestAlloyLayout(
           options.core,
           {
             hintExpressions: [`${first.name}.${second.name}`],
-            maxDepth: 1
+            maxDepth: 1,
+            forbidSearchMentions: ambiguousNames
           }
         );
         if (!synthesized) continue;

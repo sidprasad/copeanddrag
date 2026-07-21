@@ -91,6 +91,26 @@ const OVERLOADED_FIELD_XML = instanceXml(`<sig label="A" ID="4" parentID="2">
 </field>`);
 
 /**
+ * Overloaded f again, but the B declaration is EMPTY in this instance: the
+ * bare name is extensionally equal to the A part here, yet still denotes
+ * the union of both declarations in any instance where B's f has tuples.
+ */
+const OVERLOADED_EMPTY_SIBLING_XML = instanceXml(`<sig label="A" ID="4" parentID="2">
+<atom label="A0"/><atom label="A1"/><atom label="A2"/>
+</sig>
+<sig label="B" ID="5" parentID="2">
+<atom label="B0"/><atom label="B1"/>
+</sig>
+<field label="f" ID="6" parentID="4">
+<tuple><atom label="A0"/><atom label="A1"/></tuple>
+<tuple><atom label="A1"/><atom label="A2"/></tuple>
+<types> <type ID="4"/><type ID="4"/> </types>
+</field>
+<field label="f" ID="7" parentID="5">
+<types> <type ID="5"/><type ID="5"/> </types>
+</field>`);
+
+/**
  * A field declared on an abstract supertype whose full extension has no
  * clean topology: the Item part is a chain while the Ghost part is a ring.
  */
@@ -343,6 +363,27 @@ describe('selector synthesis against the installed spytial-core', () => {
       );
       expect(decision?.outcome).toBe('applied');
     }
+  });
+
+  it('keeps the restriction even when the sibling overload is empty here', () => {
+    // The bare name f verifies extensionally on THIS instance (B's f is
+    // empty), but the schema says it is overloaded, so the emitted selector
+    // must stay restricted rather than adopt the cheaper bare name.
+    const instance = load(OVERLOADED_EMPTY_SIBLING_XML);
+    const draft = suggestAlloyLayout(instance, { core });
+    const synthesized = draft.suggestions.filter(
+      ({ sourceRule }) => sourceRule === 'cope.selector-synthesis'
+    );
+    expect(synthesized).toHaveLength(1);
+    const selector = constraintSelector(synthesized[0]!.patch)!;
+    expect(selector).not.toBe('f');
+    expect(selector).toContain('&');
+    expect(evaluatePairs(instance, selector)).toEqual(
+      asKeys([
+        ['A0', 'A1'],
+        ['A1', 'A2']
+      ])
+    );
   });
 
   it('narrows a supertype field to the subtype families where it is clean', async () => {

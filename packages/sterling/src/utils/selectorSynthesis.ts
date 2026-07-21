@@ -78,6 +78,15 @@ export interface SynthesizeSelectorOptions {
    * search is skipped.
    */
   hintExpressions?: readonly string[];
+  /**
+   * Names the automatic search result may not mention (token-boundary).
+   * Extensional verification only covers the supplied instances, so a
+   * schema-ambiguous name — e.g. a field overloaded across sigs whose other
+   * declaration happens to be empty in these instances — can verify here
+   * yet denote a broader relation elsewhere. Caller hints are exempt: the
+   * caller constructs them to restrict such names deliberately.
+   */
+  forbidSearchMentions?: readonly string[];
 }
 
 /**
@@ -135,6 +144,13 @@ function sameStringSets(left: Set<string>, right: Set<string>): boolean {
   return true;
 }
 
+/** True when the expression mentions `name` as a standalone token. */
+function mentionsName(expression: string, name: string): boolean {
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  // Identifiers may contain $ (Node$0), so a plain \b boundary is not enough.
+  return new RegExp(`(^|[^\\w$])${escaped}($|[^\\w$])`).test(expression);
+}
+
 /** True when the expression mentions any atom identifier as a standalone token. */
 export function mentionsAtomLiteral(
   expression: string,
@@ -146,11 +162,7 @@ export function mentionsAtomLiteral(
     for (const atom of instance.getAtoms()) atomIds.add(atom.id);
   }
   for (const id of atomIds) {
-    const escaped = id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    // Atom ids may contain $ (Node$0), so a plain \b boundary is not enough.
-    if (new RegExp(`(^|[^\\w$])${escaped}($|[^\\w$])`).test(expression)) {
-      return true;
-    }
+    if (mentionsName(expression, id)) return true;
   }
   return false;
 }
@@ -373,7 +385,14 @@ export function synthesizeAndVerifySelector(
     core,
     searchDepth
   );
-  if (synthesized !== undefined) addCandidate(synthesized, 'synthesized');
+  if (
+    synthesized !== undefined &&
+    !(options.forbidSearchMentions ?? []).some((name) =>
+      mentionsName(synthesized, name)
+    )
+  ) {
+    addCandidate(synthesized, 'synthesized');
+  }
 
   if (candidates.length === 0) return undefined;
   const sourceRank = { guided: 0, synthesized: 1 } as const;
