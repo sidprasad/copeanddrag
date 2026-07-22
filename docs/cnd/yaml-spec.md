@@ -33,7 +33,7 @@ Specifies the relative positioning of elements selected by a binary/n-ary select
 
 ```yaml
 - orientation:
-    selector: <binary-selector>    # Required: selector returning pairs (source -> target)
+    selector: <binary-selector>    # Required: selector returning (x, y) pairs
     directions: [<direction>, ...] # Required: array of positioning directions
 ```
 
@@ -44,14 +44,16 @@ Specifies the relative positioning of elements selected by a binary/n-ary select
 
 **Available directions:**
 
-- `above` — source is above target (with flexibility)
-- `below` — source is below target (with flexibility)
-- `left` — source is left of target (with flexibility)
-- `right` — source is right of target (with flexibility)
-- `directlyAbove` — source is directly above target (strict vertical alignment)
-- `directlyBelow` — source is directly below target (strict vertical alignment)
-- `directlyLeft` — source is directly left of target (strict horizontal alignment)
-- `directlyRight` — source is directly right of target (strict horizontal alignment)
+For each selected `(x, y)` tuple, the direction describes where `x` appears relative to `y`.
+
+- `above` — `x` is above `y` (with flexibility)
+- `below` — `x` is below `y` (with flexibility)
+- `left` — `x` is left of `y` (with flexibility)
+- `right` — `x` is right of `y` (with flexibility)
+- `directlyAbove` — `x` is directly above `y` (strict vertical alignment)
+- `directlyBelow` — `x` is directly below `y` (strict vertical alignment)
+- `directlyLeft` — `x` is directly left of `y` (strict horizontal alignment)
+- `directlyRight` — `x` is directly right of `y` (strict horizontal alignment)
 
 **Examples:**
 
@@ -66,7 +68,7 @@ Specifies the relative positioning of elements selected by a binary/n-ary select
     selector: next
     directions: [directlyLeft]
 
-# Multiple directions: source is above and to the left
+# Multiple directions: x is above and to the left of y
 - orientation:
     selector: precedes
     directions: [above, left]
@@ -248,10 +250,10 @@ Any constraint can be negated by adding `hold: never`. By default, all constrain
 
 | Positive | `hold: never` meaning |
 |----------|----------------------|
-| `above` | A.y ≤ B.y (at same level or below) |
-| `below` | A.y ≥ B.y (at same level or above) |
-| `left` | A.x ≥ B.x (at same position or right) |
-| `right` | A.x ≤ B.x (at same position or left) |
+| `above` | `x` is at the same level as or below `y` |
+| `below` | `x` is at the same level as or above `y` |
+| `left` | `x` is at the same position as or right of `y` |
+| `right` | `x` is at the same position as or left of `y` |
 | `align horizontal` | Must have different Y coordinates (disjunction: one above the other) |
 | `align vertical` | Must have different X coordinates (disjunction: one left of the other) |
 | `cyclic clockwise` | No valid clockwise rotation holds (De Morgan over rotational alternatives) |

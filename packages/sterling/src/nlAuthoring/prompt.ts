@@ -21,8 +21,8 @@ Selectors are relational expressions over the instance:
 Prefer bare field/sig names. Use \`+\` for unions like \`left + right\`; use \`~parent\` when the data points child-to-parent but the layout intent is parent-to-child.
 
 ## Constraints (structural layout) — the ONLY constraint keys are: orientation, cyclic, align, group, size, hideAtom
-- orientation: {selector: <binary: source->target pairs>, directions: [above|below|left|right|directlyAbove|directlyBelow|directlyLeft|directlyRight]}
-  "directions" positions the TARGET relative to the SOURCE: for (parent, child) pairs in \`children\`, \`selector: children, directions: [below]\` puts each child below its parent. For a child->parent field like \`boss\`, \`selector: boss, directions: [above]\` puts each boss above their report (or use \`~boss\` with [below]).
+- orientation: {selector: <binary: (x, y) pairs>, directions: [above|below|left|right|directlyAbove|directlyBelow|directlyLeft|directlyRight]}
+  For each selected \`(x, y)\` tuple, "directions" describes where \`x\` appears relative to \`y\`: \`[above]\` means \`x\` is above \`y\`, and \`[below]\` means \`x\` is below \`y\`.
   Restrictions: above cannot combine with below; left cannot combine with right; directly* combines only with its plain counterpart.
 - cyclic: {selector: <binary>, direction: clockwise|counterclockwise} — arrange along a circle.
 - align: {selector: <atoms or pairs>, direction: horizontal|vertical}
@@ -118,7 +118,7 @@ Intent: "All binary tree children should be below their parents"`
       candidates: [
         {
           rationale:
-            'left + right pairs each parent with its children; directions position the child (target) below the parent (source).',
+            'left + right selects parent-child relationships; [below] places each child below its parent.',
           confidence: 'high',
           patch: {
             constraints: [
