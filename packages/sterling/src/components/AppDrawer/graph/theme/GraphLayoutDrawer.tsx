@@ -1,4 +1,5 @@
 import { PaneTitle } from '@/sterling-ui';
+import { useDisclosure } from '@chakra-ui/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSterlingDispatch, useSterlingSelector } from '../../../../state/hooks';
 import { selectActiveDatum, selectCnDSpec, selectSelectedProjections, selectTimeIndex, selectProjectionConfig, selectSequencePolicyName } from '../../../../state/selectors';
@@ -6,7 +7,10 @@ import { cndSpecSet, selectedProjectionsSet } from '../../../../state/graphs/gra
 import { parseCndFile } from '../../../../utils/cndPreParser';
 import { ensureBootstrapLoaded, getSpytialCore } from '../../../../utils/spytialCore';
 import { resolveValidatedLayout, suggestAlloyLayout, validateCndSpecWithSpytial } from '../../../../utils/layoutSuggestions';
-import type { LayoutValidationResult } from '../../../../utils/layoutSuggestions';
+import type { CndPatch, LayoutValidationResult } from '../../../../utils/layoutSuggestions';
+import { createFetchProvider, mergeSpecWithPatch, translateLayoutIntent } from '../../../../nlAuthoring';
+import type { LlmMessage, LlmProviderConfig, NlProgressEvent } from '../../../../nlAuthoring';
+import { DescribeLayoutModal } from './DescribeLayoutModal';
 import * as yaml from 'js-yaml';
 
 /**
@@ -329,6 +333,88 @@ const GraphLayoutDrawer = () => {
     }
   };
 
+  const describeLayout = useDisclosure();
+
+  /**
+   * Run the NL engine against the live datum. currentSpec is captured HERE
+   * (translate time) from the same editor read the apply path uses, so
+   * validation context matches apply context.
+   */
+  const runTranslate = useCallback(
+    async (
+      config: LlmProviderConfig,
+      utterance: string,
+      priorTranscript: LlmMessage[] | undefined,
+      onProgress: (event: NlProgressEvent) => void
+    ) => {
+      if (!datum?.data) throw new Error('No instance is loaded.');
+      const core = getSpytialCore();
+      if (!core?.AlloyInstance?.parseAlloyXML || !core.AlloyDataInstance) {
+        throw new Error('The Alloy instance parser is unavailable.');
+      }
+      const alloyDatum = core.AlloyInstance.parseAlloyXML(datum.data);
+      if (!alloyDatum.instances?.length) {
+        throw new Error('No Alloy or Forge instance is available to analyze.');
+      }
+      const instances = alloyDatum.instances.map(
+        (instance: any) => new core.AlloyDataInstance(instance)
+      );
+      const primaryIndex = Math.min(timeIndex, instances.length - 1);
+      const editorText = window.getCurrentCNDSpecFromReact?.() || '';
+      const currentSpec = rebuildFullCndSpec(editorText, extraCndBlocksRef.current);
+      return translateLayoutIntent(
+        {
+          utterance,
+          currentSpec,
+          ...(priorTranscript?.length ? { priorTranscript } : {})
+        },
+        {
+          provider: createFetchProvider(config),
+          core,
+          instances,
+          rawInstance: alloyDatum.instances[primaryIndex],
+          onProgress
+        }
+      );
+    },
+    [datum, timeIndex]
+  );
+
+  /** Merge accepted NL patches into the editor + graph — the suggestLayout tail. */
+  const applyNlPatches = useCallback(
+    (patches: CndPatch[]) => {
+      if (!datum) return;
+      const editorText = window.getCurrentCNDSpecFromReact?.() || '';
+      let spec = rebuildFullCndSpec(editorText, extraCndBlocksRef.current);
+      for (const patch of patches) {
+        spec = mergeSpecWithPatch(spec, patch);
+      }
+      const parsed = parseCndFile(spec);
+      const extraBlocks: Record<string, unknown> = {};
+      if (parsed.projections.length > 0) {
+        extraBlocks.projections = parsed.projections;
+      }
+      if (parsed.sequence.policy !== 'ignore_history') {
+        extraBlocks.temporal = { policy: parsed.sequence.policy };
+      }
+      extraCndBlocksRef.current = extraBlocks;
+
+      refreshProjectionData(spec);
+      resetProjectionPanes();
+      window.clearAllErrors?.();
+      dispatch(cndSpecSet({ datum, spec }));
+
+      if (typeof window.updateSpecFromReact === 'function') {
+        window.updateSpecFromReact(parsed.layoutYaml);
+      } else {
+        editorYamlOverrideRef.current = parsed.layoutYaml;
+        setIsEditorMounted(false);
+        setEditorRevision((revision) => revision + 1);
+      }
+    },
+    [datum, dispatch, refreshProjectionData, resetProjectionPanes]
+  );
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!datum) return;
     
@@ -384,7 +470,17 @@ const GraphLayoutDrawer = () => {
           >
             {isSuggesting ? 'Analyzing…' : 'Suggest layout'}
           </button>
-          
+
+          <button
+            type="button"
+            onClick={describeLayout.onOpen}
+            disabled={!datum?.data || !getSpytialCore()?.parseLayoutSpec}
+            title="Describe a layout in plain language; an LLM drafts it and it is validated against the current instance"
+            className="flex-1 rounded-lg border border-accent-border bg-accent-bg px-4 py-2.5 text-sm font-medium text-accent transition hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Describe layout…
+          </button>
+
           <label className="group relative flex-1 cursor-pointer">
             <div className="flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-rule-strong bg-surface px-4 py-2.5 text-sm font-medium text-ink-muted transition hover:border-accent-border hover:text-accent">
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -417,6 +513,13 @@ const GraphLayoutDrawer = () => {
           />
         </div>
       </div>
+
+      <DescribeLayoutModal
+        isOpen={describeLayout.isOpen}
+        onClose={describeLayout.onClose}
+        runTranslate={runTranslate}
+        applyPatches={applyNlPatches}
+      />
     </div>
   );
 };
