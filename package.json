@@ -18,6 +18,7 @@
     "build:alloy": "webpack --env provider=alloy",
     "build:forge": "webpack --env provider=forge",
     "build:mock": "webpack --env provider=mock",
+    "check:bundle": "node scripts/check-bundle.cjs",
     "dev:alloy": "webpack serve --open --mode=development --env provider=alloy",
     "dev:forge": "webpack serve --open --mode=development --env provider=forge",
     "dev:mock": "webpack serve --open --mode=development --env provider=mock",

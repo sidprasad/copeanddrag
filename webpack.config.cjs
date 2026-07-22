@@ -100,7 +100,14 @@ module.exports = (env, argv) => {
       new FaviconsWebpackPlugin({
         mode: 'auto',
         logo: favIconPath,
-        inject: true
+        inject: true,
+        favicons: {
+          // Skip the ~34 iOS PWA splash screens (apple-touch-startup-image-*),
+          // which accounted for most of dist/assets. Keep the normal icon set.
+          icons: {
+            appleStartup: false
+          }
+        }
       }),
       new HtmlWebpackPlugin({
         template: path.resolve(
@@ -117,7 +124,12 @@ module.exports = (env, argv) => {
           description: 'Web-based visualization of relational models.'
         }
       }),
-      new MonacoWebpackPlugin(),
+      // The app only uses a JavaScript editor (ScriptView). Restricting to
+      // js/ts keeps the ts.worker (which powers JS) but drops the unused
+      // css/html/json language workers (~1.7 MB).
+      new MonacoWebpackPlugin({
+        languages: ['javascript', 'typescript']
+      }),
       new CopyWebpackPlugin({
         patterns: [
           {
