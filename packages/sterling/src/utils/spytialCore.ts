@@ -22,6 +22,15 @@ export interface ParsedLayoutSpec {
   warnings?: LayoutSpecWarning[];
 }
 
+/**
+ * Result of simple-graph-query's static selector analysis. The `unknown` arm
+ * (parse failures, unanalyzable forms) carries no reason; every definite
+ * verdict does.
+ */
+export type ForgeStaticAnalysis =
+  | { status: 'unsat' | 'tautology' | 'empty' | 'ill-typed'; reason: string }
+  | { status: 'unknown' };
+
 export interface SpytialCoreApi {
   AlloyInstance: {
     parseAlloyXML: (xml: string) => any;
@@ -98,6 +107,23 @@ export interface SpytialCoreApi {
     pairMatchesByInstance: { instanceIndex: number; matchedPairs: [string, string][] }[];
   } | null;
   isSynthesisSupported?: (evaluator: any) => boolean;
+  /**
+   * The bundle's evaluator namespace. Holds simple-graph-query re-exports that
+   * are not lifted to the top level — notably analyzeForgeExpression, whose
+   * `schema` accepts anything with getTypes()/getRelations() (an
+   * AlloyDataInstance qualifies structurally). Prefer getForgeStaticAnalyzer()
+   * over reaching in here directly.
+   */
+  Evaluators?: {
+    analyzeForgeExpression?: (
+      forgeExpr: string,
+      schema?: { getTypes(): readonly any[]; getRelations(): readonly any[] }
+    ) => ForgeStaticAnalysis;
+  };
+  /** Alloy-style schema text ("sig Node { left: Node }") for LLM grounding. */
+  generateAlloySchema?: (instance: any) => string;
+  /** Prose schema summary with atom/tuple counts, for LLM grounding. */
+  generateTextDescription?: (instance: any) => string;
   mountCndLayoutInterface?: (elementId?: string, options?: any) => void;
 }
 
@@ -148,6 +174,19 @@ export function getSpytialCore(): SpytialCoreApi | undefined {
 
 export function hasSpytialCore(): boolean {
   return typeof getSpytialCore() !== 'undefined';
+}
+
+/**
+ * The static selector analyzer, if this core ships one. Returns only definite
+ * NEGATIVE verdicts usefully: `unknown` doubles as "no problem found" (plain
+ * typed expressions report it too), and misspelled names are NOT caught here —
+ * they surface as evaluation errors instead.
+ */
+export function getForgeStaticAnalyzer(
+  core: SpytialCoreApi | undefined
+): NonNullable<NonNullable<SpytialCoreApi['Evaluators']>['analyzeForgeExpression']> | undefined {
+  const analyze = core?.Evaluators?.analyzeForgeExpression;
+  return typeof analyze === 'function' ? analyze : undefined;
 }
 
 /**
