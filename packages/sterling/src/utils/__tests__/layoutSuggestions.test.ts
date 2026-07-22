@@ -198,6 +198,35 @@ describe('Cope layout suggestions', () => {
     }
   });
 
+  it('ignores solver-internal builtin-sourced relations like no-field-guard', () => {
+    // Forge emits a sentinel field `no-field-guard` declared on univ itself.
+    // It is not part of the model and must not reach any heuristic.
+    const data = instance(
+      [type('univ', [], true), type('A')],
+      [
+        relation('univ<:no-field-guard', 'no-field-guard', ['univ', 'univ'], []),
+        relation('A<:link', 'link', ['A', 'A'], [['A$0', 'A$1']])
+      ]
+    );
+    const draft = suggestAlloyLayout(data, {});
+    expect(JSON.stringify(draft.suggestions)).not.toContain('no-field-guard');
+    // The sentinel does not count toward the single-visible-relation rule.
+    expect(
+      draft.suggestions.some(({ id }) => id === 'hide-single-edge-label:A<:link')
+    ).toBe(true);
+  });
+
+  it('does not claim an empty builtin-targeted relation is a functional attribute', () => {
+    const data = instance(
+      [type('Int', [], true), type('A')],
+      [relation('A<:size', 'size', ['A', 'Int'], [])]
+    );
+    const draft = suggestAlloyLayout(data, {});
+    expect(
+      draft.suggestions.some(({ id }) => id.startsWith('attribute:'))
+    ).toBe(false);
+  });
+
   it('reads enum metadata directly from the parsed Alloy instance', () => {
     const types = [
       type('univ', [], true),
