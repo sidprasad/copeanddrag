@@ -815,8 +815,9 @@ function comparisonLayoutSet(
 }
 
 /**
- * Set the CnD spec for a generator (by generator name, so it persists across instances).
- * Also parses projections and sequence policy from the CND spec.
+ * Commit the CnD spec for a generator (by generator name, so it persists
+ * across instances). Synchronizes the editor draft and parses projections and
+ * sequence policy from the committed document.
  */
 function cndSpecSet(
   state: DraftState,
@@ -825,6 +826,10 @@ function cndSpecSet(
   const { datum, spec } = action.payload;
   const generator = datum.generatorName ?? '';
   state.cndSpecByGeneratorName[generator] = spec;
+  // Every applied-spec write is also an editor commit. Keeping these values
+  // atomic prevents controls outside the Layout drawer from leaving a stale
+  // draft that can later revert the graph when the user clicks Apply.
+  state.cndDraftSpecByGeneratorName[generator] = spec;
 
   // Parse projection config and sequence policy from the CND spec
   try {

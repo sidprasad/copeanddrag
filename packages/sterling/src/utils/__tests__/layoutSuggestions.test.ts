@@ -320,6 +320,126 @@ describe('Cope layout suggestions', () => {
     expect(document.temporal).toEqual({ policy: 'stability' });
   });
 
+  it('always projects temporal types, even without higher-arity relations', () => {
+    const draft = suggestAlloyLayout(
+      instance(
+        [type('univ', [], true), type('State'), type('Node')],
+        []
+      )
+    );
+
+    expect(draft.document.projections).toEqual([{ sig: 'State' }]);
+  });
+
+  it('projects all temporal and qualifying lone-singleton types', () => {
+    const types = [
+      type('univ', [], true),
+      type('State'),
+      type('FrontDesk'),
+      type('Room'),
+      type('Key')
+    ];
+    const occupancy = relation(
+      'FrontDesk<:occupancy',
+      'occupancy',
+      ['FrontDesk', 'Room', 'State'],
+      [['FrontDesk$0', 'Room$0', 'State$0']]
+    );
+    const keys = relation(
+      'FrontDesk<:keys',
+      'keys',
+      ['FrontDesk', 'Room', 'Key'],
+      [['FrontDesk$0', 'Room$0', 'Key$0']]
+    );
+    const draft = suggestAlloyLayout(instance(types, [occupancy, keys]), {
+      rawAlloyInstance: raw({
+        FrontDesk: {
+          id: 'FrontDesk',
+          types: ['FrontDesk', 'univ'],
+          meta: { one: true }
+        }
+      })
+    });
+
+    expect(draft.document.projections).toEqual([
+      { sig: 'State' },
+      { sig: 'FrontDesk' }
+    ]);
+  });
+
+  it('adds the best independent higher-arity wrapper to the projection set', () => {
+    const types = [
+      type('univ', [], true),
+      type('State'),
+      type('Snapshot'),
+      type('Node'),
+      type('Value')
+    ];
+    const changing = relation(
+      'Node<:changing',
+      'changing',
+      ['Node', 'Value', 'State'],
+      [['Node$0', 'Value$0', 'State$0']]
+    );
+    const captured = relation(
+      'Snapshot<:captured',
+      'captured',
+      ['Snapshot', 'Node', 'Value'],
+      [['Snapshot$0', 'Node$0', 'Value$0']]
+    );
+
+    const draft = suggestAlloyLayout(
+      instance(types, [changing, captured])
+    );
+
+    expect(draft.document.projections).toEqual([
+      { sig: 'State' },
+      { sig: 'Snapshot' }
+    ]);
+  });
+
+  it('does not add a ternary candidate already covered by temporal projection', () => {
+    const types = [
+      type('univ', [], true),
+      type('State'),
+      type('Node'),
+      type('Value')
+    ];
+    const changing = relation(
+      'Node<:changing',
+      'changing',
+      ['Node', 'Value', 'State'],
+      [['Node$0', 'Value$0', 'State$0']]
+    );
+
+    expect(
+      suggestAlloyLayout(instance(types, [changing])).document.projections
+    ).toEqual([{ sig: 'State' }]);
+  });
+
+  it('does not infer presentation colors', () => {
+    const draft = suggestAlloyLayout(
+      instance(
+        [
+          type('univ', [], true),
+          type('Node'),
+          type('Person'),
+          type('Place')
+        ],
+        []
+      )
+    );
+
+    expect(
+      draft.suggestions.some(({ id }) => id.startsWith('type-color:'))
+    ).toBe(false);
+    expect(draft.document.directives ?? []).not.toContainEqual(
+      expect.objectContaining({ atomStyle: expect.anything() })
+    );
+    expect(draft.spec).not.toContain('borderStyle:');
+    expect(draft.spec).not.toContain('fillStyle:');
+  });
+
   it('is deterministic and reports when declaration metadata is unavailable', () => {
     const types = [type('univ', [], true), type('Node')];
     const edges = pathEdges(12);
@@ -450,16 +570,21 @@ describe('Cope layout suggestions', () => {
   });
 
   it('lets high-confidence candidates win over conflicting medium candidates', async () => {
-    const types = [type('univ', [], true), type('State'), type('Node')];
-    const edge = relation(
-      'Node<:edge',
-      'edge',
-      ['Node', 'Node', 'State'],
-      [['Node$0', 'Node$1', 'State$0']]
+    const types = [
+      type('univ', [], true),
+      type('Wrapper'),
+      type('Node'),
+      type('Value')
+    ];
+    const values = relation(
+      'Wrapper<:values',
+      'values',
+      ['Wrapper', 'Node', 'Value'],
+      [['Wrapper$0', 'Node$0', 'Value$0']]
     );
-    const primary = instance(types, [edge]);
+    const primary = instance(types, [values]);
     const proposal = suggestAlloyLayout(primary, {
-      examples: [instance(types, [edge])]
+      examples: [instance(types, [values])]
     });
     const resolved = await resolveValidatedLayout(proposal, (_spec, document) =>
       document.temporal && document.projections
@@ -471,7 +596,7 @@ describe('Cope layout suggestions', () => {
     expect(resolved.document.projections).toBeUndefined();
     expect(resolved.decisions).toContainEqual(
       expect.objectContaining({
-        suggestionId: 'projection:State',
+        suggestionId: 'projection:Wrapper',
         outcome: 'omitted'
       })
     );

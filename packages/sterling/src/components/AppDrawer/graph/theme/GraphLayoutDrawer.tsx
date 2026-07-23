@@ -20,9 +20,6 @@ import { createFetchProvider, mergeSpecWithPatch, translateLayoutIntent } from '
 import type { LlmMessage, LlmProviderConfig, NlProgressEvent } from '../../../../nlAuthoring';
 import { DescribeLayoutModal } from './DescribeLayoutModal';
 
-/** Seed spec shown when a datum has no applied or draft layout yet. */
-const DEFAULT_SPEC = 'directives:\n  - flag: hideDisconnectedBuiltIns';
-
 const GraphLayoutDrawer = () => {
   const dispatch = useSterlingDispatch();
   const datum = useSterlingSelector(selectActiveDatum);
@@ -41,18 +38,17 @@ const GraphLayoutDrawer = () => {
   // the full `.cnd` (constraints/directives AND projections/temporal): the
   // editor round-trips the unknown top-level sections via spytial-core's
   // `otherSections`, so there is no strip/merge on the host side anymore.
-  // Falls back to the applied spec, then DEFAULT_SPEC, so a freshly-loaded
-  // datum shows a sensible starting spec without any pre-seeding step.
+  // Falls back to the applied spec. New data already seeds that applied spec
+  // with the default directive, while an explicitly empty draft remains empty.
   const draftSpec = useSterlingSelector((state) =>
     datum ? selectCnDDraftSpec(state, datum) : ''
   );
-  const effectiveSpec = draftSpec || DEFAULT_SPEC;
 
   // Latest editor value, read at call time by the NL callbacks below — mirrors
   // the old `window.getCurrentCNDSpecFromReact()` "always current" read without
   // rebuilding those callbacks on every keystroke.
-  const latestSpecRef = useRef(effectiveSpec);
-  latestSpecRef.current = effectiveSpec;
+  const latestSpecRef = useRef(draftSpec);
+  latestSpecRef.current = draftSpec;
 
   // Clear any stale suggestion error when the active datum changes.
   useEffect(() => {
@@ -185,7 +181,7 @@ const GraphLayoutDrawer = () => {
 
     // The editor already holds the full `.cnd` (projections/temporal included),
     // so there is nothing to merge back — apply the draft verbatim.
-    const spec = effectiveSpec;
+    const spec = draftSpec;
     refreshProjectionData(spec);
 
     // Collapse to single-graph view before re-applying layout.
@@ -219,7 +215,6 @@ const GraphLayoutDrawer = () => {
       const proposal = suggestAlloyLayout(primary, {
         examples,
         rawAlloyInstance: alloyDatum.instances[primaryIndex],
-        includePresentation: true,
         core,
       });
       const validationCache = new Map<string, LayoutValidationResult>();
@@ -231,11 +226,10 @@ const GraphLayoutDrawer = () => {
         return result;
       });
 
-      // Fill the editor with the strongest generated spec (full `.cnd`) and
-      // apply it. Setting the draft flows into the controlled editor's `value`,
-      // which replaces the document in place — one undo step; Builder/Code tab
-      // and scroll are preserved (the whole point of #141 Phase 2).
-      dispatch(cndDraftSpecSet({ datum, spec: draft.spec }));
+      // Commit the strongest generated spec (full `.cnd`). cndSpecSet updates
+      // the applied and draft values atomically, and the controlled editor then
+      // replaces its document in place — one undo step; Builder/Code tab and
+      // scroll are preserved (the whole point of #141 Phase 2).
       refreshProjectionData(draft.spec);
       resetProjectionPanes();
       window.clearAllErrors?.();
@@ -302,7 +296,6 @@ const GraphLayoutDrawer = () => {
         spec = mergeSpecWithPatch(spec, patch);
       }
 
-      dispatch(cndDraftSpecSet({ datum, spec }));
       refreshProjectionData(spec);
       resetProjectionPanes();
       window.clearAllErrors?.();
@@ -322,7 +315,6 @@ const GraphLayoutDrawer = () => {
         // Show the uploaded spec in the editor (previously a gap — the editor
         // kept the old content) and apply it. The full spec, including any
         // projections/temporal blocks, round-trips through the editor.
-        dispatch(cndDraftSpecSet({ datum, spec: text }));
         refreshProjectionData(text);
         dispatch(cndSpecSet({ datum, spec: text }));
       };
@@ -394,7 +386,7 @@ const GraphLayoutDrawer = () => {
             of truth; no window-global mount, no remount on suggestion. */}
         <div className="rounded-lg border border-rule bg-surface shadow-sm p-3">
           <CndLayoutInterface
-            value={effectiveSpec}
+            value={draftSpec}
             onChange={(next: string) => dispatch(cndDraftSpecSet({ datum, spec: next }))}
             instance={dataInstance}
             theme={colorMode}

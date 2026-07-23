@@ -1,10 +1,9 @@
 import { DatumParsed } from '@/sterling-connection';
 import { useSterlingDispatch, useSterlingSelector } from '../../../../../state/hooks';
-import { selectSequencePolicyName, selectCnDSpec } from '../../../../../state/selectors';
+import { selectSequencePolicyName, selectCnDDraftSpec } from '../../../../../state/selectors';
 import { temporalPolicySet, cndSpecSet } from '../../../../../state/graphs/graphsSlice';
 import type { SequencePolicyName } from '../../../../../utils/cndPreParser';
-import { parseCndFile } from '../../../../../utils/cndPreParser';
-import * as yaml from 'js-yaml';
+import { updateCndSpecTemporalPolicy } from '../../../../../utils/cndSpecMutations';
 
 /** Display labels for the four supported temporal policies. */
 const POLICY_OPTIONS: { value: SequencePolicyName; label: string; description: string }[] = [
@@ -39,8 +38,8 @@ const TemporalPolicySection = ({ datum }: { datum: DatumParsed<any> }) => {
   const currentPolicy = useSterlingSelector((state) =>
     selectSequencePolicyName(state, datum)
   );
-  const currentCndSpec = useSterlingSelector((state) =>
-    selectCnDSpec(state, datum)
+  const currentCndDraftSpec = useSterlingSelector((state) =>
+    selectCnDDraftSpec(state, datum)
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -53,26 +52,10 @@ const TemporalPolicySection = ({ datum }: { datum: DatumParsed<any> }) => {
     // Also update the full CND spec so that the temporal block is persisted
     // when the user exports or re-applies the layout.
     try {
-      const specText = currentCndSpec || '';
-      const parsed = parseCndFile(specText);
-      // Rebuild the full spec with the new temporal policy
-      let fullObj: Record<string, unknown> = {};
-      if (specText.trim()) {
-        const raw = yaml.load(specText);
-        if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
-          fullObj = raw as Record<string, unknown>;
-        }
-      }
-      // Remove old 'sequence' key if present, use 'temporal'
-      delete fullObj.sequence;
-      if (newPolicy !== 'ignore_history') {
-        fullObj.temporal = { policy: newPolicy };
-      } else {
-        delete fullObj.temporal;
-      }
-      const updatedSpec = Object.keys(fullObj).length > 0
-        ? yaml.dump(fullObj, { lineWidth: -1 })
-        : '';
+      const updatedSpec = updateCndSpecTemporalPolicy(
+        currentCndDraftSpec,
+        newPolicy
+      );
       dispatch(cndSpecSet({ datum, spec: updatedSpec }));
     } catch {
       // If parsing fails, at least the Redux state was already updated
