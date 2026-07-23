@@ -1,7 +1,7 @@
 import { DatumParsed } from '@/sterling-connection';
 import { useCallback, useEffect, useState } from 'react';
 import { useSterlingDispatch, useSterlingSelector } from '../../../../state/hooks';
-import { selectCnDSpec, selectSelectedProjections, selectProjectionConfig } from '../../../../state/selectors';
+import { selectCnDDraftSpec, selectSelectedProjections, selectProjectionConfig } from '../../../../state/selectors';
 import { cndSpecSet, projectionAtomToggled, selectedProjectionsSet } from '../../../../state/graphs/graphsSlice';
 import type { CndProjection } from '../../../../utils/cndPreParser';
 
@@ -21,7 +21,9 @@ const ProjectionSection = ({ datum }: ProjectionSectionProps) => {
   // Projection data from SpyTial - populated via window.updateProjectionData callback
   const [projectionData, setProjectionData] = useState<ProjectionTypeData[]>([]);
 
-  const cndSpec = useSterlingSelector((state) => selectCnDSpec(state, datum)) || '';
+  // Live editing draft (the Layout editor's value; falls back to the applied
+  // spec) — re-applied to trigger a re-layout when a projection atom changes.
+  const cndDraftSpec = useSterlingSelector((state) => selectCnDDraftSpec(state, datum)) || '';
 
   // CND-derived projection config from Redux (parsed from .cnd file)
   const cndProjectionConfig = useSterlingSelector((state) =>
@@ -145,9 +147,8 @@ const ProjectionSection = ({ datum }: ProjectionSectionProps) => {
     window.currentProjections[typeId] = newSelections[0] || '';
 
     // Trigger re-layout
-    const cndSpecText = window.getCurrentCNDSpecFromReact?.() || cndSpec;
-    dispatch(cndSpecSet({ datum, spec: cndSpecText }));
-  }, [datum, dispatch, selectedProjections, cndSpec, projectionData.length]);
+    dispatch(cndSpecSet({ datum, spec: cndDraftSpec }));
+  }, [datum, dispatch, selectedProjections, cndDraftSpec, projectionData.length]);
 
   // Select all atoms for a type
   const handleSelectAll = useCallback((typeId: string, atoms: { id: string }[]) => {
@@ -168,9 +169,8 @@ const ProjectionSection = ({ datum }: ProjectionSectionProps) => {
     }
     window.currentProjections[typeId] = newSelections[0] || '';
 
-    const cndSpecText = window.getCurrentCNDSpecFromReact?.() || cndSpec;
-    dispatch(cndSpecSet({ datum, spec: cndSpecText }));
-  }, [datum, dispatch, selectedProjections, cndSpec]);
+    dispatch(cndSpecSet({ datum, spec: cndDraftSpec }));
+  }, [datum, dispatch, selectedProjections, cndDraftSpec]);
 
   // Don't render if no projection data
   if (projectionData.length === 0) {

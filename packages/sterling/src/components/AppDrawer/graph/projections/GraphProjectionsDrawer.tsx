@@ -3,11 +3,11 @@ import { useCallback, useMemo, useState } from 'react';
 import { useSterlingDispatch, useSterlingSelector } from '../../../../state/hooks';
 import {
   selectActiveDatum,
-  selectCnDSpec,
+  selectCnDDraftSpec,
   selectProjectableTypes,
   selectProjectionConfig
 } from '../../../../state/selectors';
-import { cndSpecSet } from '../../../../state/graphs/graphsSlice';
+import { cndDraftSpecSet, cndSpecSet } from '../../../../state/graphs/graphsSlice';
 import { ProjectionSection } from '../state/ProjectionSection';
 import type { CndProjection } from '../../../../utils/cndPreParser';
 import * as yaml from 'js-yaml';
@@ -54,9 +54,11 @@ const GraphProjectionsDrawer = () => {
   const activeDatum = useSterlingSelector(selectActiveDatum);
   const [manualType, setManualType] = useState('');
 
-  // Current CND spec text (may come from the layout editor or Redux)
-  const cndSpec = useSterlingSelector((state) =>
-    activeDatum ? selectCnDSpec(state, activeDatum) : ''
+  // Live editing draft of the CND spec (the Layout editor's value; falls back
+  // to the applied spec). Reading the draft here composes projection changes
+  // with any in-progress hand edits.
+  const cndDraftSpec = useSterlingSelector((state) =>
+    activeDatum ? selectCnDDraftSpec(state, activeDatum) : ''
   ) || '';
 
   // All projectable types from the instance (Record<typeId, atomIds[]>)
@@ -86,11 +88,12 @@ const GraphProjectionsDrawer = () => {
     (typeName: string) => {
       if (!activeDatum || !typeName.trim()) return;
       const updated = [...currentProjections, { type: typeName.trim() }];
-      const specText = window.getCurrentCNDSpecFromReact?.() || cndSpec;
-      const newSpec = updateCndSpecProjections(specText, updated);
+      const newSpec = updateCndSpecProjections(cndDraftSpec, updated);
+      // Keep the editor (draft) and the graph (applied) in sync.
+      dispatch(cndDraftSpecSet({ datum: activeDatum, spec: newSpec }));
       dispatch(cndSpecSet({ datum: activeDatum, spec: newSpec }));
     },
-    [activeDatum, currentProjections, cndSpec, dispatch]
+    [activeDatum, currentProjections, cndDraftSpec, dispatch]
   );
 
   // ── Remove a projection type ──────────────────────────────────────
@@ -98,11 +101,12 @@ const GraphProjectionsDrawer = () => {
     (typeName: string) => {
       if (!activeDatum) return;
       const updated = currentProjections.filter((p) => p.type !== typeName);
-      const specText = window.getCurrentCNDSpecFromReact?.() || cndSpec;
-      const newSpec = updateCndSpecProjections(specText, updated);
+      const newSpec = updateCndSpecProjections(cndDraftSpec, updated);
+      // Keep the editor (draft) and the graph (applied) in sync.
+      dispatch(cndDraftSpecSet({ datum: activeDatum, spec: newSpec }));
       dispatch(cndSpecSet({ datum: activeDatum, spec: newSpec }));
     },
-    [activeDatum, currentProjections, cndSpec, dispatch]
+    [activeDatum, currentProjections, cndDraftSpec, dispatch]
   );
 
   // ── Manual add via text input ─────────────────────────────────────

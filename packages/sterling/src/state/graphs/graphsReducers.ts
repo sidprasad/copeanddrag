@@ -841,6 +841,21 @@ function cndSpecSet(
 }
 
 /**
+ * Set the live editing draft of the CnD spec (by generator name) — the Layout
+ * drawer's editor value. Unlike `cndSpecSet` this does NOT re-parse projections
+ * or re-lay-out the graph; only the applied spec drives rendering. The draft is
+ * committed to the applied spec on "Apply Layout".
+ */
+function cndDraftSpecSet(
+  state: DraftState,
+  action: PayloadAction<{ datum: DatumParsed<any>; spec: string }>
+) {
+  const { datum, spec } = action.payload;
+  const generator = datum.generatorName ?? '';
+  state.cndDraftSpecByGeneratorName[generator] = spec;
+}
+
+/**
  * Set the temporal (sequence) policy for a datum without re-parsing the full
  * CND spec. Used by the temporal-policy dropdown in the Time drawer.
  */
@@ -939,6 +954,7 @@ function validateLayouts(state: DraftState, datum: DatumParsed<any>) {
 
 export default {
   asAttributeSet,
+  cndDraftSpecSet,
   cndSpecSet,
   curveRemoved,
   curveSet,

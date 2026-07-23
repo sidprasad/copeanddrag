@@ -1,7 +1,7 @@
 {
   "name": "sterling-layout",
   "description": "Cope and Drag (CnD): a fork of the Sterling visualizer that encodes spatial layout.",
-  "version": "4.4.0",
+  "version": "4.5.0",
   "main": "index.js",
   "author": "Siddhartha Prasad",
   "license": "MIT",
@@ -61,7 +61,7 @@
     "react-monaco-editor": "^0.47.0",
     "react-redux": "^7.2.6",
     "redux": "^4.1.2",
-    "spytial-core": "3.4.0",
+    "spytial-core": "4.0.0",
     "transformation-matrix": "^2.10.0",
     "ts-is-present": "^1.2.2",
     "uuid": "^9.0.0"
@@ -120,6 +120,8 @@
     "webpack-dev-server": "^4.6.0"
   },
   "resolutions": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
     "fast-uri": "^3.1.2",
     "@xmldom/xmldom": "^0.9.10",
     "form-data": "^2.5.6",
