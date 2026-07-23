@@ -1,7 +1,8 @@
 import { PaneTitle } from '@/sterling-ui';
 import { useDisclosure } from '@chakra-ui/react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { CndLayoutInterface } from 'spytial-core/react';
+import type { LayoutAssistant, LayoutSuggestionDetail } from 'spytial-core/react';
 import 'spytial-core/react.css';
 import { useSterlingDispatch, useSterlingSelector } from '../../../../state/hooks';
 import {
@@ -15,16 +16,51 @@ import { cndDraftSpecSet, cndSpecSet, selectedProjectionsSet } from '../../../..
 import { parseCndFile } from '../../../../utils/cndPreParser';
 import { getSpytialCore } from '../../../../utils/spytialCore';
 import { resolveValidatedLayout, suggestAlloyLayout, validateCndSpecWithSpytial } from '../../../../utils/layoutSuggestions';
-import type { CndPatch, LayoutValidationResult } from '../../../../utils/layoutSuggestions';
+import type {
+  CndPatch,
+  LayoutResolutionDecision,
+  LayoutSuggestion,
+  LayoutValidationResult
+} from '../../../../utils/layoutSuggestions';
 import { createFetchProvider, mergeSpecWithPatch, translateLayoutIntent } from '../../../../nlAuthoring';
 import type { LlmMessage, LlmProviderConfig, NlProgressEvent } from '../../../../nlAuthoring';
 import { DescribeLayoutModal } from './DescribeLayoutModal';
 
+/**
+ * Project the resolver's decisions onto the editor's per-suggestion rows.
+ *
+ * One row per candidate the resolver actually tried, so "we tried this and it
+ * failed" is visible rather than silently absent. Candidates below the
+ * enable-by-default threshold produce no decision and are deliberately not
+ * listed — they were never attempted, so calling them omitted would misreport
+ * why they aren't in the spec.
+ *
+ * The rationale (why the heuristic proposed it) and the decision reason (what
+ * validation did to it) are different halves of the story; the hook's detail
+ * shape has one text field, so they read as one sentence pair.
+ */
+function describeDecisions(
+  candidates: readonly LayoutSuggestion[],
+  decisions: readonly LayoutResolutionDecision[]
+): LayoutSuggestionDetail[] {
+  const byId = new Map(candidates.map((candidate) => [candidate.id, candidate]));
+  return decisions.map((decision) => {
+    const candidate = byId.get(decision.suggestionId);
+    const rationale = [candidate?.rationale, decision.reason]
+      .filter(Boolean)
+      .join(' ');
+    return {
+      id: decision.suggestionId,
+      outcome: decision.outcome,
+      ...(rationale ? { rationale } : {}),
+      ...(candidate ? { confidence: candidate.confidence } : {})
+    };
+  });
+}
+
 const GraphLayoutDrawer = () => {
   const dispatch = useSterlingDispatch();
   const datum = useSterlingSelector(selectActiveDatum);
-  const [suggestionError, setSuggestionError] = useState<string | null>(null);
-  const [isSuggesting, setIsSuggesting] = useState(false);
 
   const colorMode = useSterlingSelector(selectColorMode);
   const selectedProjections = useSterlingSelector((state) =>
@@ -49,11 +85,6 @@ const GraphLayoutDrawer = () => {
   // rebuilding those callbacks on every keystroke.
   const latestSpecRef = useRef(draftSpec);
   latestSpecRef.current = draftSpec;
-
-  // Clear any stale suggestion error when the active datum changes.
-  useEffect(() => {
-    setSuggestionError(null);
-  }, [datum?.id]);
 
   // Build the data instance handed to the editor for domain awareness
   // (type/relation dropdowns + selector autocomplete). Replaces the old
@@ -192,54 +223,63 @@ const GraphLayoutDrawer = () => {
     dispatch(cndSpecSet({ datum, spec }));
   };
 
-  const suggestLayout = async () => {
-    if (!datum?.data) return;
-    setSuggestionError(null);
-    setIsSuggesting(true);
-    try {
-      const core = getSpytialCore();
-      if (!core?.AlloyInstance?.parseAlloyXML || !core.AlloyDataInstance) {
-        throw new Error('The Alloy instance parser is unavailable.');
-      }
-      const alloyDatum = core.AlloyInstance.parseAlloyXML(datum.data);
-      if (!alloyDatum.instances?.length) {
-        throw new Error('No Alloy or Forge instance is available to analyze.');
-      }
+  /**
+   * Suggest Layout, as spytial-core's `LayoutAssistant` hook (#141 Phase 3).
+   * Core owns the button, the busy state, the error surface, and the rationale
+   * panel; this is the policy it calls — which stays here permanently, per the
+   * boundary at the top of `layoutSuggestions.ts`.
+   *
+   * The hook's `ctx` is deliberately domain-agnostic ({domain, instance,
+   * currentYaml}), so it carries neither the raw Alloy XML the heuristics read
+   * declaration metadata from nor the sibling time steps used as validation
+   * examples. Both come from the datum closure instead.
+   *
+   * Apply semantics: core applies the returned YAML to the editor document,
+   * which surfaces as an ordinary `onChange` → `cndDraftSpecSet`. The graph
+   * does NOT redraw — the user clicks Apply Layout, exactly as for a hand edit.
+   */
+  const layoutAssistant = useMemo<LayoutAssistant | undefined>(() => {
+    if (!datum?.data) return undefined;
+    const xml = datum.data;
+    return {
+      async suggest() {
+        const core = getSpytialCore();
+        if (!core?.AlloyInstance?.parseAlloyXML || !core.AlloyDataInstance) {
+          throw new Error('The Alloy instance parser is unavailable.');
+        }
+        const alloyDatum = core.AlloyInstance.parseAlloyXML(xml);
+        if (!alloyDatum.instances?.length) {
+          throw new Error('No Alloy or Forge instance is available to analyze.');
+        }
 
-      const instances = alloyDatum.instances.map(
-        (instance: any) => new core.AlloyDataInstance(instance)
-      );
-      const primaryIndex = Math.min(timeIndex, instances.length - 1);
-      const primary = instances[primaryIndex];
-      const examples = instances.filter((_: any, index: number) => index !== primaryIndex);
-      const proposal = suggestAlloyLayout(primary, {
-        examples,
-        rawAlloyInstance: alloyDatum.instances[primaryIndex],
-        core,
-      });
-      const validationCache = new Map<string, LayoutValidationResult>();
-      const draft = await resolveValidatedLayout(proposal, (spec) => {
-        const cached = validationCache.get(spec);
-        if (cached) return cached;
-        const result = validateCndSpecWithSpytial(spec, instances, core);
-        validationCache.set(spec, result);
-        return result;
-      });
+        const instances = alloyDatum.instances.map(
+          (instance: any) => new core.AlloyDataInstance(instance)
+        );
+        const primaryIndex = Math.min(timeIndex, instances.length - 1);
+        const primary = instances[primaryIndex];
+        const examples = instances.filter((_: any, index: number) => index !== primaryIndex);
+        const proposal = suggestAlloyLayout(primary, {
+          examples,
+          rawAlloyInstance: alloyDatum.instances[primaryIndex],
+          core,
+        });
+        const validationCache = new Map<string, LayoutValidationResult>();
+        const draft = await resolveValidatedLayout(proposal, (spec) => {
+          const cached = validationCache.get(spec);
+          if (cached) return cached;
+          const result = validateCndSpecWithSpytial(spec, instances, core);
+          validationCache.set(spec, result);
+          return result;
+        });
 
-      // Commit the strongest generated spec (full `.cnd`). cndSpecSet updates
-      // the applied and draft values atomically, and the controlled editor then
-      // replaces its document in place — one undo step; Builder/Code tab and
-      // scroll are preserved (the whole point of #141 Phase 2).
-      refreshProjectionData(draft.spec);
-      resetProjectionPanes();
-      window.clearAllErrors?.();
-      dispatch(cndSpecSet({ datum, spec: draft.spec }));
-    } catch (error) {
-      setSuggestionError(error instanceof Error ? error.message : 'Could not suggest a layout.');
-    } finally {
-      setIsSuggesting(false);
-    }
-  };
+        return {
+          yaml: draft.spec,
+          suggestions: describeDecisions(proposal.suggestions, draft.decisions),
+          notes: draft.notes,
+        };
+      },
+    };
+  }, [datum?.data, timeIndex]);
 
   const describeLayout = useDisclosure();
 
@@ -341,16 +381,6 @@ const GraphLayoutDrawer = () => {
 
           <button
             type="button"
-            onClick={suggestLayout}
-            disabled={isSuggesting || !getSpytialCore()?.AlloyInstance?.parseAlloyXML}
-            title="Generate and apply an editable CnD layout from the current instance"
-            className="flex-1 rounded-lg border border-accent-border bg-accent-bg px-4 py-2.5 text-sm font-medium text-accent transition hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isSuggesting ? 'Analyzing…' : 'Suggest layout'}
-          </button>
-
-          <button
-            type="button"
             onClick={describeLayout.onOpen}
             disabled={!datum?.data || !getSpytialCore()?.parseLayoutSpec}
             title="Describe a layout in plain language; an LLM drafts it and it is validated against the current instance"
@@ -375,20 +405,17 @@ const GraphLayoutDrawer = () => {
           </label>
         </div>
 
-        {suggestionError && (
-          <div className="rounded-lg border border-danger bg-danger-bg p-3 text-sm text-danger">
-            {suggestionError}
-          </div>
-        )}
-
         {/* Editor — rendered directly as a controlled React component (spytial-core
             >= 4.0.0's `spytial-core/react`). The Redux draft is the single source
-            of truth; no window-global mount, no remount on suggestion. */}
+            of truth; no window-global mount, no remount on suggestion. Suggest
+            Layout lives in its toolbar (>= 4.0.1's `layoutAssistant` hook) and
+            writes to the draft only — Apply Layout still redraws the graph. */}
         <div className="rounded-lg border border-rule bg-surface shadow-sm p-3">
           <CndLayoutInterface
             value={draftSpec}
             onChange={(next: string) => dispatch(cndDraftSpecSet({ datum, spec: next }))}
             instance={dataInstance}
+            layoutAssistant={layoutAssistant}
             theme={colorMode}
             className="min-h-[360px]"
           />
