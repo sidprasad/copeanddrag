@@ -16,6 +16,7 @@ const graphsSlice = createSlice({
 
 export const {
   asAttributeSet,
+  cndDraftSpecSet,
   cndSpecSet,
   edgeLabelStyleRemoved,
   edgeLabelStyleSet,

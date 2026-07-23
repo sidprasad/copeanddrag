@@ -124,7 +124,6 @@ export interface SpytialCoreApi {
   generateAlloySchema?: (instance: any) => string;
   /** Prose schema summary with atom/tuple counts, for LLM grounding. */
   generateTextDescription?: (instance: any) => string;
-  mountCndLayoutInterface?: (elementId?: string, options?: any) => void;
 }
 
 declare global {
@@ -132,21 +131,7 @@ declare global {
     spytialcore?: SpytialCoreApi;
     CndCore?: SpytialCoreApi;
     CnDCore?: SpytialCoreApi;
-    mountCndLayoutInterface?: (elementId?: string, options?: any) => void;
     mountErrorMessageModal?: (elementId?: string) => void;
-    /**
-     * Push a data instance into SpyTial's shared instance state so the mounted
-     * spec editor (spytial-core >= 2.9.0) becomes domain-aware: type/relation
-     * dropdowns and selector autocomplete are derived from this instance.
-     */
-    updateInstanceFromReact?: (instance: any) => void;
-    /**
-     * Push a new layout spec into the mounted spec editor (spytial-core >=
-     * 3.4.0). The editor replaces its document in place — no remount, view and
-     * scroll preserved, one undo step. Absent on older cores; feature-detect
-     * and fall back to remounting.
-     */
-    updateSpecFromReact?: (yaml: string) => void;
     showParseError?: (message: string, context: string) => void;
     showGeneralError?: (message: string) => void;
     showPositionalError?: (errorMessages: any) => void;
@@ -156,7 +141,6 @@ declare global {
     clearAllErrors?: () => void;
     updateProjectionData?: (projectionData: any[]) => void;
     currentProjections?: Record<string, string>;
-    getCurrentCNDSpecFromReact?: () => string;
   }
 }
 

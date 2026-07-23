@@ -131,7 +131,6 @@ interface RelationProfile extends EdgeProfile {
 interface SuggestLayoutOptions {
   examples?: readonly SpytialDataInstance[];
   rawAlloyInstance?: RawAlloyInstance;
-  includePresentation?: boolean;
   /**
    * Optional spytial-core API. When present (and the instances expose their
    * atoms), structural heuristics may use selector synthesis to name a target
@@ -141,17 +140,6 @@ interface SuggestLayoutOptions {
    */
   core?: SpytialCoreApi;
 }
-
-const PALETTE = [
-  'steelblue',
-  'coral',
-  'seagreen',
-  'goldenrod',
-  'slateblue',
-  'firebrick',
-  'teal',
-  'orchid'
-] as const;
 
 function suggestion(
   id: string,
@@ -223,41 +211,137 @@ function inferEnums(
   return { all, roots };
 }
 
-function projectionCandidate(
+type ProjectionCandidateKind = 'temporal' | 'lone-singleton' | 'ternary';
+
+interface ProjectionCandidate {
+  type: SpytialType;
+  kind: ProjectionCandidateKind;
+  score: number;
+  orderBy?: string;
+}
+
+function isTemporalType(typeId: string): boolean {
+  const separator = typeId.lastIndexOf('/');
+  const name = separator >= 0 ? typeId.slice(separator + 1) : typeId;
+  return ['State', 'Time', 'Tick'].some((part) => name.includes(part));
+}
+
+function projectionOrderBy(
+  typeId: string,
+  relations: readonly SpytialRelation[]
+): string | undefined {
+  return relations.find(
+    (relation) =>
+      relation.types.length === 2 &&
+      relation.types[0] === typeId &&
+      relation.types[1] === typeId &&
+      /^(next|succ|successor|ordering)$/i.test(relation.name)
+  )?.name;
+}
+
+/**
+ * Infer the multi-signature projection set described by the improved Magic
+ * Layout algorithm: every temporal type, every isolated lone singleton used
+ * by a higher-arity relation, and the strongest remaining ternary wrapper
+ * that is independent of the temporal projection.
+ */
+function projectionCandidates(
   types: readonly SpytialType[],
   relations: readonly SpytialRelation[],
   facts: ReadonlyMap<string, TypeFacts>
-): { type: SpytialType; score: number; orderBy?: string } | undefined {
-  const likelyName = (name: string) =>
-    ['State', 'TrainState', 'Time', 'Tick', 'TimeStep'].some(
-      (part) => name.startsWith(part) || name.endsWith(part)
-    );
-  const winner = types
-    .filter((type) => !type.isBuiltin && facts.get(type.id)?.private !== true)
-    .map((type) => ({
-      type,
-      score:
-        (likelyName(type.id) ? 1 : 0) +
-        relations.filter(
-          (relation) =>
-            relation.types.length > 2 && relation.types.includes(type.id)
-        ).length
-    }))
-    .filter(({ score }) => score >= 2)
-    .sort((a, b) => b.score - a.score || a.type.id.localeCompare(b.type.id))[0];
-  if (!winner) return undefined;
-
-  const orderRelations = relations.filter(
-    (relation) =>
-      relation.types.length === 2 &&
-      relation.types[0] === winner.type.id &&
-      relation.types[1] === winner.type.id
+): ProjectionCandidate[] {
+  const eligible = types.filter(
+    (type) => !type.isBuiltin && facts.get(type.id)?.private !== true
   );
-  const orderBy =
-    orderRelations.find((relation) =>
-      /^(next|succ|successor|ordering)$/i.test(relation.name)
-    ) ?? orderRelations[0];
-  return { ...winner, ...(orderBy ? { orderBy: orderBy.name } : {}) };
+  const byId = new Map(types.map((type) => [type.id, type]));
+  const higherArityByType = new Map(
+    eligible.map((type) => [
+      type.id,
+      relations.filter(
+        (relation) =>
+          relation.types.length > 2 && relation.types.includes(type.id)
+      )
+    ])
+  );
+  const withOrder = (
+    type: SpytialType,
+    kind: ProjectionCandidateKind,
+    score: number
+  ): ProjectionCandidate => {
+    const orderBy = projectionOrderBy(type.id, relations);
+    return { type, kind, score, ...(orderBy ? { orderBy } : {}) };
+  };
+
+  const temporal = eligible
+    .filter((type) => isTemporalType(type.id))
+    .sort((left, right) => left.id.localeCompare(right.id))
+    .map((type) => withOrder(type, 'temporal', Number.MAX_SAFE_INTEGER));
+  const selectedIds = new Set(temporal.map(({ type }) => type.id));
+
+  const loneSingletons = eligible
+    .filter((type) => {
+      if (selectedIds.has(type.id) || facts.get(type.id)?.singleton !== true) {
+        return false;
+      }
+      const hasUserSupertype = type.types
+        .slice(1)
+        .some((ancestor) => byId.get(ancestor)?.isBuiltin === false);
+      const hasUserSubtype = directSubtypes(type.id, types).some(
+        (subtype) => !subtype.isBuiltin
+      );
+      return (
+        !hasUserSupertype &&
+        !hasUserSubtype &&
+        (higherArityByType.get(type.id)?.length ?? 0) > 0
+      );
+    })
+    .sort((left, right) => left.id.localeCompare(right.id))
+    .map((type) =>
+      withOrder(
+        type,
+        'lone-singleton',
+        higherArityByType.get(type.id)?.length ?? 0
+      )
+    );
+  for (const { type } of loneSingletons) selectedIds.add(type.id);
+
+  const ternary = eligible
+    .filter(
+      (type) =>
+        !selectedIds.has(type.id) &&
+        (higherArityByType.get(type.id)?.length ?? 0) > 0
+    )
+    // Projecting another type from a relation already covered by a selected
+    // temporal or singleton projection loses more information without
+    // simplifying another independent relation.
+    .filter((type) =>
+      (higherArityByType.get(type.id) ?? []).every(
+        (relation) =>
+          !relation.types.some((relationType) => selectedIds.has(relationType))
+      )
+    )
+    .map((type) => {
+      const higherArity = higherArityByType.get(type.id) ?? [];
+      const wrapperCount = higherArity.filter(
+        (relation) => relation.types[0] === type.id
+      ).length;
+      return {
+        type,
+        // Participation supplies the base score; declaring/owning the
+        // higher-arity field supplies the Magic Layout wrapper bonus.
+        score: higherArity.length + wrapperCount
+      };
+    })
+    .sort(
+      (left, right) =>
+        right.score - left.score || left.type.id.localeCompare(right.type.id)
+    )[0];
+
+  return [
+    ...temporal,
+    ...loneSingletons,
+    ...(ternary ? [withOrder(ternary.type, 'ternary', ternary.score)] : [])
+  ];
 }
 
 function matchingRelation(
@@ -517,30 +601,6 @@ function relationProfile(
     isBinary,
     isSelfRelation: isBinary && relation.types[0] === relation.types[1]
   };
-}
-
-function exactTypeSelector(
-  type: SpytialType,
-  types: readonly SpytialType[]
-): string {
-  const children = directSubtypes(type.id, types);
-  return children.length === 0
-    ? type.id
-    : `${type.id} - (${children.map((child) => child.id).join(' + ')})`;
-}
-
-function topUserType(
-  type: SpytialType,
-  types: readonly SpytialType[]
-): SpytialType {
-  const byId = new Map(types.map((candidate) => [candidate.id, candidate]));
-  let top = type;
-  for (const ancestor of type.types.slice(1)) {
-    const candidate = byId.get(ancestor);
-    if (!candidate || candidate.isBuiltin) break;
-    top = candidate;
-  }
-  return top;
 }
 
 function buildDocument(suggestions: readonly LayoutSuggestion[]): CndPatch {
@@ -879,7 +939,7 @@ export function suggestAlloyLayout(
     .filter((relation) => !builtinIds.has(relation.types[0] ?? ''));
   const facts = schemaFacts(options.rawAlloyInstance);
   const enums = inferEnums(types, facts);
-  const projection = projectionCandidate(types, relations, facts);
+  const projections = projectionCandidates(types, relations, facts);
   const suggestions: LayoutSuggestion[] = [
     suggestion(
       'flag:hideDisconnectedBuiltIns',
@@ -891,7 +951,13 @@ export function suggestAlloyLayout(
     )
   ];
 
-  if (projection) {
+  for (const projection of projections) {
+    const rationale =
+      projection.kind === 'temporal'
+        ? `Project over temporal type ${projection.type.id}.`
+        : projection.kind === 'lone-singleton'
+        ? `Project over lone singleton ${projection.type.id} to remove a stable higher-arity wrapper.`
+        : `Project over ${projection.type.id}, the strongest independent higher-arity wrapper.`;
     suggestions.push(
       suggestion(
         `projection:${projection.type.id}`,
@@ -903,10 +969,15 @@ export function suggestAlloyLayout(
             }
           ]
         },
-        projection.score >= 3 ? 'high' : 'medium',
-        `Project over ${projection.type.id} to reduce high-arity clutter.`,
-        [`Magic projection score ${projection.score}`],
-        'magic.projection',
+        projection.kind === 'ternary' ? 'medium' : 'high',
+        rationale,
+        [
+          `Magic projection category ${projection.kind}`,
+          ...(projection.kind === 'ternary'
+            ? [`Higher-arity wrapper score ${projection.score}`]
+            : [])
+        ],
+        `magic.projection.${projection.kind}`,
         true,
         projection.orderBy
           ? [{ projections: [{ sig: projection.type.id }] }]
@@ -935,7 +1006,9 @@ export function suggestAlloyLayout(
       relation.types.length === 2 &&
       target &&
       enums.all.has(target) &&
-      !relation.types.includes(projection?.type.id ?? '')
+      !relation.types.some((typeId) =>
+        projections.some(({ type }) => type.id === typeId)
+      )
     ) {
       const candidateId = `attribute:${relation.id}`;
       nonEdgeRelations.add(relation.id);
@@ -1643,55 +1716,6 @@ export function suggestAlloyLayout(
         true,
         [],
         [...nonEdgeCandidateIds.values()]
-      )
-    );
-  }
-
-  if (options.includePresentation ?? true) {
-    const visibleTypes = types.filter(
-      (type) =>
-        !type.isBuiltin &&
-        facts.get(type.id)?.instantiable !== false &&
-        facts.get(type.id)?.private !== true
-    );
-    const colorTargets =
-      visibleTypes.length <= 5
-        ? visibleTypes
-        : [
-            ...new Map(
-              visibleTypes.map((type) => {
-                const top = topUserType(type, types);
-                return [top.id, top] as const;
-              })
-            ).values()
-          ];
-    colorTargets.forEach((type, index) =>
-      suggestions.push(
-        suggestion(
-          `type-color:${type.id}`,
-          {
-            directives: [
-              {
-                atomStyle: {
-                  selector:
-                    visibleTypes.length <= 5
-                      ? exactTypeSelector(type, types)
-                      : type.id,
-                  borderStyle: { color: PALETTE[index % PALETTE.length] }
-                }
-              }
-            ]
-          },
-          'medium',
-          `Give ${type.id} a stable type-family color.`,
-          [
-            visibleTypes.length <= 5
-              ? 'At most five visible user types'
-              : 'Top-level type family'
-          ],
-          'magic.type-presentation',
-          true
-        )
       )
     );
   }

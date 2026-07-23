@@ -815,8 +815,9 @@ function comparisonLayoutSet(
 }
 
 /**
- * Set the CnD spec for a generator (by generator name, so it persists across instances).
- * Also parses projections and sequence policy from the CND spec.
+ * Commit the CnD spec for a generator (by generator name, so it persists
+ * across instances). Synchronizes the editor draft and parses projections and
+ * sequence policy from the committed document.
  */
 function cndSpecSet(
   state: DraftState,
@@ -825,6 +826,10 @@ function cndSpecSet(
   const { datum, spec } = action.payload;
   const generator = datum.generatorName ?? '';
   state.cndSpecByGeneratorName[generator] = spec;
+  // Every applied-spec write is also an editor commit. Keeping these values
+  // atomic prevents controls outside the Layout drawer from leaving a stale
+  // draft that can later revert the graph when the user clicks Apply.
+  state.cndDraftSpecByGeneratorName[generator] = spec;
 
   // Parse projection config and sequence policy from the CND spec
   try {
@@ -838,6 +843,21 @@ function cndSpecSet(
     state.projectionConfigByGeneratorName[generator] = [];
     state.sequencePolicyByGeneratorName[generator] = 'ignore_history';
   }
+}
+
+/**
+ * Set the live editing draft of the CnD spec (by generator name) — the Layout
+ * drawer's editor value. Unlike `cndSpecSet` this does NOT re-parse projections
+ * or re-lay-out the graph; only the applied spec drives rendering. The draft is
+ * committed to the applied spec on "Apply Layout".
+ */
+function cndDraftSpecSet(
+  state: DraftState,
+  action: PayloadAction<{ datum: DatumParsed<any>; spec: string }>
+) {
+  const { datum, spec } = action.payload;
+  const generator = datum.generatorName ?? '';
+  state.cndDraftSpecByGeneratorName[generator] = spec;
 }
 
 /**
@@ -939,6 +959,7 @@ function validateLayouts(state: DraftState, datum: DatumParsed<any>) {
 
 export default {
   asAttributeSet,
+  cndDraftSpecSet,
   cndSpecSet,
   curveRemoved,
   curveSet,

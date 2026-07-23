@@ -658,6 +658,17 @@ export function selectCnDSpec(
 }
 
 /**
+ * Select the live editing draft of the CnD spec — the Layout drawer's editor
+ * value. Falls back to the applied spec (see `graphsSelectors.selectCnDDraftSpec`).
+ */
+export function selectCnDDraftSpec(
+  state: SterlingState,
+  datum: DatumParsed<any>
+): string {
+  return graphsSelectors.selectCnDDraftSpec(state.graphs, datum);
+}
+
+/**
  * Select the selected projections for multi-projection view.
  * Returns a record mapping projection type to array of selected atom IDs.
  */

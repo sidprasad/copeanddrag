@@ -89,6 +89,23 @@ function selectCnDSpec(
 }
 
 /**
+ * Select the live editing draft of the CnD spec (the Layout drawer's editor
+ * value). Falls back to the applied spec, then '', so a freshly-loaded datum
+ * seeds the editor with its applied spec without any extra pre-seeding step.
+ */
+function selectCnDDraftSpec(
+  state: GraphsState,
+  datum: DatumParsed<any>
+): string {
+  const generator = datum.generatorName ?? '';
+  return (
+    state.cndDraftSpecByGeneratorName[generator] ??
+    state.cndSpecByGeneratorName[generator] ??
+    ''
+  );
+}
+
+/**
  * Select the selected projection atoms for a datum.
  * Returns a record mapping projection type to array of selected atom IDs.
  */
@@ -173,5 +190,6 @@ export default {
   selectTheme,
   selectTimeIndex,
   selectZoomMatrix,
-  selectCnDSpec
+  selectCnDSpec,
+  selectCnDDraftSpec
 };

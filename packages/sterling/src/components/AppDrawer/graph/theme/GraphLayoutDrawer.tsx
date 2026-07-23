@@ -1,60 +1,32 @@
 import { PaneTitle } from '@/sterling-ui';
 import { useDisclosure } from '@chakra-ui/react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { CndLayoutInterface } from 'spytial-core/react';
+import 'spytial-core/react.css';
 import { useSterlingDispatch, useSterlingSelector } from '../../../../state/hooks';
-import { selectActiveDatum, selectCnDSpec, selectSelectedProjections, selectTimeIndex, selectProjectionConfig, selectSequencePolicyName } from '../../../../state/selectors';
-import { cndSpecSet, selectedProjectionsSet } from '../../../../state/graphs/graphsSlice';
+import {
+  selectActiveDatum,
+  selectCnDDraftSpec,
+  selectColorMode,
+  selectSelectedProjections,
+  selectTimeIndex
+} from '../../../../state/selectors';
+import { cndDraftSpecSet, cndSpecSet, selectedProjectionsSet } from '../../../../state/graphs/graphsSlice';
 import { parseCndFile } from '../../../../utils/cndPreParser';
-import { ensureBootstrapLoaded, getSpytialCore } from '../../../../utils/spytialCore';
+import { getSpytialCore } from '../../../../utils/spytialCore';
 import { resolveValidatedLayout, suggestAlloyLayout, validateCndSpecWithSpytial } from '../../../../utils/layoutSuggestions';
 import type { CndPatch, LayoutValidationResult } from '../../../../utils/layoutSuggestions';
 import { createFetchProvider, mergeSpecWithPatch, translateLayoutIntent } from '../../../../nlAuthoring';
 import type { LlmMessage, LlmProviderConfig, NlProgressEvent } from '../../../../nlAuthoring';
 import { DescribeLayoutModal } from './DescribeLayoutModal';
-import * as yaml from 'js-yaml';
-
-/**
- * Re-combine a layout-only YAML string with previously-extracted
- * projections/sequence blocks into a single CND spec string.
- */
-function rebuildFullCndSpec(
-  layoutYaml: string,
-  extraBlocks: Record<string, unknown>
-): string {
-  // Parse the layout YAML to merge with extra blocks
-  let layoutObj: Record<string, unknown> = {};
-  if (layoutYaml && layoutYaml.trim()) {
-    try {
-      const parsed = yaml.load(layoutYaml);
-      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-        layoutObj = parsed as Record<string, unknown>;
-      }
-    } catch {
-      // If layout YAML can't be parsed, just return it as-is
-      return layoutYaml;
-    }
-  }
-  const merged = { ...extraBlocks, ...layoutObj };
-  if (Object.keys(merged).length === 0) return '';
-  return yaml.dump(merged, { lineWidth: -1 });
-}
 
 const GraphLayoutDrawer = () => {
   const dispatch = useSterlingDispatch();
   const datum = useSterlingSelector(selectActiveDatum);
-  const cndEditorRef = useRef<HTMLDivElement>(null);
-  const [isEditorMounted, setIsEditorMounted] = useState(false);
-  const [editorRevision, setEditorRevision] = useState(0);
-  const editorYamlOverrideRef = useRef<string | null>(null);
   const [suggestionError, setSuggestionError] = useState<string | null>(null);
   const [isSuggesting, setIsSuggesting] = useState(false);
 
-  // Preserve the projections/sequence blocks that were stripped from the
-  // editor so we can merge them back when "Apply Layout" is clicked.
-  const extraCndBlocksRef = useRef<Record<string, unknown>>({});
-
-  /** Load from XML (if provided) once. */
-  const preloadedSpec = useSterlingSelector((state) => datum ? selectCnDSpec(state, datum) : undefined);
+  const colorMode = useSterlingSelector(selectColorMode);
   const selectedProjections = useSterlingSelector((state) =>
     datum ? selectSelectedProjections(state, datum) : {}
   );
@@ -62,13 +34,45 @@ const GraphLayoutDrawer = () => {
     datum ? selectTimeIndex(state, datum) : 0
   );
 
-  // Overrides are scoped to one datum. If editor remounting is later added to
-  // datum switching, a generated spec must not leak into the next graph.
+  // The live editing draft — the single source of truth for the editor. It is
+  // the full `.cnd` (constraints/directives AND projections/temporal): the
+  // editor round-trips the unknown top-level sections via spytial-core's
+  // `otherSections`, so there is no strip/merge on the host side anymore.
+  // Falls back to the applied spec. New data already seeds that applied spec
+  // with the default directive, while an explicitly empty draft remains empty.
+  const draftSpec = useSterlingSelector((state) =>
+    datum ? selectCnDDraftSpec(state, datum) : ''
+  );
+
+  // Latest editor value, read at call time by the NL callbacks below — mirrors
+  // the old `window.getCurrentCNDSpecFromReact()` "always current" read without
+  // rebuilding those callbacks on every keystroke.
+  const latestSpecRef = useRef(draftSpec);
+  latestSpecRef.current = draftSpec;
+
+  // Clear any stale suggestion error when the active datum changes.
   useEffect(() => {
-    editorYamlOverrideRef.current = null;
-    extraCndBlocksRef.current = {};
     setSuggestionError(null);
   }, [datum?.id]);
+
+  // Build the data instance handed to the editor for domain awareness
+  // (type/relation dropdowns + selector autocomplete). Replaces the old
+  // `window.updateInstanceFromReact(...)` push; tracks the datum + time step.
+  const dataInstance = useMemo(() => {
+    const xml = datum?.data;
+    if (!xml) return undefined;
+    const core = getSpytialCore();
+    if (!core?.AlloyInstance?.parseAlloyXML || !core.AlloyDataInstance) return undefined;
+    try {
+      const alloyDatum = core.AlloyInstance.parseAlloyXML(xml);
+      if (!alloyDatum.instances || alloyDatum.instances.length === 0) return undefined;
+      const instanceIndex = Math.min(timeIndex, alloyDatum.instances.length - 1);
+      return new core.AlloyDataInstance(alloyDatum.instances[instanceIndex]);
+    } catch (err) {
+      console.error('Failed to build data instance for spec editor:', err);
+      return undefined;
+    }
+  }, [datum?.data, timeIndex]);
 
   const refreshProjectionData = useCallback((specText: string) => {
     if (!datum?.data) return;
@@ -154,76 +158,6 @@ const GraphLayoutDrawer = () => {
     }
   }, [datum, timeIndex, selectedProjections]);
 
-  // Load Bootstrap for SpyTial UI (used by the mounted CnD editor below).
-  useEffect(() => {
-    ensureBootstrapLoaded();
-  }, []);
-
-  // Push the active datum's data instance into SpyTial's shared instance state
-  // so the mounted spec editor (spytial-core >= 2.9.0's rebuilt structured
-  // builder) becomes domain-aware: relation/type dropdowns and selector
-  // autocomplete are derived from this instance. Mirrors the alloy-demo's
-  // `window.updateInstanceFromReact(alloyDataInstance)` call. Re-runs as the
-  // datum or time step changes so the editor's domain tracks what's displayed.
-  useEffect(() => {
-    const xml = datum?.data;
-    if (!xml) return;
-    const core = getSpytialCore();
-    if (!core?.AlloyInstance?.parseAlloyXML || !core.AlloyDataInstance) return;
-    try {
-      const alloyDatum = core.AlloyInstance.parseAlloyXML(xml);
-      if (!alloyDatum.instances || alloyDatum.instances.length === 0) return;
-      const instanceIndex = Math.min(timeIndex, alloyDatum.instances.length - 1);
-      const alloyDataInstance = new core.AlloyDataInstance(alloyDatum.instances[instanceIndex]);
-      window.updateInstanceFromReact?.(alloyDataInstance);
-    } catch (err) {
-      console.error('Failed to push data instance to spec editor:', err);
-    }
-  }, [datum?.data, timeIndex]);
-
-  // Mount the CnD Layout Interface from SpyTial
-  useEffect(() => {
-    if (cndEditorRef.current && !isEditorMounted && datum) {
-      const defaultSpec = 'directives:\n  - flag: hideDisconnectedBuiltIns';
-
-      // Strip projections/sequence blocks before passing to SpyTial's editor,
-      // which only understands constraints/directives.
-      let editorInitialSpec = editorYamlOverrideRef.current ?? defaultSpec;
-      if (editorYamlOverrideRef.current === null && preloadedSpec && preloadedSpec !== '') {
-        const parsed = parseCndFile(preloadedSpec);
-        editorInitialSpec = parsed.layoutYaml || defaultSpec;
-
-        // Stash the extra blocks so we can merge them back on apply
-        const extraBlocks: Record<string, unknown> = {};
-        if (parsed.projections.length > 0) {
-          extraBlocks.projections = parsed.projections;
-        }
-        if (parsed.sequence.policy !== 'ignore_history') {
-          extraBlocks.temporal = { policy: parsed.sequence.policy };
-        }
-        extraCndBlocksRef.current = extraBlocks;
-      }
-      
-      const options: CndLayoutInterfaceOptions = {
-        initialYamlValue: editorInitialSpec,
-        initialDirectives: (preloadedSpec && preloadedSpec !== '') ? undefined : [{ flag: 'hideDisconnectedBuiltIns' }]
-      };
-
-      try {
-        const core = getSpytialCore();
-        if (core?.mountCndLayoutInterface) {
-          core.mountCndLayoutInterface(`cnd-editor-mount-${editorRevision}`, options);
-          setIsEditorMounted(true);
-        } else if (window.mountCndLayoutInterface) {
-          window.mountCndLayoutInterface(`cnd-editor-mount-${editorRevision}`, options);
-          setIsEditorMounted(true);
-        }
-      } catch (err) {
-        console.error('Failed to mount CnD Layout Interface:', err);
-      }
-    }
-  }, [editorRevision, isEditorMounted, datum, preloadedSpec]);
-
   const resetProjectionPanes = useCallback(() => {
     if (!datum) return;
     if (!window.currentProjections) {
@@ -245,20 +179,17 @@ const GraphLayoutDrawer = () => {
     e.preventDefault();
     if (!datum) return;
 
-    // The editor only contains layout YAML (constraints/directives).
-    // Merge back any projections/sequence blocks that were stripped.
-    const editorText = window.getCurrentCNDSpecFromReact?.() || '';
-    const fullCndSpec = rebuildFullCndSpec(editorText, extraCndBlocksRef.current);
-    refreshProjectionData(fullCndSpec);
+    // The editor already holds the full `.cnd` (projections/temporal included),
+    // so there is nothing to merge back — apply the draft verbatim.
+    const spec = draftSpec;
+    refreshProjectionData(spec);
 
     // Collapse to single-graph view before re-applying layout.
     resetProjectionPanes();
 
-    if (window.clearAllErrors) {
-      window.clearAllErrors();
-    }
-    
-    dispatch(cndSpecSet({ datum, spec: fullCndSpec }));
+    window.clearAllErrors?.();
+
+    dispatch(cndSpecSet({ datum, spec }));
   };
 
   const suggestLayout = async () => {
@@ -284,7 +215,6 @@ const GraphLayoutDrawer = () => {
       const proposal = suggestAlloyLayout(primary, {
         examples,
         rawAlloyInstance: alloyDatum.instances[primaryIndex],
-        includePresentation: true,
         core,
       });
       const validationCache = new Map<string, LayoutValidationResult>();
@@ -296,36 +226,14 @@ const GraphLayoutDrawer = () => {
         return result;
       });
 
-      const parsed = parseCndFile(draft.spec);
-      const extraBlocks: Record<string, unknown> = {};
-      if (parsed.projections.length > 0) {
-        extraBlocks.projections = parsed.projections;
-      }
-      if (parsed.sequence.policy !== 'ignore_history') {
-        extraBlocks.temporal = { policy: parsed.sequence.policy };
-      }
-      extraCndBlocksRef.current = extraBlocks;
-
-      // Apply the strongest generated spec that passed the real layout pipeline
-      // for every state, then reopen it for ordinary hand editing.
+      // Commit the strongest generated spec (full `.cnd`). cndSpecSet updates
+      // the applied and draft values atomically, and the controlled editor then
+      // replaces its document in place — one undo step; Builder/Code tab and
+      // scroll are preserved (the whole point of #141 Phase 2).
       refreshProjectionData(draft.spec);
       resetProjectionPanes();
       window.clearAllErrors?.();
       dispatch(cndSpecSet({ datum, spec: draft.spec }));
-
-      if (typeof window.updateSpecFromReact === 'function') {
-        // spytial-core >= 3.4.0: push the generated YAML into the live editor.
-        // The document is replaced in place (one undo step); the Builder/Code
-        // tab, scroll, and the editor's React root all survive.
-        window.updateSpecFromReact(parsed.layoutYaml);
-      } else {
-        // Older cores have no inbound spec path: reload via a full remount.
-        // Re-keying loads the generated YAML but retains the abandoned
-        // core-owned root/listener until the core in use ships the push API.
-        editorYamlOverrideRef.current = parsed.layoutYaml;
-        setIsEditorMounted(false);
-        setEditorRevision((revision) => revision + 1);
-      }
     } catch (error) {
       setSuggestionError(error instanceof Error ? error.message : 'Could not suggest a layout.');
     } finally {
@@ -336,9 +244,9 @@ const GraphLayoutDrawer = () => {
   const describeLayout = useDisclosure();
 
   /**
-   * Run the NL engine against the live datum. currentSpec is captured HERE
-   * (translate time) from the same editor read the apply path uses, so
-   * validation context matches apply context.
+   * Run the NL engine against the live datum. currentSpec is read HERE
+   * (translate time) from the live editor draft, so validation context matches
+   * the apply context.
    */
   const runTranslate = useCallback(
     async (
@@ -360,8 +268,7 @@ const GraphLayoutDrawer = () => {
         (instance: any) => new core.AlloyDataInstance(instance)
       );
       const primaryIndex = Math.min(timeIndex, instances.length - 1);
-      const editorText = window.getCurrentCNDSpecFromReact?.() || '';
-      const currentSpec = rebuildFullCndSpec(editorText, extraCndBlocksRef.current);
+      const currentSpec = latestSpecRef.current;
       return translateLayoutIntent(
         {
           utterance,
@@ -384,66 +291,37 @@ const GraphLayoutDrawer = () => {
   const applyNlPatches = useCallback(
     (patches: CndPatch[]) => {
       if (!datum) return;
-      const editorText = window.getCurrentCNDSpecFromReact?.() || '';
-      let spec = rebuildFullCndSpec(editorText, extraCndBlocksRef.current);
+      let spec = latestSpecRef.current;
       for (const patch of patches) {
         spec = mergeSpecWithPatch(spec, patch);
       }
-      const parsed = parseCndFile(spec);
-      const extraBlocks: Record<string, unknown> = {};
-      if (parsed.projections.length > 0) {
-        extraBlocks.projections = parsed.projections;
-      }
-      if (parsed.sequence.policy !== 'ignore_history') {
-        extraBlocks.temporal = { policy: parsed.sequence.policy };
-      }
-      extraCndBlocksRef.current = extraBlocks;
 
       refreshProjectionData(spec);
       resetProjectionPanes();
       window.clearAllErrors?.();
       dispatch(cndSpecSet({ datum, spec }));
-
-      if (typeof window.updateSpecFromReact === 'function') {
-        window.updateSpecFromReact(parsed.layoutYaml);
-      } else {
-        editorYamlOverrideRef.current = parsed.layoutYaml;
-        setIsEditorMounted(false);
-        setEditorRevision((revision) => revision + 1);
-      }
     },
     [datum, dispatch, refreshProjectionData, resetProjectionPanes]
   );
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!datum) return;
-    
+
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (event) => {
         const text = event.target?.result as string;
-        // The full file may contain projections/sequence blocks.
-        // Store the full spec in Redux (cndSpecSet will parse it),
-        // and update the extra-blocks ref so future Apply Layout
-        // calls preserve them.
-        const parsed = parseCndFile(text);
-        const extraBlocks: Record<string, unknown> = {};
-        if (parsed.projections.length > 0) {
-          extraBlocks.projections = parsed.projections;
-        }
-        if (parsed.sequence.policy !== 'ignore_history') {
-          extraBlocks.temporal = { policy: parsed.sequence.policy };
-        }
-        extraCndBlocksRef.current = extraBlocks;
-
+        // Show the uploaded spec in the editor (previously a gap — the editor
+        // kept the old content) and apply it. The full spec, including any
+        // projections/temporal blocks, round-trips through the editor.
         refreshProjectionData(text);
         dispatch(cndSpecSet({ datum, spec: text }));
       };
       reader.readAsText(file);
     }
   };
-  
+
   if (!datum) {
     return null;
   }
@@ -503,13 +381,16 @@ const GraphLayoutDrawer = () => {
           </div>
         )}
 
-        {/* Editor */}
+        {/* Editor — rendered directly as a controlled React component (spytial-core
+            >= 4.0.0's `spytial-core/react`). The Redux draft is the single source
+            of truth; no window-global mount, no remount on suggestion. */}
         <div className="rounded-lg border border-rule bg-surface shadow-sm p-3">
-          <div
-            key={editorRevision}
-            id={`cnd-editor-mount-${editorRevision}`}
-            ref={cndEditorRef}
-            className="min-h-[360px] overflow-hidden rounded-lg border border-rule bg-surface-muted"
+          <CndLayoutInterface
+            value={draftSpec}
+            onChange={(next: string) => dispatch(cndDraftSpecSet({ datum, spec: next }))}
+            instance={dataInstance}
+            theme={colorMode}
+            className="min-h-[360px]"
           />
         </div>
       </div>

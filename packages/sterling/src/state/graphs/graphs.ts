@@ -51,6 +51,14 @@ export interface GraphsState {
   /** The CnD spec by generator name, so layouts persist across instances */
   cndSpecByGeneratorName: Record<string, string>;
 
+  /**
+   * The live, unapplied editing draft of the CnD spec by generator name — what
+   * the Layout drawer's editor currently shows. Committed to
+   * `cndSpecByGeneratorName` on "Apply Layout". Falls back to the applied spec
+   * when absent (see `selectCnDDraftSpec`), so it need not be pre-seeded.
+   */
+  cndDraftSpecByGeneratorName: Record<string, string>;
+
   // TODO: Refactor this
   hiddenByDatumId: Record<string, Record<string, string[]>>;
   
@@ -136,6 +144,7 @@ export function newGraphsState(): GraphsState {
     timeByDatumId: {},
     hiddenByDatumId: {},
     cndSpecByGeneratorName: {},
+    cndDraftSpecByGeneratorName: {},
     selectedProjectionsByGeneratorName: {},
     selectedTimeIndicesByDatumId: {},
     presentationModeByDatumId: {},

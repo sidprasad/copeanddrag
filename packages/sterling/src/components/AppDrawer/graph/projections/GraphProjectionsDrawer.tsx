@@ -3,60 +3,27 @@ import { useCallback, useMemo, useState } from 'react';
 import { useSterlingDispatch, useSterlingSelector } from '../../../../state/hooks';
 import {
   selectActiveDatum,
-  selectCnDSpec,
-  selectProjectableTypes,
-  selectProjectionConfig
+  selectCnDDraftSpec,
+  selectProjectableTypes
 } from '../../../../state/selectors';
 import { cndSpecSet } from '../../../../state/graphs/graphsSlice';
 import { ProjectionSection } from '../state/ProjectionSection';
 import type { CndProjection } from '../../../../utils/cndPreParser';
-import * as yaml from 'js-yaml';
-
-/**
- * Rebuild a full CND YAML spec string after modifying the projection list.
- * Preserves existing constraints, directives, and temporal config.
- */
-function updateCndSpecProjections(
-  currentSpec: string,
-  newProjections: CndProjection[]
-): string {
-  let parsed: Record<string, unknown> = {};
-  if (currentSpec && currentSpec.trim()) {
-    try {
-      const raw = yaml.load(currentSpec);
-      if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
-        parsed = raw as Record<string, unknown>;
-      }
-    } catch {
-      // Start fresh if the current spec is unparseable
-    }
-  }
-
-  // Remove old projection keys
-  delete parsed.projections;
-  delete parsed.projection;
-
-  // Add new projections block (only if non-empty)
-  if (newProjections.length > 0) {
-    parsed.projections = newProjections.map((p) => {
-      const entry: Record<string, string> = { sig: p.type };
-      if (p.orderBy) entry.orderBy = p.orderBy;
-      return entry;
-    });
-  }
-
-  if (Object.keys(parsed).length === 0) return '';
-  return yaml.dump(parsed, { lineWidth: -1 });
-}
+import {
+  getCndSpecProjections,
+  updateCndSpecProjections
+} from '../../../../utils/cndSpecMutations';
 
 const GraphProjectionsDrawer = () => {
   const dispatch = useSterlingDispatch();
   const activeDatum = useSterlingSelector(selectActiveDatum);
   const [manualType, setManualType] = useState('');
 
-  // Current CND spec text (may come from the layout editor or Redux)
-  const cndSpec = useSterlingSelector((state) =>
-    activeDatum ? selectCnDSpec(state, activeDatum) : ''
+  // Live editing draft of the CND spec (the Layout editor's value; falls back
+  // to the applied spec). Reading the draft here composes projection changes
+  // with any in-progress hand edits.
+  const cndDraftSpec = useSterlingSelector((state) =>
+    activeDatum ? selectCnDDraftSpec(state, activeDatum) : ''
   ) || '';
 
   // All projectable types from the instance (Record<typeId, atomIds[]>)
@@ -70,10 +37,13 @@ const GraphProjectionsDrawer = () => {
     }
   });
 
-  // Currently configured projections from the CND spec
-  const currentProjections: CndProjection[] = useSterlingSelector((state) =>
-    activeDatum ? selectProjectionConfig(state, activeDatum) : []
-  ) || [];
+  // The controls must reflect the live editor document, not the last applied
+  // projection cache. Otherwise adding/removing here can erase unapplied
+  // projection rules inferred by Suggest Layout or typed in the editor.
+  const currentProjections: CndProjection[] = useMemo(
+    () => getCndSpecProjections(cndDraftSpec),
+    [cndDraftSpec]
+  );
 
   // Types not yet projected over
   const availableTypes = useMemo(() => {
@@ -85,12 +55,20 @@ const GraphProjectionsDrawer = () => {
   const handleAddProjection = useCallback(
     (typeName: string) => {
       if (!activeDatum || !typeName.trim()) return;
-      const updated = [...currentProjections, { type: typeName.trim() }];
-      const specText = window.getCurrentCNDSpecFromReact?.() || cndSpec;
-      const newSpec = updateCndSpecProjections(specText, updated);
+      const type = typeName.trim();
+      if (currentProjections.some((projection) => projection.type === type)) return;
+      const updated = [...currentProjections, { type }];
+      let newSpec: string;
+      try {
+        newSpec = updateCndSpecProjections(cndDraftSpec, updated);
+      } catch (error) {
+        console.warn('[GraphProjectionsDrawer] Cannot edit invalid CnD YAML:', error);
+        return;
+      }
+      // cndSpecSet atomically commits this value to the graph and editor.
       dispatch(cndSpecSet({ datum: activeDatum, spec: newSpec }));
     },
-    [activeDatum, currentProjections, cndSpec, dispatch]
+    [activeDatum, currentProjections, cndDraftSpec, dispatch]
   );
 
   // ── Remove a projection type ──────────────────────────────────────
@@ -98,11 +76,17 @@ const GraphProjectionsDrawer = () => {
     (typeName: string) => {
       if (!activeDatum) return;
       const updated = currentProjections.filter((p) => p.type !== typeName);
-      const specText = window.getCurrentCNDSpecFromReact?.() || cndSpec;
-      const newSpec = updateCndSpecProjections(specText, updated);
+      let newSpec: string;
+      try {
+        newSpec = updateCndSpecProjections(cndDraftSpec, updated);
+      } catch (error) {
+        console.warn('[GraphProjectionsDrawer] Cannot edit invalid CnD YAML:', error);
+        return;
+      }
+      // cndSpecSet atomically commits this value to the graph and editor.
       dispatch(cndSpecSet({ datum: activeDatum, spec: newSpec }));
     },
-    [activeDatum, currentProjections, cndSpec, dispatch]
+    [activeDatum, currentProjections, cndDraftSpec, dispatch]
   );
 
   // ── Manual add via text input ─────────────────────────────────────
