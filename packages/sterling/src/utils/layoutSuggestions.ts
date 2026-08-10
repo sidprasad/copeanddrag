@@ -452,25 +452,80 @@ function classifyStructure(profile: EdgeProfile): StructureKind | undefined {
   return 'hierarchy';
 }
 
-function structuralPatch(kind: StructureKind, selector: string): CndPatch {
+// Field-name tokens that flip a chain's reading direction. A directed chain is
+// laid out source->target, left to right, by default; a name whose leading
+// directional token is "backward" (prev, predecessor, ...) marks the target as
+// the EARLIER element, so that chain should read right to left instead. Forward
+// tokens and unrecognized names keep the default, so a draft with no matching
+// token is byte-identical to before this rule existed. Direction is the one bit
+// topology cannot recover — a directed path is the same shape read either way —
+// so this is the only place a field name overrides a structural default, and it
+// only ever mirrors an already-classified chain; it never changes the shape.
+const CHAIN_BACKWARD_TOKENS = new Set([
+  'prev',
+  'previous',
+  'pred',
+  'predecessor',
+  'before',
+  'prior'
+]);
+const CHAIN_FORWARD_TOKENS = new Set(['next', 'succ', 'successor', 'after']);
+
+/** Lowercased word tokens of a field name, split on camelCase, snake_case, and
+ *  kebab-case boundaries. `predecessorOf` -> ['predecessor', 'of']. */
+function nameTokens(name: string): string[] {
+  return name
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .split(/[^A-Za-z0-9]+/)
+    .map((token) => token.toLowerCase())
+    .filter((token) => token.length > 0);
+}
+
+/** The backward token that should mirror a chain, or undefined to keep the
+ *  left-to-right default. The first recognized directional token decides, so a
+ *  forward name is never flipped by an incidental later token. */
+function chainBackwardToken(name: string | undefined): string | undefined {
+  if (!name) return undefined;
+  for (const token of nameTokens(name)) {
+    if (CHAIN_BACKWARD_TOKENS.has(token)) return token;
+    if (CHAIN_FORWARD_TOKENS.has(token)) return undefined;
+  }
+  return undefined;
+}
+
+function structuralPatch(
+  kind: StructureKind,
+  selector: string,
+  chainName?: string
+): CndPatch {
   if (kind === 'cycle') {
     return { constraints: [{ cyclic: { selector, direction: 'clockwise' } }] };
   }
   if (kind === 'chain') {
+    const direction = chainBackwardToken(chainName)
+      ? 'directlyLeft'
+      : 'directlyRight';
     return {
-      constraints: [{ orientation: { selector, directions: ['directlyRight'] } }]
+      constraints: [{ orientation: { selector, directions: [direction] } }]
     };
   }
   return { constraints: [{ orientation: { selector, directions: ['below'] } }] };
 }
 
 /** The issue-ranking "weaker direct constraint on the declared relation". */
-function weakerStructuralPatch(kind: StructureKind, selector: string): CndPatch {
+function weakerStructuralPatch(
+  kind: StructureKind,
+  selector: string,
+  chainName?: string
+): CndPatch {
   if (kind === 'cycle') {
     return { constraints: [{ cyclic: { selector, direction: 'clockwise' } }] };
   }
   if (kind === 'chain') {
-    return { constraints: [{ orientation: { selector, directions: ['right'] } }] };
+    const direction = chainBackwardToken(chainName) ? 'left' : 'right';
+    return {
+      constraints: [{ orientation: { selector, directions: [direction] } }]
+    };
   }
   return { constraints: [{ orientation: { selector, directions: ['below'] } }] };
 }
@@ -1190,7 +1245,7 @@ export function suggestAlloyLayout(
             `${kind === 'cycle' ? 'cyclic' : 'orientation'}:synth-restrict:${
               member.id
             }`,
-            structuralPatch(kind, synthesized.expression),
+            structuralPatch(kind, synthesized.expression, name),
             kind === 'hierarchy' ? 'medium' : 'high',
             `Restrict the overloaded field ${name} to its ${sourceType} declaration and draw that part as a ${kind}.`,
             [
@@ -1199,7 +1254,7 @@ export function suggestAlloyLayout(
             ],
             'cope.selector-synthesis',
             true,
-            [weakerStructuralPatch(kind, name)]
+            [weakerStructuralPatch(kind, name, name)]
           )
         );
       }
@@ -1254,7 +1309,7 @@ export function suggestAlloyLayout(
             `${kind === 'cycle' ? 'cyclic' : 'orientation'}:synth-narrow:${
               relation.id
             }:${subtype.id}`,
-            structuralPatch(kind, synthesized.expression),
+            structuralPatch(kind, synthesized.expression, relation.name),
             'medium',
             `Restrict ${relation.name} to ${subtype.id}, where it forms a clean ${kind}.`,
             [
@@ -1263,7 +1318,7 @@ export function suggestAlloyLayout(
             ],
             'cope.selector-synthesis',
             true,
-            [weakerStructuralPatch(kind, relation.name)]
+            [weakerStructuralPatch(kind, relation.name, relation.name)]
           )
         );
       }
@@ -1513,7 +1568,7 @@ export function suggestAlloyLayout(
         suggestions.push(
           suggestion(
             `orientation:synth-join:${first.id}:${second.id}`,
-            structuralPatch(kind, synthesized.expression),
+            structuralPatch(kind, synthesized.expression, first.name),
             'medium',
             `Follow ${first.name} through ${linkType} and draw the composed relation as one ${kind}.`,
             [
@@ -1637,6 +1692,7 @@ export function suggestAlloyLayout(
         )
       );
     } else if (profile.isLinearChain && !synthCovered.has(relation.id)) {
+      const backwardToken = chainBackwardToken(relation.name);
       suggestions.push(
         suggestion(
           `orientation:${relation.id}:chain`,
@@ -1645,14 +1701,23 @@ export function suggestAlloyLayout(
               {
                 orientation: {
                   selector: relation.name,
-                  directions: ['directlyRight']
+                  directions: [backwardToken ? 'directlyLeft' : 'directlyRight']
                 }
               }
             ]
           },
           'high',
-          `Lay the ${relation.name} chain out from left to right.`,
-          ['Observed topology is a single linear chain'],
+          backwardToken
+            ? `Lay the ${relation.name} chain out from right to left.`
+            : `Lay the ${relation.name} chain out from left to right.`,
+          [
+            'Observed topology is a single linear chain',
+            ...(backwardToken
+              ? [
+                  `Field-name token "${backwardToken}" marks the target as the earlier element, so the chain reads leftward`
+                ]
+              : [])
+          ],
           'cope.topology',
           true,
           [
@@ -1661,7 +1726,7 @@ export function suggestAlloyLayout(
                 {
                   orientation: {
                     selector: relation.name,
-                    directions: ['right']
+                    directions: [backwardToken ? 'left' : 'right']
                   }
                 }
               ]
