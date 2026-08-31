@@ -198,6 +198,58 @@ describe('Cope layout suggestions', () => {
     }
   });
 
+  it('mirrors a chain whose field name reads backward (prev/pred -> leftward)', () => {
+    for (const name of [
+      'prev',
+      'previous',
+      'pred',
+      'predecessor',
+      'before',
+      'prevState',
+      'predecessorOf'
+    ]) {
+      const document = documentFor(
+        instance(
+          [type('univ', [], true), type('Node')],
+          [relation(`Node<:${name}`, name, ['Node', 'Node'], pathEdges(6))]
+        )
+      );
+
+      expect(document.constraints).toContainEqual({
+        orientation: { selector: name, directions: ['directlyLeft'] }
+      });
+      expect(document.constraints).not.toContainEqual({
+        orientation: { selector: name, directions: ['directlyRight'] }
+      });
+    }
+  });
+
+  it('keeps a forward-named or unremarkable chain reading left-to-right', () => {
+    for (const name of [
+      'next',
+      'succ',
+      'successor',
+      'after',
+      'nextNode',
+      'link',
+      'edge'
+    ]) {
+      const document = documentFor(
+        instance(
+          [type('univ', [], true), type('Node')],
+          [relation(`Node<:${name}`, name, ['Node', 'Node'], pathEdges(6))]
+        )
+      );
+
+      expect(document.constraints).toContainEqual({
+        orientation: { selector: name, directions: ['directlyRight'] }
+      });
+      expect(document.constraints).not.toContainEqual({
+        orientation: { selector: name, directions: ['directlyLeft'] }
+      });
+    }
+  });
+
   it('ignores solver-internal builtin-sourced relations like no-field-guard', () => {
     // Forge emits a sentinel field `no-field-guard` declared on univ itself.
     // It is not part of the model and must not reach any heuristic.

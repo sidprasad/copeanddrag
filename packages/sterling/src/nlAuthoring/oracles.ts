@@ -133,9 +133,10 @@ export function collectPatchFindings(
   const sites = collectSelectorSites(patch);
   const primary = deps.instances[0];
 
-  // Stage 3b: static analysis. Only definite negative verdicts are findings —
-  // 'unknown' doubles as "no problem found" (and does NOT catch bad names;
-  // evaluation below does).
+  // Stage 3b: static analysis. Definite negative verdicts are findings; an
+  // 'unknown' verdict is "no problem found" UNLESS core (>= 5) attached
+  // unresolvedNames — an identifier that matches nothing in the schema, caught
+  // here instead of at evaluation below.
   const staticallyFlagged = new Set<string>();
   const analyze = getForgeStaticAnalyzer(deps.core);
   if (analyze && primary) {
@@ -157,6 +158,16 @@ export function collectPatchFindings(
           'static',
           `${site.context}: \`${site.expression}\` is a tautology: ${verdict.reason}`
         );
+      } else if (
+        verdict.status === 'unknown' &&
+        verdict.unresolvedNames &&
+        verdict.unresolvedNames.length > 0
+      ) {
+        blocking(
+          'static',
+          `${site.context}: \`${site.expression}\` references unknown name(s): ${verdict.unresolvedNames.join(', ')}. Use a field or type from the schema.`
+        );
+        staticallyFlagged.add(site.context);
       }
     }
   }

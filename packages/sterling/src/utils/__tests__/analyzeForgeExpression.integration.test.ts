@@ -74,11 +74,13 @@ describe('static selector analysis on the installed spytial-core', () => {
     expect((verdict as any).reason).toMatch(/arity/);
   });
 
-  it('does NOT catch unknown names — that is the evaluator stage’s job', () => {
-    // The nlAuthoring oracle pipeline relies on this division: misspelled
-    // selectors pass static analysis and must be caught by evaluation.
+  it('reports an unknown name via unresolvedNames (core >= 5)', () => {
+    // spytial-core >= 5 keeps status 'unknown' (no definite verdict) but lists
+    // the unresolved identifier, so the nlAuthoring oracle can catch a
+    // misspelled selector statically instead of waiting for evaluation.
     expect(getForgeStaticAnalyzer(core)!('lft', schema)).toEqual({
-      status: 'unknown'
+      status: 'unknown',
+      unresolvedNames: ['lft']
     });
   });
 

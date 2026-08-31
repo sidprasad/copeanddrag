@@ -23,13 +23,15 @@ export interface ParsedLayoutSpec {
 }
 
 /**
- * Result of simple-graph-query's static selector analysis. The `unknown` arm
- * (parse failures, unanalyzable forms) carries no reason; every definite
- * verdict does.
+ * Result of simple-graph-query's static selector analysis. Every definite
+ * verdict carries a `reason`. The `unknown` arm (parse failures, unanalyzable
+ * forms) carries none — but spytial-core >= 5 also lists any `unresolvedNames`
+ * it found (identifiers matching no schema field or type), so a caller can
+ * catch a misspelled name here instead of waiting for evaluation.
  */
 export type ForgeStaticAnalysis =
   | { status: 'unsat' | 'tautology' | 'empty' | 'ill-typed'; reason: string }
-  | { status: 'unknown' };
+  | { status: 'unknown'; unresolvedNames?: string[] };
 
 export interface SpytialCoreApi {
   AlloyInstance: {
@@ -161,10 +163,11 @@ export function hasSpytialCore(): boolean {
 }
 
 /**
- * The static selector analyzer, if this core ships one. Returns only definite
- * NEGATIVE verdicts usefully: `unknown` doubles as "no problem found" (plain
- * typed expressions report it too), and misspelled names are NOT caught here —
- * they surface as evaluation errors instead.
+ * The static selector analyzer, if this core ships one. `unknown` doubles as
+ * "no problem found" for plain typed expressions — but spytial-core >= 5
+ * attaches `unresolvedNames` to an `unknown` verdict when an identifier matches
+ * no schema field or type, so a misspelled name can be caught here rather than
+ * only at evaluation.
  */
 export function getForgeStaticAnalyzer(
   core: SpytialCoreApi | undefined
