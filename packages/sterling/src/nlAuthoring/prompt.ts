@@ -27,7 +27,6 @@ Prefer bare field/sig names. Use \`+\` for unions like \`left + right\`; use \`~
 - cyclic: {selector: <binary>, direction: clockwise|counterclockwise} — arrange along a circle.
 - align: {selector: <atoms or pairs>, direction: horizontal|vertical}
 - group (by selector): {selector: <atoms>, name: "<label>", addEdge: true|false}
-- group (by field): {field: <field name>, groupOn: <tuple index>, addToGroup: <tuple index>, selector: <optional unary filter>}
 - size: {selector: <unary>, width: <px>, height: <px>}
 - hideAtom: {selector: <unary>}
 Any constraint may add \`hold: never\` to assert it must NEVER hold (no double negation).

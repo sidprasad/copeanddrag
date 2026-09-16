@@ -310,6 +310,16 @@ const SpyTialEditGraph = forwardRef<SpyTialEditGraphHandle, SpyTialEditGraphProp
       setError(msg);
     };
 
+    // spytial-core 6 refuses an edit whose relation name is ambiguous (a field declared on
+    // several sigs) instead of editing the first match; surface it rather than dropping it.
+    const handleRelationEditError = (e: Event) => {
+      const ce = e as CustomEvent;
+      const msg = ce.detail?.error?.message
+        ?? ce.detail?.message
+        ?? 'Relation edit was rejected';
+      setError(msg);
+    };
+
     const handleConstraintsSatisfied = () => setError(null);
 
     graphElement.addEventListener('layout-complete', handleLayoutComplete as EventListener);
@@ -321,6 +331,7 @@ const SpyTialEditGraph = forwardRef<SpyTialEditGraphHandle, SpyTialEditGraphProp
     graphElement.addEventListener('relation-added', handleEdited as EventListener);
     graphElement.addEventListener('constraint-error', handleConstraintError as EventListener);
     graphElement.addEventListener('layout-generation-error', handleLayoutGenerationError as EventListener);
+    graphElement.addEventListener('relation-edit-error', handleRelationEditError as EventListener);
     graphElement.addEventListener('constraints-satisfied', handleConstraintsSatisfied as EventListener);
 
     graphContainerRef.current.appendChild(graphElement);
@@ -342,6 +353,7 @@ const SpyTialEditGraph = forwardRef<SpyTialEditGraphHandle, SpyTialEditGraphProp
         graphElementRef.current.removeEventListener('relation-added', handleEdited as EventListener);
         graphElementRef.current.removeEventListener('constraint-error', handleConstraintError as EventListener);
         graphElementRef.current.removeEventListener('layout-generation-error', handleLayoutGenerationError as EventListener);
+        graphElementRef.current.removeEventListener('relation-edit-error', handleRelationEditError as EventListener);
         graphElementRef.current.removeEventListener('constraints-satisfied', handleConstraintsSatisfied as EventListener);
 
         graphElementRef.current.clear?.();

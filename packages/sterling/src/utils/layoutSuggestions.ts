@@ -1,6 +1,7 @@
 import * as yaml from 'js-yaml';
 import { parseCndFile } from './cndPreParser';
 import type { SpytialCoreApi } from './spytialCore';
+import { applyProjectionTransform } from './projectionTransform';
 import { synthesizeAndVerifySelector } from './selectorSynthesis';
 import type { SynthesizedSelectorCandidate } from './selectorSynthesis';
 
@@ -884,16 +885,10 @@ export function validateCndSpecWithSpytial(
       let instanceForLayout: SpytialDataInstance = instance;
 
       if (parsed.projections.length > 0) {
-        if (!core.applyProjectionTransform) {
-          return {
-            valid: false,
-            reason:
-              'Projection transforms are not supported by this Spytial build.'
-          };
-        }
         let orderByError: unknown;
         try {
-          const projected = core.applyProjectionTransform(
+          const projected = applyProjectionTransform(
+            core,
             instance,
             parsed.projections.map(({ type, orderBy }) => ({
               sig: type,
@@ -916,7 +911,7 @@ export function validateCndSpecWithSpytial(
               }: ${failureMessage(orderByError)}`
             };
           }
-          instanceForLayout = projected.instance as SpytialDataInstance;
+          instanceForLayout = projected.instance;
         } catch (error) {
           return {
             valid: false,

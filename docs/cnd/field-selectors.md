@@ -116,16 +116,16 @@ directives:
       filter: 'active & (univ -> False)'
 ```
 
-### Group by Field with Selectors
+### Group by a Filtered Field
+
+The field form of `group` was removed; filter the relation inside a binary selector instead (first column is the group key, second the members).
 
 ```yaml
 constraints:
-  # Group by 'owns', but only for relations involving Person atoms
+  # Group by 'owns', but only for Person owners
   - group:
-      field: 'owns'
-      groupOn: 0
-      addToGroup: 1
-      selector: 'Person'
+      selector: 'owns & (Person -> univ)'
+      name: 'Owned'
 ```
 
 ---

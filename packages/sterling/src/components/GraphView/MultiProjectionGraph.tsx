@@ -3,6 +3,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState, useMemo } fr
 import type { LayoutState, TransformInfo, NodePositionHint } from './SpyTialGraph';
 import { parseCndFile, CndProjection, SequencePolicyName } from '../../utils/cndPreParser';
 import { getSpytialCore, hasSpytialCore, removeGraphThemeControl } from '../../utils/spytialCore';
+import { applyProjectionTransform } from '../../utils/projectionTransform';
 import { useSterlingSelector } from '../../state/hooks';
 import { selectColorMode } from '../../state/selectors';
 
@@ -132,11 +133,12 @@ const SingleProjectionPane = (props: SingleProjectionPaneProps) => {
       // Apply projection transform for THIS specific atom
       // This replaces the old pattern of passing projections to generateLayout()
       let instanceForLayout = alloyDataInstance;
-      if (projectionType && atomId && core.applyProjectionTransform) {
+      if (projectionType && atomId) {
         try {
           const projConfig = [{ sig: projectionType }];
           const selections = { [projectionType]: atomId };
-          const projResult = core.applyProjectionTransform(
+          const projResult = applyProjectionTransform(
+            core,
             alloyDataInstance,
             projConfig,
             selections,

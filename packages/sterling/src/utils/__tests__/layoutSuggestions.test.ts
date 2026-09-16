@@ -40,10 +40,28 @@ function instance(
   types: SpytialType[],
   relations: SpytialRelation[]
 ): SpytialDataInstance {
-  return {
+  const data = {
     getTypes: () => types,
-    getRelations: () => relations
+    getRelations: () => relations,
+    // The Alloy instance projection rewrites (see projectionTransform.ts).
+    getAlloyInstance: () => ({
+      types: Object.fromEntries(
+        types.map((t) => [t.id, { _: 'type', id: t.id, types: t.types, atoms: [] }])
+      ),
+      relations: Object.fromEntries(
+        relations.map((r) => [
+          r.id,
+          {
+            _: 'relation',
+            ...r,
+            tuples: r.tuples.map((t) => ({ _: 'tuple', ...t }))
+          }
+        ])
+      ),
+      skolems: {}
+    })
   };
+  return data;
 }
 
 function raw(types: RawAlloyInstance['types']): RawAlloyInstance {
@@ -109,25 +127,6 @@ function fakeSpytialCore(
         }
         return { layout: { state: this.state } };
       }
-    },
-    applyProjectionTransform: (
-      data: SpytialDataInstance,
-      projections: Array<{ sig: string; orderBy?: string }>,
-      _selections: Record<string, string>,
-      transformOptions?: {
-        evaluateOrderBy?: (selector: string) => string[][];
-        onOrderByError?: (selector: string, error: unknown) => void;
-      }
-    ) => {
-      for (const projection of projections) {
-        if (!projection.orderBy) continue;
-        try {
-          transformOptions?.evaluateOrderBy?.(projection.orderBy);
-        } catch (error) {
-          transformOptions?.onOrderByError?.(projection.orderBy, error);
-        }
-      }
-      return { instance: data, choices: [] };
     },
     getSequencePolicy: (name: string) => ({ name, apply: () => undefined })
   } as unknown as SpytialCoreApi;
