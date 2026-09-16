@@ -88,18 +88,18 @@ describe('validatePatch', () => {
     expect(problems.some((p) => p.includes('"name" is required'))).toBe(true);
   });
 
-  it('validates field-form groups by their own rules', () => {
-    expect(
-      validatePatch({
-        constraints: [
-          { group: { field: 'worksIn', groupOn: 1, addToGroup: 0 } }
-        ]
-      })
-    ).toEqual([]);
+  it('rejects the removed field-form group with its selector rewrite', () => {
     const problems = validatePatch({
-      constraints: [{ group: { field: 'worksIn', groupOn: 1 } }]
+      constraints: [
+        { group: { field: 'worksIn', groupOn: 1, addToGroup: 0 } }
+      ]
     });
-    expect(problems.some((p) => p.includes('addToGroup'))).toBe(true);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toContain('were removed');
+    expect(problems[0]).toContain('selector: ~worksIn');
+    expect(
+      validatePatch({ constraints: [{ group: { field: 'worksIn', groupOn: 2 } }] })
+    ).toEqual([expect.stringContaining('were removed')]);
   });
 
   it('treats flag as a bare string from the closed set', () => {
@@ -171,16 +171,11 @@ describe('collectSelectorSites', () => {
 describe('collectFieldRefSites', () => {
   it('collects field-name references from field-bearing forms', () => {
     const sites = collectFieldRefSites({
-      constraints: [{ group: { field: 'worksIn', groupOn: 1, addToGroup: 0 } }],
       directives: [
         { attribute: { field: 'val' } },
         { hideField: { field: 'internal' } }
       ]
     });
-    expect(sites.map(({ field }) => field)).toEqual([
-      'worksIn',
-      'val',
-      'internal'
-    ]);
+    expect(sites.map(({ field }) => field)).toEqual(['val', 'internal']);
   });
 });

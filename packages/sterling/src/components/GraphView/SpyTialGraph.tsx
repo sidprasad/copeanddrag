@@ -2,6 +2,7 @@ import { DatumParsed } from '@/sterling-connection';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { parseCndFile, type CndProjection, type SequencePolicyName } from '../../utils/cndPreParser';
 import { getSpytialCore, hasSpytialCore, removeGraphThemeControl } from '../../utils/spytialCore';
+import { applyProjectionTransform } from '../../utils/projectionTransform';
 import { useSterlingDispatch, useSterlingSelector } from '../../state/hooks';
 import { selectColorMode } from '../../state/selectors';
 import { colorModeSet } from '../../state/ui/uiSlice';
@@ -263,12 +264,13 @@ const SpyTialGraph = (props: SpyTialGraphProps) => {
       const currentProjectionConfig = projectionConfigRef.current;
       const currentProjectionSelections = projectionSelectionsRef.current;
 
-      if (currentProjectionConfig.length > 0 && core.applyProjectionTransform) {
+      if (currentProjectionConfig.length > 0) {
         try {
           const selectionsCopy = { ...currentProjectionSelections };
-          // spytial-core expects { sig, orderBy } — our CndProjection uses { type, orderBy }
+          // applyProjectionTransform expects { sig, orderBy } — our CndProjection uses { type, orderBy }
           const projectionsForCore = currentProjectionConfig.map(p => ({ sig: p.type, orderBy: p.orderBy }));
-          const projResult = core.applyProjectionTransform(
+          const projResult = applyProjectionTransform(
+            core,
             alloyDataInstance,
             projectionsForCore,
             selectionsCopy,

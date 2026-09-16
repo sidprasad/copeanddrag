@@ -178,41 +178,33 @@ Groups elements based on a selector expression.
 
 ---
 
-### Group (by Field)
+### Group (by Field) — removed
 
-Groups elements based on a relational field (tuple-based grouping).
-
-```yaml
-- group:
-    field: <field-name>          # Required: relation field name
-    groupOn: <index>             # Required: tuple index for the group key (0-based)
-    addToGroup: <index>          # Required: tuple index for grouped element (0-based)
-    selector: <unary-selector>   # Optional: filter which source atoms apply
-```
-
-| Field | Required | Type | Description |
-|-------|----------|------|-------------|
-| `field` | yes | string | Name of the relation/field |
-| `groupOn` | yes | integer | Index of the tuple element to use as group key |
-| `addToGroup` | yes | integer | Index of the tuple element to add to the group |
-| `selector` | no | string | Unary selector to filter which atoms this applies to |
-
-**Examples:**
+The field form of `group` (`field` / `groupOn` / `addToGroup`) was removed; a spec that still uses it fails to parse. Use a group with a binary `selector` instead: the first column is the group key, the second the members, and the group needs a `name`.
 
 ```yaml
-# Group employees by their department
-# For relation: worksIn: Employee -> Department
+# Before — worksIn: Employee -> Department, grouped by department
 - group:
     field: worksIn
-    groupOn: 1      # Department is the group key
-    addToGroup: 0   # Employee gets added to the group
+    groupOn: 1
+    addToGroup: 0
 
-# Group with selector filter
+# After — transpose so the department (the key) comes first
+- group:
+    selector: ~worksIn
+    name: "Department"
+
+# Before — owns, grouped by owner, Person owners only
 - group:
     field: owns
     groupOn: 0
     addToGroup: 1
     selector: Person
+
+# After — the key is already first; restrict the owners with a product
+- group:
+    selector: owns & (Person -> univ)
+    name: "Owned"
 ```
 
 ---

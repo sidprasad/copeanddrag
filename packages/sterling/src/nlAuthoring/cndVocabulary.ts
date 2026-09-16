@@ -81,6 +81,18 @@ interface FieldRule {
   values?: readonly string[];
 }
 
+/** The fix for a removed field-form group, phrased like spytial-core's own parse error. */
+function fieldGroupRewrite(body: Record<string, unknown>): string {
+  const removed =
+    'group "field"/"groupOn"/"addToGroup" were removed. Use a group with a binary "selector" ' +
+    '(first column is the group key, second the members) and a "name".';
+  const { field, groupOn, addToGroup } = body;
+  if (!isNonEmptyString(field)) return removed;
+  if (groupOn === 0 && addToGroup === 1) return `${removed} Here: selector: ${field}`;
+  if (groupOn === 1 && addToGroup === 0) return `${removed} Here: selector: ~${field}`;
+  return removed;
+}
+
 function checkFields(
   context: string,
   body: Entry,
@@ -262,35 +274,26 @@ function validateConstraintEntry(
       );
       break;
     case 'group':
-      if ('field' in body) {
-        checkFields(
-          label,
-          body,
-          {
-            field: { required: true, kind: 'string' },
-            groupOn: { required: true, kind: 'integer' },
-            addToGroup: { required: true, kind: 'integer' },
-            selector: { kind: 'string' }
-          },
-          problems
+      if ('field' in body || 'groupOn' in body || 'addToGroup' in body) {
+        // spytial-core 6 removed field-form groups; parseLayoutSpec throws on them.
+        problems.push(`${label}: ${fieldGroupRewrite(body)}`);
+        break;
+      }
+      checkFields(
+        label,
+        body,
+        {
+          selector: { required: true, kind: 'string' },
+          name: { kind: 'string' },
+          addEdge: { kind: 'boolean' },
+          hold: HOLD_RULE
+        },
+        problems
+      );
+      if (body.hold !== 'never' && !isNonEmptyString(body.name)) {
+        problems.push(
+          `${label}: "name" is required unless the group has hold: never.`
         );
-      } else {
-        checkFields(
-          label,
-          body,
-          {
-            selector: { required: true, kind: 'string' },
-            name: { kind: 'string' },
-            addEdge: { kind: 'boolean' },
-            hold: HOLD_RULE
-          },
-          problems
-        );
-        if (body.hold !== 'never' && !isNonEmptyString(body.name)) {
-          problems.push(
-            `${label}: "name" is required unless the group has hold: never.`
-          );
-        }
       }
       break;
     case 'size':
@@ -540,8 +543,7 @@ export function collectSelectorSites(patch: CndPatch): SelectorSite[] {
         pushSelector(sites, label, body.selector);
         break;
       case 'group':
-        // Field-form group's selector is a unary source filter.
-        pushSelector(sites, label, body.selector, 'field' in body ? 1 : undefined);
+        pushSelector(sites, label, body.selector);
         break;
       case 'size':
       case 'hideAtom':
@@ -581,16 +583,6 @@ export function collectSelectorSites(patch: CndPatch): SelectorSite[] {
 /** Every field-NAME reference in a patch (checked against schema relations). */
 export function collectFieldRefSites(patch: CndPatch): FieldRefSite[] {
   const sites: FieldRefSite[] = [];
-  (patch.constraints ?? []).forEach((entry, index) => {
-    const key = Object.keys(entry)[0];
-    const body = entry[key as string];
-    if (key === 'group' && isPlainObject(body) && isNonEmptyString(body.field)) {
-      sites.push({
-        field: body.field,
-        context: `constraint ${index + 1} (group) field`
-      });
-    }
-  });
   (patch.directives ?? []).forEach((entry, index) => {
     const key = Object.keys(entry)[0];
     const body = entry[key as string];

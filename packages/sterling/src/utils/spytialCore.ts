@@ -61,22 +61,6 @@ export interface SpytialCoreApi {
       };
     };
   };
-  applyProjectionTransform?: (
-    instance: any,
-    projections: Array<{ sig: string; orderBy?: string }>,
-    selections: Record<string, string>,
-    options?: {
-      evaluateOrderBy?: (selector: string) => string[][];
-      onOrderByError?: (selector: string, error: unknown) => void;
-    }
-  ) => {
-    instance: any;
-    choices: Array<{
-      type: string;
-      projectedAtom: string;
-      atoms: string[];
-    }>;
-  };
   getSequencePolicy?: (name: string) => {
     readonly name: string;
     apply: (context: any) => any;

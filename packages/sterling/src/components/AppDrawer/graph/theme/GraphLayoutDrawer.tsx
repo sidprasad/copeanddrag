@@ -15,6 +15,7 @@ import {
 import { cndDraftSpecSet, cndSpecSet, selectedProjectionsSet } from '../../../../state/graphs/graphsSlice';
 import { parseCndFile } from '../../../../utils/cndPreParser';
 import { getSpytialCore } from '../../../../utils/spytialCore';
+import { applyProjectionTransform } from '../../../../utils/projectionTransform';
 import { resolveValidatedLayout, suggestAlloyLayout, validateCndSpecWithSpytial } from '../../../../utils/layoutSuggestions';
 import type {
   CndPatch,
@@ -140,7 +141,7 @@ const GraphLayoutDrawer = () => {
       const layoutResult = layoutInstance.generateLayout(alloyDataInstance);
 
       // If CND spec has projections, use applyProjectionTransform to get choices
-      if (parsedCnd.projections.length > 0 && typeof core.applyProjectionTransform === 'function') {
+      if (parsedCnd.projections.length > 0) {
         try {
           // Convert selectedProjections (Record<string, string[]>) to Record<string, string>
           // by taking the first selected atom per type
@@ -150,9 +151,10 @@ const GraphLayoutDrawer = () => {
               singleSelections[typeId] = atoms[0];
             }
           }
-          // spytial-core expects { sig, orderBy } — our CndProjection uses { type, orderBy }
+          // applyProjectionTransform expects { sig, orderBy } — our CndProjection uses { type, orderBy }
           const projectionsForCore = parsedCnd.projections.map(p => ({ sig: p.type, orderBy: p.orderBy }));
-          const projResult = core.applyProjectionTransform(
+          const projResult = applyProjectionTransform(
+            core,
             alloyDataInstance,
             projectionsForCore,
             singleSelections,
