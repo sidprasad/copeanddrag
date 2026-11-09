@@ -16,6 +16,18 @@ export interface Button {
   mouseover?: string;
 }
 
+export interface NearMissViolation {
+  rule: string;
+  details: string[];
+  atoms: string[];
+  edges: { relation: string; source: string; target: string }[];
+}
+
+export type NearMissReport = { originalId: string } & (
+  | { violations: NearMissViolation[]; message?: never; more?: 'available' | 'exhausted'; keep?: number[]; previous?: number[][] }
+  | { message: string; violations?: never }
+);
+
 /**
  * An individual datum that can be displayed in Sterling.
  */
@@ -42,6 +54,13 @@ export interface Datum {
    * An array of buttons to be displayed with this datum in the Sterling interface.
    */
   buttons?: Button[];
+  /** Advertised on an original UNSAT result by a diagnostic-capable provider. */
+  nearMissOptions?: { rules: string[]; fixed: string[] };
+  /** Present only on a diagnostic result, never an instance of the original command. */
+  nearMiss?: NearMissReport;
+  diagnosticError?: string;
+  status?: string;
+  core?: string[] | false;
   /**
    * A boolean indicating whether REPL functionality is available for this datum.
    */

@@ -25,11 +25,13 @@ const ListViewDatumItem = (props: ListViewDatumItemProps) => {
   const statefulProjected = useSterlingSelector((state) =>
     selectDatumIsStatefulProjected(state, datum)
   );
+  const kind = datum.nearMiss?.violations ? 'Near miss' : datum.nearMiss?.message
+    ? 'Diagnosis' : datum.nearMissOptions ? 'UNSAT' : 'Instance';
   const cn = active ? 'text-on-accent bg-accent' : '';
 
   return (
     <Row onClick={(event) => onClickItem(event, datum)}>
-      <RowItem className={cn}>Instance {datum.id} (from: '{datum.generatorName ?? 'UNNAMED'}')</RowItem>
+      <RowItem className={cn}>{kind} {datum.id} (from: '{datum.generatorName ?? 'UNNAMED'}')</RowItem>
       <RowItem className={cn}>
         {datum.evaluator && <Icon as={GoTerminal} />}
       </RowItem>

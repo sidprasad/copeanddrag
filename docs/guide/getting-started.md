@@ -37,3 +37,11 @@ Each fixture is exposed as a Sterling "generator" — pick one in the Explorer t
 
 - Read the [CnD language overview](/cnd/).
 - Skim the [YAML specification](/cnd/yaml-spec) for the full constraint and directive reference.
+
+## Explain a Forge UNSAT result
+
+Run your Forge model as usual. In Cope and Drag, select an UNSAT command in **Explorer** and click **Show near miss**. **Choose rules to keep** lets you pin individual source rules before the search. This action is available when the Forge provider advertises near-miss support for a static relational run or check.
+
+To try the review branches before the next bundled UI update, start `yarn dev:forge` in this checkout. In a second terminal here, run `racket demos/near-miss/storage.frg -O run_sterling serve -O sterling_port 17100`. Open [the local CnD visualizer](http://localhost:8081/?17100) and select **placement**. With both source rules available to relax, one explanation stores two replicas on one disk. **Another explanation** keeps disk separation and leaves a replica unstored. Each witness highlights the available atom and relation evidence. Restoring any one of its relaxed rules makes the command UNSAT again within the original bounds.
+
+**Another explanation** searches for a different minimal set of relaxed rules under the same pins. When the search is exhausted, the last diagram stays visible. Use **Back to UNSAT** to try different pins.
