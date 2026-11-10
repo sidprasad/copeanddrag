@@ -1,12 +1,9 @@
 import type { NearMissFormula, NearMissViolation } from '@/sterling-connection';
 
-export function formulaLabel({ text, predicate, file, line }: NearMissFormula): string {
-  const label = predicate ? `${predicate}: ${text}` : text;
+export function sourceLocation({ file, line }: NearMissFormula) {
   const filename = file && file.split(/[\\/]/).pop();
-  return filename && line ? `${filename}:${line} · ${label}` : label;
+  return filename && line ? `${filename}:${line}` : undefined;
 }
-
-const required = { lone: 'at most one', one: 'exactly one', no: 'zero', some: 'at least one' };
 
 /** Explain and highlight the same binding and the same sample of its tuples. */
 export function presentViolation({ cases }: NearMissViolation) {
@@ -20,21 +17,19 @@ export function presentViolation({ cases }: NearMissViolation) {
         atoms.add(String(atom));
         return `${variable} = ${atom}`;
       });
-      lines.push(bindings.join(', '));
+      const count = cases.length > 1 ? ` (1 of ${cases.length} bindings)` : '';
+      lines.push(bindings.join(', ') + count);
     }
-    for (const { expression, value, multiplicity, relation, tuples } of example.evaluations) {
+    for (const { expression, value, relation, tuples } of example.evaluations) {
       if (!Array.isArray(value)) {
         lines.push(`${expression} = ${value}`);
         continue;
       }
       const shown = value.slice(0, 8);
       const sample = shown.map(row => row.join(' → ')).join(', ');
-      const count = value.length > shown.length ? ` (first ${shown.length} of ${value.length} tuples)` : '';
-      lines.push(`${expression} = {${sample}}${count}`);
-      if (multiplicity) {
-        const noun = value.length === 1 ? 'tuple' : 'tuples';
-        lines.push(`The expression contains ${value.length} ${noun}. ${multiplicity} requires ${required[multiplicity]}.`);
-      }
+      const omitted = value.length - shown.length;
+      const suffix = omitted ? ` (+${omitted} more)` : '';
+      lines.push(`${expression} = {${sample}}${suffix}`);
       for (const row of shown) {
         for (const atom of row) atoms.add(String(atom));
       }
@@ -45,7 +40,6 @@ export function presentViolation({ cases }: NearMissViolation) {
         }
       }
     }
-    if (cases.length > 1) lines.push(`Showing one of ${cases.length} bindings.`);
   }
   return { lines, atoms: [...atoms], edges };
 }
