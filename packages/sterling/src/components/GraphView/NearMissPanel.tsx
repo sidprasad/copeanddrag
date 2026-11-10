@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { activeDatumSet } from '../../state/data/dataSlice';
 import { useSterlingDispatch, useSterlingSelector } from '../../state/hooks';
 import { selectIsConnected } from '../../state/selectors';
+import { formulaLabel, presentViolation } from './nearMissEvidence';
 
 export function NearMissPanel({ datum }: { datum: Datum }) {
   const dispatch = useSterlingDispatch();
@@ -47,12 +48,12 @@ export function NearMissPanel({ datum }: { datum: Datum }) {
           <p>Every other rule holds. Restoring any one of the rules below makes the command UNSAT again.</p>
           <ul className="list-disc pl-5">
             {report.violations.map((v, i) => <li key={i}>
-              <code>{v.rule}</code>
-              {v.details.map((line, j) => <div key={j}>{line}</div>)}
+              <code>{formulaLabel(v.formula)}</code>
+              {presentViolation(v).lines.map((line, j) => <div key={j}>{line}</div>)}
             </li>)}
           </ul>
           {report.more === 'exhausted' && <p role="status">No other minimal explanation exists with these rules pinned.</p>}
-        </> : <p role="status">{report.message}</p>}
+        </> : <p role="status">The fixed rules and bounds are already UNSAT.</p>}
         {datum.diagnosticError && <p role="alert">{datum.diagnosticError}</p>}
       </section>
     );
@@ -61,7 +62,7 @@ export function NearMissPanel({ datum }: { datum: Datum }) {
   return (
     <section className="overflow-auto px-5 py-4 text-sm text-ink">
       <h2 className="font-semibold">UNSAT within this scope</h2>
-      {options.fixed.map((rule, i) => <p key={i}>Required outcome: <code>{rule}</code></p>)}
+      {options.fixed.map((rule, i) => <p key={i}>Required outcome: <code>{formulaLabel(rule)}</code></p>)}
       {options.rules.length > 0 ? <>
         <details className="my-2">
           <summary className="cursor-pointer">Choose rules to keep</summary>
@@ -69,7 +70,7 @@ export function NearMissPanel({ datum }: { datum: Datum }) {
             <label className="my-1 flex items-baseline gap-2" key={i}>
               <input type="checkbox" checked={keep.includes(i)}
                 onChange={e => setKeep(e.target.checked ? [...keep, i] : keep.filter(k => k !== i))} />
-              <code>{rule}</code>
+              <code>{formulaLabel(rule)}</code>
             </label>
           ))}
         </details>

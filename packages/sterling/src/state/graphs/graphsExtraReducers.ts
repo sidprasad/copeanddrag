@@ -61,7 +61,7 @@ function dataReceived(
       const DEFAULT_CND_SPEC = 'directives:\n  - flag: hideDisconnectedBuiltIns';
       // Forge's UNSAT placeholder omits the model's visualizer config. Let the
       // witness seed the generator's layout when it arrives with the real XML.
-      if (!alloyDatum.nearMissOptions && !alloyDatum.nearMiss?.message && !(generator in state.cndSpecByGeneratorName)) {
+      if (!alloyDatum.nearMissOptions && !alloyDatum.nearMiss?.reason && !(generator in state.cndSpecByGeneratorName)) {
         const specToLoad = alloyDatum.parsed.visualizerConfig?.cnd ?? DEFAULT_CND_SPEC;
         state.cndSpecByGeneratorName[generator] = specToLoad;
 

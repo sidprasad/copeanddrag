@@ -16,16 +16,33 @@ export interface Button {
   mouseover?: string;
 }
 
+export interface NearMissFormula {
+  text: string;
+  predicate: string | false;
+  file: string | false;
+  line: number | false;
+}
+
+type Atom = string | number;
+
 export interface NearMissViolation {
-  rule: string;
-  details: string[];
-  atoms: string[];
-  edges: { relation: string; source: string; target: string }[];
+  formula: NearMissFormula;
+  cases: {
+    bindings: { variable: string; atom: Atom }[];
+    evaluations: {
+      expression: string;
+      value: Atom[][] | number | boolean;
+      multiplicity?: 'no' | 'some' | 'lone' | 'one';
+      /** Concrete tuples in declaration order, when the expression reads a field directly. */
+      relation?: string;
+      tuples?: Atom[][];
+    }[];
+  }[];
 }
 
 export type NearMissReport = { originalId: string } & (
-  | { violations: NearMissViolation[]; message?: never; more?: 'available' | 'exhausted'; keep?: number[]; previous?: number[][] }
-  | { message: string; violations?: never }
+  | { violations: NearMissViolation[]; reason?: never; more?: 'available' | 'exhausted'; keep?: number[]; previous?: number[][] }
+  | { reason: 'fixed-unsat'; violations?: never }
 );
 
 /**
@@ -55,7 +72,7 @@ export interface Datum {
    */
   buttons?: Button[];
   /** Advertised on an original UNSAT result by a diagnostic-capable provider. */
-  nearMissOptions?: { rules: string[]; fixed: string[] };
+  nearMissOptions?: { rules: NearMissFormula[]; fixed: NearMissFormula[] };
   /** Present only on a diagnostic result, never an instance of the original command. */
   nearMiss?: NearMissReport;
   diagnosticError?: string;
