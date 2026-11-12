@@ -25,7 +25,7 @@ const ListViewDatumItem = (props: ListViewDatumItemProps) => {
   const statefulProjected = useSterlingSelector((state) =>
     selectDatumIsStatefulProjected(state, datum)
   );
-  const kind = datum.nearMiss?.violations ? 'Near miss' : datum.nearMiss?.reason
+  const kind = datum.nearMiss?.violations ? 'Counterfactual' : datum.nearMiss?.reason
     ? 'Diagnosis' : datum.nearMissOptions ? 'UNSAT' : 'Instance';
   const cn = active ? 'text-on-accent bg-accent' : '';
 
