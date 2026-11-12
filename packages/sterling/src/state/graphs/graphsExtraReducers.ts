@@ -59,7 +59,9 @@ function dataReceived(
       // load it into the state. Otherwise, use the default directive to hide disconnected built-ins.
       // Using generator name allows the layout to persist across instances.
       const DEFAULT_CND_SPEC = 'directives:\n  - flag: hideDisconnectedBuiltIns';
-      if (!(generator in state.cndSpecByGeneratorName)) {
+      // Forge's UNSAT placeholder omits the model's visualizer config. Let the
+      // witness seed the generator's layout when it arrives with the real XML.
+      if (!alloyDatum.nearMissOptions && !alloyDatum.nearMiss?.reason && !(generator in state.cndSpecByGeneratorName)) {
         const specToLoad = alloyDatum.parsed.visualizerConfig?.cnd ?? DEFAULT_CND_SPEC;
         state.cndSpecByGeneratorName[generator] = specToLoad;
 

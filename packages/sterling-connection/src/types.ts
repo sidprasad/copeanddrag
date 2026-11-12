@@ -16,6 +16,35 @@ export interface Button {
   mouseover?: string;
 }
 
+export interface NearMissFormula {
+  text: string;
+  predicate: string | false;
+  file: string | false;
+  line: number | false;
+}
+
+type Atom = string | number;
+
+export interface NearMissViolation {
+  formula: NearMissFormula;
+  cases: {
+    bindings: { variable: string; atom: Atom }[];
+    evaluations: {
+      expression: string;
+      value: Atom[][] | number | boolean;
+      multiplicity?: 'no' | 'some' | 'lone' | 'one';
+      /** Concrete tuples in declaration order, when the expression reads a field directly. */
+      relation?: string;
+      tuples?: Atom[][];
+    }[];
+  }[];
+}
+
+export type NearMissReport = { originalId: string } & (
+  | { violations: NearMissViolation[]; reason?: never; more?: 'available' | 'exhausted'; keep?: number[]; previous?: number[][] }
+  | { reason: 'fixed-unsat'; violations?: never }
+);
+
 /**
  * An individual datum that can be displayed in Sterling.
  */
@@ -42,6 +71,13 @@ export interface Datum {
    * An array of buttons to be displayed with this datum in the Sterling interface.
    */
   buttons?: Button[];
+  /** Advertised on an original UNSAT result by a diagnostic-capable provider. */
+  nearMissOptions?: { rules: NearMissFormula[]; fixed: NearMissFormula[] };
+  /** Present only on a diagnostic result, never an instance of the original command. */
+  nearMiss?: NearMissReport;
+  diagnosticError?: string;
+  status?: string;
+  core?: string[] | false;
   /**
    * A boolean indicating whether REPL functionality is available for this datum.
    */

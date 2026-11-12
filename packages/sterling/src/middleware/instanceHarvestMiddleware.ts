@@ -91,6 +91,12 @@ export const instanceHarvestMiddleware: Middleware<{}, SterlingState> =
           return result;
         }
 
+        if (newDatum.nearMiss) return result;
+        if (newDatum.status === 'unsat') {
+          store.dispatch(harvestOutOfInstances());
+          return result;
+        }
+
         const parsedDatum = core.AlloyInstance.parseAlloyXML(newDatum.data);
         if (!parsedDatum.instances || parsedDatum.instances.length === 0) {
           return result;
