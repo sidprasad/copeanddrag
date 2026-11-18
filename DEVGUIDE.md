@@ -4,7 +4,7 @@ How to run, build, and work on Cope and Drag locally.
 
 ## Prerequisites
 
-- Node 18+ (for the app) / Node 20+ (for the docs — VitePress)
+- Node 20.9+ (CI runs Node 22)
 - Yarn 1.x
 
 ## Running the app

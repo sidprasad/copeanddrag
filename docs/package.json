@@ -12,7 +12,7 @@
     "vitepress": "^1.5.0"
   },
   "resolutions": {
-    "vite": "^6.4.3",
+    "vite": "^6.4.4",
     "esbuild": "^0.25.0"
   }
 }
