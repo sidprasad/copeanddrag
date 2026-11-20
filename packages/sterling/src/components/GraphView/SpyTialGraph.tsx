@@ -1,3 +1,4 @@
+import { presentViolation } from './nearMissEvidence';
 import { DatumParsed } from '@/sterling-connection';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { parseCndFile, type CndProjection, type SequencePolicyName } from '../../utils/cndPreParser';
@@ -406,10 +407,24 @@ const SpyTialGraph = (props: SpyTialGraphProps) => {
           renderOptions.priorPositions = priorState;
         }
 
+        const evidence = datum.nearMiss?.violations?.map(presentViolation) ?? [];
+        if (evidence.length) {
+          const edges = evidence.flatMap(v => v.edges);
+          for (const edge of layoutResult.layout.edges) {
+            if (edges.some(t => t.relation === edge.relationName &&
+                t.source === edge.source.id && t.target === edge.target.id)) {
+              edge.highlight = '#e09b24';
+            }
+          }
+        }
         await graphElementRef.current.renderLayout(
           layoutResult.layout,
           Object.keys(renderOptions).length > 0 ? renderOptions : undefined
         );
+
+        if (evidence.length) {
+          graphElementRef.current.highlightNodes?.([...new Set(evidence.flatMap(v => v.atoms))]);
+        }
 
         // Re-fit the viewport to the freshly rendered content. With morph
         // transitions the graph restores the prior viewport and suppresses its
